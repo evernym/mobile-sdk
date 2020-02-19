@@ -1,0 +1,402 @@
+# Proof request flow
+
+In order to successfully fill and sign proof request, we need to follow this steps: 
+
+1. Download messages and filter objects having type `proofReq`
+2. Deserialize connection and get connection handle
+3. Create proof with message ID
+4. Retrieve proof matching credentials
+5. Populate proof required attributes - found in matching credentials
+5.a. User populates missing attributes (SelfAttested Attributes) - if proof required accepts it
+6. Generate proof 
+7. Send proof to agency
+
+![Proof Request Flow](https://github.com/evernym/mobile-starter/blob/master/wiki-images/ProofRequestFlowConnectMe.png)
+
+## 1. Download messages and filter objects having type `proofReq`
+
+Call `downloadMessages('MS-103', null, pwDID)` and filter objects having type `proofReq`.  From there use `decryptedPayload` and the `uid` from the object 
+
+### iOS
+
+```ObjC
+[appDelegate.sdkApi downloadMessages:@"MS-103" uid_s:nil pwdids:pw_did completion:^(NSError *error, NSString *messages) {
+    NSMutableArray *myMessages = [NSJSONSerialization JSONObjectWithData:[messages dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingMutableContainers error:&error];
+    // filter myMesssages to type = proofReq
+    for(NSDictionary *item in myMessages) {
+        for(NSDictionary *msg in item[@"msgs"]) {
+            if ([msg[@"type"] isEqualToString: @"proofReq"]) {
+                 /// continue with next step
+            }
+        }
+    }
+}
+```
+
+### Android 
+
+
+### Javascript 
+
+```javascript
+        const MESSAGE_PENDING = 'MS-103';
+        // Get messages will have type 'profReq'
+        const downloadMessages = await RNIndy.downloadMessages(
+          MESSAGE_PENDING,
+          null,
+          this.props.connection.pwDid,
+        );
+     
+        const msgObject = JSON.parse(downloadMessages)[0]
+```
+
+
+## 2. Deserialize connection and get connection handle
+
+Once we get proof object from agency, we need to use proof **requestedAttributes** and fill it with our automated data from certificate(s) or manually (self attested attributes)
+
+For testing flow we will use example where user needs to provide this details about himself: 
+	
+	- First Name
+	- Last Name
+	- Color
+	- Job Title
+	- Number
+
+Original requested attributes data will look like this (in json format): 
+
+```json
+    ...(rest proof request data)...
+	  "requested_attributes": {
+	        "First Name": {
+	            "name": "First Name"
+	        },
+	        "Color": {
+	            "name": "Color"
+	        },
+	        "Number": {
+	            "name": "Number"
+	        },
+	        "Last Name": {
+	            "name": "Last Name"
+	        },
+	        "Job Title": {
+	            "name": "Job Title"
+	        }
+	   }
+	   ...
+```
+
+After we serialize proof request, request attributes should look like this for self attested attributes: 
+
+```json
+    ...(rest proof request data)...
+    "requested_attributes": [
+        {
+"First Name": "fieldValue"
+        },
+        {
+            "Color": "fieldValue"
+        },
+        {
+            "Number": "fieldValue"
+        },
+        {
+            "Last Name": "fieldValue"
+        },
+        {
+            "Job Title": "fieldValue"
+        }
+    ]
+    ...
+```
+    
+
+## 3. AutoFill request data attributes
+
+Next step is to search for attributes in accepted credentials with the same label and autofill given attribute with data from matched credential:
+
+Example of autofilled attribute from credential: 
+
+```json
+	{
+    "attrs": {
+        "First Name": {
+            "tails_file": null,
+            "credential": {
+                "cred_info": {
+                    "cred_rev_id": null,
+                    "cred_def_id": "AVLv6qDJKU22F22T18XD5x:3:CL:9001:tag1",
+                    "schema_id": "AVLv6qDJKU22F22T18XD5x:2:Evernym Staging1539111153570:1.0",
+                    "attrs": {
+                        "First Name": "Predrag",
+                        "Color": "bl",
+                        "Number": "1",
+                        "Last Name": "Jevtic",
+                        "Job Title": "Dev"
+                    },
+                    "rev_reg_id": null,
+                    "referent": "9d5902c7-326a-4761-87c1-bff2c40d940e"
+                },
+                "interval": null
+            }
+        }
+    }
+	}
+```
+
+In order to match some of the proof request attributes, we will need to call libVCX method **proofRequestCredentials**, which will retrieve all previously accepted credentials. 
+Json example:
+
+```json
+{
+    "attrs": {
+        "First Name": {
+            "tails_file": null,
+            "credential": {
+                "cred_info": {
+                    "cred_rev_id": null,
+                    "cred_def_id": "AVLv6qDJKU22F22T18XD5x:3:CL:9001:tag1",
+                    "schema_id": "AVLv6qDJKU22F22T18XD5x:2:Evernym Staging1539111153570:1.0",
+                    "attrs": {
+                        "First Name": "Predrag",
+                        "Color": "bl",
+                        "Number": "1",
+                        "Last Name": "Jevtic",
+                        "Job Title": "Dev"
+                    },
+                    "rev_reg_id": null,
+                    "referent": "9d5902c7-326a-4761-87c1-bff2c40d940e"
+                },
+                "interval": null
+            }
+        },
+        "Color": {
+            "tails_file": null,
+            "credential": {
+                "cred_info": {
+                    "cred_rev_id": null,
+                    "cred_def_id": "AVLv6qDJKU22F22T18XD5x:3:CL:9001:tag1",
+                    "schema_id": "AVLv6qDJKU22F22T18XD5x:2:Evernym Staging1539111153570:1.0",
+                    "attrs": {
+                        "First Name": "Predrag",
+                        "Color": "bl",
+                        "Number": "1",
+                        "Last Name": "Jevtic",
+                        "Job Title": "Dev"
+                    },
+                    "rev_reg_id": null,
+                    "referent": "9d5902c7-326a-4761-87c1-bff2c40d940e"
+                },
+                "interval": null
+            }
+        },
+        "Number": {
+            "tails_file": null,
+            "credential": {
+                "cred_info": {
+                    "cred_rev_id": null,
+                    "cred_def_id": "AVLv6qDJKU22F22T18XD5x:3:CL:9001:tag1",
+                    "schema_id": "AVLv6qDJKU22F22T18XD5x:2:Evernym Staging1539111153570:1.0",
+                    "attrs": {
+                        "First Name": "Predrag",
+                        "Color": "bl",
+                        "Number": "1",
+                        "Last Name": "Jevtic",
+                        "Job Title": "Dev"
+                    },
+                    "rev_reg_id": null,
+                    "referent": "9d5902c7-326a-4761-87c1-bff2c40d940e"
+                },
+                "interval": null
+            }
+        },
+        "Last Name": {
+            "tails_file": null,
+            "credential": {
+                "cred_info": {
+                    "cred_rev_id": null,
+                    "cred_def_id": "AVLv6qDJKU22F22T18XD5x:3:CL:9001:tag1",
+                    "schema_id": "AVLv6qDJKU22F22T18XD5x:2:Evernym Staging1539111153570:1.0",
+                    "attrs": {
+                        "First Name": "Predrag",
+                        "Color": "bl",
+                        "Number": "1",
+                        "Last Name": "Jevtic",
+                        "Job Title": "Dev"
+                    },
+                    "rev_reg_id": null,
+                    "referent": "9d5902c7-326a-4761-87c1-bff2c40d940e"
+                },
+                "interval": null
+            }
+        },
+        "Job Title": {
+            "tails_file": null,
+            "credential": {
+                "cred_info": {
+                    "cred_rev_id": null,
+                    "cred_def_id": "AVLv6qDJKU22F22T18XD5x:3:CL:9001:tag1",
+                    "schema_id": "AVLv6qDJKU22F22T18XD5x:2:Evernym Staging1539111153570:1.0",
+                    "attrs": {
+                        "First Name": "Predrag",
+                        "Color": "bl",
+                        "Number": "1",
+                        "Last Name": "Jevtic",
+                        "Job Title": "Dev"
+                    },
+                    "rev_reg_id": null,
+                    "referent": "9d5902c7-326a-4761-87c1-bff2c40d940e"
+                },
+                "interval": null
+            }
+        }
+    }
+	}
+```
+	
+## 4. Fill missing - self attested attributes
+
+For all fields which couldn't be found in any of accepted credentials, we will need to fill them manually (in most cases via some UI form which user can fill by typing or coping into)
+
+Structure of the request attributes attribute in proof request will be similar to previous example but without additional fields which get's populated from credential: 
+
+Example of self attested attributes: 
+
+```
+	...(rest proof request data)...
+	    "requested_attributes": [
+	        {
+	            "label": "First Name",
+	            "key": "First Name",
+	            "data": "John"
+	        },
+	        ...
+	    ]
+  ...
+```
+
+**Note**: Self attested / manually filled attributes needs to be provided separately from automatically filled one in **VCX Proof Generate method**. 
+Example for objC: 
+
+```ObjC
+	[libVCX proofGenerate:proofHandle withSelectedCredentials: vcxCreds withSelfAttestedAttrs: @"{}" withCompletion: ^(NSError *error) {
+		// ...rest of the flow
+	}
+```
+	
+
+## 5. Generate proof 
+
+Once we get all request attributes filled with data, we should send request for generating proof from proof request we managed in previous steps. Keep in mind that we need to separate autofilled fields from self attest fields populated manually. 
+
+Required attributes are:
+- proofHandle (from proof request)
+- selectedCredentialAttributes (from step 2)
+- selfAttestedAttributes (from step 3)
+
+Example in LibVCX library for ObjC: 
+
+```ObjC
+	[[[ConnectMeVcx alloc] init] proofGenerate: proofHandle
+                     withSelectedCredentials: selectedCredentials
+                       withSelfAttestedAttrs: selfAttestedAttributes
+                              withCompletion: ^(NSError *error)
+	  {
+	  
+	  }
+```
+  
+## 6. Sending proof 
+
+After proof is generated successfully, only step remains is to link generated proof with established connection. 
+
+Required attributes for this step are: 
+
+	- proofHandle
+	- connectionHandle  
+
+Example in LibVCX library for ObjC: 
+
+```ObjC
+	[[[ConnectMeVcx alloc] init] proofSend: proof_handle
+                    withConnectionHandle: connection_handle
+                          withCompletion: ^(NSError *error)
+	  {
+	  }
+```
+
+
+### Javascript example 
+
+ This is example of full flow in javascript: 
+
+   1. call `downloadMessages('MS-103', null, pwDID)` and filter objects having type `proofReq`.  From there use `decryptedPayload` and the `uid` from the object 
+
+```javascript
+    const MESSAGE_PENDING = 'MS-103';
+    // Get messages will have type 'profReq'
+    const downloadMessages = await RNIndy.downloadMessages(
+        MESSAGE_PENDING,
+        null,
+        this.props.connection.pwDid,
+    );
+    
+    const msgObject = JSON.parse(downloadMessages)[0]
+
+    //
+    const proofReqMsg = msgObject.msgs.find(msg => msg.type === 'proofReq')
+    const parsedPayload = proofReqMsg.decryptedPayload
+    
+    // Step 1 convert decrypted payload from downloadMessages
+    const proofRequest = this.convertDecryptedPayloadToSerializedProofRequest(parsedPayload, proofReqMsg.uid )
+    // console.log('proofRequest',proofRequest)
+    
+    // Step 2 get proofHandle
+    const proofHandle = await RNIndy.proofDeserialize(proofRequest)
+    
+    // Step 3 get matchingCredentialsJson
+    const matchingCredentialsJson = await RNIndy.proofRetrieveCredentials(proofHandle)
+    //{"attrs":{"Account Type":[],"Driver Card":[],"First Name":[]}}
+
+    // Step 4 SKIPPING FOR NOW... if allowing self attested attributes get them from user.  
+
+    // Step 5
+    await RNIndy.proofGenerate(proofHandle, JSON.stringify(matchingCredentialsJson), '{}' )
+
+    // Step 6
+    const connectionHandle = this.props.connection.connectionHandle
+    await RNIndy.proofSend(proofHandle, parseInt(connectionHandle))
+```
+    
+
+```javascript
+    convertDecryptedPayloadToSerializedProofRequest = (decryptedPayload,uid ) => {
+    let stringifiableProofRequest = {
+        data: {
+        agent_did: null,
+        agent_vk: null,
+        link_secret_alias: 'main',
+        my_did: null,
+        my_vk: null,
+        proof: null,
+        proof_request: null,
+        source_id: uid,
+        state: 3,
+        their_did: null,
+        their_vk: null,
+        },
+        version: '1.0',
+    }
+    const parsedPayload = JSON.parse(decryptedPayload)
+    const parsedMsg = JSON.parse(parsedPayload['@msg'])
+    const parsedType = parsedPayload['@type']
+    stringifiableProofRequest.data.proof_request = {
+        ...parsedMsg,
+        msg_ref_id: uid,
+    }
+    stringifiableProofRequest.version = parsedType.ver
+    return JSON.stringify(stringifiableProofRequest)
+    }
+```
+

@@ -1,15 +1,10 @@
-<a href="https://www.evernym.com/"><img src="https://pbs.twimg.com/profile_images/1022255393395929088/0eYH-Os__400x400.jpg" title="Evernym"></a>
+<a href="https://www.evernym.com/"><img src="https://pbs.twimg.com/profile_images/1022255393395929088/0eYH-Os__400x400.jpg" title="Evernym" style="width: 150px"></a>
 
 # ConnectMe Mobile SDK
 
-> Evernym's mobile sdk repo with links to aar and cocoapod and starter files
-
 Welcome to the ConnectMe Mobile SDK!
 
-![Mobile SDK Flow](https://github.com/evernym/mobile-starter/blob/master/wiki-images/ConnectMeMobileSDK.png)
-
-
-
+> Evernym's mobile sdk repo with links to aar and cocoapod and starter files. 
 > Current repo of mobile starter kit <a href="https://github.com/evernym/mobile-starter " target="_blank">Mobile Starter Kit</a>.  Download before continuing. 
 > <a href="https://drive.google.com/drive/folders/1-ySuVqU7q79jG2epoVJH4bFU1CqWVGnR?usp=sharing" target="_blank">
     current location</a>  of aar and coocapods
@@ -18,12 +13,15 @@ Connecting and exchanging encrypted data between agency (server side) and edge c
 
 After project setup and adding dependency libraries, that communication consists of several different steps and they are: 
 
-1. [Initialize mobile SDK](https://github.com/evernym/mobile-starter/wiki/1.-Project-Setup#3-initialize-sdk-api) - VCX library in app runtime 
-2. [Initialize wallet](https://github.com/evernym/mobile-starter/wiki/2.-Initializing-the-Wallet) and communication with specific agency (web server)
-3. [Accepting invitation and establish connection](https://github.com/evernym/mobile-starter/wiki/3.-Connections) with entity  
-4. [Accepting offered credential(s)](https://github.com/evernym/mobile-starter/wiki/4.-Credentials)
-5. [Accepting and responding to proof request(s)](https://github.com/evernym/mobile-starter/wiki/5.-Proofs)
-6. [Exchanging secured structured messages](https://github.com/evernym/mobile-starter/wiki/6.-Structured-Messages)
+1. [Initialize mobile SDK](https://github.com/evernym/mobile-sdk/blob/master/1.ProjectSetup.md) - VCX library in app runtime 
+2. [Initialize wallet](https://github.com/evernym/mobile-sdk/blob/master/2.IntializingTheWallet.md) and communication with specific agency (web server)
+3. [Accepting invitation and establish connection](https://github.com/evernym/mobile-sdk/blob/master/3.Connections.md) with entity  
+4. [Accepting offered credential(s)](https://github.com/evernym/mobile-sdk/blob/master/4.Credentials.md)
+5. [Accepting and responding to proof request(s)](https://github.com/evernym/mobile-sdk/blob/master/5.Proofs)
+6. [Exchanging secured structured messages](https://github.com/evernym/mobile-sdk/blob/master/6.StructuredMessages.md)
+
+![Mobile SDK Flow](https://github.com/evernym/mobile-sdk/blob/master/wiki-images/ConnectMeMobileSDK.png)
+
 
 
 ## FAQ
