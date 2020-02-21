@@ -17,7 +17,7 @@ After project setup and adding dependency libraries, that communication consists
 2. [Initialize wallet](2.IntializingTheWallet.md) and communication with specific agency (web server)
 3. [Accepting invitation and establish connection](3.Connections.md) with entity  
 4. [Accepting offered credential(s)](4.Credentials.md)
-5. [Accepting and responding to proof request(s)](5.Proofs)
+5. [Accepting and responding to proof request(s)](5.Proofs.md)
 6. [Exchanging secured structured messages](6.StructuredMessages.md)
 
 ![Mobile SDK Flow](wiki-images/ConnectMeMobileSDK.png)
