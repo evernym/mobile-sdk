@@ -5,9 +5,6 @@
 Welcome to the ConnectMe Mobile SDK!
 
 > Evernym's mobile sdk repo with links to aar and cocoapod and starter files. 
-> Current repo of mobile starter kit <a href="https://github.com/evernym/mobile-starter " target="_blank">Mobile Starter Kit</a>.  Download before continuing. 
-> <a href="https://drive.google.com/drive/folders/1-ySuVqU7q79jG2epoVJH4bFU1CqWVGnR?usp=sharing" target="_blank">
-    current location</a>  of aar and coocapods
 
 Connecting and exchanging encrypted data between agency (server side) and edge client (mobile application) is happening through several steps and via secured, encrypted protocol library (VCX). 
 
