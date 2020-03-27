@@ -304,20 +304,15 @@
 			files = (
 			);
 			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-CMeSdkSwift/Pods-CMeSdkSwift-frameworks.sh",
-				"${PODS_ROOT}/vcx/vcx/vcx.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-CMeSdkSwift/Pods-CMeSdkSwift-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-			);
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/vcx.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-CMeSdkSwift/Pods-CMeSdkSwift-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-CMeSdkSwift/Pods-CMeSdkSwift-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-CMeSdkSwift/Pods-CMeSdkSwift-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		4070FD04EEE4249CED9EB606 /* [CP] Check Pods Manifest.lock */ = {
