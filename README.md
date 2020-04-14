@@ -16,9 +16,9 @@ After project setup and adding dependency libraries, perform the the following s
 4. [Accept the offered credential](4.Credentials.md)
 5. [Accept and respond to a proof request](5.Proofs.md)
 6. [Exchange secured structured messages](6.StructuredMessages.md)
-
-![Mobile SDK Flow](wiki-images/ConnectMeMobileSDK.png) <!--"Initializing" is misspelled in the illustration-->
-
+7. [Connection Redirection](7.ConnectionRedirection.md)
+   
+![Mobile SDK Flow](wiki-images/ConnectMeMobileSDK.png)
 
 
 <!--To be created in response to customer feedback ## FAQ
