@@ -7,7 +7,7 @@ target 'CMeSdkSwift' do
   use_frameworks!
 
   # Pods for ConnectMe
-  pod 'vcx', :path => '/Users/pedja/work/evernym/mobileSDK/vcx.podspec'
+  pod 'vcx', :path => '../../../vcx.podspec'
 
   pod 'Firebase/Analytics'
   pod 'Firebase/Messaging'
