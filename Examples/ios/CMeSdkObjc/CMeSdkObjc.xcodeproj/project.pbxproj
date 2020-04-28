@@ -193,7 +193,6 @@
 				8E509FDD2281EFC60098812A /* Sources */,
 				8E509FDE2281EFC60098812A /* Frameworks */,
 				8E509FDF2281EFC60098812A /* Resources */,
-				07C75AD485EE2748D2C73802 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -318,28 +317,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		07C75AD485EE2748D2C73802 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-CMeSdkObjc/Pods-CMeSdkObjc-frameworks.sh",
-				"${PODS_ROOT}/vcx/vcx/vcx.framework",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/vcx.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-CMeSdkObjc/Pods-CMeSdkObjc-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		9A44E13B1B6A49CCB9AC4BE3 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;

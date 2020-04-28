@@ -1,22 +1,13 @@
 # Uncomment the next line to define a global platform for your project
 # platform :ios, '9.0'
 source 'https://github.com/CocoaPods/Specs.git'
-source 'git@github.com:evernym/indy-sdk.git'
-
-def vcx_version_for_debug_or_release
-    if ENV['CONNECTME_DEBUG'] == "true"
-        '0.0.102'
-    else
-        '0.0.101'
-    end
-end
 
 target 'CMeSdkObjc' do
   # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
   # use_frameworks!
 
   # Pods for CMeSdkObjc
-  pod 'vcx', vcx_version_for_debug_or_release
+  pod 'vcx', :path => '../../../vcx.podspec'
   pod 'Firebase/Analytics'
   pod 'Firebase/Messaging'
 
