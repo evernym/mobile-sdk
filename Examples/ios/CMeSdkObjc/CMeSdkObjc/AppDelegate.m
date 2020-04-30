@@ -433,8 +433,8 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
-  [FIRApp configure];
-  [FIRMessaging messaging].delegate = self;
+//  [FIRApp configure];
+//  [FIRMessaging messaging].delegate = self;
   [self registerForRemoteNotifications];
 
   UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
@@ -469,7 +469,7 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
   NSLog(@"Creating pool transaction genesis file was successful: %@", filePath);
 
   // Step c.
-  [self.sdkApi initNullPay];
+  [self.sdkApi initSovToken];
     
   // Step d.
   NSString *walletName = @"wallet_name";

@@ -24,12 +24,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         // Step 1
-        //VcxLogger.setDefault("DEBUG");
-        VcxLogger.setLogger({ (context: Any, level: Int, target: String, message: String, modulePath: String, file: String, line: Int) -> Void in
-            
-            NSLog("[Inside VcxLogger.setLogger callback] %@    %@:%@ | %@", self.levelMappings[String(level)] ?? "Debug", file, line, message)
-            
-        })
+        VcxLogger.setDefault("DEBUG");
+        
+//        VcxLogger.setLogger({ (content)})
+//        VcxLogger.setLogger({ (context: Any, level: Int, target: String, message: String, modulePath: String, file: String, line: Int) -> Void in
+////            NSLog("[Inside VcxLogger.setLogger callback] %@    %@:%@ | %@", self.levelMappings[String(level)] ?? "Debug", file, line, message)
+////
+//        })
         
         
         // Step 2
