@@ -1,9 +1,16 @@
 ### Helpful links
 
-- <a href="https://github.com/evernym/mobile-starter " target="_blank">Mobile Starter Kit</a> current repo of mobile starter kit
-- <a href="https://drive.google.com/drive/folders/1-ySuVqU7q79jG2epoVJH4bFU1CqWVGnR?usp=sharing" target="_blank">
-    Starter files</a> current location of aar and coocapods
+- <a href="https://github.com/evernym/mobile-sdk/releases" target="_blank">Starter files</a> - Current location of aar and coocapods
+
 - <a href=" https://docs.google.com/document/d/1HAa27qArYlU0NO1VbEjA8ANXmVHl-b7fxa40e21I5L8/edit" target="_blank">
-    Old SDK docs</a>
-- <a href=" https://docs.google.com/document/d/1HAa27qArYlU0NO1VbEjA8ANXmVHl-b7fxa40e21I5L8/edit" target="_blank">
-    Connector App</a> helpful resource to see how an older version od connect.me works
+    Old SDK documentation</a>
+- [https://github.com/evernym/mobile-sdk/tree/master/Examples](https://github.com/evernym/mobile-sdk/tree/master/Examples) - Examples for iOS and Android steps with
+
+- <a href=" https://docs.google.com/document/d/1HAa27qArYlU0NO1VbEjA8ANXmVHl-b7fxa40e21I5L8/edit" target="_blank">Connector App</a> - Helpful resource to see how an older version od connect.me works
+
+- https://developer.apple.com/documentation/usernotifications - Push notifications iOS
+
+- https://developer.android.com/guide/topics/ui/notifiers/notifications - Push notifications Android 
+
+- https://firebase.google.com/docs/cloud-messaging/android/client - Push notifications Firebase Cloud Messaging 
+
