@@ -4,8 +4,6 @@
 
 Welcome to the Connect.Me Mobile SDK!
 
-<!--What should go here?> Evernym's mobile sdk repo with links to aar and cocoapod and starter files. --> 
-
 Connecting and exchanging encrypted data between an Agency (server side) and an Edge Client (mobile application) consists of several steps and is supported by a secured, encrypted protocol library (VCX). 
 
 After project setup and adding dependency libraries, perform the the following steps: 
