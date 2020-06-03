@@ -16,12 +16,6 @@
 @property (strong, nonatomic) ConnectMeVcx *sdkApi;
 @property (nonatomic) BOOL sdkInited;
 
-+(NSString*)updateJSONConfig:(NSString*)jsonConfig
-                     withKey:(NSString*)key
-                   withValue:(NSString*)value;
-+(NSString*)updateJSONConfig:(NSString*)jsonConfig withValues:(NSString*)values;
-+(NSString*)removeJSONConfig:(NSString*)jsonConfig
-                    toRemove:(NSString*)values;
-
 @end
+
 
