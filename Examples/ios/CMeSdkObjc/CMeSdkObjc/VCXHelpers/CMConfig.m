@@ -15,7 +15,7 @@
 @implementation CMConfig
 
 // Define your wallet name constant here
-NSString* walletName = @"myWalletKey"; //@"PleaseSetYourConnectMeWalletName";
+NSString* walletName = @"Lor6Ohwaichoow9p1"; //@"PleaseSetYourConnectMeWalletName";
 
 // Below settings will depend on your choosen environment
 // Selected here is Production Enviroment
@@ -35,7 +35,7 @@ NSString* agencyVerKey = @"844sJfb2snyeEugKvpY7Y4jZJk9LT6BnS6bnuKoiqbip";
 
     @try {
         NSMutableData *data = [[walletName dataUsingEncoding: NSUTF8StringEncoding] mutableCopy];
-        int result = SecRandomCopyBytes(NULL, 128, data.mutableBytes);
+        int result = 0; //SecRandomCopyBytes(NULL, 128, data.mutableBytes);
         if (result == 0) {
             walletKey = [data base64EncodedStringWithOptions: 0];
         } else {
@@ -152,7 +152,7 @@ NSString* agencyVerKey = @"844sJfb2snyeEugKvpY7Y4jZJk9LT6BnS6bnuKoiqbip";
     NSLog(@"Agency config %@", agencyConfig);
     
     [sdkApi agentProvisionAsync: agencyConfig completion: ^(NSError *error, NSString *oneTimeInfo) {
-        if (error) {
+        if (error && error.code > 0) {
             return [CMUtilities printError: error];
         }
         NSMutableDictionary *keychainVcxConfig = [@{} mutableCopy];
@@ -164,7 +164,7 @@ NSString* agencyVerKey = @"844sJfb2snyeEugKvpY7Y4jZJk9LT6BnS6bnuKoiqbip";
         NSString *vcxConfig = [CMConfig vsxConfig: oneTimeInfo withKeychainConfig: keychainVcxConfig];
 
         [sdkApi initWithConfig: vcxConfig completion:^(NSError *error) {
-            if (error) {
+            if (error && error.code > 0) {
                 return [CMUtilities printError: error];
             }
                 AppDelegate* appDelegate = (AppDelegate*)[[UIApplication   sharedApplication] delegate];

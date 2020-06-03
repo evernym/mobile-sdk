@@ -70,7 +70,7 @@ DEPENDENCIES:
   - vcx (from `../../../vcx.podspec`)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  https://github.com/CocoaPods/Specs.git:
     - Firebase
     - FirebaseAnalytics
     - FirebaseAnalyticsInterop
@@ -101,4 +101,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 9b86e704d220edc1397c1a942a63c6d69bb7246e
 
-COCOAPODS: 1.7.5
+COCOAPODS: 1.9.1
