@@ -62,7 +62,7 @@ PODS:
   - nanopb/decode (0.3.901)
   - nanopb/encode (0.3.901)
   - Protobuf (3.6.1)
-  - vcx (0.0.165)
+  - vcx (0.0.173)
 
 DEPENDENCIES:
   - Firebase/Analytics
@@ -97,7 +97,7 @@ SPEC CHECKSUMS:
   GoogleUtilities: 111a012f4c3a29c9e7c954c082fafd6ee3c999c0
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   Protobuf: 1eb9700044745f00181c136ef21b8ff3ad5a0fd5
-  vcx: de80c531fd16e3da225599dc6e976f230166a166
+  vcx: 483db31d4cebd0281734b2d98449fd9f153076ad
 
 PODFILE CHECKSUM: 9b86e704d220edc1397c1a942a63c6d69bb7246e
 
