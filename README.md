@@ -25,6 +25,7 @@ After project setup and adding dependency libraries, perform the the following s
     - No problem! Just do this. -->
 
 ### Helpful links
+- [VCX Errors](VcxErrors.md) &#8212; The list of all possible VCX errors and their definitions. 
 - <a href="https://github.com/evernym/mobile-starter" target="_blank">Mobile Starter Kit</a> &#8212; Current repo of mobile starter kit
 - <a href="https://drive.google.com/drive/folders/1-ySuVqU7q79jG2epoVJH4bFU1CqWVGnR?usp=sharing" target="_blank">
     Starter files</a> &#8212; Current location of AAR and Cocoapods
