@@ -11,8 +11,8 @@
         android:layout_width="326dp"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="textMultiLine"
-        android:text='{"id":"ZWFjZDQ","s":{"d":"SRmwnQPTojnLZsYNfNG6AQ","dp":{"d":"VXNghAvedCLNC6LUWYnfUn","k":"GYh28D4k7z3ovh71JXr3GgFNAMMNZ43Wcu1TZsgwQ8jd","s":"fNBf4rkv12RpAO4wncLa8yBup3luT7DSipZxpl2VSGffiliSBCmg3qDI9R6zv9o92bdG2DLabY0hjSuBc9j7BA=="},"l":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPgI3HfspcXjsAA9xDHRA_T7xShb5GvbXF3OvPUXoPIhIBIjXecA","n":"Thrift CU","v":"EroYShKFxfR2ZPZyVYdwEoutL6FKAvui5jXgyraiJXYg"},"sa":{"d":"UNM2cmvMVoWpk6r3pG5FAq","e":"52.26.236.159:80/agency/msg","v":"FvA7e4DuD2f9kYHq6B3n7hE7NQvmpgeFRrox3ELKv9vX"},"sc":"MS-101","sm":"message created","t":"there"}' />
+        android:inputType="text"
+        android:text='' />
 
     <Button
         android:id="@+id/button"
@@ -22,5 +22,32 @@
         android:layout_marginTop="10dp"
         android:onClick="addConnectionOnClick"
         android:text="Add Connection" />
+
+    <EditText
+        android:id="@+id/editTextConn"
+        android:layout_below="@id/button"
+        android:layout_width="326dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        />
+
+    <Button
+        android:id="@+id/buttonAccept"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editTextConn"
+        android:layout_marginTop="10dp"
+        android:onClick="acceptOnClick"
+        android:text="Accept offers" />
+
+    <Button
+        android:id="@+id/buttonProof"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttonAccept"
+        android:layout_marginTop="10dp"
+        android:onClick="proofOnClick"
+        android:text="Accept proofs" />
 
 </RelativeLayout>

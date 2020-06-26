@@ -7,8 +7,13 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.List;
+import java.util.UUID;
+
+import java9.util.concurrent.CompletableFuture;
+
+import me.connect.sdk.java.connection.QRConnection;
+import me.connect.sdk.java.proof.ProofHolder;
 
 public class MainActivity extends BaseActivity {
 
@@ -27,36 +32,64 @@ public class MainActivity extends BaseActivity {
         sdkApi.init();
     }
 
+    public void acceptOnClick(View v) {
+        EditText editTextConn = (EditText) findViewById(R.id.editTextConn);
+        String serializedConn = editTextConn.getText().toString();
+        try {
+            List<String> offers = ConnectMeVcxUpdated.getCredentialOffers(serializedConn).get();
+            for (String offer : offers) {
+                try {
+                    String co = ConnectMeVcxUpdated.acceptCredentialOffer(serializedConn, UUID.randomUUID().toString(), offer).get();
+                    Log.i(TAG, "Credential offer: " + co);
+                    ConnectMeVcxUpdated.awaitCredentialStatusChange(co);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Accept failed with exception, " + e);
+            e.printStackTrace();
+        }
+    }
+
+    public void proofOnClick(View view) {
+        EditText editTextConn = (EditText) findViewById(R.id.editTextConn);
+        String serializedConn = editTextConn.getText().toString();
+        try {
+            List<String> proofReqs = ConnectMeVcxUpdated.getProofRequests(serializedConn).get();
+            for (String proof : proofReqs) {
+                try {
+                    ProofHolder pr = ConnectMeVcxUpdated.retrieveProofRequest(serializedConn, UUID.randomUUID().toString(), proof).get();
+                    Log.i(TAG, "Proof request found: " + pr);
+                    String mappedCreds = ConnectMeVcxUpdated.mapCredentials(pr.getRetrievedCredentials());
+
+                    String res = ConnectMeVcxUpdated.sendProofRequestResponse(serializedConn, pr.getSerializedProof(), mappedCreds, "{}").get();
+                    Log.i(TAG, "Proof request sent: " + res);
+                    ConnectMeVcxUpdated.awaitProofStatusChange(res);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Accept failed with exception, " + e);
+            e.printStackTrace();
+        }
+    }
+
     public void addConnectionOnClick(View v) {
-        EditText editText   = (EditText)findViewById(R.id.editText2);
+        EditText editText = (EditText) findViewById(R.id.editText2);
+        EditText editTextConn = (EditText) findViewById(R.id.editTextConn);
         String invitationDetails = editText.getText().toString();
         Log.d(TAG, "connection invitation is set to: " + invitationDetails);
 
+        CompletableFuture<String> result = ConnectMeVcxUpdated.createConnection(invitationDetails, new QRConnection());
         try {
-            JSONObject json = new JSONObject(invitationDetails);
-            sdkApi.createConnectionWithInvite(json.getString("id"), invitationDetails, new CompletableFuturePromise<>(connectionHandle -> {
-                Log.e(TAG, "createConnectionWithInvite return code is: " + connectionHandle);
-                if(connectionHandle != -1) {
-                    sdkApi.vcxAcceptInvitation(connectionHandle, "{\"connection_type\":\"QR\",\"phone\":\"\"}", new CompletableFuturePromise<>(inviteDetails -> {
-                        Log.e(TAG, "vcxAcceptInvitation return code is: " + inviteDetails);
-                        if(invitationDetails != null) {
-                            sdkApi.getSerializedConnection(connectionHandle, new CompletableFuturePromise<>(state -> {
-                                Log.e(TAG, "getSerializedConnection returned state is: " + state);
-                            }, (t) -> {
-                                Log.e(TAG, "getSerializedConnection error is: ", t);
-                                return null;
-                            }));
-                        }
-                    }, (t) -> {
-                        Log.e(TAG, "vcxAcceptInvitation error is: ", t);
-                        return null;
-                    }));
-                }
-            }, (t) -> {
-                Log.e(TAG, "createConnectionWithInvite error is: ", t);
-                return -1;
-            }));
-        } catch (JSONException e) {
+            String serializedConnection = result.get();
+            Log.i(TAG, "Established connection: " + serializedConnection);
+            editTextConn.setText(serializedConnection);
+
+        } catch (Exception e) {
+            Log.e("TAG", "Connection creation failed with exception, " + e);
             e.printStackTrace();
         }
     }
