@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Environment;
@@ -32,9 +31,10 @@ public class ConnectMeVcx {
     public static final String TAG = "ConnectMeVcx";
 
     private Context context;
+    private String genesisPool;
+    private String agency;
 
-    public ConnectMeVcx(Context context) {
-        this.context = context;
+    private ConnectMeVcx() {
         VcxStaticData.uniqueAndroidID = Settings.Secure.getString(context.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
     }
@@ -54,7 +54,7 @@ public class ConnectMeVcx {
                 //if(!SecurePreferencesHelper.containsLongStringValue(context, VcxStaticData.SECURE_PREF_VCXCONFIG)) {
                 //    deleteWallet(walletName, walletKey, poolName, 0);
                 //} else {
-                    initWithConfig(walletName, walletKey, poolName);
+                initWithConfig(walletName, walletKey, poolName);
                 //}
             }, (t) -> {
                 Log.e(TAG, "wallet key error is: ", t);
@@ -94,8 +94,12 @@ public class ConnectMeVcx {
         File walletDir = new File(context.getFilesDir().getAbsolutePath() + "/.indy_client/wallet");
         walletDir.mkdirs();
 
-        String agencyConfig = "{\"agency_url\":\"http://agency.pps.evernym.com\",\"agency_did\":\"3mbwr7i85JNSL3LoNQecaW\",\"agency_verkey\":\"2WXxo6y1FJvXWgZnoYUP5BJej2mceFrqBDNPE3p6HDPf\",\"wallet_name\":\"" + walletName + "\",\"wallet_key\":\"" + walletKey + "\",\"agent_seed\":null,\"enterprise_seed\":null,\"storage_config\": \"{\\\"path\\\":\\\"" + context.getFilesDir().getAbsolutePath() + "/.indy_client/wallet\\\"}\"}";
-        //String agencyConfig = "{\"agency_url\":\"http://agency.pps.evernym.com\",\"agency_did\":\"3mbwr7i85JNSL3LoNQecaW\",\"agency_verkey\":\"2WXxo6y1FJvXWgZnoYUP5BJej2mceFrqBDNPE3p6HDPf\",\"wallet_name\":\"" + walletName + "\",\"wallet_key\":\"" + walletKey + "\",\"agent_seed\":null,\"enterprise_seed\":null}";
+        String agencyConfig = null;
+        try {
+            agencyConfig = AgencyConfig.setConfigParameters(agency, walletName, walletKey, context);
+        } catch (JSONException e) {
+            Log.e(TAG, "Failed to populate agency config");
+        }
         Log.d(TAG, "agencyConfig is set to: " + agencyConfig);
 
         // create the one time info
@@ -105,7 +109,7 @@ public class ConnectMeVcx {
 
             String vcxConfig = null;
             if (oneTimeInfo == null) {
-                if(SecurePreferencesHelper.containsLongStringValue(context, VcxStaticData.SECURE_PREF_VCXCONFIG)) {
+                if (SecurePreferencesHelper.containsLongStringValue(context, VcxStaticData.SECURE_PREF_VCXCONFIG)) {
                     Log.d(TAG, "found vcxConfig at key me.connect.vcxConfig");
                     vcxConfig = SecurePreferencesHelper.getLongStringValue(context, VcxStaticData.SECURE_PREF_VCXCONFIG, null);
                 } else {
@@ -113,19 +117,11 @@ public class ConnectMeVcx {
                 }
             } else {
                 File genesisFilePath = new File(context.getFilesDir().getAbsolutePath() + "/pool_transactions_genesis_DEMO");
-                if(!genesisFilePath.exists()) {
-                    try {
-                        FileOutputStream stream = new FileOutputStream(genesisFilePath);
-                        try {
-                            Log.d(TAG, "writing poolTxnGenesis to file: " + genesisFilePath.getAbsolutePath());
-                            stream.write(PoolTxnGenesis.poolTxnGenesis1.getBytes());
-                            stream.write(PoolTxnGenesis.poolTxnGenesis2.getBytes());
-                            stream.write(PoolTxnGenesis.poolTxnGenesis3.getBytes());
-                        } finally {
-                            if (stream != null) {
-                                stream.close();
-                            }
-                        }
+                if (!genesisFilePath.exists()) {
+                    try (FileOutputStream stream = new FileOutputStream(genesisFilePath)) {
+                        Log.d(TAG, "writing poolTxnGenesis to file: " + genesisFilePath.getAbsolutePath());
+                        stream.write(genesisPool.getBytes());
+
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -137,6 +133,7 @@ public class ConnectMeVcx {
                     json.put("institution_name", "real institution name");
                     json.put("pool_name", poolName);
                     json.put("protocol_version", "2");
+                    json.put("protocol_type", "3.0");
                     //json.put("storage_config", "{\"path\":\"" + context.getFilesDir().getAbsolutePath() + "/.indy_client/wallet\"}");
                     vcxConfig = json.toString();
                 } catch (JSONException e) {
@@ -148,7 +145,7 @@ public class ConnectMeVcx {
             }
 
             Log.d(TAG, "vcxConfig is set to: " + vcxConfig);
-            if(vcxConfig == null) {
+            if (vcxConfig == null) {
                 throw new RuntimeException("vcxConfig is null and this is  not allowed!");
             }
 
@@ -182,7 +179,7 @@ public class ConnectMeVcx {
             byte bytes[] = new byte[lengthOfKey];
             random.nextBytes(bytes);
             promise.resolve(Base64.encodeToString(bytes, Base64.NO_WRAP));
-        } catch(Exception e) {
+        } catch (Exception e) {
             Log.e(TAG, "createWalletKey: ", e);
             promise.reject("Exception", e.getMessage());
         }
@@ -217,8 +214,8 @@ public class ConnectMeVcx {
         BridgeUtils.writeCACert(context);
 
         try {
-            int retCode = VcxApi.initNullPay();
-            if(retCode != 0) {
+            int retCode = VcxApi.initSovToken();
+            if (retCode != 0) {
                 promise.reject("Could not init nullpay", String.valueOf(retCode));
             } else {
                 VcxApi.vcxInitWithConfig(config).exceptionally((t) -> {
@@ -260,7 +257,7 @@ public class ConnectMeVcx {
     private static void requestPermission(final Context context, final Promise<String> promise) {
         VcxStaticData.LOGGER_PROMISE = promise;
 
-        if(ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             // Provide an additional rationale to the user if the permission was not granted
             // and the user would benefit from additional context for the use of the permission.
             // For example if the user has previously denied the permission.
@@ -277,22 +274,22 @@ public class ConnectMeVcx {
 
         } else {
             // permission has not been granted yet. Request it directly.
-            ActivityCompat.requestPermissions((Activity)context,
+            ActivityCompat.requestPermissions((Activity) context,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     VcxStaticData.REQUEST_WRITE_EXTERNAL_STORAGE);
         }
     }
 
     private static int getLogLevel(String levelName) {
-        if("Error".equalsIgnoreCase(levelName)) {
+        if ("Error".equalsIgnoreCase(levelName)) {
             return 1;
-        } else if("Warning".equalsIgnoreCase(levelName) || levelName.toLowerCase().contains("warn")) {
+        } else if ("Warning".equalsIgnoreCase(levelName) || levelName.toLowerCase().contains("warn")) {
             return 2;
-        } else if("Info".equalsIgnoreCase(levelName)) {
+        } else if ("Info".equalsIgnoreCase(levelName)) {
             return 3;
-        } else if("Debug".equalsIgnoreCase(levelName)) {
+        } else if ("Debug".equalsIgnoreCase(levelName)) {
             return 4;
-        } else if("Trace".equalsIgnoreCase(levelName)) {
+        } else if ("Trace".equalsIgnoreCase(levelName)) {
             return 5;
         } else {
             return 3;
@@ -312,12 +309,12 @@ public class ConnectMeVcx {
 
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
             //RUNTIME PERMISSION Android M
-            if(PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
 
-                Context currentActivity = ((MainApplication)context.getApplicationContext()).getCurrentActivity();
-                if(currentActivity == null && context instanceof Activity) {
+                Context currentActivity = ((MainApplication) context.getApplicationContext()).getCurrentActivity();
+                if (currentActivity == null && context instanceof Activity) {
                     currentActivity = context;
-                } else if(currentActivity == null) {
+                } else if (currentActivity == null) {
                     promise.reject("ERR-103", "The current activity is null!! This is not allowed!!");
                     throw new IllegalStateException("The current activity is null!! This is not allowed!!");
                 }
@@ -385,6 +382,42 @@ public class ConnectMeVcx {
         } catch (VcxException e) {
             promise.reject("VCXException", e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        private Context context;
+        private String genesisPool;
+        private String agency;
+
+        private Builder() {
+        }
+
+        public Builder withContext(Context context) {
+            this.context = context;
+            return this;
+        }
+
+        public Builder withGenesisPool(String genesisPool) {
+            this.genesisPool = genesisPool;
+            return this;
+        }
+
+        public Builder withAgency(String agency) {
+            this.agency = agency;
+            return this;
+        }
+
+        public ConnectMeVcx build() {
+            ConnectMeVcx connectMeVcx = new ConnectMeVcx();
+            connectMeVcx.context = context.getApplicationContext();
+            connectMeVcx.agency = this.agency;
+            connectMeVcx.genesisPool = this.genesisPool;
+            return connectMeVcx;
         }
     }
 }
