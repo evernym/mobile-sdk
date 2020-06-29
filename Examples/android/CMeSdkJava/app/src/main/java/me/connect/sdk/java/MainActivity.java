@@ -13,6 +13,7 @@ import java.util.UUID;
 import java9.util.concurrent.CompletableFuture;
 
 import me.connect.sdk.java.connection.QRConnection;
+import me.connect.sdk.java.message.MessageType;
 import me.connect.sdk.java.proof.ProofHolder;
 
 public class MainActivity extends BaseActivity {
@@ -28,7 +29,12 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
 
         // Init the sdkApi
-        sdkApi = new ConnectMeVcx(this);
+        sdkApi =  ConnectMeVcx.builder()
+            .withContext(getApplicationContext())
+            .withGenesisPool(PoolTxnGenesis.POOL_TXN_GENESIS_PROD)
+            .withAgency(AgencyConfig.DEFAULT)
+            .build();
+
         sdkApi.init();
     }
 
@@ -63,7 +69,7 @@ public class MainActivity extends BaseActivity {
                     Log.i(TAG, "Proof request found: " + pr);
                     String mappedCreds = ConnectMeVcxUpdated.mapCredentials(pr.getRetrievedCredentials());
 
-                    String res = ConnectMeVcxUpdated.sendProofRequestResponse(serializedConn, pr.getSerializedProof(), mappedCreds, "{}").get();
+                    String res = ConnectMeVcxUpdated.sendProof(serializedConn, pr.getSerializedProof(), mappedCreds, "{}").get();
                     Log.i(TAG, "Proof request sent: " + res);
                     ConnectMeVcxUpdated.awaitProofStatusChange(res);
                 } catch (Exception e) {

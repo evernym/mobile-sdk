@@ -31,9 +31,10 @@ public class ConnectMeVcx {
     public static final String TAG = "ConnectMeVcx";
 
     private Context context;
+    private String genesisPool;
+    private String agency;
 
-    public ConnectMeVcx(Context context) {
-        this.context = context;
+    private ConnectMeVcx() {
         VcxStaticData.uniqueAndroidID = Settings.Secure.getString(context.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
     }
@@ -93,7 +94,12 @@ public class ConnectMeVcx {
         File walletDir = new File(context.getFilesDir().getAbsolutePath() + "/.indy_client/wallet");
         walletDir.mkdirs();
 
-        String agencyConfig = "{\"agency_url\":\"http://agency.evernym.com\",\"agency_did\":\"DwXzE7GdE5DNfsrRXJChSD\",\"agency_verkey\":\"844sJfb2snyeEugKvpY7Y4jZJk9LT6BnS6bnuKoiqbip\",\"wallet_name\":\"" + walletName + "\",\"wallet_key\":\"" + walletKey + "\",\"agent_seed\":null,\"enterprise_seed\":null,\"storage_config\": \"{\\\"path\\\":\\\"" + context.getFilesDir().getAbsolutePath() + "/.indy_client/wallet\\\"}\"}";
+        String agencyConfig = null;
+        try {
+            agencyConfig = AgencyConfig.setConfigParameters(agency, walletName, walletKey, context);
+        } catch (JSONException e) {
+            Log.e(TAG, "Failed to populate agency config");
+        }
         Log.d(TAG, "agencyConfig is set to: " + agencyConfig);
 
         // create the one time info
@@ -114,7 +120,7 @@ public class ConnectMeVcx {
                 if (!genesisFilePath.exists()) {
                     try (FileOutputStream stream = new FileOutputStream(genesisFilePath)) {
                         Log.d(TAG, "writing poolTxnGenesis to file: " + genesisFilePath.getAbsolutePath());
-                        stream.write(PoolTxnGenesis.POOL_TXN_GENESIS_PROD.getBytes());
+                        stream.write(genesisPool.getBytes());
 
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -376,6 +382,42 @@ public class ConnectMeVcx {
         } catch (VcxException e) {
             promise.reject("VCXException", e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        private Context context;
+        private String genesisPool;
+        private String agency;
+
+        private Builder() {
+        }
+
+        public Builder withContext(Context context) {
+            this.context = context;
+            return this;
+        }
+
+        public Builder withGenesisPool(String genesisPool) {
+            this.genesisPool = genesisPool;
+            return this;
+        }
+
+        public Builder withAgency(String agency) {
+            this.agency = agency;
+            return this;
+        }
+
+        public ConnectMeVcx build() {
+            ConnectMeVcx connectMeVcx = new ConnectMeVcx();
+            connectMeVcx.context = context.getApplicationContext();
+            connectMeVcx.agency = this.agency;
+            connectMeVcx.genesisPool = this.genesisPool;
+            return connectMeVcx;
         }
     }
 }

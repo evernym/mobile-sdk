@@ -1,7 +1,8 @@
 package me.connect.sdk.java.message;
 
 public enum MessageType {
-    PROOF_REQUEST("proofReq", "PROOF_REQUEST");
+    PROOF_REQUEST("proofReq", "PROOF_REQUEST"),
+    QUESTION("question", "QUESTION");
 
     private final String proprietary;
     private final String aries;
