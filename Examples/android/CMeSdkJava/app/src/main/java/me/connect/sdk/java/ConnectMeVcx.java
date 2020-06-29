@@ -35,12 +35,11 @@ public class ConnectMeVcx {
     private String agency;
 
     private ConnectMeVcx() {
-        VcxStaticData.uniqueAndroidID = Settings.Secure.getString(context.getContentResolver(),
-                Settings.Secure.ANDROID_ID);
     }
 
     public void init() {
-
+        VcxStaticData.uniqueAndroidID = Settings.Secure.getString(context.getContentResolver(),
+                Settings.Secure.ANDROID_ID);
         // NOTE: api.vcx_set_logger is already initialized by com.evernym.sdk.vcx.LibVcx
         setVcxLogger("trace", VcxStaticData.uniqueAndroidID, 10000000, new CompletableFuturePromise<>(logFilePath -> {
             Log.d(TAG, "the log file path is: " + logFilePath);
@@ -95,8 +94,9 @@ public class ConnectMeVcx {
         walletDir.mkdirs();
 
         String agencyConfig = null;
+        String path = context.getFilesDir().getAbsolutePath() + "/.indy_client/wallet";
         try {
-            agencyConfig = AgencyConfig.setConfigParameters(agency, walletName, walletKey, context);
+            agencyConfig = AgencyConfig.setConfigParameters(agency, walletName, walletKey, path, context);
         } catch (JSONException e) {
             Log.e(TAG, "Failed to populate agency config");
         }
@@ -414,7 +414,7 @@ public class ConnectMeVcx {
 
         public ConnectMeVcx build() {
             ConnectMeVcx connectMeVcx = new ConnectMeVcx();
-            connectMeVcx.context = context.getApplicationContext();
+            connectMeVcx.context = context;
             connectMeVcx.agency = this.agency;
             connectMeVcx.genesisPool = this.genesisPool;
             return connectMeVcx;
