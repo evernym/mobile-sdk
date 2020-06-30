@@ -1,4 +1,4 @@
-package me.connect.sdk.java;
+package me.connect.sdk.java.sample;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -12,6 +12,11 @@ import java.util.UUID;
 
 import java9.util.concurrent.CompletableFuture;
 
+import me.connect.sdk.java.AgencyConfig;
+import me.connect.sdk.java.ConnectMeVcx;
+import me.connect.sdk.java.ConnectMeVcxUpdated;
+import me.connect.sdk.java.PoolTxnGenesis;
+import me.connect.sdk.java.VcxStaticData;
 import me.connect.sdk.java.connection.QRConnection;
 import me.connect.sdk.java.proof.ProofHolder;
 

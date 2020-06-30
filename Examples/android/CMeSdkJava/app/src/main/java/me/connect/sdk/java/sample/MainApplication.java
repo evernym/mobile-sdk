@@ -1,4 +1,4 @@
-package me.connect.sdk.java;
+package me.connect.sdk.java.sample;
 
 import android.app.Activity;
 import android.app.Application;

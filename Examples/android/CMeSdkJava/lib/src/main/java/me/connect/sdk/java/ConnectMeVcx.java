@@ -311,7 +311,7 @@ public class ConnectMeVcx {
             //RUNTIME PERMISSION Android M
             if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
 
-                Context currentActivity = ((MainApplication) context.getApplicationContext()).getCurrentActivity();
+                Context currentActivity = context;//((MainApplication) context.getApplicationContext()).getCurrentActivity();
                 if (currentActivity == null && context instanceof Activity) {
                     currentActivity = context;
                 } else if (currentActivity == null) {
