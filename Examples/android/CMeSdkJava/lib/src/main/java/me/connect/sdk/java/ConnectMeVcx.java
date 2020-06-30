@@ -1,17 +1,12 @@
 package me.connect.sdk.java;
 
-import android.Manifest;
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.provider.Settings;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Base64;
 import android.util.Log;
-
-import androidx.core.app.ActivityCompat;
 
 import com.evernym.sdk.vcx.VcxException;
 import com.evernym.sdk.vcx.connection.ConnectionApi;
@@ -38,6 +33,12 @@ public class ConnectMeVcx {
     }
 
     public void init() {
+        Log.i(TAG, "Initializing ConnectMeVcx");
+        try {
+            Os.setenv("EXTERNAL_STORAGE", Utils.getRootDir(context), true);
+        } catch (ErrnoException e) {
+            Log.e(TAG, "Failed to set environment variable storage", e);
+        }
         VcxStaticData.uniqueAndroidID = Settings.Secure.getString(context.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
         // NOTE: api.vcx_set_logger is already initialized by com.evernym.sdk.vcx.LibVcx
@@ -90,13 +91,13 @@ public class ConnectMeVcx {
 
     public void initWithConfig(String walletName, String walletKey, String poolName) {
 
-        File walletDir = new File(context.getFilesDir().getAbsolutePath() + "/.indy_client/wallet");
+        File walletDir = new File(Utils.getRootDir(context), "indy_client/wallet");
         walletDir.mkdirs();
 
         String agencyConfig = null;
-        String path = context.getFilesDir().getAbsolutePath() + "/.indy_client/wallet";
+        String walletPath = walletDir.getAbsolutePath();
         try {
-            agencyConfig = AgencyConfig.setConfigParameters(agency, walletName, walletKey, path, context);
+            agencyConfig = AgencyConfig.setConfigParameters(agency, walletName, walletKey, walletPath);
         } catch (JSONException e) {
             Log.e(TAG, "Failed to populate agency config");
         }
@@ -116,7 +117,7 @@ public class ConnectMeVcx {
                     throw new RuntimeException("oneTimeInfo is null AND the key me.connect.vcxConfig is empty!!");
                 }
             } else {
-                File genesisFilePath = new File(context.getFilesDir().getAbsolutePath() + "/pool_transactions_genesis_DEMO");
+                File genesisFilePath = new File(Utils.getRootDir(context), "pool_transactions_genesis_DEMO");
                 if (!genesisFilePath.exists()) {
                     try (FileOutputStream stream = new FileOutputStream(genesisFilePath)) {
                         Log.d(TAG, "writing poolTxnGenesis to file: " + genesisFilePath.getAbsolutePath());
@@ -128,7 +129,7 @@ public class ConnectMeVcx {
                 }
                 try {
                     JSONObject json = new JSONObject(oneTimeInfo);
-                    json.put("genesis_path", genesisFilePath.getAbsoluteFile());
+                    json.put("genesis_path", genesisFilePath.getAbsolutePath());
                     json.put("institution_logo_url", "https://robothash.com/logo.png");
                     json.put("institution_name", "real institution name");
                     json.put("pool_name", poolName);
@@ -188,7 +189,7 @@ public class ConnectMeVcx {
     public void createOneTimeInfo(String agencyConfig, Promise<String> promise) {
         Log.d(TAG, "createOneTimeInfo() called with: agencyConfig = [" + agencyConfig + "]");
         // We have top create thew ca cert for the openssl to work properly on android
-        BridgeUtils.writeCACert(context);
+        Utils.writeCACert(context);
 
         try {
             UtilsApi.vcxAgentProvisionAsync(agencyConfig).exceptionally((t) -> {
@@ -197,7 +198,7 @@ public class ConnectMeVcx {
                 return null;
             }).thenAccept(result -> {
                 Log.d(TAG, "vcx::APP::async result Prov: " + result);
-                BridgeUtils.resolveIfValid(promise, result);
+                Utils.resolveIfValid(promise, result);
             });
         } catch (VcxException e) {
             promise.reject("VCXException", e.getMessage());
@@ -211,7 +212,7 @@ public class ConnectMeVcx {
         // and hence ca-crt is not written within app directory
         // since the logic to write ca cert checks for file existence
         // we won't have to pay too much cost for calling this function inside init
-        BridgeUtils.writeCACert(context);
+        Utils.writeCACert(context);
 
         try {
             int retCode = VcxApi.initSovToken();
@@ -253,33 +254,6 @@ public class ConnectMeVcx {
         }
     }
 
-
-    private static void requestPermission(final Context context, final Promise<String> promise) {
-        VcxStaticData.LOGGER_PROMISE = promise;
-
-        if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            // Provide an additional rationale to the user if the permission was not granted
-            // and the user would benefit from additional context for the use of the permission.
-            // For example if the user has previously denied the permission.
-            new AlertDialog.Builder(context)
-                    .setMessage("permission storage")
-                    .setPositiveButton("positive button", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions((Activity) context,
-                                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                    VcxStaticData.REQUEST_WRITE_EXTERNAL_STORAGE);
-                        }
-                    }).show();
-
-        } else {
-            // permission has not been granted yet. Request it directly.
-            ActivityCompat.requestPermissions((Activity) context,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    VcxStaticData.REQUEST_WRITE_EXTERNAL_STORAGE);
-        }
-    }
-
     private static int getLogLevel(String levelName) {
         if ("Error".equalsIgnoreCase(levelName)) {
             return 1;
@@ -300,33 +274,15 @@ public class ConnectMeVcx {
     public String setVcxLogger(String logLevel, String uniqueIdentifier, int MAX_ALLOWED_FILE_BYTES, Promise<String> promise) {
 
         VcxStaticData.MAX_ALLOWED_FILE_BYTES = MAX_ALLOWED_FILE_BYTES;
-        VcxStaticData.LOG_FILE_PATH = context.getFilesDir().getAbsolutePath() +
-                "/connectme.rotating." + uniqueIdentifier + ".log";
+        File logFile = new File(Utils.getRootDir(context), "connectme.rotating." + uniqueIdentifier + ".log");
+        VcxStaticData.LOG_FILE_PATH = logFile.getAbsolutePath();
         VcxStaticData.ENCRYPTED_LOG_FILE_PATH = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() +
                 "/connectme.rotating." + uniqueIdentifier + ".log.enc";
         //get the documents directory:
         Log.d(TAG, "Setting vcx logger to: " + VcxStaticData.LOG_FILE_PATH);
 
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            //RUNTIME PERMISSION Android M
-            if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-
-                Context currentActivity = context;//((MainApplication) context.getApplicationContext()).getCurrentActivity();
-                if (currentActivity == null && context instanceof Activity) {
-                    currentActivity = context;
-                } else if (currentActivity == null) {
-                    promise.reject("ERR-103", "The current activity is null!! This is not allowed!!");
-                    throw new IllegalStateException("The current activity is null!! This is not allowed!!");
-                }
-
-                requestPermission(currentActivity, promise);
-            } else {
-                VcxStaticData.initLoggerFile(context);
-                promise.resolve(VcxStaticData.LOG_FILE_PATH);
-            }
-        } else {
-            promise.reject("ERR-102", "Media is not mounted!!");
-        }
+        VcxStaticData.initLoggerFile(context);
+        promise.resolve(VcxStaticData.LOG_FILE_PATH);
 
         return VcxStaticData.LOG_FILE_PATH;
 
@@ -343,7 +299,7 @@ public class ConnectMeVcx {
                 return -1;
             }).thenAccept(connectionHandle -> {
                 if (connectionHandle != -1) {
-                    BridgeUtils.resolveIfValid(promise, connectionHandle);
+                    Utils.resolveIfValid(promise, connectionHandle);
                 }
             });
 
@@ -361,7 +317,7 @@ public class ConnectMeVcx {
                 Log.e(TAG, "vcxAcceptInvitation: ", t);
                 promise.reject("FutureException", t.getMessage());
                 return null;
-            }).thenAccept(inviteDetails -> BridgeUtils.resolveIfValid(promise, inviteDetails));
+            }).thenAccept(inviteDetails -> Utils.resolveIfValid(promise, inviteDetails));
         } catch (VcxException e) {
             e.printStackTrace();
             promise.reject(e);
@@ -377,7 +333,7 @@ public class ConnectMeVcx {
                 promise.reject("FutureException", t.getMessage());
                 return null;
             }).thenAccept(state -> {
-                BridgeUtils.resolveIfValid(promise, state);
+                Utils.resolveIfValid(promise, state);
             });
         } catch (VcxException e) {
             promise.reject("VCXException", e.getMessage());
