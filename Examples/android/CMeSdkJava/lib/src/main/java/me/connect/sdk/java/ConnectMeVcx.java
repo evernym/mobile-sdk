@@ -32,6 +32,7 @@ public class ConnectMeVcx {
     private ConnectMeVcx() {
     }
 
+    // fixme init should notify user of initialization process finished
     public void init() {
         Log.i(TAG, "Initializing ConnectMeVcx");
         try {
@@ -99,7 +100,7 @@ public class ConnectMeVcx {
         try {
             agencyConfig = AgencyConfig.setConfigParameters(agency, walletName, walletKey, walletPath);
         } catch (JSONException e) {
-            Log.e(TAG, "Failed to populate agency config");
+            Log.e(TAG, "Failed to populate agency config", e);
         }
         Log.d(TAG, "agencyConfig is set to: " + agencyConfig);
 
@@ -358,6 +359,8 @@ public class ConnectMeVcx {
             return this;
         }
 
+        // fixme genesis pool contents could be bigger than a String size limit, so we need to provide alternative
+        //       methods to populate pool
         public Builder withGenesisPool(String genesisPool) {
             this.genesisPool = genesisPool;
             return this;

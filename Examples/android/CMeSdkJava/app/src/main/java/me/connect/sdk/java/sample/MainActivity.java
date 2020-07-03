@@ -49,7 +49,7 @@ public class MainActivity extends BaseActivity {
             List<String> offers = ConnectMeVcxUpdated.getCredentialOffers(serializedConn).get();
             for (String offer : offers) {
                 try {
-                    String co = ConnectMeVcxUpdated.createCredentialOffer(serializedConn, UUID.randomUUID().toString(), offer).get();
+                    String co = ConnectMeVcxUpdated.createCredentialWithOffer(serializedConn, UUID.randomUUID().toString(), offer).get();
                     Log.i(TAG, "Credential offer: " + co);
                     String co2 = ConnectMeVcxUpdated.acceptCredentialOffer(serializedConn, co).get();
                     Log.i(TAG, "Credential after accepting: " + co2);
