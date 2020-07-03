@@ -745,6 +745,12 @@ public class ConnectMeVcxUpdated {
         return result;
     }
 
+    /**
+     * @param serializedConnection JSON string containing serialized connection
+     * @param messageId            message ID
+     * @param answer               nonce value of the answer
+     * @return {@link CompletableFuture} containing message ID
+     */
     public static @NonNull
     CompletableFuture<String> answerStructuredMessage(@NonNull String serializedConnection, @NonNull String messageId,
                                                       @NonNull String answer) {
@@ -756,50 +762,60 @@ public class ConnectMeVcxUpdated {
                         Log.e(TAG, "Failed to deserialize connection: ", t);
                         result.completeExceptionally(t);
                         return null;
-                    }).thenApply(conHandle -> {
-                if (conHandle == null) {
-                    return null;
-                }
-                byte[] encodedAnswer = Base64.encode(answer.getBytes(), Base64.NO_WRAP);
-                try {
-                    ConnectionApi.connectionSignData(conHandle, encodedAnswer, encodedAnswer.length)
-                            .exceptionally(t -> {
-                                Log.e(TAG, "Failed to sign data: ", t);
-                                result.completeExceptionally(t);
-                                return null;
-                            })
-                            .thenAccept(signature -> {
-                                if (signature == null) {
-                                    return;
-                                }
-                                try {
+                    })
+                    .thenAccept(conHandle -> {
+                        if (conHandle == null) {
+                            return;
+                        }
+                        byte[] encodedAnswer = Base64.encode(answer.getBytes(), Base64.NO_WRAP);
+                        try {
+                            ConnectionApi.connectionSignData(conHandle, encodedAnswer, encodedAnswer.length)
+                                    .exceptionally(t -> {
+                                        Log.e(TAG, "Failed to sign data: ", t);
+                                        result.completeExceptionally(t);
+                                        return null;
+                                    })
+                                    .thenAccept(signature -> {
+                                        if (signature == null) {
+                                            return;
+                                        }
+                                        try {
+                                            // Fixme extract response creation into separate method
+                                            JSONObject sig = new JSONObject();
+                                            sig.put("signature", Base64.encodeToString(signature, Base64.NO_WRAP));
+                                            sig.put("sig_data", new String(encodedAnswer));
+                                            sig.put("timestamp", System.currentTimeMillis() / 1000);
+                                            JSONObject message = new JSONObject();
+                                            message.put("@type", "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/committedanswer/1.0/answer");
+                                            message.put("response.@sig", sig);
 
-                                    ConnectionApi.connectionVerifySignature(conHandle, encodedAnswer, encodedAnswer.length, signature, signature.length)
-                                            .exceptionally(t -> {
-                                                Log.e(TAG, "Failed to verify signature: ", t);
-                                                result.completeExceptionally(t);
-                                                return null;
-                                            })
-                                            .thenAccept(verified -> {
-                                                if (verified == null) {
-                                                    return;
-                                                }
-                                                if (verified) {
-                                                    // todo update message state
-                                                    result.completeExceptionally(new Exception("Not implemented yet"));
-                                                } else {
-                                                    result.completeExceptionally(new Exception("Signature verification unsuccessful"));
-                                                }
-                                            });
-                                } catch (Exception e) {
-                                    result.completeExceptionally(e);
-                                }
-                            });
-                } catch (Exception e) {
-                    result.completeExceptionally(e);
-                }
-                return null;
-            });
+                                            JSONObject messageOptions = new JSONObject();
+                                            messageOptions.put("msg_type", "Answer");
+                                            messageOptions.put("msg_title", "Peer sent answer");
+                                            messageOptions.put("ref_msg_id", messageId);
+
+                                            ConnectionApi.connectionSendMessage(conHandle, message.toString(), messageOptions.toString())
+                                                    .exceptionally(t -> {
+                                                        Log.e(TAG, "Failed to send message: ", t);
+                                                        result.completeExceptionally(t);
+                                                        return null;
+                                                    }).thenAccept(res -> {
+                                                        if (res == null) {
+                                                            return;
+                                                        }
+                                                        result.complete(res);
+                                                    }
+                                            );
+
+                                        } catch (Exception e) {
+                                            result.completeExceptionally(e);
+                                        }
+                                    });
+                        } catch (Exception e) {
+                            result.completeExceptionally(e);
+                        }
+                        return;
+                    });
         } catch (Exception e) {
             result.completeExceptionally(e);
         }

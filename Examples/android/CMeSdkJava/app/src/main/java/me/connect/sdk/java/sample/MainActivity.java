@@ -18,6 +18,8 @@ import me.connect.sdk.java.ConnectMeVcxUpdated;
 import me.connect.sdk.java.PoolTxnGenesis;
 import me.connect.sdk.java.VcxStaticData;
 import me.connect.sdk.java.connection.QRConnection;
+import me.connect.sdk.java.message.MessageType;
+import me.connect.sdk.java.message.StructuredMessage;
 import me.connect.sdk.java.proof.ProofHolder;
 
 public class MainActivity extends BaseActivity {
@@ -78,6 +80,28 @@ public class MainActivity extends BaseActivity {
                     String res = ConnectMeVcxUpdated.sendProof(serializedConn, pr.getSerializedProof(), mappedCreds, "{}").get();
                     Log.i(TAG, "Proof request sent: " + res);
                     ConnectMeVcxUpdated.awaitProofStatusChange(res);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Accept failed with exception, " + e);
+            e.printStackTrace();
+        }
+    }
+
+    public void questionOnClick(View v) {
+        EditText editTextConn = (EditText) findViewById(R.id.editTextConn);
+        String serializedConn = editTextConn.getText().toString();
+        try {
+            List<String> questions = ConnectMeVcxUpdated.getPendingMessages(serializedConn, MessageType.QUESTION).get();
+            for (String question : questions) {
+                try {
+                    Log.i(TAG, "Question received: " + question);
+                    StructuredMessage sm = ConnectMeVcxUpdated.extractStructuredMessage(question);
+                    StructuredMessage.Response resp = sm.getResponses().get(0);
+                    String res = ConnectMeVcxUpdated.answerStructuredMessage(serializedConn, sm.getMessageId(), resp.getNonce()).get();
+                    Log.i(TAG, "Structured message response: " + res);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
