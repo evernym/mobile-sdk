@@ -1,5 +1,6 @@
 package me.connect.sdk.java;
 
+import android.util.Base64;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -23,6 +24,7 @@ import java9.util.concurrent.CompletableFuture;
 import me.connect.sdk.java.connection.Connection;
 import me.connect.sdk.java.message.MessageStatusType;
 import me.connect.sdk.java.message.MessageType;
+import me.connect.sdk.java.message.StructuredMessage;
 import me.connect.sdk.java.proof.ProofHolder;
 
 /**
@@ -741,6 +743,99 @@ public class ConnectMeVcxUpdated {
             result.completeExceptionally(e);
         }
         return result;
+    }
+
+    public static @NonNull
+    CompletableFuture<String> answerStructuredMessage(@NonNull String serializedConnection, @NonNull String messageId,
+                                                      @NonNull String answer) {
+        Log.i(TAG, "Respond to structured message");
+        CompletableFuture<String> result = new CompletableFuture<>();
+        try {
+            ConnectionApi.connectionDeserialize(serializedConnection)
+                    .exceptionally(t -> {
+                        Log.e(TAG, "Failed to deserialize connection: ", t);
+                        result.completeExceptionally(t);
+                        return null;
+                    }).thenApply(conHandle -> {
+                if (conHandle == null) {
+                    return null;
+                }
+                byte[] encodedAnswer = Base64.encode(answer.getBytes(), Base64.NO_WRAP);
+                try {
+                    ConnectionApi.connectionSignData(conHandle, encodedAnswer, encodedAnswer.length)
+                            .exceptionally(t -> {
+                                Log.e(TAG, "Failed to sign data: ", t);
+                                result.completeExceptionally(t);
+                                return null;
+                            })
+                            .thenAccept(signature -> {
+                                if (signature == null) {
+                                    return;
+                                }
+                                try {
+
+                                    ConnectionApi.connectionVerifySignature(conHandle, encodedAnswer, encodedAnswer.length, signature, signature.length)
+                                            .exceptionally(t -> {
+                                                Log.e(TAG, "Failed to verify signature: ", t);
+                                                result.completeExceptionally(t);
+                                                return null;
+                                            })
+                                            .thenAccept(verified -> {
+                                                if (verified == null) {
+                                                    return;
+                                                }
+                                                if (verified) {
+                                                    // todo update message state
+                                                    result.completeExceptionally(new Exception("Not implemented yet"));
+                                                } else {
+                                                    result.completeExceptionally(new Exception("Signature verification unsuccessful"));
+                                                }
+                                            });
+                                } catch (Exception e) {
+                                    result.completeExceptionally(e);
+                                }
+                            });
+                } catch (Exception e) {
+                    result.completeExceptionally(e);
+                }
+                return null;
+            });
+        } catch (Exception e) {
+            result.completeExceptionally(e);
+        }
+        return result;
+    }
+
+
+    /**
+     * Temporary method to parse structured question message JSON string and extract {@link StructuredMessage} from it.
+     *
+     * @param message JSON string containing Structured question message
+     * @return parsed {@link StructuredMessage}
+     */
+    public static StructuredMessage extractStructuredMessage(String message) {
+        try {
+            JSONObject jsonObject = new JSONObject(message);
+            String payload = jsonObject.getString("decryptedPayload");
+            String msgString = new JSONObject(payload).getString("@msg");
+            JSONObject msg = new JSONObject(msgString);
+            String messageId = jsonObject.getString("uid");
+            String id = msg.getString("@id");
+            String questionText = msg.getString("question_text");
+            String questionDetail = msg.getString("question_detail");
+            ArrayList<StructuredMessage.Response> responses = new ArrayList<>();
+            JSONArray jsonResponses = msg.getJSONArray("valid_responses");
+            for (int i = 0; i < jsonResponses.length(); i++) {
+                JSONObject response = jsonResponses.getJSONObject(i);
+                String text = response.getString("text");
+                String nonce = response.getString("nonce");
+                StructuredMessage.Response res = new StructuredMessage.Response(text, nonce);
+                responses.add(res);
+            }
+            return new StructuredMessage(id, questionText, questionDetail, responses, messageId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
