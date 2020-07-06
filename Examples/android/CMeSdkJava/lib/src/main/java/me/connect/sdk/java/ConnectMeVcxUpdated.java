@@ -291,8 +291,8 @@ public class ConnectMeVcxUpdated {
      * @return serialized credential offer
      */
     public static @NonNull
-    CompletableFuture<String> createCredentialOffer(@NonNull String serializedConnection, @NonNull String sourceId,
-                                                    @NonNull String message) {
+    CompletableFuture<String> createCredentialWithOffer(@NonNull String serializedConnection, @NonNull String sourceId,
+                                                        @NonNull String message) {
         Log.i(TAG, "Accepting credential offer");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
@@ -595,7 +595,7 @@ public class ConnectMeVcxUpdated {
      * @param serializedProof        string containing serialized proof request
      * @param selectedCreds          selected credentials to provide proof
      * @param selfAttestedAttributes user-defined attributes to provide proof
-     * @return CompletableFuture containing status code of the operation
+     * @return CompletableFuture containing serialized proof
      */
     public static
     @NonNull
@@ -688,13 +688,13 @@ public class ConnectMeVcxUpdated {
      *
      * @param serializedConnection string containing serialized connection
      * @param serializedProof      string containing serialized proof request
-     * @return CompletableFuture containing status code of the operation
+     * @return CompletableFuture containing serialized proof
      */
     public static
     @NonNull
-    CompletableFuture<Integer> rejectProof(@NonNull String serializedConnection, @NonNull String serializedProof) {
+    CompletableFuture<String> rejectProof(@NonNull String serializedConnection, @NonNull String serializedProof) {
         Log.i(TAG, "Sending proof request response");
-        CompletableFuture<Integer> result = new CompletableFuture<>();
+        CompletableFuture<String> result = new CompletableFuture<>();
         try {
             ConnectionApi.connectionDeserialize(serializedConnection)
                     .exceptionally(t -> {
@@ -723,11 +723,25 @@ public class ConnectMeVcxUpdated {
                                                 result.completeExceptionally(t);
                                                 return null;
                                             })
-                                            .thenAccept(res -> {
-                                                if (res == null) {
+                                            .thenAccept(r -> {
+                                                if (r == null) {
                                                     return;
                                                 }
-                                                result.complete(res);
+                                                try {
+                                                    DisclosedProofApi.proofSerialize(pHandle)
+                                                            .exceptionally(t -> {
+                                                                Log.e(TAG, "Failed to serialize proof: ", t);
+                                                                result.completeExceptionally(t);
+                                                                return null;
+                                                            })
+                                                            .thenAccept(sp -> {
+                                                                if (sp == null)
+                                                                    return;
+                                                                result.complete(sp);
+                                                            });
+                                                } catch (VcxException e) {
+                                                    result.completeExceptionally(e);
+                                                }
                                             });
                                 } catch (VcxException e) {
                                     result.completeExceptionally(e);
