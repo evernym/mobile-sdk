@@ -281,7 +281,7 @@ public class ConnectMeVcxUpdated {
     }
 
     /**
-     * Accept credential offer
+     * Create credential offer
      *
      * @param serializedConnection serialized connection string
      * @param sourceId             custom string for this cred offer
@@ -289,8 +289,8 @@ public class ConnectMeVcxUpdated {
      * @return serialized credential offer
      */
     public static @NonNull
-    CompletableFuture<String> acceptCredentialOffer(@NonNull String serializedConnection, @NonNull String sourceId,
-                                                    @NonNull String message) {
+    CompletableFuture<String> createCredentialWithOffer(@NonNull String serializedConnection, @NonNull String sourceId,
+                                                        @NonNull String message) {
         Log.i(TAG, "Accepting credential offer");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
@@ -310,10 +310,73 @@ public class ConnectMeVcxUpdated {
                                 result.completeExceptionally(t);
                                 return null;
                             })
+                            .thenAccept(credHandle -> {
+                                if (credHandle == null) {
+                                    return;
+                                }
+                                try {
+                                    CredentialApi.credentialSerialize(credHandle)
+                                            .exceptionally(t -> {
+                                                Log.e(TAG, "Failed to serialize credentials: ", t);
+                                                result.completeExceptionally(t);
+                                                return null;
+                                            }).thenAccept(
+                                            sc -> {
+                                                if (sc == null) {
+                                                    return;
+                                                }
+                                                result.complete(sc);
+                                            });
+                                } catch (VcxException e) {
+                                    Log.e(TAG, "Failed to serialize credentials: ", e);
+                                    result.completeExceptionally(e);
+                                }
+                            });
+                    return null;
+
+                } catch (Exception e) {
+                    result.completeExceptionally(e);
+                }
+                return null;
+            });
+
+
+        } catch (Exception e) {
+            result.completeExceptionally(e);
+        }
+        return result;
+    }
+
+    /**
+     * Accept credential offer
+     *
+     * @param serializedConnection serialized connection string
+     * @param serializedCredOffer  serialized credential offer
+     * @return serialized credential offer
+     */
+    public static @NonNull
+    CompletableFuture<String> acceptCredentialOffer(@NonNull String serializedConnection, @NonNull String serializedCredOffer) {
+        Log.i(TAG, "Accepting credential offer");
+        CompletableFuture<String> result = new CompletableFuture<>();
+        try {
+            ConnectionApi.connectionDeserialize(serializedConnection)
+                    .exceptionally(t -> {
+                        Log.e(TAG, "Failed to deserialize connection: ", t);
+                        result.completeExceptionally(t);
+                        return null;
+                    }).thenApply(conHandle -> {
+                if (conHandle == null) {
+                    return null;
+                }
+                try {
+                    CredentialApi.credentialDeserialize(serializedCredOffer)
+                            .exceptionally(t -> {
+                                Log.e(TAG, "Failed to deserialize credential offer: ", t);
+                                result.completeExceptionally(t);
+                                return null;
+                            })
                             .thenApply(credHandle -> {
                                         try {
-                                            // fixme: should be split into separate method. User interaction must be performed
-                                            //        after credential creation
                                             CredentialApi.credentialSendRequest(credHandle, conHandle, 0)
                                                     .exceptionally(t -> {
                                                         Log.e(TAG, "Failed to send credential request: ", t);
@@ -336,7 +399,10 @@ public class ConnectMeVcxUpdated {
                                                                                     return;
                                                                                 }
                                                                                 try {
-                                                                                    String messageId = new JSONArray(message).getJSONObject(0).getString("msg_ref_id");
+                                                                                    String messageId = new JSONObject(serializedCredOffer)
+                                                                                            .getJSONObject("data")
+                                                                                            .getJSONObject("credential_offer")
+                                                                                            .getString("msg_ref_id");
                                                                                     String jsonMsg = String.format("[{\"pairwiseDID\" : \"%s\", \"uids\": [\"%s\"]}]", pwDid, messageId);
                                                                                     UtilsApi.vcxUpdateMessages(MessageStatusType.ANSWERED, jsonMsg).thenAccept(i -> {
                                                                                         try {
@@ -527,7 +593,7 @@ public class ConnectMeVcxUpdated {
      * @param serializedProof        string containing serialized proof request
      * @param selectedCreds          selected credentials to provide proof
      * @param selfAttestedAttributes user-defined attributes to provide proof
-     * @return CompletableFuture containing status code of the operation
+     * @return CompletableFuture containing serialized proof
      */
     public static
     @NonNull
@@ -616,6 +682,82 @@ public class ConnectMeVcxUpdated {
     }
 
     /**
+     * Reject proof request
+     *
+     * @param serializedConnection string containing serialized connection
+     * @param serializedProof      string containing serialized proof request
+     * @return CompletableFuture containing serialized proof
+     */
+    public static
+    @NonNull
+    CompletableFuture<String> rejectProof(@NonNull String serializedConnection, @NonNull String serializedProof) {
+        Log.i(TAG, "Sending proof request response");
+        CompletableFuture<String> result = new CompletableFuture<>();
+        try {
+            ConnectionApi.connectionDeserialize(serializedConnection)
+                    .exceptionally(t -> {
+                        Log.e(TAG, "Failed to deserialize connection: ", t);
+                        result.completeExceptionally(t);
+                        return null;
+                    }).thenApply(conHandle -> {
+                if (conHandle == null) {
+                    return null;
+                }
+                try {
+                    DisclosedProofApi.proofDeserialize(serializedProof)
+                            .exceptionally(t -> {
+                                Log.e(TAG, "Failed to deserialize proof: ", t);
+                                result.completeExceptionally(t);
+                                return null;
+                            })
+                            .thenAccept(pHandle -> {
+                                if (pHandle == null) {
+                                    return;
+                                }
+                                try {
+                                    DisclosedProofApi.proofReject(pHandle, conHandle)
+                                            .exceptionally(t -> {
+                                                Log.e(TAG, "Failed to reject proof: ", t);
+                                                result.completeExceptionally(t);
+                                                return null;
+                                            })
+                                            .thenAccept(r -> {
+                                                if (r == null) {
+                                                    return;
+                                                }
+                                                try {
+                                                    DisclosedProofApi.proofSerialize(pHandle)
+                                                            .exceptionally(t -> {
+                                                                Log.e(TAG, "Failed to serialize proof: ", t);
+                                                                result.completeExceptionally(t);
+                                                                return null;
+                                                            })
+                                                            .thenAccept(sp -> {
+                                                                if (sp == null)
+                                                                    return;
+                                                                result.complete(sp);
+                                                            });
+                                                } catch (VcxException e) {
+                                                    result.completeExceptionally(e);
+                                                }
+                                            });
+                                } catch (VcxException e) {
+                                    result.completeExceptionally(e);
+                                }
+                            });
+
+                } catch (Exception e) {
+                    result.completeExceptionally(e);
+                }
+                return null;
+            });
+        } catch (Exception e) {
+            result.completeExceptionally(e);
+        }
+        return result;
+    }
+
+    /**
      * Temporary method to extract credentials for proof request and prepare map that will be used later in proof request confirmation
      *
      * @param proofRequestCreds JSON string containing list of available credentials
@@ -641,5 +783,4 @@ public class ConnectMeVcxUpdated {
             throw new RuntimeException(e);
         }
     }
-
 }

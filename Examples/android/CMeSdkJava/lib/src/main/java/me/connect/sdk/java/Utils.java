@@ -1,7 +1,6 @@
 package me.connect.sdk.java;
 
 import android.content.Context;
-import android.os.Environment;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -11,14 +10,16 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
 import android.content.ContextWrapper;
 
 /**
  * Created by abdussami on 23/05/18.
  */
 
-public class BridgeUtils {
-    private static  String TAG ="BRIDGEUTILS";
+class Utils {
+    private static String TAG = "BRIDGEUTILS";
+    static final String ROOT_DIR = "connectMeVcx";
 
     public static void resolveIfValid(Promise promise, Object result) {
         // Add more conditions here if you want to check if the result is valid
@@ -35,7 +36,7 @@ public class BridgeUtils {
 
     public static void writeCACert(Context context) {
         ContextWrapper cw = new ContextWrapper(context);
-        File cert_file = new File(cw.getFilesDir().getAbsolutePath() + "/cacert.pem");
+        File cert_file = new File(getRootDir(cw), "cacert.pem");
         Log.d(TAG, "writeCACert() called with: context = [" + context + "] and writing to file: " + cert_file.getAbsolutePath());
         if (!cert_file.exists()) {
             try {
@@ -44,7 +45,7 @@ public class BridgeUtils {
                 fw.flush();
                 fw.close();
             } catch (IOException e) {
-                Log.e(TAG, "writeCACert: ",e );
+                Log.e(TAG, "writeCACert: ", e);
             }
         } else {
             Log.d(TAG, "cacert.pem file already exists: " + cert_file.getAbsolutePath());
@@ -81,12 +82,12 @@ public class BridgeUtils {
         return "";
     }
 
-    static String getFileContents( File file ) throws IOException {
+    static String getFileContents(File file) throws IOException {
         StringBuffer text = new StringBuffer(99999);
-        FileInputStream fileStream = new FileInputStream( file );
-        BufferedReader br = new BufferedReader( new InputStreamReader( fileStream ) );
-        for ( String line; (line = br.readLine()) != null; )
-            text.append( line + System.lineSeparator() );
+        FileInputStream fileStream = new FileInputStream(file);
+        BufferedReader br = new BufferedReader(new InputStreamReader(fileStream));
+        for (String line; (line = br.readLine()) != null; )
+            text.append(line + System.lineSeparator());
         return text.toString();
     }
 
@@ -111,5 +112,9 @@ public class BridgeUtils {
                         result.indexOf(textTo));
 
         return result;
+    }
+
+    static String getRootDir(Context context) {
+        return context.getFilesDir().getAbsolutePath() + "/" + ROOT_DIR;
     }
 }

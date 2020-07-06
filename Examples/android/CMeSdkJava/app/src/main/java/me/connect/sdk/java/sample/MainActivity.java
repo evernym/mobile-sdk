@@ -1,4 +1,4 @@
-package me.connect.sdk.java;
+package me.connect.sdk.java.sample;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -12,8 +12,12 @@ import java.util.UUID;
 
 import java9.util.concurrent.CompletableFuture;
 
+import me.connect.sdk.java.AgencyConfig;
+import me.connect.sdk.java.ConnectMeVcx;
+import me.connect.sdk.java.ConnectMeVcxUpdated;
+import me.connect.sdk.java.PoolTxnGenesis;
+import me.connect.sdk.java.VcxStaticData;
 import me.connect.sdk.java.connection.QRConnection;
-import me.connect.sdk.java.message.MessageType;
 import me.connect.sdk.java.proof.ProofHolder;
 
 public class MainActivity extends BaseActivity {
@@ -29,11 +33,11 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
 
         // Init the sdkApi
-        sdkApi =  ConnectMeVcx.builder()
-            .withContext(getApplicationContext())
-            .withGenesisPool(PoolTxnGenesis.POOL_TXN_GENESIS_PROD)
-            .withAgency(AgencyConfig.DEFAULT)
-            .build();
+        sdkApi = ConnectMeVcx.builder()
+                .withContext(this)
+                .withGenesisPool(PoolTxnGenesis.POOL_TXN_GENESIS_PROD)
+                .withAgency(AgencyConfig.DEFAULT)
+                .build();
 
         sdkApi.init();
     }
@@ -45,8 +49,10 @@ public class MainActivity extends BaseActivity {
             List<String> offers = ConnectMeVcxUpdated.getCredentialOffers(serializedConn).get();
             for (String offer : offers) {
                 try {
-                    String co = ConnectMeVcxUpdated.acceptCredentialOffer(serializedConn, UUID.randomUUID().toString(), offer).get();
+                    String co = ConnectMeVcxUpdated.createCredentialWithOffer(serializedConn, UUID.randomUUID().toString(), offer).get();
                     Log.i(TAG, "Credential offer: " + co);
+                    String co2 = ConnectMeVcxUpdated.acceptCredentialOffer(serializedConn, co).get();
+                    Log.i(TAG, "Credential after accepting: " + co2);
                     ConnectMeVcxUpdated.awaitCredentialStatusChange(co);
                 } catch (Exception e) {
                     e.printStackTrace();
