@@ -22,8 +22,10 @@ import java.util.List;
 import java9.util.concurrent.CompletableFuture;
 
 import me.connect.sdk.java.connection.Connection;
+import me.connect.sdk.java.message.MessageHolder;
 import me.connect.sdk.java.message.MessageStatusType;
 import me.connect.sdk.java.message.MessageType;
+import me.connect.sdk.java.message.MessageUtils;
 import me.connect.sdk.java.message.StructuredMessage;
 import me.connect.sdk.java.proof.ProofHolder;
 
@@ -794,21 +796,8 @@ public class ConnectMeVcxUpdated {
                                             return;
                                         }
                                         try {
-                                            // Fixme extract response creation into separate method
-                                            JSONObject sig = new JSONObject();
-                                            sig.put("signature", Base64.encodeToString(signature, Base64.NO_WRAP));
-                                            sig.put("sig_data", new String(encodedAnswer));
-                                            sig.put("timestamp", System.currentTimeMillis() / 1000);
-                                            JSONObject message = new JSONObject();
-                                            message.put("@type", "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/committedanswer/1.0/answer");
-                                            message.put("response.@sig", sig);
-
-                                            JSONObject messageOptions = new JSONObject();
-                                            messageOptions.put("msg_type", "Answer");
-                                            messageOptions.put("msg_title", "Peer sent answer");
-                                            messageOptions.put("ref_msg_id", messageId);
-
-                                            ConnectionApi.connectionSendMessage(conHandle, message.toString(), messageOptions.toString())
+                                            MessageHolder msg = MessageUtils.prepareAnswer(encodedAnswer, signature, messageId);
+                                            ConnectionApi.connectionSendMessage(conHandle, msg.getMessage(), msg.getMessageOptions())
                                                     .exceptionally(t -> {
                                                         Log.e(TAG, "Failed to send message: ", t);
                                                         result.completeExceptionally(t);
