@@ -8,6 +8,8 @@ import android.system.Os;
 import android.util.Base64;
 import android.util.Log;
 
+import androidx.annotation.RawRes;
+
 import com.evernym.sdk.vcx.VcxException;
 import com.evernym.sdk.vcx.connection.ConnectionApi;
 import com.evernym.sdk.vcx.utils.UtilsApi;
@@ -19,6 +21,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.security.SecureRandom;
 
 public class ConnectMeVcx {
@@ -27,6 +30,7 @@ public class ConnectMeVcx {
 
     private Context context;
     private String genesisPool;
+    private Integer genesisPoolResId;
     private String agency;
 
     private ConnectMeVcx() {
@@ -122,8 +126,17 @@ public class ConnectMeVcx {
                 if (!genesisFilePath.exists()) {
                     try (FileOutputStream stream = new FileOutputStream(genesisFilePath)) {
                         Log.d(TAG, "writing poolTxnGenesis to file: " + genesisFilePath.getAbsolutePath());
-                        stream.write(genesisPool.getBytes());
-
+                        if (genesisPool != null) {
+                            stream.write(genesisPool.getBytes());
+                        } else if (genesisPoolResId != null) {
+                            try (InputStream genesisStream = context.getResources().openRawResource(genesisPoolResId)) {
+                                byte[] buffer = new byte[8 * 1024];
+                                int bytesRead;
+                                while ((bytesRead = genesisStream.read(buffer)) != -1) {
+                                    stream.write(buffer, 0, bytesRead);
+                                }
+                            }
+                        }
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -349,6 +362,7 @@ public class ConnectMeVcx {
     public static final class Builder {
         private Context context;
         private String genesisPool;
+        private Integer genesisPoolResId;
         private String agency;
 
         private Builder() {
@@ -359,10 +373,13 @@ public class ConnectMeVcx {
             return this;
         }
 
-        // fixme genesis pool contents could be bigger than a String size limit, so we need to provide alternative
-        //       methods to populate pool
         public Builder withGenesisPool(String genesisPool) {
             this.genesisPool = genesisPool;
+            return this;
+        }
+
+        public Builder withGenesisPool(@RawRes int genesisPoolResId) {
+            this.genesisPoolResId = genesisPoolResId;
             return this;
         }
 
@@ -376,6 +393,7 @@ public class ConnectMeVcx {
             connectMeVcx.context = context;
             connectMeVcx.agency = this.agency;
             connectMeVcx.genesisPool = this.genesisPool;
+            connectMeVcx.genesisPoolResId = this.genesisPoolResId;
             return connectMeVcx;
         }
     }

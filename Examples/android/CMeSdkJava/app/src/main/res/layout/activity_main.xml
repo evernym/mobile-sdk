@@ -50,4 +50,14 @@
         android:onClick="proofOnClick"
         android:text="Accept proofs" />
 
+
+    <Button
+        android:id="@+id/buttonQuestion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttonProof"
+        android:layout_marginTop="10dp"
+        android:onClick="questionOnClick"
+        android:text="Answer question" />
+
 </RelativeLayout>
