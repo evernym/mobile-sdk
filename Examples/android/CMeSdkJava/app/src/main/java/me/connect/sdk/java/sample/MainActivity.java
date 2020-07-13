@@ -1,11 +1,9 @@
 package me.connect.sdk.java.sample;
 
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,7 +14,6 @@ import me.connect.sdk.java.AgencyConfig;
 import me.connect.sdk.java.ConnectMeVcx;
 import me.connect.sdk.java.ConnectMeVcxUpdated;
 import me.connect.sdk.java.PoolTxnGenesis;
-import me.connect.sdk.java.VcxStaticData;
 import me.connect.sdk.java.connection.QRConnection;
 import me.connect.sdk.java.message.MessageType;
 import me.connect.sdk.java.message.StructuredMessage;
@@ -130,31 +127,27 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case VcxStaticData.REQUEST_WRITE_EXTERNAL_STORAGE: {
-                if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    VcxStaticData.initLoggerFile(this);
-                    Toast.makeText(this,
-                            "File system access allowed",
-                            Toast.LENGTH_SHORT).show();
-
-                    // resolve the promise for file system access
-                    VcxStaticData.resolveLoggerPromise(VcxStaticData.LOG_FILE_PATH);
-                } else {
-                    Toast.makeText(this,
-                            "File system access NOT allowed",
-                            Toast.LENGTH_SHORT).show();
-
-                    // reject the promise for file system access
-                    VcxStaticData.rejectLoggerPromise("ERR-104", "File system access NOT allowed");
-                }
-                return;
-            }
+    public void doBackupOnClick(View v) {
+        try {
+            String sb = ConnectMeVcxUpdated.createBackup("sourceId", "backupKey").get();
+            Log.i(TAG, "Serialized backup after creation: " + sb);
+            ConnectMeVcxUpdated.awaitBackupStatusChange(sb);
+            String sb2 = ConnectMeVcxUpdated.performBackup(this, sb).get();
+            Log.i(TAG, "Serialized backup after backup processing: " + sb2);
+            ConnectMeVcxUpdated.awaitBackupStatusChange(sb2);
+        } catch (Exception e) {
+            Log.e(TAG, "Backup creation failed", e);
+            e.printStackTrace();
         }
-
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
+    public void doRestoreOnClick(View v) {
+        try {
+            ConnectMeVcxUpdated.restoreBackup(this, "backupKey").get();
+            Log.i(TAG, "Backup restore performed");
+        } catch (Exception e) {
+            Log.e(TAG, "Backup restore failed", e);
+            e.printStackTrace();
+        }
+    }
 }

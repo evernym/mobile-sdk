@@ -3,13 +3,18 @@ package me.connect.sdk.java;
 import android.content.Context;
 import android.util.Log;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import android.content.ContextWrapper;
 
@@ -18,6 +23,7 @@ import android.content.ContextWrapper;
  */
 
 class Utils {
+    private static final int BUFFER_SIZE = 4096;
     private static String TAG = "BRIDGEUTILS";
     static final String ROOT_DIR = "connectMeVcx";
 
@@ -116,5 +122,44 @@ class Utils {
 
     static String getRootDir(Context context) {
         return context.getFilesDir().getAbsolutePath() + "/" + ROOT_DIR;
+    }
+
+    public static void zipFiles(String sourcePath, String outputPath) throws IOException {
+        File source = new File(sourcePath);
+        FileOutputStream dest = new FileOutputStream(outputPath);
+        try (ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest))) {
+            if (source.isDirectory()) {
+                zipFolder(out, source, source.getParent().length());
+            } else {
+                writeBytes(out, source, 0);
+            }
+        }
+    }
+
+    private static void zipFolder(ZipOutputStream out, File folder, int basePathLength) throws IOException {
+
+        File[] files = folder.listFiles();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                zipFolder(out, file, basePathLength);
+            } else {
+                writeBytes(out, file, basePathLength);
+            }
+        }
+    }
+
+    private static void writeBytes(ZipOutputStream zipOutput, File inputFile, int basePathLength) throws IOException {
+        String unmodifiedFilePath = inputFile.getPath();
+        String relativePath = unmodifiedFilePath.substring(basePathLength);
+        try (BufferedInputStream origin = new BufferedInputStream(new FileInputStream(unmodifiedFilePath), BUFFER_SIZE)) {
+            ZipEntry entry = new ZipEntry(relativePath);
+            entry.setTime(inputFile.lastModified());
+            zipOutput.putNextEntry(entry);
+            int bytesRead;
+            byte[] data = new byte[BUFFER_SIZE];
+            while ((bytesRead = origin.read(data, 0, BUFFER_SIZE)) != -1) {
+                zipOutput.write(data, 0, bytesRead);
+            }
+        }
     }
 }
