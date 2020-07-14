@@ -36,6 +36,8 @@ dependencies {
     api 'net.sourceforge.streamsupport:android-retrostreams:1.7.1'
     implementation 'de.adorsys.android:securestoragelibrary:1.1.0'
     implementation 'androidx.annotation:annotation:1.1.0'
+    implementation "androidx.annotation:annotation-experimental:1.0.0"
+    implementation "androidx.annotation:annotation-experimental-lint:1.0.0"
 
 
     testImplementation 'junit:junit:4.12'

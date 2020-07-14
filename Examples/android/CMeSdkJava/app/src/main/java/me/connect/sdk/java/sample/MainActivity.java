@@ -126,28 +126,4 @@ public class MainActivity extends BaseActivity {
             e.printStackTrace();
         }
     }
-
-    public void doBackupOnClick(View v) {
-        try {
-            String sb = ConnectMeVcxUpdated.createBackup("sourceId", "backupKey").get();
-            Log.i(TAG, "Serialized backup after creation: " + sb);
-            ConnectMeVcxUpdated.awaitBackupStatusChange(sb);
-            String sb2 = ConnectMeVcxUpdated.performBackup(this, sb).get();
-            Log.i(TAG, "Serialized backup after backup processing: " + sb2);
-            ConnectMeVcxUpdated.awaitBackupStatusChange(sb2);
-        } catch (Exception e) {
-            Log.e(TAG, "Backup creation failed", e);
-            e.printStackTrace();
-        }
-    }
-
-    public void doRestoreOnClick(View v) {
-        try {
-            ConnectMeVcxUpdated.restoreBackup(this, "backupKey").get();
-            Log.i(TAG, "Backup restore performed");
-        } catch (Exception e) {
-            Log.e(TAG, "Backup restore failed", e);
-            e.printStackTrace();
-        }
-    }
 }

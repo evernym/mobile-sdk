@@ -17,17 +17,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
-import java.util.zip.ZipOutputStream;
 
 import java9.util.concurrent.CompletableFuture;
 
@@ -844,7 +837,8 @@ public class ConnectMeVcxUpdated {
      * @param backupKey - String representing the User's Key for securing  the exported wallet
      * @return CompletableFuture containing JSON string with serialized wallet backup
      */
-    public static @NonNull
+    @ExperimentalWalletBackup
+    static @NonNull
     CompletableFuture<String> createBackup(@NonNull String sourceId, @NonNull String backupKey) {
         Log.i(TAG, "Creating backup");
         CompletableFuture<String> result = new CompletableFuture<>();
@@ -907,7 +901,8 @@ public class ConnectMeVcxUpdated {
      * @param serializedBackup String containing serialized backup wallet handle
      * @return CompletableFuture containig serialized backup wallet handle
      */
-    public static @NonNull
+    @ExperimentalWalletBackup
+    static @NonNull
     CompletableFuture<String> performBackup(@NonNull Context context, @NonNull String serializedBackup) {
         Log.i(TAG, "Performing backup");
         CompletableFuture<String> result = new CompletableFuture<>();
@@ -966,7 +961,8 @@ public class ConnectMeVcxUpdated {
      * @param backupKey backup wallet key used during backup wallet creation
      * @return CompletableFuture with nothing
      */
-    public static @NonNull
+    @ExperimentalWalletBackup
+    static @NonNull
     CompletableFuture<Void> restoreBackup(@NonNull Context context, @NonNull String backupKey) {
         // Todo Context object should be taken from ConnectMeVcx after merge
         Log.i(TAG, "Restoring backup");
@@ -1003,7 +999,8 @@ public class ConnectMeVcxUpdated {
      * @param serializedBackup string containing serialized wallet backup
      * @return string containing serialized wallet backup
      */
-    public static @NonNull
+    @ExperimentalWalletBackup
+    static @NonNull
     String awaitBackupStatusChange(@NonNull String serializedBackup) {
         Log.i(TAG, "Awaiting backup state change");
         int count = 1;
