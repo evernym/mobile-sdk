@@ -25,12 +25,11 @@
 
     <EditText
         android:id="@+id/editTextConn"
-        android:layout_below="@id/button"
         android:layout_width="326dp"
         android:layout_height="wrap_content"
+        android:layout_below="@id/button"
         android:ems="10"
-        android:inputType="text"
-        />
+        android:inputType="text" />
 
     <Button
         android:id="@+id/buttonAccept"
@@ -59,24 +58,5 @@
         android:layout_marginTop="10dp"
         android:onClick="questionOnClick"
         android:text="Answer question" />
-
-    <Button
-        android:id="@+id/buttonDoBackup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/buttonQuestion"
-        android:layout_marginTop="10dp"
-        android:onClick="doBackupOnClick"
-        android:text="Do backup" />
-
-    <Button
-        android:id="@+id/buttonDoRestore"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/buttonDoBackup"
-        android:layout_alignTop="@id/buttonDoBackup"
-        android:layout_marginStart="10dp"
-        android:onClick="doRestoreOnClick"
-        android:text="Do restore" />
 
 </RelativeLayout>
