@@ -9,7 +9,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
-        android:layout_toStartOf="@id/buttonAddConnection" />
+        android:layout_toStartOf="@id/buttonAddConnection"
+        android:singleLine="true" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/buttonAddConnection"

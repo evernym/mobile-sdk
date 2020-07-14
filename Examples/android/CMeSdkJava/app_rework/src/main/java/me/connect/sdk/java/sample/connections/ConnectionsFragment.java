@@ -34,19 +34,16 @@ public class ConnectionsFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        // todo use viewmodel;
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         binding.connectionList.setLayoutManager(layoutManager);
         ConnectionsAdapter adapter = new ConnectionsAdapter();
         binding.connectionList.setAdapter(adapter);
 
         ConnectionsViewModel model = new ViewModelProvider(requireActivity()).get(ConnectionsViewModel.class);
-        model.getConnections().observe(getViewLifecycleOwner(), connections -> {
-            adapter.setData(connections);
-        });
+        model.getConnections().observe(getViewLifecycleOwner(), adapter::setData);
 
         binding.buttonAddConnection.setOnClickListener(v -> {
             binding.buttonAddConnection.setEnabled(false);
@@ -54,7 +51,7 @@ public class ConnectionsFragment extends Fragment {
 
             model.newConnection(connString).observe(requireActivity(), status -> {
                 binding.buttonAddConnection.setEnabled(true);
-                Toast.makeText(requireContext(), "Connection processing: " + status, Toast.LENGTH_SHORT);
+                Toast.makeText(requireContext(), "Connection processing: " + status, Toast.LENGTH_SHORT).show();
             });
         });
     }

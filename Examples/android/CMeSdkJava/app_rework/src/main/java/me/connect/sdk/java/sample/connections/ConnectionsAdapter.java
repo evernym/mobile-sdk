@@ -3,10 +3,13 @@ package me.connect.sdk.java.sample.connections;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
 
 import org.w3c.dom.Text;
 
@@ -18,7 +21,7 @@ import me.connect.sdk.java.sample.db.entity.Connection;
 
 public class ConnectionsAdapter extends RecyclerView.Adapter<ConnectionsAdapter.ConnectionsViewHolder> {
 
-    private List<Connection> data; //todo implement
+    private List<Connection> data;
 
     public ConnectionsAdapter() {
         data = new ArrayList<>();
@@ -34,7 +37,11 @@ public class ConnectionsAdapter extends RecyclerView.Adapter<ConnectionsAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ConnectionsViewHolder holder, int position) {
-        holder.textView.setText(data.get(position).name);
+        Connection conn = data.get(position);
+        holder.text.setText(conn.name);
+        if (conn.icon != null) {
+            Glide.with(holder.image.getContext()).load(conn.icon).into(holder.image);
+        }
     }
 
     @Override
@@ -43,11 +50,13 @@ public class ConnectionsAdapter extends RecyclerView.Adapter<ConnectionsAdapter.
     }
 
     static class ConnectionsViewHolder extends RecyclerView.ViewHolder {
-        public TextView textView;
+        public TextView text;
+        public ImageView image;
 
         public ConnectionsViewHolder(View v) {
             super(v);
-            textView = v.findViewById(R.id.textView);
+            text = v.findViewById(R.id.text);
+            image = v.findViewById(R.id.image);
         }
     }
 
