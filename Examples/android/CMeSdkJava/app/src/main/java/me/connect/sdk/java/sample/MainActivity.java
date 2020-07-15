@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,9 +37,14 @@ public class MainActivity extends BaseActivity {
                 .withContext(this)
                 .withGenesisPool(PoolTxnGenesis.POOL_TXN_GENESIS_PROD)
                 .withAgency(AgencyConfig.DEFAULT)
+                .withWalletName("some-wallet-name")
                 .build();
 
-        sdkApi.init();
+        sdkApi.init().handle((aVoid, throwable) -> {
+            Log.i(TAG, "Init finished, res: " + aVoid + ", err: " + throwable);
+            Toast.makeText(MainActivity.this, "Init finished", Toast.LENGTH_LONG).show();
+            return null;
+        });
     }
 
     public void acceptOnClick(View v) {

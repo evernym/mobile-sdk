@@ -27,19 +27,6 @@ class Utils {
     private static String TAG = "BRIDGEUTILS";
     static final String ROOT_DIR = "connectMeVcx";
 
-    public static void resolveIfValid(Promise promise, Object result) {
-        // Add more conditions here if you want to check if the result is valid
-        //e.g Like if result is null return false
-        //e.g If result is empty string return false
-        if (result != null) {
-            promise.resolve(result);
-        } else {
-            promise.reject("NULL VALUE", "Null value was received as result from wrapper");
-        }
-
-    }
-
-
     public static void writeCACert(Context context) {
         ContextWrapper cw = new ContextWrapper(context);
         File cert_file = new File(getRootDir(cw), "cacert.pem");
