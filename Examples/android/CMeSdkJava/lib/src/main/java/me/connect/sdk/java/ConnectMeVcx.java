@@ -19,6 +19,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.SecureRandom;
 
@@ -28,7 +30,9 @@ public class ConnectMeVcx {
 
     public static final String TAG = "ConnectMeVcx";
     public static final int LOG_MAX_SIZE_DEFAULT = 1_000_000;
+    private static final int WALLET_KEY_LENGTH = 128;
     private static final String SECURE_PREF_VCXCONFIG = "me.connect.vcx.config";
+    private static LogFileObserver logFileObserver = null;
 
     private Context context;
     private String genesisPool;
@@ -46,15 +50,15 @@ public class ConnectMeVcx {
         if (logMaxSize != null) {
             this.logMaxSize = logMaxSize;
         }
-
     }
 
     /**
-     * Initializes library
+     * Initialize library
      *
-     * @return {@link CompletableFuture} containing nothing
+     * @return {@link CompletableFuture}
      */
-    public CompletableFuture<Void> init() {
+    public @NonNull
+    CompletableFuture<Void> init() {
         Log.i(TAG, "Initializing ConnectMeVcx");
         CompletableFuture<Void> result = new CompletableFuture<>();
         Exception error = validate();
@@ -69,29 +73,27 @@ public class ConnectMeVcx {
         }
 
         // NOTE: api.vcx_set_logger is already initialized by com.evernym.sdk.vcx.LibVcx
-        String logFilePath = setVcxLogger("trace", logMaxSize); // todo could be moved into config param
+        String logFilePath = setVcxLogger("trace", logMaxSize);
 
         Log.d(TAG, "the log file path is: " + logFilePath);
 
         String wName = walletName + "-wallet";
         String poolName = walletName + "-pool";
-        createWalletKey(128).handle((walletKey, err) -> {
+        createWalletKey(WALLET_KEY_LENGTH).handle((walletKey, err) -> {
             if (err != null) {
                 result.completeExceptionally(err);
                 return null;
             }
             Log.d(TAG, "wallet key value is: " + walletKey);
-
             initWithConfig(wName, walletKey, poolName).handle((aVoid, t) -> {
                 if (t != null) {
                     result.completeExceptionally(t);
-                    return null;
+                } else {
+                    result.complete(null);
                 }
-                result.complete(null);
                 return null;
             });
             return null;
-
         });
 
         return result;
@@ -147,7 +149,6 @@ public class ConnectMeVcx {
         }
         Log.d(TAG, "agencyConfig is set to: " + agencyConfig);
 
-        // create the one time info
         createOneTimeInfo(agencyConfig).handle((oneTimeInfo, throwable) -> {
             if (throwable != null) {
                 result.completeExceptionally(throwable);
@@ -164,7 +165,7 @@ public class ConnectMeVcx {
                     throw new RuntimeException("oneTimeInfo is null AND the key me.connect.vcxConfig is empty!!");
                 }
             } else {
-                File genesisFilePath = new File(Utils.getRootDir(context), "pool_transactions_genesis_DEMO");
+                File genesisFilePath = new File(Utils.getRootDir(context), "pool_transactions_genesis");
                 if (!genesisFilePath.exists()) {
                     try (FileOutputStream stream = new FileOutputStream(genesisFilePath)) {
                         Log.d(TAG, "writing poolTxnGenesis to file: " + genesisFilePath.getAbsolutePath());
@@ -191,7 +192,6 @@ public class ConnectMeVcx {
                     json.put("pool_name", poolName);
                     json.put("protocol_version", "2");
                     json.put("protocol_type", "3.0");
-                    //json.put("storage_config", "{\"path\":\"" + context.getFilesDir().getAbsolutePath() + "/.indy_client/wallet\"}");
                     vcxConfig = json.toString();
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -204,11 +204,9 @@ public class ConnectMeVcx {
             Log.d(TAG, "vcxConfig is set to: " + vcxConfig);
             if (vcxConfig == null) {
                 throw new RuntimeException("vcxConfig is null and this is  not allowed!");
-                //todo complete exceptionally
             }
 
             // invoke initWithConfig
-
             init(vcxConfig).handle((returnCode, err) -> {
                 if (err != null) {
                     result.completeExceptionally(err);
@@ -237,7 +235,7 @@ public class ConnectMeVcx {
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
             SecureRandom random = new SecureRandom();
-            byte bytes[] = new byte[lengthOfKey];
+            byte[] bytes = new byte[lengthOfKey];
             random.nextBytes(bytes);
             String key = Base64.encodeToString(bytes, Base64.NO_WRAP);
             result.complete(key);
@@ -259,7 +257,7 @@ public class ConnectMeVcx {
                     .handle((res, err) -> {
                         if (err != null) {
                             Log.e(TAG, "createOneTimeInfo: ", err);
-                            result.completeExceptionally(err);
+                            result.complete(null); // todo check
                         } else {
                             Log.i(TAG, "createOneTimeInfo: " + res);
                             result.complete(res);
@@ -273,8 +271,8 @@ public class ConnectMeVcx {
         return result;
     }
 
-    public CompletableFuture<Integer> init(String config) {
-        CompletableFuture<Integer> result = new CompletableFuture<>();
+    public CompletableFuture<Void> init(String config) {
+        CompletableFuture<Void> result = new CompletableFuture<>();
         Log.d(TAG, " ==> init() called with: config = [" + config + "]");
         // When we restore data, then we are not calling createOneTimeInfo
         // and hence ca-crt is not written within app directory
@@ -287,35 +285,21 @@ public class ConnectMeVcx {
             if (retCode != 0) {
                 result.completeExceptionally(new Exception("Could not init: " + retCode));
             } else {
-                VcxApi.vcxInitWithConfig(config).exceptionally((t) -> {
-                    Log.e(TAG, "init: ", t);
-                    result.completeExceptionally(t);
-                    return -1;
-                }).thenAccept(res -> {
-                    // Need to put this logic in every accept because that is how ugly Java's
-                    // promise API is
-                    // even if exceptionally is called, then also thenAccept block will be called
-                    // we either need to switch to complete method and pass two callbacks as
-                    // parameter
-                    // till we change to that API, we have to live with this IF condition
-                    // also reason to add this if condition is because we already rejected promise
-                    // in
-                    // exceptionally block, if we call promise.resolve now, then it `thenAccept`
-                    // block
-                    // would throw an exception that would not be caught here, because this is an
-                    // async
-                    // block and above try catch would not catch this exception
-                    if (res != -1) {
-                        result.complete(0);
-                    }
-                });
+                VcxApi.vcxInitWithConfig(config)
+                        .handle((integer, err) -> {
+                            if (err != null) {
+                                result.completeExceptionally(err);
+                            } else {
+                                result.complete(null);
+                            }
+                            return null;
+                        });
             }
-
         } catch (AlreadyInitializedException e) {
             // even if we get already initialized exception
             // then also we will resolve promise, because we don't care if vcx is already
             // initialized
-            result.complete(0);
+            result.complete(null);
         } catch (VcxException e) {
             e.printStackTrace();
             result.completeExceptionally(e);
@@ -339,23 +323,45 @@ public class ConnectMeVcx {
         }
     }
 
-
     public String setVcxLogger(String logLevel, int maxFileSizeBytes) {
         CompletableFuture<String> result = new CompletableFuture<>();
         File logFile = new File(Utils.getRootDir(context), "me.connect.rotating.log");
         String logFilePath = logFile.getAbsolutePath();
-        /*VcxStaticData.ENCRYPTED_LOG_FILE_PATH = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() +
-                "/connectme.rotating." + uniqueIdentifier + ".log.enc";*/
-        //get the documents directory:
         Log.d(TAG, "Setting vcx logger to: " + logFilePath);
-
-        VcxStaticData.initLoggerFile(context, logFilePath, maxFileSizeBytes);
+        initLoggerFile(context, logFilePath, maxFileSizeBytes);
         return logFilePath;
-        //promise.resolve(VcxStaticData.LOG_FILE_PATH);
+    }
+
+    private void initLoggerFile(final Context context, String logFilePath, int maxFileSizeBytes) {
+        // create the log file if it does not exist
+        try {
+            if (!new File(logFilePath).exists()) {
+                new FileWriter(logFilePath).close();
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return;
+        }
+
+        // Now monitor the logFile and empty it out when it's size is
+        // larger than MAX_ALLOWED_FILE_BYTES
+        logFileObserver = new LogFileObserver(logFilePath, maxFileSizeBytes);
+        logFileObserver.startWatching();
+
+        pl.brightinventions.slf4android.FileLogHandlerConfiguration fileHandler = pl.brightinventions.slf4android.LoggerConfiguration.fileLogHandler(context);
+        fileHandler.setFullFilePathPattern(logFilePath);
+        fileHandler.setRotateFilesCountLimit(1);
+        // Prevent slf4android from rotating the log file as we will handle that. The
+        // way that we prevent slf4android from rotating the log file is to set the log
+        // file size limit to 1 million bytes higher that our MAX_ALLOWED_FILE_BYTES
+        fileHandler.setLogFileSizeLimitInBytes(maxFileSizeBytes + 1000000);
+        pl.brightinventions.slf4android.LoggerConfiguration.configuration().addHandlerToRootLogger(fileHandler);
+
+        // !!TODO: Remove the pl.brightinventions.slf4android.LoggerConfiguration.configuration() console logger
     }
 
     /**
-     * Creates builder for ConnectMeVcx wrapper
+     * Creates builder for {@link ConnectMeVcx}.
      *
      * @return {@link Builder} instance
      */
@@ -363,6 +369,7 @@ public class ConnectMeVcx {
         return new Builder();
     }
 
+    // todo add log level parameters
     public static final class Builder {
         private Context context;
         private String genesisPool;
@@ -389,7 +396,6 @@ public class ConnectMeVcx {
 
         /**
          * Set genesis pool string.
-         * In case string exceeds 65,536 symbols limit, {@link #withGenesisPool(int)}} method should be used;
          *
          * @param genesisPool genesis pool string
          * @return {@link Builder} instance
@@ -455,7 +461,8 @@ public class ConnectMeVcx {
          *
          * @return {@link ConnectMeVcx} instance
          */
-        public ConnectMeVcx build() {
+        public @NonNull
+        ConnectMeVcx build() {
             return new ConnectMeVcx(context, genesisPool, genesisPoolResId, agency, walletName, logMaxSize);
         }
     }
