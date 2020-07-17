@@ -20,6 +20,7 @@ import me.connect.sdk.java.sample.databinding.ConnectionsFragmentBinding;
 public class ConnectionsFragment extends Fragment {
 
     private ConnectionsFragmentBinding binding;
+    private ConnectionsViewModel model;
 
     public static ConnectionsFragment newInstance() {
         return new ConnectionsFragment();
@@ -42,16 +43,18 @@ public class ConnectionsFragment extends Fragment {
         ConnectionsAdapter adapter = new ConnectionsAdapter();
         binding.connectionList.setAdapter(adapter);
 
-        ConnectionsViewModel model = new ViewModelProvider(requireActivity()).get(ConnectionsViewModel.class);
+        model = new ViewModelProvider(requireActivity()).get(ConnectionsViewModel.class);
         model.getConnections().observe(getViewLifecycleOwner(), adapter::setData);
 
         binding.buttonAddConnection.setOnClickListener(v -> {
             binding.buttonAddConnection.setEnabled(false);
             String connString = binding.editTextConnection.getText().toString();
+            binding.editTextConnection.setText(null);
 
-            model.newConnection(connString).observe(requireActivity(), status -> {
-                binding.buttonAddConnection.setEnabled(true);
-                Toast.makeText(requireContext(), "Connection processing: " + status, Toast.LENGTH_SHORT).show();
+            model.newConnection(connString).observe(getViewLifecycleOwner(), status -> {
+                if (status) {
+                    binding.buttonAddConnection.setEnabled(true);
+                }
             });
         });
     }

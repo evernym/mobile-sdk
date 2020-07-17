@@ -49,6 +49,11 @@ public class ConnectionsAdapter extends RecyclerView.Adapter<ConnectionsAdapter.
         return data.size();
     }
 
+    public void setData(List<Connection> data) {
+        this.data = data;
+        this.notifyDataSetChanged();
+    }
+
     static class ConnectionsViewHolder extends RecyclerView.ViewHolder {
         public TextView text;
         public ImageView image;
@@ -58,10 +63,5 @@ public class ConnectionsAdapter extends RecyclerView.Adapter<ConnectionsAdapter.
             text = v.findViewById(R.id.text);
             image = v.findViewById(R.id.image);
         }
-    }
-
-    public void setData(List<Connection> data) {
-        this.data = data;
-        this.notifyDataSetChanged();
     }
 }

@@ -1,6 +1,9 @@
 package me.connect.sdk.java.sample.connections;
 
 import android.app.Application;
+import android.net.Uri;
+import android.util.Base64;
+import android.webkit.URLUtil;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -9,6 +12,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -25,7 +29,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
 
     public ConnectionsViewModel(@NonNull Application application) {
         super(application);
-        db = Database.newInstance(application);
+        db = Database.getInstance(application);
     }
 
     public LiveData<List<Connection>> getConnections() {
@@ -54,36 +58,51 @@ public class ConnectionsViewModel extends AndroidViewModel {
 
     private void createConnection(String invite) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            ConnectMeVcxUpdated.createConnection(invite, new QRConnection())
+            String parsedInvite = parseInvite(invite);
+            ConnectMeVcxUpdated.createConnection(parsedInvite, new QRConnection())
                     .handle((res, throwable) -> {
                         if (res != null) {
                             ConnDataHolder data = extractDataFromConnectionString(res);
                             Connection c = new Connection();
                             c.name = data.name;
                             c.icon = data.logo;
-                            c.serializedConnection = res;
+                            c.serialized = res;
                             db.connectionDao().insertAll(c);
                             loadConnections();
-                            newConnectionState.setValue(true);
-                        } else {
-                            newConnectionState.setValue(false);
                         }
+                        newConnectionState.postValue(true);
                         return res;
                     });
         });
     }
 
+    private String parseInvite(String invite) {
+        if (URLUtil.isValidUrl(invite)) {
+            Uri uri = Uri.parse(invite);
+            String param = uri.getQueryParameter("c_i");
+            return new String(Base64.decode(param, Base64.NO_WRAP));
+        } else {
+            return invite;
+        }
+    }
+
     private ConnDataHolder extractDataFromConnectionString(String str) {
         try {
-            JSONObject data = new JSONObject(str);
-            JSONObject details = data.getJSONObject("data").getJSONObject("invite_detail").getJSONObject("senderDetail");
-            return new ConnDataHolder(details.getString("name"), details.getString("logoUrl"));
+            JSONObject data = new JSONObject(str).getJSONObject("data");
+            JSONObject details = data.optJSONObject("invite_detail");
+            if (details != null) {
+                JSONObject senderDetails = details.getJSONObject("senderDetail");
+                return new ConnDataHolder(senderDetails.getString("name"), senderDetails.getString("logoUrl"));
+            } else {
+                // workaround in case details missing
+                String sourceId = data.getString("source_id");
+                return new ConnDataHolder(sourceId, null);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
         }
     }
-
 
     static class ConnDataHolder {
         String name;

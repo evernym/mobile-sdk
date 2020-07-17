@@ -10,7 +10,6 @@ public class MainApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        //todo init sdk
         sdk = ConnectMeVcx.builder()
                 .withAgency(AgencyConfig.DEFAULT)
                 .withGenesisPool(Constants.POOL_TXN_GENESIS)

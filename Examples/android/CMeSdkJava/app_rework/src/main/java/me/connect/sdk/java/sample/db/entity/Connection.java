@@ -6,11 +6,11 @@ import androidx.room.PrimaryKey;
 
 @Entity
 public class Connection {
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     public int id;
 
-    @ColumnInfo(name = "serialized_connection")
-    public String serializedConnection;
+    @ColumnInfo(name = "serialized")
+    public String serialized;
 
     @ColumnInfo(name = "name")
     public String name;

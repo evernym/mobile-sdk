@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
 import me.connect.sdk.java.sample.connections.ConnectionsFragment;
+import me.connect.sdk.java.sample.credentials.CredentialOffersFragment;
 
 public class MainPagerAdapter extends FragmentPagerAdapter {
     public MainPagerAdapter(@NonNull FragmentManager fm) {
@@ -20,7 +21,7 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
             case 0:
                 return ConnectionsFragment.newInstance();
             case 1:
-                return CredentialsFragment.newInstance();
+                return CredentialOffersFragment.newInstance();
             case 2:
                 return ProofRequestsFragment.newInstance();
             case 3:
@@ -40,7 +41,7 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
             case 0:
                 return "Connections";
             case 1:
-                return "Credentials";
+                return "Credentials Offers";
             case 2:
                 return "Proof requests";
             case 3:
