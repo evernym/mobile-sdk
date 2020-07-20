@@ -56,10 +56,10 @@ public class ConnectionsViewModel extends AndroidViewModel {
     private void createConnection(String invite, SingleLiveData<Boolean> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             String parsedInvite = parseInvite(invite);
+            ConnDataHolder data = extractDataFromInvite(parsedInvite);
             ConnectMeVcxUpdated.createConnection(parsedInvite, new QRConnection())
                     .handle((res, throwable) -> {
                         if (res != null) {
-                            ConnDataHolder data = extractDataFromConnectionString(res);
                             Connection c = new Connection();
                             c.name = data.name;
                             c.icon = data.logo;
@@ -83,16 +83,19 @@ public class ConnectionsViewModel extends AndroidViewModel {
         }
     }
 
-    private ConnDataHolder extractDataFromConnectionString(String str) {
+    private ConnDataHolder extractDataFromInvite(String invite) {
         try {
-            JSONObject data = new JSONObject(str).getJSONObject("data");
-            JSONObject details = data.optJSONObject("invite_detail");
-            if (details != null) {
-                JSONObject senderDetails = details.getJSONObject("senderDetail");
-                return new ConnDataHolder(senderDetails.getString("name"), senderDetails.getString("logoUrl"));
+            JSONObject json = new JSONObject(invite);
+            if (json.has("label")) {
+                String label = json.getString("label");
+                return new ConnDataHolder(label, null);
+            }
+            JSONObject data = json.optJSONObject("s");
+            if (data != null) {
+                return new ConnDataHolder(data.getString("n"), data.getString("l"));
             } else {
                 // workaround in case details missing
-                String sourceId = data.getString("source_id");
+                String sourceId = json.getString("id");
                 return new ConnDataHolder(sourceId, null);
             }
         } catch (JSONException e) {
