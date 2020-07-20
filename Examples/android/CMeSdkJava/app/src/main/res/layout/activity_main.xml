@@ -25,12 +25,11 @@
 
     <EditText
         android:id="@+id/editTextConn"
-        android:layout_below="@id/button"
         android:layout_width="326dp"
         android:layout_height="wrap_content"
+        android:layout_below="@id/button"
         android:ems="10"
-        android:inputType="text"
-        />
+        android:inputType="text" />
 
     <Button
         android:id="@+id/buttonAccept"
