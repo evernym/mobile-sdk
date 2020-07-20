@@ -52,6 +52,7 @@ public class CredentialOffersAdapter extends RecyclerView.Adapter<CredentialOffe
         holder.image.setImageResource(res);
         holder.accept.setVisibility(credentialOffer.accepted == null ? View.VISIBLE : View.GONE);
         holder.accept.setOnClickListener(view -> {
+            holder.accept.setEnabled(false);
             itemClickListener.onItemClick(credentialOffer.id);
         });
     }

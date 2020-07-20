@@ -13,8 +13,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
-
 import me.connect.sdk.java.sample.databinding.ConnectionsFragmentBinding;
 
 public class ConnectionsFragment extends Fragment {
@@ -49,15 +47,15 @@ public class ConnectionsFragment extends Fragment {
         binding.buttonAddConnection.setOnClickListener(v -> {
             binding.buttonAddConnection.setEnabled(false);
             String connString = binding.editTextConnection.getText().toString();
-            binding.editTextConnection.setText(null);
 
-            model.newConnection(connString).observe(getViewLifecycleOwner(), status -> {
+            // fixme possible leaks?
+            model.newConnection(connString).observeOnce(getViewLifecycleOwner(), status -> {
+                Toast.makeText(getActivity(), "New connection processed", Toast.LENGTH_SHORT).show();
                 if (status) {
-                    binding.buttonAddConnection.setEnabled(true);
+                    binding.editTextConnection.setText(null);
                 }
+                binding.buttonAddConnection.setEnabled(true);
             });
         });
     }
 }
-
-

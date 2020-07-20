@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -50,17 +51,15 @@ public class CredentialOffersFragment extends Fragment {
 
         binding.buttonCheckOffers.setOnClickListener(v -> {
             binding.buttonCheckOffers.setEnabled(false);
-            model.getNewCredentialOffers().observe(getViewLifecycleOwner(), ok -> {
-                if (ok) {
-                    binding.buttonCheckOffers.setEnabled(true);
-                }
+            model.getNewCredentialOffers().observeOnce(getViewLifecycleOwner(), ok -> {
+                binding.buttonCheckOffers.setEnabled(true);
             });
         });
     }
 
     private void accept(int offerId) {
-        model.acceptOffer(offerId); //todo UI updates
+        model.acceptOffer(offerId).observeOnce(getViewLifecycleOwner(), ok -> {
+            Toast.makeText(getActivity(), "Accept offer processed", Toast.LENGTH_SHORT).show();
+        });
     }
-
 }
-

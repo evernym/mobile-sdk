@@ -19,13 +19,13 @@ import java.util.concurrent.Executors;
 
 import me.connect.sdk.java.ConnectMeVcxUpdated;
 import me.connect.sdk.java.connection.QRConnection;
+import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Connection;
 
 public class ConnectionsViewModel extends AndroidViewModel {
     private final Database db;
     private MutableLiveData<List<Connection>> connections;
-    private MutableLiveData<Boolean> newConnectionState;
 
     public ConnectionsViewModel(@NonNull Application application) {
         super(application);
@@ -40,13 +40,10 @@ public class ConnectionsViewModel extends AndroidViewModel {
         return connections;
     }
 
-    public LiveData<Boolean> newConnection(String invite) {
-        if (newConnectionState == null) {
-            newConnectionState = new MutableLiveData<>();
-        }
-        createConnection(invite);
-
-        return newConnectionState;
+    public SingleLiveData<Boolean> newConnection(String invite) {
+        SingleLiveData<Boolean> data = new SingleLiveData<>();
+        createConnection(invite, data);
+        return data;
     }
 
     private void loadConnections() {
@@ -56,7 +53,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
         });
     }
 
-    private void createConnection(String invite) {
+    private void createConnection(String invite, SingleLiveData<Boolean> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             String parsedInvite = parseInvite(invite);
             ConnectMeVcxUpdated.createConnection(parsedInvite, new QRConnection())
@@ -70,7 +67,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
                             db.connectionDao().insertAll(c);
                             loadConnections();
                         }
-                        newConnectionState.postValue(true);
+                        liveData.postValue(throwable == null);
                         return res;
                     });
         });

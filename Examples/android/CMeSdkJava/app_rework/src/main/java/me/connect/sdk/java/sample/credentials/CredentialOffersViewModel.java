@@ -17,6 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 
 import me.connect.sdk.java.ConnectMeVcxUpdated;
+import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Connection;
 import me.connect.sdk.java.sample.db.entity.CredentialOffer;
@@ -25,7 +26,6 @@ import me.connect.sdk.java.sample.db.entity.CredentialOffer;
 public class CredentialOffersViewModel extends AndroidViewModel {
     private final Database db;
     private MutableLiveData<List<CredentialOffer>> credentialOffers;
-    private MutableLiveData<Boolean> newCredentialOffers;
 
     public CredentialOffersViewModel(@NonNull Application application) {
         super(application);
@@ -47,19 +47,19 @@ public class CredentialOffersViewModel extends AndroidViewModel {
         });
     }
 
-    public LiveData<Boolean> getNewCredentialOffers() {
-        if (newCredentialOffers == null) {
-            newCredentialOffers = new MutableLiveData<>();
-        }
-        checkCredentialOffers();
-        return newCredentialOffers;
+    public SingleLiveData<Boolean> getNewCredentialOffers() {
+        SingleLiveData<Boolean> data = new SingleLiveData<>();
+        checkCredentialOffers(data);
+        return data;
     }
 
-    public void acceptOffer(int offerId) { //todo liveData
-        acceptCredentialOffer(offerId);
+    public SingleLiveData<Boolean> acceptOffer(int offerId) {
+        SingleLiveData<Boolean> data = new SingleLiveData<>();
+        acceptCredentialOffer(offerId, data);
+        return data;
     }
 
-    private void acceptCredentialOffer(int offerId) {
+    private void acceptCredentialOffer(int offerId, SingleLiveData<Boolean> data) {
         Executors.newSingleThreadExecutor().execute(() -> {
             CredentialOffer offer = db.credentialOffersDao().getById(offerId);
             Connection connection = db.connectionDao().getById(offer.connectionId);
@@ -71,6 +71,7 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                             db.credentialOffersDao().update(offer);
                         }
                         loadCredentialOffers();
+                        data.postValue(throwable == null);
                         return null;
                     }
             );
@@ -78,7 +79,7 @@ public class CredentialOffersViewModel extends AndroidViewModel {
     }
 
 
-    private void checkCredentialOffers() {
+    private void checkCredentialOffers(SingleLiveData<Boolean> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             List<Connection> connections = db.connectionDao().getAll();
             for (Connection c : connections) {
@@ -101,10 +102,10 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                             });
                         }
                     }
+                    liveData.postValue(true);
                     return res;
                 });
             }
-            newCredentialOffers.postValue(true);
         });
     }
 
