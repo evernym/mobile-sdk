@@ -2,10 +2,6 @@ package me.connect.sdk.java;
 
 import android.content.Context;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import de.adorsys.android.securestoragelibrary.SecurePreferences;
 
 public class SecurePreferencesHelper {
@@ -21,7 +17,7 @@ public class SecurePreferencesHelper {
         // instead if you wanted.
         String[] ret = new String[((text.length() + size - 1) / size)];
 
-        for (int start = 0,retIndex = 0; start < text.length(); start += size) {
+        for (int start = 0, retIndex = 0; start < text.length(); start += size) {
             ret[retIndex] = text.substring(start, Math.min(text.length(), start + size));
             retIndex++;
         }
@@ -34,8 +30,8 @@ public class SecurePreferencesHelper {
 
         SecurePreferences.setValue(context, getNumberOfChunksKey(key), chunks.length);
 
-        for(int i=0; i < chunks.length; ++i) {
-            SecurePreferences.setValue(context, key+i, chunks[i]);
+        for (int i = 0; i < chunks.length; ++i) {
+            SecurePreferences.setValue(context, key + i, chunks[i]);
         }
     }
 
@@ -47,8 +43,8 @@ public class SecurePreferencesHelper {
         }
 
         StringBuffer longString = new StringBuffer();
-        for(int i=0; i < numberOfChunks; ++i) {
-            longString.append(SecurePreferences.getStringValue(context, key+i, ""));
+        for (int i = 0; i < numberOfChunks; ++i) {
+            longString.append(SecurePreferences.getStringValue(context, key + i, ""));
         }
 
         return longString.toString();
@@ -58,8 +54,8 @@ public class SecurePreferencesHelper {
         int numberOfChunks = SecurePreferences.getIntValue(context, getNumberOfChunksKey(key), 0);
 
         //(0 until numberOfChunks).map { SecurePreferences.removeValue("$key$it") }
-        for(int i=0; i < numberOfChunks; ++i) {
-            SecurePreferences.removeValue(context, key+i);
+        for (int i = 0; i < numberOfChunks; ++i) {
+            SecurePreferences.removeValue(context, key + i);
         }
         SecurePreferences.removeValue(context, getNumberOfChunksKey(key));
     }

@@ -525,6 +525,92 @@ public class ConnectMeVcxUpdated {
         return serializedProof;
     }
 
+    /**
+     * Creates proof request
+     *
+     * @param sourceId custom string for this cred offer
+     * @param message  proof request string
+     * @return {@link CompletableFuture} containing serialized proof request
+     */
+    public static @NonNull
+    CompletableFuture<String> createProofWithRequest(@NonNull String sourceId,
+                                                     @NonNull String message) {
+        Log.i(TAG, "Retrieving proof request");
+        CompletableFuture<String> result = new CompletableFuture<>();
+        try {
+            DisclosedProofApi.proofCreateWithRequest(sourceId, message)
+                    .exceptionally(t -> {
+                        Log.e(TAG, "Failed create proof with request: ", t);
+                        result.completeExceptionally(t);
+                        return null;
+                    })
+                    .thenAccept(proofHandle -> {
+                        if (proofHandle == null) {
+                            return;
+                        }
+                        try {
+                            DisclosedProofApi.proofSerialize(proofHandle)
+                                    .exceptionally(t -> {
+                                        Log.e(TAG, "Failed to serialize proof request: ", t);
+                                        result.completeExceptionally(t);
+                                        return null;
+                                    })
+                                    .thenAccept(result::complete);
+                        } catch (VcxException e) {
+                            result.completeExceptionally(e);
+                        }
+                    });
+        } catch (Exception e) {
+            result.completeExceptionally(e);
+        }
+        return result;
+    }
+
+    /**
+     * Retrieves available credentials for proof request
+     *
+     * @param serializedProof proof request string
+     * @return {@link CompletableFuture} containing string with available credentials
+     */
+    public static @NonNull
+    CompletableFuture<String> retrieveCredentialsForProof(@NonNull String serializedProof) {
+        Log.i(TAG, "Retrieving credentials for proof request");
+        CompletableFuture<String> result = new CompletableFuture<>();
+        try {
+            DisclosedProofApi.proofDeserialize(serializedProof)
+                    .exceptionally(t -> {
+                        Log.e(TAG, "Failed deserialize proof request: ", t);
+                        result.completeExceptionally(t);
+                        return null;
+                    })
+                    .thenAccept(proofHandle -> {
+                        if (proofHandle == null) {
+                            return;
+                        }
+                        try {
+                            DisclosedProofApi.proofRetrieveCredentials(proofHandle)
+                                    .exceptionally(t -> {
+                                        Log.e(TAG, "Failed to retrieve proof credentials: ", t);
+                                        result.completeExceptionally(t);
+                                        return null;
+                                    })
+                                    .thenAccept(retrievedCreds -> {
+                                        if (retrievedCreds == null) {
+                                            return;
+                                        }
+                                        result.complete(retrievedCreds);
+                                    });
+                        } catch (VcxException e) {
+                            e.printStackTrace();
+                        }
+                    });
+        } catch (Exception e) {
+            result.completeExceptionally(e);
+        }
+        return result;
+    }
+
+    @Deprecated
     public static @NonNull
     CompletableFuture<ProofHolder> retrieveProofRequest(@NonNull String serializedConnection, @NonNull String sourceId,
                                                         @NonNull String message) {

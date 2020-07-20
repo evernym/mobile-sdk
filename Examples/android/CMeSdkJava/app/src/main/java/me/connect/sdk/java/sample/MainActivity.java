@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,7 +18,6 @@ import me.connect.sdk.java.PoolTxnGenesis;
 import me.connect.sdk.java.connection.QRConnection;
 import me.connect.sdk.java.message.MessageType;
 import me.connect.sdk.java.message.StructuredMessage;
-import me.connect.sdk.java.proof.ProofHolder;
 
 public class MainActivity extends BaseActivity {
 
@@ -36,9 +36,14 @@ public class MainActivity extends BaseActivity {
                 .withContext(this)
                 .withGenesisPool(PoolTxnGenesis.POOL_TXN_GENESIS_PROD)
                 .withAgency(AgencyConfig.DEFAULT)
+                .withWalletName("some-wallet-name")
                 .build();
 
-        sdkApi.init();
+        sdkApi.init().handle((aVoid, throwable) -> {
+            Log.i(TAG, "Init finished, res: " + aVoid + ", err: " + throwable);
+            Toast.makeText(MainActivity.this, "Init finished", Toast.LENGTH_LONG).show();
+            return null;
+        });
     }
 
     public void acceptOnClick(View v) {
@@ -70,11 +75,12 @@ public class MainActivity extends BaseActivity {
             List<String> proofReqs = ConnectMeVcxUpdated.getProofRequests(serializedConn).get();
             for (String proof : proofReqs) {
                 try {
-                    ProofHolder pr = ConnectMeVcxUpdated.retrieveProofRequest(serializedConn, UUID.randomUUID().toString(), proof).get();
-                    Log.i(TAG, "Proof request found: " + pr);
-                    String mappedCreds = ConnectMeVcxUpdated.mapCredentials(pr.getRetrievedCredentials());
-
-                    String res = ConnectMeVcxUpdated.sendProof(serializedConn, pr.getSerializedProof(), mappedCreds, "{}").get();
+                    String serializedProof = ConnectMeVcxUpdated.createProofWithRequest(UUID.randomUUID().toString(), proof).get();
+                    Log.i(TAG, "Proof request created: " + serializedProof);
+                    String availableCreds = ConnectMeVcxUpdated.retrieveCredentialsForProof(serializedProof).get();
+                    Log.i(TAG, "Available creds retrieved: " + availableCreds);
+                    String mappedCreds = ConnectMeVcxUpdated.mapCredentials(availableCreds);
+                    String res = ConnectMeVcxUpdated.sendProof(serializedConn, serializedProof, mappedCreds, "{}").get();
                     Log.i(TAG, "Proof request sent: " + res);
                     ConnectMeVcxUpdated.awaitProofStatusChange(res);
                 } catch (Exception e) {
@@ -82,7 +88,7 @@ public class MainActivity extends BaseActivity {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "Accept failed with exception, " + e);
+            Log.e(TAG, "Proof request failed with exception, " + e);
             e.printStackTrace();
         }
     }
