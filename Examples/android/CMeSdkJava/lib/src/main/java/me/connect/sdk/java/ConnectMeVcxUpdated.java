@@ -533,8 +533,8 @@ public class ConnectMeVcxUpdated {
      * @return {@link CompletableFuture} containing serialized proof request
      */
     public static @NonNull
-    CompletableFuture<String> createProofRequest(@NonNull String sourceId,
-                                                 @NonNull String message) {
+    CompletableFuture<String> createProofWithRequest(@NonNull String sourceId,
+                                                     @NonNull String message) {
         Log.i(TAG, "Retrieving proof request");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
