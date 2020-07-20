@@ -93,6 +93,28 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    public void rejectProofOnClick(View view) {
+        EditText editTextConn = (EditText) findViewById(R.id.editTextConn);
+        String serializedConn = editTextConn.getText().toString();
+        try {
+            List<String> proofReqs = ConnectMeVcxUpdated.getProofRequests(serializedConn).get();
+            for (String proof : proofReqs) {
+                try {
+                    ProofHolder pr = ConnectMeVcxUpdated.retrieveProofRequest(serializedConn, UUID.randomUUID().toString(), proof).get();
+                    Log.i(TAG, "Proof request found: " + pr);
+                    String res = ConnectMeVcxUpdated.rejectProof(serializedConn, pr.getSerializedProof()).get();
+                    Log.i(TAG, "Proof reject sent: " + res);
+                    ConnectMeVcxUpdated.awaitProofStatusChange(res);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Reject failed with exception, " + e);
+            e.printStackTrace();
+        }
+    }
+
     public void questionOnClick(View v) {
         EditText editTextConn = (EditText) findViewById(R.id.editTextConn);
         String serializedConn = editTextConn.getText().toString();

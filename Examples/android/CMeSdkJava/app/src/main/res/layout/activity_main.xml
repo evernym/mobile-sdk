@@ -49,6 +49,16 @@
         android:onClick="proofOnClick"
         android:text="Accept proofs" />
 
+    <Button
+        android:id="@+id/buttonRejectProof"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/buttonProof"
+        android:layout_marginStart="10dp"
+        android:layout_toEndOf="@id/buttonProof"
+        android:onClick="rejectProofOnClick"
+        android:text="Reject proofs" />
+
 
     <Button
         android:id="@+id/buttonQuestion"
