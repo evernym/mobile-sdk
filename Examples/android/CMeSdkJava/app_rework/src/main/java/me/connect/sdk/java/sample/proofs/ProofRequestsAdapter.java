@@ -52,6 +52,8 @@ public class ProofRequestsAdapter extends RecyclerView.Adapter<ProofRequestsAdap
         holder.image.setImageResource(res);
         holder.accept.setVisibility(acceptVisible ? View.VISIBLE : View.GONE);
         holder.reject.setVisibility(rejectVisible ? View.VISIBLE : View.GONE);
+        holder.accept.setEnabled(true);
+        holder.reject.setEnabled(true);
         holder.name.setText(proofRequest.name);
         holder.attributes.setText(proofRequest.attributes);
         holder.accept.setOnClickListener(v -> {
