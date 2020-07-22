@@ -8,6 +8,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import me.connect.sdk.java.sample.connections.ConnectionsFragment;
 import me.connect.sdk.java.sample.credentials.CredentialOffersFragment;
+import me.connect.sdk.java.sample.proofs.ProofRequestsFragment;
 
 public class MainPagerAdapter extends FragmentPagerAdapter {
     public MainPagerAdapter(@NonNull FragmentManager fm) {
