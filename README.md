@@ -7,8 +7,8 @@ The tools in this repository will help you to build mobile identity agents to ho
 * [Trust Over IP](https://trustoverip.org/)
 * [Hyperledger Aries](https://www.hyperledger.org/use/aries)
 * [DIDComm](https://identity.foundation/working-groups/did-comm.html)
-* [W3C Verifiable Credentials](https://www.w3.org/2017/vc/WG/)(UNDER DEVELOPMENT)
-* [W3C Decentralized Identifiers](https://w3c.github.io/did-core/)(UNDER DEVELOPMENT)
+* [W3C Verifiable Credentials](https://www.w3.org/2017/vc/WG/) (UNDER DEVELOPMENT)
+* [W3C Decentralized Identifiers](https://w3c.github.io/did-core/) (UNDER DEVELOPMENT)
 
 These tools depend on the Evernym Consumer Agency SaaS service to act as a communication mediator in the cloud which provides a persistent address for communication and herd anonymity. Access to the Consumer Agency is provided to Evernym customers (see the section "[Getting Help](#getting-help)").
 
