@@ -7,10 +7,12 @@ import androidx.room.RoomDatabase;
 
 import me.connect.sdk.java.sample.db.dao.ConnectionDao;
 import me.connect.sdk.java.sample.db.dao.CredentialOfferDao;
+import me.connect.sdk.java.sample.db.dao.ProofRequestDao;
 import me.connect.sdk.java.sample.db.entity.Connection;
 import me.connect.sdk.java.sample.db.entity.CredentialOffer;
+import me.connect.sdk.java.sample.db.entity.ProofRequest;
 
-@androidx.room.Database(entities = {Connection.class, CredentialOffer.class}, version = 1)
+@androidx.room.Database(entities = {Connection.class, CredentialOffer.class, ProofRequest.class}, version = 1)
 public abstract class Database extends RoomDatabase {
     private static final String DB_NAME = "db";
     private static Database instance = null;
@@ -18,6 +20,8 @@ public abstract class Database extends RoomDatabase {
     public abstract ConnectionDao connectionDao();
 
     public abstract CredentialOfferDao credentialOffersDao();
+
+    public abstract ProofRequestDao proofRequestDao();
 
     public static Database getInstance(Context context) {
         if (instance == null) {

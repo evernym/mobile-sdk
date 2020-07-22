@@ -86,9 +86,9 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                 ConnectMeVcxUpdated.getCredentialOffers(c.serialized).handle((res, throwable) -> {
                     if (res != null) {
                         for (String credOffer : res) {
-                            ConnectMeVcxUpdated.createCredentialWithOffer(c.serialized, UUID.randomUUID().toString(), credOffer).handle((co, err) -> {
-                                CredDataHolder holder = extractDataFromCredentialsOfferString(credOffer);
-                                if (!db.credentialOffersDao().checkOfferExists(holder.id)) {
+                            CredDataHolder holder = extractDataFromCredentialsOfferString(credOffer);
+                            if (!db.credentialOffersDao().checkOfferExists(holder.id, c.id)) {
+                                ConnectMeVcxUpdated.createCredentialWithOffer(c.serialized, UUID.randomUUID().toString(), credOffer).handle((co, err) -> {
                                     CredentialOffer offer = new CredentialOffer();
                                     offer.claimId = holder.id;
                                     offer.name = holder.name;
@@ -96,10 +96,10 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                                     offer.attributes = holder.attributes;
                                     offer.serialized = co;
                                     db.credentialOffersDao().insertAll(offer);
-                                }
-                                loadCredentialOffers();
-                                return null;
-                            });
+                                    loadCredentialOffers();
+                                    return null;
+                                });
+                            }
                         }
                     }
                     liveData.postValue(true);
@@ -112,7 +112,7 @@ public class CredentialOffersViewModel extends AndroidViewModel {
     private CredDataHolder extractDataFromCredentialsOfferString(String str) {
         try {
             JSONObject data = new JSONArray(str).getJSONObject(0);
-            Integer id = data.getInt("claim_id");
+            String id = data.getString("claim_id");
             String name = data.getString("claim_name");
             JSONObject attributesJson = data.getJSONObject("credential_attrs");
             StringBuilder attributes = new StringBuilder();
@@ -130,11 +130,11 @@ public class CredentialOffersViewModel extends AndroidViewModel {
     }
 
     static class CredDataHolder {
-        Integer id;
+        String id;
         String name;
         String attributes;
 
-        public CredDataHolder(Integer id, String name, String attributes) {
+        public CredDataHolder(String id, String name, String attributes) {
             this.id = id;
             this.name = name;
             this.attributes = attributes;
