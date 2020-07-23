@@ -77,7 +77,11 @@ public class ConnectionsViewModel extends AndroidViewModel {
         if (URLUtil.isValidUrl(invite)) {
             Uri uri = Uri.parse(invite);
             String param = uri.getQueryParameter("c_i");
-            return new String(Base64.decode(param, Base64.NO_WRAP));
+            if (param != null) {
+                return new String(Base64.decode(param, Base64.NO_WRAP));
+            } else {
+                return "";
+            }
         } else {
             return invite;
         }

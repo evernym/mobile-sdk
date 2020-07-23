@@ -1,5 +1,6 @@
 package me.connect.sdk.java.sample.connections;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import me.connect.sdk.java.sample.databinding.ConnectionsFragmentBinding;
 
@@ -45,17 +49,43 @@ public class ConnectionsFragment extends Fragment {
         model.getConnections().observe(getViewLifecycleOwner(), adapter::setData);
 
         binding.buttonAddConnection.setOnClickListener(v -> {
-            binding.buttonAddConnection.setEnabled(false);
-            String connString = binding.editTextConnection.getText().toString();
+            String invite = binding.editTextConnection.getText().toString();
+            performNewConnection(invite);
+        });
 
-            // fixme possible leaks?
-            model.newConnection(connString).observeOnce(getViewLifecycleOwner(), status -> {
-                Toast.makeText(getActivity(), "New connection processed", Toast.LENGTH_SHORT).show();
-                if (status) {
-                    binding.editTextConnection.setText(null);
-                }
-                binding.buttonAddConnection.setEnabled(true);
-            });
+        binding.buttonQr.setOnClickListener(v -> {
+            IntentIntegrator
+                    .forSupportFragment(this)
+                    .setPrompt("Scan invitation QR code")
+                    .setOrientationLocked(true)
+                    .initiateScan();
+        });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (result != null) {
+            if (result.getContents() != null) {
+                String invite = result.getContents();
+                binding.editTextConnection.setText(invite);
+                performNewConnection(invite);
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private void performNewConnection(String invite) {
+        binding.buttonAddConnection.setEnabled(false);
+        binding.buttonQr.setEnabled(false);
+        model.newConnection(invite).observeOnce(getViewLifecycleOwner(), status -> {
+            Toast.makeText(getActivity(), "New connection processed", Toast.LENGTH_SHORT).show();
+            if (status) {
+                binding.editTextConnection.setText(null);
+            }
+            binding.buttonAddConnection.setEnabled(true);
+            binding.buttonQr.setEnabled(true);
         });
     }
 }
