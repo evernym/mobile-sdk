@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 
 import me.connect.sdk.java.ConnectMeVcxUpdated;
 import me.connect.sdk.java.connection.QRConnection;
+import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Connection;
@@ -60,10 +61,11 @@ public class ConnectionsViewModel extends AndroidViewModel {
             ConnectMeVcxUpdated.createConnection(parsedInvite, new QRConnection())
                     .handle((res, throwable) -> {
                         if (res != null) {
+                            String serializedCon = ConnectMeVcxUpdated.awaitConnectionStatusChange(res, MessageState.ACCEPTED);
                             Connection c = new Connection();
                             c.name = data.name;
                             c.icon = data.logo;
-                            c.serialized = res;
+                            c.serialized = serializedCon;
                             db.connectionDao().insertAll(c);
                             loadConnections();
                         }

@@ -16,6 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 
 import me.connect.sdk.java.ConnectMeVcxUpdated;
+import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Connection;
@@ -58,7 +59,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                 String data = ConnectMeVcxUpdated.mapCredentials(creds);
                 ConnectMeVcxUpdated.sendProof(con.serialized, proof.serialized, data, "{}").handle((s, e) -> {
                     if (s != null) {
-                        String serializedProof = ConnectMeVcxUpdated.awaitProofStatusChange(s);
+                        String serializedProof = ConnectMeVcxUpdated.awaitProofStatusChange(s, MessageState.ACCEPTED);
                         proof.accepted = true;
                         proof.serialized = serializedProof;
                         db.proofRequestDao().update(proof);
@@ -84,7 +85,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
             Connection con = db.connectionDao().getById(proof.connectionId);
             ConnectMeVcxUpdated.rejectProof(con.serialized, proof.serialized).handle((s, err) -> {
                 if (s != null) {
-                    String serializedProof = ConnectMeVcxUpdated.awaitProofStatusChange(s);
+                    String serializedProof = ConnectMeVcxUpdated.awaitProofStatusChange(s, MessageState.REJECTED);
                     proof.serialized = serializedProof;
                     proof.accepted = false;
                     db.proofRequestDao().update(proof);
