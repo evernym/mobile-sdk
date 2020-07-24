@@ -17,7 +17,7 @@ import org.json.JSONObject;
 import java.util.List;
 import java.util.concurrent.Executors;
 
-import me.connect.sdk.java.ConnectMeVcxUpdated;
+import me.connect.sdk.java.Connections;
 import me.connect.sdk.java.connection.QRConnection;
 import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.sample.SingleLiveData;
@@ -58,10 +58,10 @@ public class ConnectionsViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             String parsedInvite = parseInvite(invite);
             ConnDataHolder data = extractDataFromInvite(parsedInvite);
-            ConnectMeVcxUpdated.createConnection(parsedInvite, new QRConnection())
+            Connections.createConnection(parsedInvite, new QRConnection())
                     .handle((res, throwable) -> {
                         if (res != null) {
-                            String serializedCon = ConnectMeVcxUpdated.awaitConnectionStatusChange(res, MessageState.ACCEPTED);
+                            String serializedCon = Connections.awaitConnectionStatusChange(res, MessageState.ACCEPTED);
                             Connection c = new Connection();
                             c.name = data.name;
                             c.icon = data.logo;

@@ -13,8 +13,11 @@ import java9.util.concurrent.CompletableFuture;
 
 import me.connect.sdk.java.AgencyConfig;
 import me.connect.sdk.java.ConnectMeVcx;
-import me.connect.sdk.java.ConnectMeVcxUpdated;
+import me.connect.sdk.java.Connections;
+import me.connect.sdk.java.Credentials;
 import me.connect.sdk.java.PoolTxnGenesis;
+import me.connect.sdk.java.Proofs;
+import me.connect.sdk.java.StructuredMessages;
 import me.connect.sdk.java.connection.QRConnection;
 import me.connect.sdk.java.message.MessageType;
 import me.connect.sdk.java.message.StructuredMessage;
@@ -50,14 +53,14 @@ public class MainActivity extends BaseActivity {
         EditText editTextConn = (EditText) findViewById(R.id.editTextConn);
         String serializedConn = editTextConn.getText().toString();
         try {
-            List<String> offers = ConnectMeVcxUpdated.getCredentialOffers(serializedConn).get();
+            List<String> offers = Credentials.getOffers(serializedConn).get();
             for (String offer : offers) {
                 try {
-                    String co = ConnectMeVcxUpdated.createCredentialWithOffer(serializedConn, UUID.randomUUID().toString(), offer).get();
+                    String co = Credentials.createWithOffer(serializedConn, UUID.randomUUID().toString(), offer).get();
                     Log.i(TAG, "Credential offer: " + co);
-                    String co2 = ConnectMeVcxUpdated.acceptCredentialOffer(serializedConn, co).get();
+                    String co2 = Credentials.acceptOffer(serializedConn, co).get();
                     Log.i(TAG, "Credential after accepting: " + co2);
-                    ConnectMeVcxUpdated.awaitCredentialStatusChange(co);
+                    Credentials.awaitStatusChange(co);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -72,17 +75,17 @@ public class MainActivity extends BaseActivity {
         EditText editTextConn = (EditText) findViewById(R.id.editTextConn);
         String serializedConn = editTextConn.getText().toString();
         try {
-            List<String> proofReqs = ConnectMeVcxUpdated.getProofRequests(serializedConn).get();
+            List<String> proofReqs = Proofs.getRequests(serializedConn).get();
             for (String proof : proofReqs) {
                 try {
-                    String serializedProof = ConnectMeVcxUpdated.createProofWithRequest(UUID.randomUUID().toString(), proof).get();
+                    String serializedProof = Proofs.createWithRequest(UUID.randomUUID().toString(), proof).get();
                     Log.i(TAG, "Proof request created: " + serializedProof);
-                    String availableCreds = ConnectMeVcxUpdated.retrieveCredentialsForProof(serializedProof).get();
+                    String availableCreds = Proofs.retrieveAvailableCredentials(serializedProof).get();
                     Log.i(TAG, "Available creds retrieved: " + availableCreds);
-                    String mappedCreds = ConnectMeVcxUpdated.mapCredentials(availableCreds);
-                    String res = ConnectMeVcxUpdated.sendProof(serializedConn, serializedProof, mappedCreds, "{}").get();
+                    String mappedCreds = Proofs.mapCredentials(availableCreds);
+                    String res = Proofs.send(serializedConn, serializedProof, mappedCreds, "{}").get();
                     Log.i(TAG, "Proof request sent: " + res);
-                    ConnectMeVcxUpdated.awaitProofStatusChange(res);
+                    Proofs.awaitStatusChange(res);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -97,14 +100,14 @@ public class MainActivity extends BaseActivity {
         EditText editTextConn = (EditText) findViewById(R.id.editTextConn);
         String serializedConn = editTextConn.getText().toString();
         try {
-            List<String> proofReqs = ConnectMeVcxUpdated.getProofRequests(serializedConn).get();
+            List<String> proofReqs = Proofs.getRequests(serializedConn).get();
             for (String proof : proofReqs) {
                 try {
-                    ProofHolder pr = ConnectMeVcxUpdated.retrieveProofRequest(serializedConn, UUID.randomUUID().toString(), proof).get();
+                    ProofHolder pr = Connections.retrieveProofRequest(serializedConn, UUID.randomUUID().toString(), proof).get();
                     Log.i(TAG, "Proof request found: " + pr);
-                    String res = ConnectMeVcxUpdated.rejectProof(serializedConn, pr.getSerializedProof()).get();
+                    String res = Proofs.reject(serializedConn, pr.getSerializedProof()).get();
                     Log.i(TAG, "Proof reject sent: " + res);
-                    ConnectMeVcxUpdated.awaitProofStatusChange(res);
+                    Proofs.awaitStatusChange(res);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -119,13 +122,13 @@ public class MainActivity extends BaseActivity {
         EditText editTextConn = (EditText) findViewById(R.id.editTextConn);
         String serializedConn = editTextConn.getText().toString();
         try {
-            List<String> questions = ConnectMeVcxUpdated.getPendingMessages(serializedConn, MessageType.QUESTION).get();
+            List<String> questions = Connections.getPendingMessages(serializedConn, MessageType.QUESTION).get();
             for (String question : questions) {
                 try {
                     Log.i(TAG, "Question received: " + question);
-                    StructuredMessage sm = ConnectMeVcxUpdated.extractStructuredMessage(question);
+                    StructuredMessage sm = StructuredMessages.extract(question);
                     StructuredMessage.Response resp = sm.getResponses().get(0);
-                    String res = ConnectMeVcxUpdated.answerStructuredMessage(serializedConn, sm.getMessageId(), resp.getNonce()).get();
+                    String res = StructuredMessages.answer(serializedConn, sm.getMessageId(), resp.getNonce()).get();
                     Log.i(TAG, "Structured message response: " + res);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -143,7 +146,7 @@ public class MainActivity extends BaseActivity {
         String invitationDetails = editText.getText().toString();
         Log.d(TAG, "connection invitation is set to: " + invitationDetails);
 
-        CompletableFuture<String> result = ConnectMeVcxUpdated.createConnection(invitationDetails, new QRConnection());
+        CompletableFuture<String> result = Connections.createConnection(invitationDetails, new QRConnection());
         try {
             String serializedConnection = result.get();
             Log.i(TAG, "Established connection: " + serializedConnection);
