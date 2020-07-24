@@ -32,60 +32,45 @@ public class ConnectMeVcx {
     public static final int LOG_MAX_SIZE_DEFAULT = 1_000_000;
     private static final int WALLET_KEY_LENGTH = 128;
     private static final String SECURE_PREF_VCXCONFIG = "me.connect.vcx.config";
-    private static LogFileObserver logFileObserver = null;
 
-    private Context context;
-    private String genesisPool;
-    private Integer genesisPoolResId;
-    private String agency;
-    private String walletName;
-    private Integer logMaxSize = LOG_MAX_SIZE_DEFAULT;
-
-    public ConnectMeVcx(Context context, String genesisPool, Integer genesisPoolResId, String agency, String walletName, Integer logMaxSize) {
-        this.context = context;
-        this.genesisPool = genesisPool;
-        this.genesisPoolResId = genesisPoolResId;
-        this.agency = agency;
-        this.walletName = walletName;
-        if (logMaxSize != null) {
-            this.logMaxSize = logMaxSize;
-        }
+    private ConnectMeVcx() {
     }
 
     /**
      * Initialize library
      *
+     * @param config library config
      * @return {@link CompletableFuture}
      */
-    public @NonNull
-    CompletableFuture<Void> init() {
+    public static @NonNull
+    CompletableFuture<Void> init(Config config) {
         Log.i(TAG, "Initializing ConnectMeVcx");
         CompletableFuture<Void> result = new CompletableFuture<>();
-        Exception error = validate();
+        Exception error = validate(config);
         if (error != null) {
             result.completeExceptionally(error);
             return result;
         }
         try {
-            Os.setenv("EXTERNAL_STORAGE", Utils.getRootDir(context), true);
+            Os.setenv("EXTERNAL_STORAGE", Utils.getRootDir(config.context), true);
         } catch (ErrnoException e) {
             Log.e(TAG, "Failed to set environment variable storage", e);
         }
 
         // NOTE: api.vcx_set_logger is already initialized by com.evernym.sdk.vcx.LibVcx
-        String logFilePath = setVcxLogger("trace", logMaxSize);
+        String logFilePath = setVcxLogger("trace", config.logMaxSize, config.context);
 
         Log.d(TAG, "the log file path is: " + logFilePath);
 
-        String wName = walletName + "-wallet";
-        String poolName = walletName + "-pool";
+        String wName = config.walletName + "-wallet";
+        String poolName = config.walletName + "-pool";
         createWalletKey(WALLET_KEY_LENGTH).handle((walletKey, err) -> {
             if (err != null) {
                 result.completeExceptionally(err);
                 return null;
             }
             Log.d(TAG, "wallet key value is: " + walletKey);
-            initWithConfig(wName, walletKey, poolName).handle((aVoid, t) -> {
+            initWithConfig(wName, walletKey, poolName, config).handle((aVoid, t) -> {
                 if (t != null) {
                     result.completeExceptionally(t);
                 } else {
@@ -99,57 +84,35 @@ public class ConnectMeVcx {
         return result;
     }
 
-    private Exception validate() {
-        if (context == null) {
+    private static Exception validate(Config config) {
+        if (config.context == null) {
             return new IllegalStateException("Context must not be null");
-        } else if (genesisPoolResId == null && genesisPool == null) {
+        } else if (config.genesisPoolResId == null && config.genesisPool == null) {
             return new IllegalStateException("Genesis pool must not be null");
-        } else if (agency == null) {
+        } else if (config.agency == null) {
             return new IllegalStateException("Agency must not be null");
-        } else if (walletName == null) {
+        } else if (config.walletName == null) {
             return new IllegalStateException("Wallet name must not be null");
         }
         return null;
     }
 
-//    public void deleteWallet(String walletName, String walletKey, String poolName, int attempts) {
-//        Log.d(TAG, "trying to delete the old wallet: ");
-//        init("{\"wallet_name\":\"" + walletName + "\",\"wallet_key\":\"" + walletKey + "\"}", new CompletableFuturePromise<>(returnCode -> {
-//            Log.e(TAG, "simple init for deleting the wallet return code is: " + returnCode);
-//            if(returnCode != -1) {
-//                Log.e(TAG, "deleting the wallet: " + walletName);
-//                shutdownVcx(true);
-//                initWithConfig(walletName, walletKey, poolName);
-//            } else if(attempts < 5) {
-//                Log.e(TAG, "AGAIN trying to delete wallet... " + walletName);
-//                deleteWallet(walletName, walletKey, poolName, attempts + 1);
-//            } else {
-//                Log.e(TAG, "Deleting wallet failed... Trying to init anyways: " + walletName);
-//                shutdownVcx(true);
-//                initWithConfig(walletName, walletKey, poolName);
-//            }
-//        }, (t) -> {
-//            Log.e(TAG, "init with config error is: ", t);
-//            return -1;
-//        }));
-//    }
-
-    public CompletableFuture<Void> initWithConfig(String walletName, String walletKey, String poolName) {
+    private static CompletableFuture<Void> initWithConfig(String walletName, String walletKey, String poolName, Config config) {
         CompletableFuture<Void> result = new CompletableFuture<>();
-        File walletDir = new File(Utils.getRootDir(context), "indy_client/wallet");
+        File walletDir = new File(Utils.getRootDir(config.context), "indy_client/wallet");
         walletDir.mkdirs();
 
         String agencyConfig = null;
         String walletPath = walletDir.getAbsolutePath();
         try {
-            agencyConfig = AgencyConfig.setConfigParameters(agency, walletName, walletKey, walletPath);
+            agencyConfig = AgencyConfig.setConfigParameters(config.agency, walletName, walletKey, walletPath);
         } catch (JSONException e) {
             Log.e(TAG, "Failed to populate agency config", e);
             result.completeExceptionally(e);
         }
         Log.d(TAG, "agencyConfig is set to: " + agencyConfig);
 
-        createOneTimeInfo(agencyConfig).handle((oneTimeInfo, throwable) -> {
+        createOneTimeInfo(agencyConfig, config.context).handle((oneTimeInfo, throwable) -> {
             if (throwable != null) {
                 result.completeExceptionally(throwable);
                 return null;
@@ -158,21 +121,21 @@ public class ConnectMeVcx {
 
             String vcxConfig = null;
             if (oneTimeInfo == null) {
-                if (SecurePreferencesHelper.containsLongStringValue(context, SECURE_PREF_VCXCONFIG)) {
+                if (SecurePreferencesHelper.containsLongStringValue(config.context, SECURE_PREF_VCXCONFIG)) {
                     Log.d(TAG, "found vcxConfig at key me.connect.vcxConfig");
-                    vcxConfig = SecurePreferencesHelper.getLongStringValue(context, SECURE_PREF_VCXCONFIG, null);
+                    vcxConfig = SecurePreferencesHelper.getLongStringValue(config.context, SECURE_PREF_VCXCONFIG, null);
                 } else {
                     throw new RuntimeException("oneTimeInfo is null AND the key me.connect.vcxConfig is empty!!");
                 }
             } else {
-                File genesisFilePath = new File(Utils.getRootDir(context), "pool_transactions_genesis");
+                File genesisFilePath = new File(Utils.getRootDir(config.context), "pool_transactions_genesis");
                 if (!genesisFilePath.exists()) {
                     try (FileOutputStream stream = new FileOutputStream(genesisFilePath)) {
                         Log.d(TAG, "writing poolTxnGenesis to file: " + genesisFilePath.getAbsolutePath());
-                        if (genesisPool != null) {
-                            stream.write(genesisPool.getBytes());
-                        } else if (genesisPoolResId != null) {
-                            try (InputStream genesisStream = context.getResources().openRawResource(genesisPoolResId)) {
+                        if (config.genesisPool != null) {
+                            stream.write(config.genesisPool.getBytes());
+                        } else if (config.genesisPoolResId != null) {
+                            try (InputStream genesisStream = config.context.getResources().openRawResource(config.genesisPoolResId)) {
                                 byte[] buffer = new byte[8 * 1024];
                                 int bytesRead;
                                 while ((bytesRead = genesisStream.read(buffer)) != -1) {
@@ -198,7 +161,7 @@ public class ConnectMeVcx {
                 }
 
                 Log.d(TAG, "stored vcxConfig to key me.connect.vcxConfig: " + vcxConfig);
-                SecurePreferencesHelper.setLongStringValue(context, SECURE_PREF_VCXCONFIG, vcxConfig);
+                SecurePreferencesHelper.setLongStringValue(config.context, SECURE_PREF_VCXCONFIG, vcxConfig);
             }
 
             Log.d(TAG, "vcxConfig is set to: " + vcxConfig);
@@ -207,7 +170,7 @@ public class ConnectMeVcx {
             }
 
             // invoke initWithConfig
-            init(vcxConfig).handle((returnCode, err) -> {
+            init(vcxConfig, config.context).handle((returnCode, err) -> {
                 if (err != null) {
                     result.completeExceptionally(err);
                     return null;
@@ -231,7 +194,7 @@ public class ConnectMeVcx {
         }
     }
 
-    public CompletableFuture<String> createWalletKey(int lengthOfKey) {
+    private static CompletableFuture<String> createWalletKey(int lengthOfKey) {
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
             SecureRandom random = new SecureRandom();
@@ -246,7 +209,7 @@ public class ConnectMeVcx {
         return result;
     }
 
-    public CompletableFuture<String> createOneTimeInfo(String agencyConfig) {
+    private static CompletableFuture<String> createOneTimeInfo(String agencyConfig, Context context) {
         CompletableFuture<String> result = new CompletableFuture<>();
         Log.d(TAG, "createOneTimeInfo() called with: agencyConfig = [" + agencyConfig + "]");
         // We have top create thew ca cert for the openssl to work properly on android
@@ -271,7 +234,7 @@ public class ConnectMeVcx {
         return result;
     }
 
-    public CompletableFuture<Void> init(String config) {
+    private static CompletableFuture<Void> init(String config, Context context) {
         CompletableFuture<Void> result = new CompletableFuture<>();
         Log.d(TAG, " ==> init() called with: config = [" + config + "]");
         // When we restore data, then we are not calling createOneTimeInfo
@@ -323,7 +286,7 @@ public class ConnectMeVcx {
         }
     }
 
-    public String setVcxLogger(String logLevel, int maxFileSizeBytes) {
+    private static String setVcxLogger(String logLevel, int maxFileSizeBytes, Context context) {
         CompletableFuture<String> result = new CompletableFuture<>();
         File logFile = new File(Utils.getRootDir(context), "me.connect.rotating.log");
         String logFilePath = logFile.getAbsolutePath();
@@ -332,7 +295,7 @@ public class ConnectMeVcx {
         return logFilePath;
     }
 
-    private void initLoggerFile(final Context context, String logFilePath, int maxFileSizeBytes) {
+    private static void initLoggerFile(final Context context, String logFilePath, int maxFileSizeBytes) {
         // create the log file if it does not exist
         try {
             if (!new File(logFilePath).exists()) {
@@ -345,7 +308,7 @@ public class ConnectMeVcx {
 
         // Now monitor the logFile and empty it out when it's size is
         // larger than MAX_ALLOWED_FILE_BYTES
-        logFileObserver = new LogFileObserver(logFilePath, maxFileSizeBytes);
+        LogFileObserver logFileObserver = new LogFileObserver(logFilePath, maxFileSizeBytes);
         logFileObserver.startWatching();
 
         pl.brightinventions.slf4android.FileLogHandlerConfiguration fileHandler = pl.brightinventions.slf4android.LoggerConfiguration.fileLogHandler(context);
@@ -360,17 +323,8 @@ public class ConnectMeVcx {
         // !!TODO: Remove the pl.brightinventions.slf4android.LoggerConfiguration.configuration() console logger
     }
 
-    /**
-     * Creates builder for {@link ConnectMeVcx}.
-     *
-     * @return {@link Builder} instance
-     */
-    public static Builder builder() {
-        return new Builder();
-    }
-
     // todo add log level parameters
-    public static final class Builder {
+    public static final class ConfigBuilder {
         private Context context;
         private String genesisPool;
         private Integer genesisPoolResId;
@@ -378,7 +332,7 @@ public class ConnectMeVcx {
         private String walletName;
         private Integer logMaxSize;
 
-        private Builder() {
+        private ConfigBuilder() {
         }
 
         /**
@@ -386,10 +340,10 @@ public class ConnectMeVcx {
          * Context is required to access internal file storage and shared preferences.
          *
          * @param context {@link Context} of current application
-         * @return {@link Builder} instance
+         * @return {@link ConfigBuilder} instance
          */
         public @NonNull
-        Builder withContext(@NonNull Context context) {
+        ConfigBuilder withContext(@NonNull Context context) {
             this.context = context;
             return this;
         }
@@ -398,10 +352,10 @@ public class ConnectMeVcx {
          * Set genesis pool string.
          *
          * @param genesisPool genesis pool string
-         * @return {@link Builder} instance
+         * @return {@link ConfigBuilder} instance
          */
         public @NonNull
-        Builder withGenesisPool(@NonNull String genesisPool) {
+        ConfigBuilder withGenesisPool(@NonNull String genesisPool) {
 
             this.genesisPool = genesisPool;
             return this;
@@ -411,10 +365,10 @@ public class ConnectMeVcx {
          * Set genesis pool raw resource id.
          *
          * @param genesisPoolResId raw resource ID of genesis pool
-         * @return {@link Builder} instance
+         * @return {@link ConfigBuilder} instance
          */
         public @NonNull
-        Builder withGenesisPool(@RawRes int genesisPoolResId) {
+        ConfigBuilder withGenesisPool(@RawRes int genesisPoolResId) {
             this.genesisPoolResId = genesisPoolResId;
             return this;
         }
@@ -423,10 +377,10 @@ public class ConnectMeVcx {
          * Set agency config.
          *
          * @param agency agency config
-         * @return {@link Builder} instance
+         * @return {@link ConfigBuilder} instance
          */
         public @NonNull
-        Builder withAgency(@NonNull String agency) {
+        ConfigBuilder withAgency(@NonNull String agency) {
             this.agency = agency;
             return this;
         }
@@ -435,10 +389,10 @@ public class ConnectMeVcx {
          * Set wallet name.
          *
          * @param walletName wallet name
-         * @return {@link Builder} instance
+         * @return {@link ConfigBuilder} instance
          */
         public @NonNull
-        Builder withWalletName(@NonNull String walletName) {
+        ConfigBuilder withWalletName(@NonNull String walletName) {
             this.walletName = walletName;
             return this;
         }
@@ -447,23 +401,54 @@ public class ConnectMeVcx {
          * Set log max size in bytes. Default value is {@link #LOG_MAX_SIZE_DEFAULT}.
          *
          * @param logMaxSize max log file size in bytes
-         * @return {@link Builder} instance
+         * @return {@link ConfigBuilder} instance
          */
         public @NonNull
-        Builder withLogMaxSize(int logMaxSize) {
+        ConfigBuilder withLogMaxSize(int logMaxSize) {
             this.logMaxSize = logMaxSize;
             return this;
         }
 
         /**
-         * Build {@link ConnectMeVcx} instance.
-         * Call {@link #init()} to initialize library.
+         * Build {@link Config} instance.
          *
-         * @return {@link ConnectMeVcx} instance
+         * @return {@link Config} instance
          */
         public @NonNull
-        ConnectMeVcx build() {
-            return new ConnectMeVcx(context, genesisPool, genesisPoolResId, agency, walletName, logMaxSize);
+        Config build() {
+            return new Config(context, genesisPool, genesisPoolResId, agency, walletName, logMaxSize);
+        }
+    }
+
+    /**
+     * Config used during {@link ConnectMeVcx} initialization.
+     */
+    public static class Config {
+        private Context context;
+        private String genesisPool;
+        private Integer genesisPoolResId;
+        private String agency;
+        private String walletName;
+        private Integer logMaxSize = LOG_MAX_SIZE_DEFAULT;
+
+        public Config(Context context, String genesisPool, Integer genesisPoolResId, String agency, String walletName, Integer logMaxSize) {
+            this.context = context;
+            this.genesisPool = genesisPool;
+            this.genesisPoolResId = genesisPoolResId;
+            this.agency = agency;
+            this.walletName = walletName;
+            if (logMaxSize != null) {
+                this.logMaxSize = logMaxSize;
+            }
+        }
+
+        /**
+         * Creates builder for {@link Config}.
+         *
+         * @return {@link ConfigBuilder} instance
+         */
+        public static ConfigBuilder builder() {
+            return new ConfigBuilder();
         }
     }
 }

@@ -15,10 +15,12 @@ import me.connect.sdk.java.AgencyConfig;
 import me.connect.sdk.java.ConnectMeVcx;
 import me.connect.sdk.java.Connections;
 import me.connect.sdk.java.Credentials;
+import me.connect.sdk.java.Messages;
 import me.connect.sdk.java.PoolTxnGenesis;
 import me.connect.sdk.java.Proofs;
 import me.connect.sdk.java.StructuredMessages;
 import me.connect.sdk.java.connection.QRConnection;
+import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.message.MessageType;
 import me.connect.sdk.java.message.StructuredMessage;
 
@@ -26,23 +28,20 @@ public class MainActivity extends BaseActivity {
 
     public static final String TAG = "MainActivity";
 
-    private boolean sdkInited = false;
-    private ConnectMeVcx sdkApi;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         // Init the sdkApi
-        sdkApi = ConnectMeVcx.builder()
+        ConnectMeVcx.Config config = ConnectMeVcx.Config.builder()
                 .withContext(this)
                 .withGenesisPool(PoolTxnGenesis.POOL_TXN_GENESIS_PROD)
                 .withAgency(AgencyConfig.DEFAULT)
                 .withWalletName("some-wallet-name")
                 .build();
 
-        sdkApi.init().handle((aVoid, throwable) -> {
+        ConnectMeVcx.init(config).handle((aVoid, throwable) -> {
             Log.i(TAG, "Init finished, res: " + aVoid + ", err: " + throwable);
             Toast.makeText(MainActivity.this, "Init finished", Toast.LENGTH_LONG).show();
             return null;
@@ -60,7 +59,7 @@ public class MainActivity extends BaseActivity {
                     Log.i(TAG, "Credential offer: " + co);
                     String co2 = Credentials.acceptOffer(serializedConn, co).get();
                     Log.i(TAG, "Credential after accepting: " + co2);
-                    Credentials.awaitStatusChange(co);
+                    Credentials.awaitStatusChange(co, MessageState.ACCEPTED);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -85,7 +84,7 @@ public class MainActivity extends BaseActivity {
                     String mappedCreds = Proofs.mapCredentials(availableCreds);
                     String res = Proofs.send(serializedConn, serializedProof, mappedCreds, "{}").get();
                     Log.i(TAG, "Proof request sent: " + res);
-                    Proofs.awaitStatusChange(res);
+                    Proofs.awaitStatusChange(res, MessageState.ACCEPTED);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -103,11 +102,9 @@ public class MainActivity extends BaseActivity {
             List<String> proofReqs = Proofs.getRequests(serializedConn).get();
             for (String proof : proofReqs) {
                 try {
-                    ProofHolder pr = Connections.retrieveProofRequest(serializedConn, UUID.randomUUID().toString(), proof).get();
-                    Log.i(TAG, "Proof request found: " + pr);
-                    String res = Proofs.reject(serializedConn, pr.getSerializedProof()).get();
-                    Log.i(TAG, "Proof reject sent: " + res);
-                    Proofs.awaitStatusChange(res);
+                    String res = Proofs.reject(serializedConn, proof).get();
+                    Log.i(TAG, "Proof rejected: " + res);
+                    Proofs.awaitStatusChange(res, MessageState.REJECTED);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -122,7 +119,7 @@ public class MainActivity extends BaseActivity {
         EditText editTextConn = (EditText) findViewById(R.id.editTextConn);
         String serializedConn = editTextConn.getText().toString();
         try {
-            List<String> questions = Connections.getPendingMessages(serializedConn, MessageType.QUESTION).get();
+            List<String> questions = Messages.getPendingMessages(serializedConn, MessageType.QUESTION).get();
             for (String question : questions) {
                 try {
                     Log.i(TAG, "Question received: " + question);
@@ -146,7 +143,7 @@ public class MainActivity extends BaseActivity {
         String invitationDetails = editText.getText().toString();
         Log.d(TAG, "connection invitation is set to: " + invitationDetails);
 
-        CompletableFuture<String> result = Connections.createConnection(invitationDetails, new QRConnection());
+        CompletableFuture<String> result = Connections.create(invitationDetails, new QRConnection());
         try {
             String serializedConnection = result.get();
             Log.i(TAG, "Established connection: " + serializedConnection);

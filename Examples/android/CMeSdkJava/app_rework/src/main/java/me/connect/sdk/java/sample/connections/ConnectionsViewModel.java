@@ -58,10 +58,10 @@ public class ConnectionsViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             String parsedInvite = parseInvite(invite);
             ConnDataHolder data = extractDataFromInvite(parsedInvite);
-            Connections.createConnection(parsedInvite, new QRConnection())
+            Connections.create(parsedInvite, new QRConnection())
                     .handle((res, throwable) -> {
                         if (res != null) {
-                            String serializedCon = Connections.awaitConnectionStatusChange(res, MessageState.ACCEPTED);
+                            String serializedCon = Connections.awaitStatusChange(res, MessageState.ACCEPTED);
                             Connection c = new Connection();
                             c.name = data.name;
                             c.icon = data.logo;

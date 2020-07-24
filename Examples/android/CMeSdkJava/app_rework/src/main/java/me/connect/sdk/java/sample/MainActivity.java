@@ -13,7 +13,6 @@ import me.connect.sdk.java.sample.ui.main.MainPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "MainActivity";
-    private ConnectMeVcx sdk;
 
 
     private MainActivityBinding viewBinding;
@@ -33,14 +32,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void initSdk() {
         Toast.makeText(this, "Started SDK initialization", Toast.LENGTH_SHORT).show();
-        sdk = ConnectMeVcx.builder()
+
+        ConnectMeVcx.Config config = ConnectMeVcx.Config.builder()
                 .withAgency(AgencyConfig.DEFAULT)
                 .withGenesisPool(Constants.POOL_TXN_GENESIS)
                 .withWalletName(Constants.WALLET_NAME)
                 .withContext(this)
                 .build();
+
         // Todo progress bar could be added
-        sdk.init().handleAsync((res, err) -> {
+        ConnectMeVcx.init(config).handleAsync((res, err) -> {
             String message;
             if (err == null) {
                 message = "SDK initialized successfully.";
