@@ -40,6 +40,7 @@ public class CredentialOffersAdapter extends RecyclerView.Adapter<CredentialOffe
         holder.text.setText(credentialOffer.name);
         holder.offers.setText(credentialOffer.attributes);
         int res;
+        holder.accept.setEnabled(true);
         if (credentialOffer.accepted == null)
             res = R.drawable.question;
         else if (credentialOffer.accepted)

@@ -17,6 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 
 import me.connect.sdk.java.ConnectMeVcxUpdated;
+import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Connection;
@@ -65,7 +66,7 @@ public class CredentialOffersViewModel extends AndroidViewModel {
             Connection connection = db.connectionDao().getById(offer.connectionId);
             ConnectMeVcxUpdated.acceptCredentialOffer(connection.serialized, offer.serialized).handle((s, throwable) -> {
                         if (s != null) {
-                            String s2 = ConnectMeVcxUpdated.awaitCredentialStatusChange(s);
+                            String s2 = ConnectMeVcxUpdated.awaitCredentialStatusChange(s, MessageState.ACCEPTED);
                             offer.serialized = s2;
                             offer.accepted = true;
                             db.credentialOffersDao().update(offer);
