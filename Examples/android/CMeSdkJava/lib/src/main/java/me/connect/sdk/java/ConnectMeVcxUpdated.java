@@ -64,50 +64,40 @@ public class ConnectMeVcxUpdated {
                 invitationId = json.getString("@id");
             }
 
-            ConnectionApi.vcxCreateConnectionWithInvite(invitationId, invitationDetails)
-                    .exceptionally(t -> {
-                        Log.e(TAG, "Failed to create connection with invite: ", t);
-                        result.completeExceptionally(t);
-                        return null;
-                    })
-                    .thenApply(handle -> {
-                        if (handle == null) {
-                            return null;
+            ConnectionApi.vcxCreateConnectionWithInvite(invitationId, invitationDetails).whenComplete((handle, err) -> {
+                if (err != null) {
+                    Log.e(TAG, "Failed to create connection with invite: ", err);
+                    result.completeExceptionally(err);
+                }
+                Log.i(TAG, "Received handle: " + handle);
+                try {
+                    String connType = connectionType.getConnectionType();
+                    ConnectionApi.vcxAcceptInvitation(handle, connType).whenComplete((invite, t) -> {
+                        if (t != null) {
+                            Log.e(TAG, "Failed to accept invitation: ", t);
+                            result.completeExceptionally(t);
+                            return;
                         }
-                        Log.i(TAG, "Received handle: " + handle);
+                        Log.i(TAG, "Received invite: " + invite);
                         try {
-                            String connType = connectionType.getConnectionType();
-                            return ConnectionApi.vcxAcceptInvitation(handle, connType)
-                                    .exceptionally(t -> {
-                                        Log.e(TAG, "Failed to accept invitation: ", t);
-                                        result.completeExceptionally(t);
-                                        return null;
-                                    })
-                                    .thenApply(invite -> {
-                                        if (invite == null) {
-                                            return null;
-                                        }
-                                        Log.i(TAG, "Received invite: " + invite);
-                                        try {
-                                            return ConnectionApi.connectionSerialize(handle)
-                                                    .exceptionally(t -> {
-                                                        Log.e(TAG, "Failed to serialize connection", t);
-                                                        result.completeExceptionally(t);
-                                                        return null;
-                                                    })
-                                                    .thenAccept(result::complete);
-                                        } catch (VcxException e) {
-                                            result.completeExceptionally(e);
-                                            return null;
-                                        }
-                                    });
-                        } catch (VcxException e) {
-                            result.completeExceptionally(e);
-                            return null;
+                            ConnectionApi.connectionSerialize(handle).whenComplete((serializedConn, e) -> {
+                                if (e != null) {
+                                    Log.e(TAG, "Failed to serialize connection", e);
+                                    result.completeExceptionally(e);
+                                } else {
+                                    result.complete(serializedConn);
+                                }
+                            });
+                        } catch (VcxException ex) {
+                            result.completeExceptionally(ex);
                         }
                     });
-        } catch (Exception e) {
-            result.completeExceptionally(e);
+                } catch (VcxException ex) {
+                    result.completeExceptionally(ex);
+                }
+            });
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
         }
         return result;
     }
@@ -126,53 +116,48 @@ public class ConnectMeVcxUpdated {
         CompletableFuture<List<String>> result = new CompletableFuture<>();
         try {
             String pwDid = new JSONObject(serializedConnection).getJSONObject("data").getString("pw_did");
-            UtilsApi.vcxGetMessages(MessageStatusType.PENDING, null, pwDid)
-                    .exceptionally(t -> {
-                        Log.e(TAG, "Failed to retrieve messages: ", t);
-                        result.completeExceptionally(t);
-                        return null;
-                    })
-                    .thenAccept(messagesString -> {
-                        if (messagesString == null) {
-                            return;
-                        }
-                        try {
-                            List<String> messages = new ArrayList<String>();
-                            JSONArray messagesJson = new JSONArray(messagesString);
-                            for (int i = 0; i < messagesJson.length(); i++) {
-                                JSONArray msgsJson = messagesJson.getJSONObject(i).optJSONArray("msgs");
-                                if (msgsJson != null) {
-                                    for (int j = 0; j < msgsJson.length(); j++) {
-                                        JSONObject message = msgsJson.getJSONObject(j);
-                                        String type = message.getString("type");
-                                        String msgType;
-                                        //Fixme workaround to check message type in different protocols
-                                        if (type.equals("aries")) {
-                                            String payload = message.getString("decryptedPayload");
-                                            String msg = new JSONObject(payload).getString("@msg");
-                                            String mt = new JSONObject(msg).getString("@type");
-                                            if (!mt.startsWith("{")) {
-                                                continue;
-                                            }
-                                            type = new JSONObject(mt).getString("name");
-                                            msgType = messageType.getAries();
-                                        } else {
-                                            msgType = messageType.getProprietary();
-                                        }
-                                        if (type.equals(msgType)) {
-                                            messages.add(message.toString());
-                                        }
+            UtilsApi.vcxGetMessages(MessageStatusType.PENDING, null, pwDid).whenComplete((messagesString, err) -> {
+                if (err != null) {
+                    Log.e(TAG, "Failed to retrieve messages: ", err);
+                    result.completeExceptionally(err);
+                    return;
+                }
+                try {
+                    List<String> messages = new ArrayList<>();
+                    JSONArray messagesJson = new JSONArray(messagesString);
+                    for (int i = 0; i < messagesJson.length(); i++) {
+                        JSONArray msgsJson = messagesJson.getJSONObject(i).optJSONArray("msgs");
+                        if (msgsJson != null) {
+                            for (int j = 0; j < msgsJson.length(); j++) {
+                                JSONObject message = msgsJson.getJSONObject(j);
+                                String type = message.getString("type");
+                                String msgType;
+                                //Fixme workaround to check message type in different protocols
+                                if (type.equals("aries")) {
+                                    String payload = message.getString("decryptedPayload");
+                                    String msg = new JSONObject(payload).getString("@msg");
+                                    String mt = new JSONObject(msg).getString("@type");
+                                    if (!mt.startsWith("{")) {
+                                        continue;
                                     }
+                                    type = new JSONObject(mt).getString("name");
+                                    msgType = messageType.getAries();
+                                } else {
+                                    msgType = messageType.getProprietary();
+                                }
+                                if (type.equals(msgType)) {
+                                    messages.add(message.toString());
                                 }
                             }
-                            result.complete(messages);
-                        } catch (JSONException e) {
-                            result.completeExceptionally(e);
                         }
-
-                    });
-        } catch (Exception e) {
-            result.completeExceptionally(e);
+                    }
+                    result.complete(messages);
+                } catch (JSONException ex) {
+                    result.completeExceptionally(ex);
+                }
+            });
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
         }
         return result;
     }
@@ -189,46 +174,39 @@ public class ConnectMeVcxUpdated {
         Log.i(TAG, "Getting credential offers");
         CompletableFuture<List<String>> result = new CompletableFuture<>();
         try {
-            ConnectionApi.connectionDeserialize(connection)
-                    .exceptionally(t -> {
-                        Log.e(TAG, "Failed to deserialize connection", t);
-                        result.completeExceptionally(t);
-                        return null;
-                    })
-                    .thenAccept(conHandle -> {
-                        try {
-                            CredentialApi.credentialGetOffers(conHandle)
-                                    .exceptionally(t -> {
-                                        Log.e(TAG, "Failed to get credential offers", t);
-                                        result.completeExceptionally(t);
-                                        return null;
-                                    })
-                                    .thenAccept(offersJson -> {
-                                        if (offersJson == null) {
-                                            return;
-                                        }
-                                        Log.i(TAG, "Received credential offers");
-                                        try {
-                                            JSONArray offerArray = new JSONArray(offersJson);
-                                            List<String> offers = new ArrayList<>();
-                                            for (int i = 0; i < offerArray.length(); i++) {
-                                                offers.add(offerArray.getString(i));
-                                            }
-                                            result.complete(offers);
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                            result.completeExceptionally(e);
-                                        }
-
-                                    });
-                        } catch (VcxException e) {
+            ConnectionApi.connectionDeserialize(connection).whenComplete((conHandle, err) -> {
+                if (err != null) {
+                    Log.e(TAG, "Failed to deserialize connection", err);
+                    result.completeExceptionally(err);
+                    return;
+                }
+                try {
+                    CredentialApi.credentialGetOffers(conHandle).whenComplete((offersJson, e) -> {
+                        if (e != null) {
                             Log.e(TAG, "Failed to get credential offers", e);
                             result.completeExceptionally(e);
+                            return;
+                        }
+                        Log.i(TAG, "Received credential offers");
+                        try {
+                            JSONArray offerArray = new JSONArray(offersJson);
+                            List<String> offers = new ArrayList<>();
+                            for (int i = 0; i < offerArray.length(); i++) {
+                                offers.add(offerArray.getString(i));
+                            }
+                            result.complete(offers);
+                        } catch (JSONException ex) {
+                            result.completeExceptionally(ex);
                         }
                     });
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to deserialize connection", e);
-            result.completeExceptionally(e);
+                } catch (VcxException ex) {
+                    Log.e(TAG, "Failed to get credential offers", ex);
+                    result.completeExceptionally(ex);
+                }
+            });
+        } catch (Exception ex) {
+            Log.e(TAG, "Failed to deserialize connection", ex);
+            result.completeExceptionally(ex);
         }
         return result;
     }
@@ -245,46 +223,40 @@ public class ConnectMeVcxUpdated {
         Log.i(TAG, "Getting proof requests");
         CompletableFuture<List<String>> result = new CompletableFuture<>();
         try {
-            ConnectionApi.connectionDeserialize(connection)
-                    .exceptionally(t -> {
-                        Log.e(TAG, "Failed to deserialize connection", t);
-                        result.completeExceptionally(t);
-                        return null;
-                    })
-                    .thenAccept(conHandle -> {
-                        try {
-                            DisclosedProofApi.proofGetRequests(conHandle)
-                                    .exceptionally(t -> {
-                                        Log.e(TAG, "Failed to get proof requests", t);
-                                        result.completeExceptionally(t);
-                                        return null;
-                                    })
-                                    .thenAccept(offersJson -> {
-                                        if (offersJson == null) {
-                                            return;
-                                        }
-                                        Log.i(TAG, "Received proof requests");
-                                        try {
-                                            JSONArray offerArray = new JSONArray(offersJson);
-                                            List<String> offers = new ArrayList<>();
-                                            for (int i = 0; i < offerArray.length(); i++) {
-                                                offers.add(offerArray.getString(i));
-                                            }
-                                            result.complete(offers);
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                            result.completeExceptionally(e);
-                                        }
-
-                                    });
-                        } catch (VcxException e) {
-                            Log.e(TAG, "Failed to get proof requests", e);
-                            result.completeExceptionally(e);
+            ConnectionApi.connectionDeserialize(connection).whenComplete((conHandle, err) -> {
+                if (err != null) {
+                    Log.e(TAG, "Failed to deserialize connection", err);
+                    result.completeExceptionally(err);
+                    return;
+                }
+                try {
+                    DisclosedProofApi.proofGetRequests(conHandle).whenComplete((offersJson, er) -> {
+                        if (er != null) {
+                            Log.e(TAG, "Failed to get proof requests", er);
+                            result.completeExceptionally(er);
+                            return;
                         }
+                        Log.i(TAG, "Received proof requests");
+                        try {
+                            JSONArray offerArray = new JSONArray(offersJson);
+                            List<String> offers = new ArrayList<>();
+                            for (int i = 0; i < offerArray.length(); i++) {
+                                offers.add(offerArray.getString(i));
+                            }
+                            result.complete(offers);
+                        } catch (JSONException ex) {
+                            result.completeExceptionally(ex);
+                        }
+
                     });
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to deserialize connection", e);
-            result.completeExceptionally(e);
+                } catch (VcxException ex) {
+                    Log.e(TAG, "Failed to get proof requests", ex);
+                    result.completeExceptionally(ex);
+                }
+            });
+        } catch (Exception ex) {
+            Log.e(TAG, "Failed to deserialize connection", ex);
+            result.completeExceptionally(ex);
         }
         return result;
     }
@@ -303,55 +275,39 @@ public class ConnectMeVcxUpdated {
         Log.i(TAG, "Accepting credential offer");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
-            ConnectionApi.connectionDeserialize(serializedConnection)
-                    .exceptionally(t -> {
-                        Log.e(TAG, "Failed to deserialize connection: ", t);
-                        result.completeExceptionally(t);
-                        return null;
-                    }).thenApply(conHandle -> {
-                if (conHandle == null) {
-                    return null;
+            ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((conHandle, err) -> {
+                if (err != null) {
+                    Log.e(TAG, "Failed to deserialize connection: ", err);
+                    result.completeExceptionally(err);
+                    return;
                 }
                 try {
-                    CredentialApi.credentialCreateWithOffer(sourceId, message)
-                            .exceptionally(t -> {
-                                Log.e(TAG, "Failed to create credential with offer: ", t);
-                                result.completeExceptionally(t);
-                                return null;
-                            })
-                            .thenAccept(credHandle -> {
-                                if (credHandle == null) {
-                                    return;
-                                }
-                                try {
-                                    CredentialApi.credentialSerialize(credHandle)
-                                            .exceptionally(t -> {
-                                                Log.e(TAG, "Failed to serialize credentials: ", t);
-                                                result.completeExceptionally(t);
-                                                return null;
-                                            }).thenAccept(
-                                            sc -> {
-                                                if (sc == null) {
-                                                    return;
-                                                }
-                                                result.complete(sc);
-                                            });
-                                } catch (VcxException e) {
+                    CredentialApi.credentialCreateWithOffer(sourceId, message).whenComplete((credHandle, er) -> {
+                        if (er != null) {
+                            Log.e(TAG, "Failed to create credential with offer: ", er);
+                            result.completeExceptionally(er);
+                            return;
+                        }
+                        try {
+                            CredentialApi.credentialSerialize(credHandle).whenComplete((sc, e) -> {
+                                if (e != null) {
                                     Log.e(TAG, "Failed to serialize credentials: ", e);
                                     result.completeExceptionally(e);
+                                } else {
+                                    result.complete(sc);
                                 }
+
                             });
-                    return null;
-
-                } catch (Exception e) {
-                    result.completeExceptionally(e);
+                        } catch (VcxException ex) {
+                            result.completeExceptionally(ex);
+                        }
+                    });
+                } catch (Exception ex) {
+                    result.completeExceptionally(ex);
                 }
-                return null;
             });
-
-
-        } catch (Exception e) {
-            result.completeExceptionally(e);
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
         }
         return result;
     }
@@ -368,95 +324,78 @@ public class ConnectMeVcxUpdated {
         Log.i(TAG, "Accepting credential offer");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
-            ConnectionApi.connectionDeserialize(serializedConnection)
-                    .exceptionally(t -> {
-                        Log.e(TAG, "Failed to deserialize connection: ", t);
-                        result.completeExceptionally(t);
-                        return null;
-                    }).thenApply(conHandle -> {
-                if (conHandle == null) {
-                    return null;
+            ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((conHandle, err) -> {
+                if (err != null) {
+                    Log.e(TAG, "Failed to deserialize connection: ", err);
+                    result.completeExceptionally(err);
+                    return;
                 }
                 try {
-                    CredentialApi.credentialDeserialize(serializedCredOffer)
-                            .exceptionally(t -> {
-                                Log.e(TAG, "Failed to deserialize credential offer: ", t);
-                                result.completeExceptionally(t);
-                                return null;
-                            })
-                            .thenApply(credHandle -> {
-                                        try {
-                                            CredentialApi.credentialSendRequest(credHandle, conHandle, 0)
-                                                    .handle((v, err) -> {
-                                                        if (err != null) {
-                                                            Log.e(TAG, "Failed to send credential request: ", err);
-                                                            result.completeExceptionally(err);
-                                                            return null;
-                                                        }
-                                                        try {
-                                                            ConnectionApi.connectionGetPwDid(conHandle).
-                                                                    exceptionally(t -> {
-                                                                        Log.e(TAG, "Failed to get pwDid: ", t);
-                                                                        result.completeExceptionally(t);
-                                                                        return null;
-                                                                    })
-                                                                    .thenAccept(pwDid -> {
-                                                                        if (pwDid == null) {
-                                                                            return;
-                                                                        }
-                                                                        try {
-                                                                            String messageId = new JSONObject(serializedCredOffer)
-                                                                                    .getJSONObject("data")
-                                                                                    .getJSONObject("credential_offer")
-                                                                                    .getString("msg_ref_id");
-                                                                            String jsonMsg = String.format("[{\"pairwiseDID\" : \"%s\", \"uids\": [\"%s\"]}]", pwDid, messageId);
-                                                                            UtilsApi.vcxUpdateMessages(MessageStatusType.ANSWERED, jsonMsg).thenAccept(i -> {
-                                                                                try {
-                                                                                    CredentialApi.credentialSerialize(credHandle)
-                                                                                            .exceptionally(t -> {
-                                                                                                Log.e(TAG, "Failed to serialize credentials: ", t);
-                                                                                                result.completeExceptionally(t);
-                                                                                                return null;
-                                                                                            }).thenAccept(
-                                                                                            sc -> {
-                                                                                                if (sc == null) {
-                                                                                                    return;
-                                                                                                }
-                                                                                                result.complete(sc);
-                                                                                            });
-                                                                                } catch (VcxException e) {
-                                                                                    Log.e(TAG, "Failed to serialize credentials: ", e);
-                                                                                    result.completeExceptionally(e);
-                                                                                }
-                                                                            });
-                                                                        } catch (Exception e) {
-                                                                            result.completeExceptionally(e);
-                                                                        }
-                                                                    });
-                                                        } catch (Exception e) {
-                                                            result.completeExceptionally(e);
-                                                        }
-                                                        return null;
-                                                    });
-                                        } catch (VcxException e) {
-                                            Log.e(TAG, "Failed to send credential request: ", e);
-                                            result.completeExceptionally(e);
-                                            return null;
+                    CredentialApi.credentialDeserialize(serializedCredOffer).whenComplete((credHandle, er) -> {
+                        if (er != null) {
+                            Log.e(TAG, "Failed to deserialize credential offer: ", er);
+                            result.completeExceptionally(er);
+                            return;
+                        }
+                        try {
+                            CredentialApi.credentialSendRequest(credHandle, conHandle, 0).whenComplete((v, e) -> {
+                                if (e != null) {
+                                    Log.e(TAG, "Failed to send credential request: ", e);
+                                    result.completeExceptionally(e);
+                                    return;
+                                }
+                                try {
+                                    ConnectionApi.connectionGetPwDid(conHandle).whenComplete((pwDid, t) -> {
+                                        if (t != null) {
+                                            Log.e(TAG, "Failed to get pwDid: ", t);
+                                            result.completeExceptionally(t);
+                                            return;
                                         }
-                                        return null;
-                                    }
-                            );
-                    return null;
-
-                } catch (Exception e) {
-                    result.completeExceptionally(e);
+                                        try {
+                                            String messageId = new JSONObject(serializedCredOffer)
+                                                    .getJSONObject("data")
+                                                    .getJSONObject("credential_offer")
+                                                    .getString("msg_ref_id");
+                                            String jsonMsg = String.format("[{\"pairwiseDID\" : \"%s\", \"uids\": [\"%s\"]}]", pwDid, messageId);
+                                            UtilsApi.vcxUpdateMessages(MessageStatusType.ANSWERED, jsonMsg).whenComplete((v1, error) -> {
+                                                if (error != null) {
+                                                    Log.e(TAG, "Failed to update messages", error);
+                                                    result.completeExceptionally(error);
+                                                    return;
+                                                }
+                                                try {
+                                                    CredentialApi.credentialSerialize(credHandle).whenComplete((sc, th) -> {
+                                                        if (th != null) {
+                                                            Log.e(TAG, "Failed to serialize credentials: ", th);
+                                                            result.completeExceptionally(th);
+                                                        } else {
+                                                            result.complete(sc);
+                                                        }
+                                                    });
+                                                } catch (VcxException ex) {
+                                                    Log.e(TAG, "Failed to serialize credentials: ", ex);
+                                                    result.completeExceptionally(ex);
+                                                }
+                                            });
+                                        } catch (Exception ex) {
+                                            result.completeExceptionally(ex);
+                                        }
+                                    });
+                                } catch (Exception ex) {
+                                    result.completeExceptionally(ex);
+                                }
+                            });
+                        } catch (VcxException ex) {
+                            Log.e(TAG, "Failed to send credential request: ", ex);
+                            result.completeExceptionally(ex);
+                        }
+                    });
+                } catch (Exception ex) {
+                    result.completeExceptionally(ex);
                 }
-                return null;
             });
-
-
-        } catch (Exception e) {
-            result.completeExceptionally(e);
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
         }
         return result;
     }
@@ -537,30 +476,27 @@ public class ConnectMeVcxUpdated {
         Log.i(TAG, "Retrieving proof request");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
-            DisclosedProofApi.proofCreateWithRequest(sourceId, message)
-                    .exceptionally(t -> {
-                        Log.e(TAG, "Failed create proof with request: ", t);
-                        result.completeExceptionally(t);
-                        return null;
-                    })
-                    .thenAccept(proofHandle -> {
-                        if (proofHandle == null) {
-                            return;
-                        }
-                        try {
-                            DisclosedProofApi.proofSerialize(proofHandle)
-                                    .exceptionally(t -> {
-                                        Log.e(TAG, "Failed to serialize proof request: ", t);
-                                        result.completeExceptionally(t);
-                                        return null;
-                                    })
-                                    .thenAccept(result::complete);
-                        } catch (VcxException e) {
+            DisclosedProofApi.proofCreateWithRequest(sourceId, message).whenComplete((proofHandle, err) -> {
+                if (err != null) {
+                    Log.e(TAG, "Failed create proof with request: ", err);
+                    result.completeExceptionally(err);
+                    return;
+                }
+                try {
+                    DisclosedProofApi.proofSerialize(proofHandle).whenComplete((sp, e) -> {
+                        if (e != null) {
+                            Log.e(TAG, "Failed to serialize proof request: ", e);
                             result.completeExceptionally(e);
+                        } else {
+                            result.complete(sp);
                         }
                     });
-        } catch (Exception e) {
-            result.completeExceptionally(e);
+                } catch (VcxException ex) {
+                    result.completeExceptionally(ex);
+                }
+            });
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
         }
         return result;
     }
@@ -576,106 +512,27 @@ public class ConnectMeVcxUpdated {
         Log.i(TAG, "Retrieving credentials for proof request");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
-            DisclosedProofApi.proofDeserialize(serializedProof)
-                    .exceptionally(t -> {
-                        Log.e(TAG, "Failed deserialize proof request: ", t);
-                        result.completeExceptionally(t);
-                        return null;
-                    })
-                    .thenAccept(proofHandle -> {
-                        if (proofHandle == null) {
-                            return;
-                        }
-                        try {
-                            DisclosedProofApi.proofRetrieveCredentials(proofHandle)
-                                    .exceptionally(t -> {
-                                        Log.e(TAG, "Failed to retrieve proof credentials: ", t);
-                                        result.completeExceptionally(t);
-                                        return null;
-                                    })
-                                    .thenAccept(retrievedCreds -> {
-                                        if (retrievedCreds == null) {
-                                            return;
-                                        }
-                                        result.complete(retrievedCreds);
-                                    });
-                        } catch (VcxException e) {
-                            e.printStackTrace();
-                        }
-                    });
-        } catch (Exception e) {
-            result.completeExceptionally(e);
-        }
-        return result;
-    }
-
-    @Deprecated
-    public static @NonNull
-    CompletableFuture<ProofHolder> retrieveProofRequest(@NonNull String serializedConnection, @NonNull String sourceId,
-                                                        @NonNull String message) {
-        Log.i(TAG, "Retrieving proof request");
-        CompletableFuture<ProofHolder> result = new CompletableFuture<>();
-        try {
-            ProofHolder holder = new ProofHolder();
-            ConnectionApi.connectionDeserialize(serializedConnection)
-                    .exceptionally(t -> {
-                        Log.e(TAG, "Failed to deserialize connection: ", t);
-                        result.completeExceptionally(t);
-                        return null;
-                    }).thenApply(conHandle -> {
-                if (conHandle == null) {
-                    return null;
+            DisclosedProofApi.proofDeserialize(serializedProof).whenComplete((proofHandle, err) -> {
+                if (err != null) {
+                    Log.e(TAG, "Failed deserialize proof request: ", err);
+                    result.completeExceptionally(err);
+                    return;
                 }
                 try {
-                    DisclosedProofApi.proofCreateWithRequest(sourceId, message)
-                            .exceptionally(t -> {
-                                Log.e(TAG, "Failed create proof with request: ", t);
-                                result.completeExceptionally(t);
-                                return null;
-                            })
-                            .thenAccept(proofHandle -> {
-                                if (proofHandle == null) {
-                                    return;
-                                }
-                                try {
-                                    DisclosedProofApi.proofRetrieveCredentials(proofHandle)
-                                            .exceptionally(t -> {
-                                                Log.e(TAG, "Failed to retrieve proof credentials: ", t);
-                                                result.completeExceptionally(t);
-                                                return null;
-                                            })
-                                            .thenAccept(retrievedCreds -> {
-                                                        if (retrievedCreds == null) {
-                                                            return;
-                                                        }
-                                                        try {
-                                                            DisclosedProofApi.proofSerialize(proofHandle)
-                                                                    .exceptionally(t -> {
-                                                                        Log.e(TAG, "Failed to serialize proof request: ", t);
-                                                                        result.completeExceptionally(t);
-                                                                        return null;
-                                                                    })
-                                                                    .thenAccept(sp -> {
-                                                                        holder.setSerializedProof(sp);
-                                                                        holder.setRetrievedCredentials(retrievedCreds);
-                                                                        result.complete(holder);
-                                                                    });
-                                                        } catch (VcxException e) {
-                                                            result.completeExceptionally(e);
-                                                        }
-                                                    }
-                                            );
-                                } catch (VcxException e) {
-                                    e.printStackTrace();
-                                }
-                            });
-                } catch (Exception e) {
-                    result.completeExceptionally(e);
+                    DisclosedProofApi.proofRetrieveCredentials(proofHandle).whenComplete((retrievedCreds, e) -> {
+                        if (e != null) {
+                            Log.e(TAG, "Failed to retrieve proof credentials: ", e);
+                            result.completeExceptionally(e);
+                        } else {
+                            result.complete(retrievedCreds);
+                        }
+                    });
+                } catch (VcxException ex) {
+                    result.completeExceptionally(ex);
                 }
-                return null;
             });
-        } catch (Exception e) {
-            result.completeExceptionally(e);
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
         }
         return result;
     }
@@ -696,75 +553,60 @@ public class ConnectMeVcxUpdated {
         Log.i(TAG, "Sending proof request response");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
-            ConnectionApi.connectionDeserialize(serializedConnection)
-                    .exceptionally(t -> {
-                        Log.e(TAG, "Failed to deserialize connection: ", t);
-                        result.completeExceptionally(t);
-                        return null;
-                    }).thenApply(conHandle -> {
-                if (conHandle == null) {
-                    return null;
+            ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((conHandle, err) -> {
+                if (err != null) {
+                    Log.e(TAG, "Failed to deserialize connection: ", err);
+                    result.completeExceptionally(err);
+                    return;
                 }
                 try {
-                    DisclosedProofApi.proofDeserialize(serializedProof)
-                            .exceptionally(t -> {
-                                Log.e(TAG, "Failed to deserialize proof: ", t);
-                                result.completeExceptionally(t);
-                                return null;
-                            })
-                            .thenAccept(pHandle -> {
-                                if (pHandle == null) {
+                    DisclosedProofApi.proofDeserialize(serializedProof).whenComplete((pHandle, er) -> {
+                        if (er != null) {
+                            Log.e(TAG, "Failed to deserialize proof: ", er);
+                            result.completeExceptionally(er);
+                            return;
+                        }
+                        try {
+                            DisclosedProofApi.proofGenerate(pHandle, selectedCreds, selfAttestedAttributes).whenComplete((v, e) -> {
+                                if (e != null) {
+                                    Log.e(TAG, "Failed to generate proof: ", e);
+                                    result.completeExceptionally(e);
                                     return;
                                 }
                                 try {
-                                    DisclosedProofApi.proofGenerate(pHandle, selectedCreds, selfAttestedAttributes)
-                                            .handle((v, err) -> {
-                                                if (err != null) {
-                                                    Log.e(TAG, "Failed to generate proof: ", err);
-                                                    result.completeExceptionally(err);
-                                                    return null;
+                                    DisclosedProofApi.proofSend(pHandle, conHandle).whenComplete((r, error) -> {
+                                        if (error != null) {
+                                            Log.e(TAG, "Failed to send proof: ", error);
+                                            result.completeExceptionally(error);
+                                            return;
+                                        }
+                                        try {
+                                            DisclosedProofApi.proofSerialize(pHandle).whenComplete((sp, t) -> {
+                                                if (t != null) {
+                                                    Log.e(TAG, "Failed to serialize proof: ", t);
+                                                    result.completeExceptionally(t);
+                                                } else {
+                                                    result.complete(sp);
                                                 }
-                                                try {
-                                                    DisclosedProofApi.proofSend(pHandle, conHandle)
-                                                            .handle((r, error) -> {
-                                                                if (err != null) {
-                                                                    Log.e(TAG, "Failed to send proof: ", error);
-                                                                    result.completeExceptionally(error);
-                                                                    return null;
-                                                                }
-                                                                try {
-                                                                    DisclosedProofApi.proofSerialize(pHandle).exceptionally(t -> {
-                                                                        Log.e(TAG, "Failed to serialize proof: ", t);
-                                                                        result.completeExceptionally(t);
-                                                                        return null;
-                                                                    })
-                                                                            .thenAccept(sp -> {
-                                                                                if (sp == null)
-                                                                                    return;
-                                                                                result.complete(sp);
-                                                                            });
-                                                                } catch (VcxException e) {
-                                                                    result.completeExceptionally(e);
-                                                                }
-                                                                return null;
-                                                            });
-                                                } catch (VcxException e) {
-                                                    result.completeExceptionally(e);
-                                                }
-                                                return null;
                                             });
-                                } catch (VcxException e) {
-                                    result.completeExceptionally(e);
+                                        } catch (VcxException ex) {
+                                            result.completeExceptionally(ex);
+                                        }
+                                    });
+                                } catch (VcxException ex) {
+                                    result.completeExceptionally(ex);
                                 }
                             });
-
-                } catch (Exception e) {
-                    result.completeExceptionally(e);
+                        } catch (VcxException ex) {
+                            result.completeExceptionally(ex);
+                        }
+                    });
+                } catch (Exception ex) {
+                    result.completeExceptionally(ex);
                 }
-                return null;
             });
-        } catch (Exception e) {
-            result.completeExceptionally(e);
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
         }
         return result;
     }
@@ -782,63 +624,49 @@ public class ConnectMeVcxUpdated {
         Log.i(TAG, "Sending proof request response");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
-            ConnectionApi.connectionDeserialize(serializedConnection)
-                    .exceptionally(t -> {
-                        Log.e(TAG, "Failed to deserialize connection: ", t);
-                        result.completeExceptionally(t);
-                        return null;
-                    }).thenApply(conHandle -> {
-                if (conHandle == null) {
-                    return null;
+            ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((conHandle, err) -> {
+                if (err != null) {
+                    Log.e(TAG, "Failed to deserialize connection: ", err);
+                    result.completeExceptionally(err);
+                    return;
                 }
                 try {
-                    DisclosedProofApi.proofDeserialize(serializedProof)
-                            .exceptionally(t -> {
-                                Log.e(TAG, "Failed to deserialize proof: ", t);
-                                result.completeExceptionally(t);
-                                return null;
-                            })
-                            .thenAccept(pHandle -> {
-                                if (pHandle == null) {
+                    DisclosedProofApi.proofDeserialize(serializedProof).whenComplete((pHandle, e) -> {
+                        if (e != null) {
+                            Log.e(TAG, "Failed to deserialize proof: ", e);
+                            result.completeExceptionally(e);
+                            return;
+                        }
+                        try {
+                            DisclosedProofApi.proofReject(pHandle, conHandle).whenComplete((v, er) -> {
+                                if (er != null) {
+                                    Log.e(TAG, "Failed to reject proof: ", er);
+                                    result.completeExceptionally(er);
                                     return;
                                 }
                                 try {
-                                    DisclosedProofApi.proofReject(pHandle, conHandle)
-                                            .handle((v, err) -> {
-                                                if (err != null) {
-                                                    Log.e(TAG, "Failed to reject proof: ", err);
-                                                    result.completeExceptionally(err);
-                                                    return null;
-                                                }
-                                                try {
-                                                    DisclosedProofApi.proofSerialize(pHandle)
-                                                            .exceptionally(t -> {
-                                                                Log.e(TAG, "Failed to serialize proof: ", t);
-                                                                result.completeExceptionally(t);
-                                                                return null;
-                                                            })
-                                                            .thenAccept(sp -> {
-                                                                if (sp == null)
-                                                                    return;
-                                                                result.complete(sp);
-                                                            });
-                                                } catch (VcxException e) {
-                                                    result.completeExceptionally(e);
-                                                }
-                                                return null;
-                                            });
-                                } catch (VcxException e) {
-                                    result.completeExceptionally(e);
+                                    DisclosedProofApi.proofSerialize(pHandle).whenComplete((sp, t) -> {
+                                        if (t != null) {
+                                            Log.e(TAG, "Failed to serialize proof: ", t);
+                                            result.completeExceptionally(t);
+                                        } else {
+                                            result.complete(sp);
+                                        }
+                                    });
+                                } catch (VcxException ex) {
+                                    result.completeExceptionally(ex);
                                 }
                             });
-
-                } catch (Exception e) {
-                    result.completeExceptionally(e);
+                        } catch (VcxException ex) {
+                            result.completeExceptionally(ex);
+                        }
+                    });
+                } catch (Exception ex) {
+                    result.completeExceptionally(ex);
                 }
-                return null;
             });
-        } catch (Exception e) {
-            result.completeExceptionally(e);
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
         }
         return result;
     }
@@ -855,54 +683,41 @@ public class ConnectMeVcxUpdated {
         Log.i(TAG, "Respond to structured message");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
-            ConnectionApi.connectionDeserialize(serializedConnection)
-                    .exceptionally(t -> {
-                        Log.e(TAG, "Failed to deserialize connection: ", t);
-                        result.completeExceptionally(t);
-                        return null;
-                    })
-                    .thenAccept(conHandle -> {
-                        if (conHandle == null) {
+            ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((conHandle, err) -> {
+                if (err != null) {
+                    Log.e(TAG, "Failed to deserialize connection: ", err);
+                    result.completeExceptionally(err);
+                    return;
+                }
+                byte[] encodedAnswer = Base64.encode(answer.getBytes(), Base64.NO_WRAP);
+                try {
+                    ConnectionApi.connectionSignData(conHandle, encodedAnswer, encodedAnswer.length).whenComplete((signature, e) -> {
+                        if (e != null) {
+                            Log.e(TAG, "Failed to sign data: ", e);
+                            result.completeExceptionally(e);
                             return;
                         }
-                        byte[] encodedAnswer = Base64.encode(answer.getBytes(), Base64.NO_WRAP);
                         try {
-                            ConnectionApi.connectionSignData(conHandle, encodedAnswer, encodedAnswer.length)
-                                    .exceptionally(t -> {
-                                        Log.e(TAG, "Failed to sign data: ", t);
-                                        result.completeExceptionally(t);
-                                        return null;
-                                    })
-                                    .thenAccept(signature -> {
-                                        if (signature == null) {
-                                            return;
-                                        }
-                                        try {
-                                            MessageHolder msg = MessageUtils.prepareAnswer(encodedAnswer, signature, messageId);
-                                            ConnectionApi.connectionSendMessage(conHandle, msg.getMessage(), msg.getMessageOptions())
-                                                    .exceptionally(t -> {
-                                                        Log.e(TAG, "Failed to send message: ", t);
-                                                        result.completeExceptionally(t);
-                                                        return null;
-                                                    }).thenAccept(res -> {
-                                                        if (res == null) {
-                                                            return;
-                                                        }
-                                                        result.complete(res);
-                                                    }
-                                            );
-
-                                        } catch (Exception e) {
-                                            result.completeExceptionally(e);
-                                        }
-                                    });
-                        } catch (Exception e) {
-                            result.completeExceptionally(e);
+                            MessageHolder msg = MessageUtils.prepareAnswer(encodedAnswer, signature, messageId);
+                            ConnectionApi.connectionSendMessage(conHandle, msg.getMessage(), msg.getMessageOptions()).whenComplete((r, t) -> {
+                                if (t != null) {
+                                    Log.e(TAG, "Failed to send message: ", t);
+                                    result.completeExceptionally(t);
+                                } else {
+                                    result.complete(r);
+                                }
+                            });
+                        } catch (Exception ex) {
+                            result.completeExceptionally(ex);
                         }
-                        return;
                     });
-        } catch (Exception e) {
-            result.completeExceptionally(e);
+
+                } catch (Exception ex) {
+                    result.completeExceptionally(ex);
+                }
+            });
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
         }
         return result;
     }
@@ -997,11 +812,11 @@ public class ConnectMeVcxUpdated {
                         }
                         try {
                             WalletApi.backupWalletBackup(backupHandle, pathToArchive)
-                                    .handle((v, err) -> {
+                                    .whenComplete((v, err) -> {
                                         if (err != null) {
                                             Log.e(TAG, "Failed to backup wallet: ", err);
                                             result.completeExceptionally(err);
-                                            return null;
+                                            return;
                                         }
                                         try {
                                             WalletApi.serializeBackupWallet(backupHandle)
@@ -1019,7 +834,6 @@ public class ConnectMeVcxUpdated {
                                         } catch (VcxException e) {
                                             result.completeExceptionally(e);
                                         }
-                                        return null;
                                     });
                         } catch (VcxException e) {
                             result.completeExceptionally(e);
@@ -1053,15 +867,13 @@ public class ConnectMeVcxUpdated {
             config.put("backup_key", backupKey);
             config.put("exported_wallet_path", Utils.getRootDir(context) + "/restored");
             WalletApi.restoreWalletBackup(config.toString())
-                    .handle((v, err) -> {
+                    .whenComplete((v, err) -> {
                         if (err != null) {
                             Log.e(TAG, "Failed to backup wallet: ", err);
                             result.completeExceptionally(err);
-
                         } else {
                             result.complete(null);
                         }
-                        return null;
                     });
         } catch (Exception e) {
             result.completeExceptionally(e);
