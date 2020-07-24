@@ -16,9 +16,17 @@
         android:id="@+id/buttonAddConnection"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toStartOf="@id/buttonQr"
+        android:text="Add Connection" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/buttonQr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:text="Add Connection" />
+        android:text="QR" />
 
 
     <androidx.recyclerview.widget.RecyclerView
@@ -27,5 +35,6 @@
         android:layout_height="wrap_content"
         android:layout_above="@id/buttonAddConnection"
         android:layout_alignParentTop="true" />
+
 
 </RelativeLayout>
