@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 
-import me.connect.sdk.java.ConnectMeVcxUpdated;
+import me.connect.sdk.java.Credentials;
 import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
@@ -64,9 +64,9 @@ public class CredentialOffersViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             CredentialOffer offer = db.credentialOffersDao().getById(offerId);
             Connection connection = db.connectionDao().getById(offer.connectionId);
-            ConnectMeVcxUpdated.acceptCredentialOffer(connection.serialized, offer.serialized).handle((s, throwable) -> {
+            Credentials.acceptOffer(connection.serialized, offer.serialized).handle((s, throwable) -> {
                         if (s != null) {
-                            String s2 = ConnectMeVcxUpdated.awaitCredentialStatusChange(s, MessageState.ACCEPTED);
+                            String s2 = Credentials.awaitStatusChange(s, MessageState.ACCEPTED);
                             offer.serialized = s2;
                             offer.accepted = true;
                             db.credentialOffersDao().update(offer);
@@ -84,12 +84,12 @@ public class CredentialOffersViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             List<Connection> connections = db.connectionDao().getAll();
             for (Connection c : connections) {
-                ConnectMeVcxUpdated.getCredentialOffers(c.serialized).handle((res, throwable) -> {
+                Credentials.getOffers(c.serialized).handle((res, throwable) -> {
                     if (res != null) {
                         for (String credOffer : res) {
                             CredDataHolder holder = extractDataFromCredentialsOfferString(credOffer);
                             if (!db.credentialOffersDao().checkOfferExists(holder.id, c.id)) {
-                                ConnectMeVcxUpdated.createCredentialWithOffer(c.serialized, UUID.randomUUID().toString(), credOffer).handle((co, err) -> {
+                                Credentials.createWithOffer(c.serialized, UUID.randomUUID().toString(), credOffer).handle((co, err) -> {
                                     CredentialOffer offer = new CredentialOffer();
                                     offer.claimId = holder.id;
                                     offer.name = holder.name;

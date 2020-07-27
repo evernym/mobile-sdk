@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 
-import me.connect.sdk.java.ConnectMeVcxUpdated;
+import me.connect.sdk.java.Proofs;
 import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
@@ -49,17 +49,17 @@ public class ProofRequestsViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             ProofRequest proof = db.proofRequestDao().getById(proofId);
             Connection con = db.connectionDao().getById(proof.connectionId);
-            ConnectMeVcxUpdated.retrieveCredentialsForProof(proof.serialized).handle((creds, err) -> {
+            Proofs.retrieveAvailableCredentials(proof.serialized).handle((creds, err) -> {
                 if (err != null) {
                     liveData.postValue(false);
                     return null;
                 }
                 // We automatically map first of each provided credentials to final structure
                 // This process should be interactive in real app
-                String data = ConnectMeVcxUpdated.mapCredentials(creds);
-                ConnectMeVcxUpdated.sendProof(con.serialized, proof.serialized, data, "{}").handle((s, e) -> {
+                String data = Proofs.mapCredentials(creds);
+                Proofs.send(con.serialized, proof.serialized, data, "{}").handle((s, e) -> {
                     if (s != null) {
-                        String serializedProof = ConnectMeVcxUpdated.awaitProofStatusChange(s, MessageState.ACCEPTED);
+                        String serializedProof = Proofs.awaitStatusChange(s, MessageState.ACCEPTED);
                         proof.accepted = true;
                         proof.serialized = serializedProof;
                         db.proofRequestDao().update(proof);
@@ -83,9 +83,9 @@ public class ProofRequestsViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             ProofRequest proof = db.proofRequestDao().getById(proofId);
             Connection con = db.connectionDao().getById(proof.connectionId);
-            ConnectMeVcxUpdated.rejectProof(con.serialized, proof.serialized).handle((s, err) -> {
+            Proofs.reject(con.serialized, proof.serialized).handle((s, err) -> {
                 if (s != null) {
-                    String serializedProof = ConnectMeVcxUpdated.awaitProofStatusChange(s, MessageState.REJECTED);
+                    String serializedProof = Proofs.awaitStatusChange(s, MessageState.REJECTED);
                     proof.serialized = serializedProof;
                     proof.accepted = false;
                     db.proofRequestDao().update(proof);
@@ -114,12 +114,12 @@ public class ProofRequestsViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             List<Connection> connections = db.connectionDao().getAll();
             for (Connection c : connections) {
-                ConnectMeVcxUpdated.getProofRequests(c.serialized).handle((res, throwable) -> {
+                Proofs.getRequests(c.serialized).handle((res, throwable) -> {
                     if (res != null) {
                         for (String proofReq : res) {
                             ProofDataHolder holder = extractRequestedFieldsFromProof(proofReq);
                             if (!db.proofRequestDao().checkExists(holder.threadId)) {
-                                ConnectMeVcxUpdated.createProofWithRequest(UUID.randomUUID().toString(), proofReq).handle((pr, err) -> {
+                                Proofs.createWithRequest(UUID.randomUUID().toString(), proofReq).handle((pr, err) -> {
                                     ProofRequest proof = new ProofRequest();
                                     proof.serialized = pr;
                                     proof.name = holder.name;
