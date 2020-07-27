@@ -4,7 +4,6 @@ This document is split into two parts each of them contains the list of options 
 
 * [Agent Provisioning](#agent-provisioning-options) - preparation step to obtain a user associated Agent and create a Wallet.
 * [Library Initialization](#library-initialization-options) - get the library ready for work.
-* [Logger Initialization](#logger-initialization) - init library logging.
 
 ## Agent Provisioning Options
 
