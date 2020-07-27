@@ -36,13 +36,13 @@ public class Messages {
     public static @NonNull
     CompletableFuture<List<String>> getPendingMessages(@NonNull String serializedConnection,
                                                        @NonNull MessageType messageType) {
-        Log.i(TAG, "Retrieving pending messages");
+        Logger.getInstance().i("Retrieving pending messages");
         CompletableFuture<List<String>> result = new CompletableFuture<>();
         try {
             String pwDid = new JSONObject(serializedConnection).getJSONObject("data").getString("pw_did");
             UtilsApi.vcxGetMessages(MessageStatusType.PENDING, null, pwDid).whenComplete((messagesString, err) -> {
                 if (err != null) {
-                    Log.e(TAG, "Failed to retrieve messages: ", err);
+                    Logger.getInstance().e("Failed to retrieve messages: ", err);
                     result.completeExceptionally(err);
                     return;
                 }

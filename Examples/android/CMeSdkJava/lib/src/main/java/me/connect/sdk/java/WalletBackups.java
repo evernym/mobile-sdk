@@ -1,7 +1,6 @@
 package me.connect.sdk.java;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -10,6 +9,7 @@ import com.evernym.sdk.vcx.wallet.WalletApi;
 
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 
 import java9.util.concurrent.CompletableFuture;
@@ -33,12 +33,12 @@ class WalletBackups {
     @ExperimentalWalletBackup
     static @NonNull
     CompletableFuture<String> createBackup(@NonNull String sourceId, @NonNull String backupKey) {
-        Log.i(Connections.TAG, "Creating backup");
+        Logger.getInstance().i("Creating backup");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
             WalletApi.createWalletBackup(sourceId, backupKey)
                     .exceptionally(t -> {
-                        Log.e(Connections.TAG, "Failed to create wallet backup: ", t);
+                        Logger.getInstance().e("Failed to create wallet backup: ", t);
                         result.completeExceptionally(t);
                         return null;
                     })
@@ -49,7 +49,7 @@ class WalletBackups {
                         try {
                             WalletApi.serializeBackupWallet(backupHandle)
                                     .exceptionally(t -> {
-                                        Log.e(Connections.TAG, "Failed to serialize wallet backup: ", t);
+                                        Logger.getInstance().e("Failed to serialize wallet backup: ", t);
                                         result.completeExceptionally(t);
                                         return null;
                                     })
@@ -79,8 +79,8 @@ class WalletBackups {
      * @throws IOException in case there are problems during working with files
      */
     static String generateBackupArchive(Context context, String relativePath, String archivePath) throws IOException {
-        String walletPath = Utils.getRootDir(context) + "/" + relativePath;
-        String backupPath = Utils.getRootDir(context) + "/" + archivePath;
+        String walletPath = Utils.getRootDir(context) + File.separator + relativePath;
+        String backupPath = Utils.getRootDir(context) + File.separator + archivePath;
         Utils.zipFiles(walletPath, backupPath);
         return backupPath;
     }
@@ -95,13 +95,13 @@ class WalletBackups {
     @ExperimentalWalletBackup
     static @NonNull
     CompletableFuture<String> performBackup(@NonNull Context context, @NonNull String serializedBackup) {
-        Log.i(Connections.TAG, "Performing backup");
+        Logger.getInstance().i("Performing backup");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
             String pathToArchive = generateBackupArchive(context, "indy_client", "backup-" + System.currentTimeMillis());
             WalletApi.deserializeBackupWallet(serializedBackup)
                     .exceptionally(t -> {
-                        Log.e(Connections.TAG, "Failed to deserialize wallet backup: ", t);
+                        Logger.getInstance().e("Failed to deserialize wallet backup: ", t);
                         result.completeExceptionally(t);
                         return null;
                     })
@@ -113,14 +113,14 @@ class WalletBackups {
                             WalletApi.backupWalletBackup(backupHandle, pathToArchive)
                                     .whenComplete((v, err) -> {
                                         if (err != null) {
-                                            Log.e(Connections.TAG, "Failed to backup wallet: ", err);
+                                            Logger.getInstance().e("Failed to backup wallet: ", err);
                                             result.completeExceptionally(err);
                                             return;
                                         }
                                         try {
                                             WalletApi.serializeBackupWallet(backupHandle)
                                                     .exceptionally(t -> {
-                                                        Log.e(Connections.TAG, "Failed to serialize wallet backup: ", t);
+                                                        Logger.getInstance().e("Failed to serialize wallet backup: ", t);
                                                         result.completeExceptionally(t);
                                                         return null;
                                                     })
@@ -155,7 +155,7 @@ class WalletBackups {
     static @NonNull
     CompletableFuture<Void> restoreBackup(@NonNull Context context, @NonNull String backupKey) {
         // Todo Context object should be taken from ConnectMeVcx after merge
-        Log.i(Connections.TAG, "Restoring backup");
+        Logger.getInstance().i("Restoring backup");
         CompletableFuture<Void> result = new CompletableFuture<>();
 
         try {
@@ -167,7 +167,7 @@ class WalletBackups {
             WalletApi.restoreWalletBackup(config.toString())
                     .whenComplete((v, err) -> {
                         if (err != null) {
-                            Log.e(Connections.TAG, "Failed to backup wallet: ", err);
+                            Logger.getInstance().e("Failed to backup wallet: ", err);
                             result.completeExceptionally(err);
                         } else {
                             result.complete(null);
@@ -189,14 +189,14 @@ class WalletBackups {
     @ExperimentalWalletBackup
     static @NonNull
     String awaitBackupStatusChange(@NonNull String serializedBackup) {
-        Log.i(Connections.TAG, "Awaiting backup state change");
+        Logger.getInstance().i("Awaiting backup state change");
         int count = 1;
         try {
             Integer handle = WalletApi.deserializeBackupWallet(serializedBackup).get();
             while (true) {
-                Log.i(Connections.TAG, "Awaiting backup state change: attempt #" + count);
+                Logger.getInstance().i("Awaiting backup state change: attempt #" + count);
                 Integer state = WalletApi.updateWalletBackupState(handle).get();
-                Log.i(Connections.TAG, "Awaiting backup state change: update state=" + state);
+                Logger.getInstance().i("Awaiting backup state change: update state=" + state);
                 if (state == 4 || state == 2) {
                     return WalletApi.serializeBackupWallet(handle).get();
                 }
@@ -204,7 +204,7 @@ class WalletBackups {
                 Thread.sleep(1000);
             }
         } catch (Exception e) {
-            Log.e(Connections.TAG, "Failed to await proof state", e);
+            Logger.getInstance().e("Failed to await proof state", e);
             e.printStackTrace();
         }
         return serializedBackup;
