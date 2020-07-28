@@ -30,7 +30,7 @@ class Utils {
     public static void writeCACert(Context context) {
         ContextWrapper cw = new ContextWrapper(context);
         File cert_file = new File(getRootDir(cw), "cacert.pem");
-        Log.d(TAG, "writeCACert() called with: context = [" + context + "] and writing to file: " + cert_file.getAbsolutePath());
+        Logger.getInstance().d("writeCACert() called with: context = [" + context + "] and writing to file: " + cert_file.getAbsolutePath());
         if (!cert_file.exists()) {
             try {
                 FileWriter fw = new FileWriter(cert_file);
@@ -38,10 +38,10 @@ class Utils {
                 fw.flush();
                 fw.close();
             } catch (IOException e) {
-                Log.e(TAG, "writeCACert: ", e);
+                Logger.getInstance().e("writeCACert: ", e);
             }
         } else {
-            Log.d(TAG, "cacert.pem file already exists: " + cert_file.getAbsolutePath());
+            Logger.getInstance().d("cacert.pem file already exists: " + cert_file.getAbsolutePath());
         }
     }
 
@@ -108,7 +108,12 @@ class Utils {
     }
 
     static String getRootDir(Context context) {
-        return context.getFilesDir().getAbsolutePath() + "/" + ROOT_DIR;
+        return context.getFilesDir().getAbsolutePath() + File.separator + ROOT_DIR;
+    }
+
+    static boolean makeRootDir(Context context) {
+        String rootDir = getRootDir(context);
+        return new File(rootDir).mkdirs();
     }
 
     public static void zipFiles(String sourcePath, String outputPath) throws IOException {

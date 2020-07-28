@@ -4,7 +4,6 @@ import android.content.Context;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Base64;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RawRes;
@@ -16,15 +15,18 @@ import com.evernym.sdk.vcx.vcx.VcxApi;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+
 import java.io.InputStream;
 import java.security.SecureRandom;
 
 import java9.util.concurrent.CompletableFuture;
+import pl.brightinventions.slf4android.FileLogHandlerConfiguration;
+import pl.brightinventions.slf4android.LogLevel;
+import pl.brightinventions.slf4android.LoggerConfiguration;
 
 public class ConnectMeVcx {
 
@@ -32,6 +34,22 @@ public class ConnectMeVcx {
     public static final int LOG_MAX_SIZE_DEFAULT = 1_000_000;
     private static final int WALLET_KEY_LENGTH = 128;
     private static final String SECURE_PREF_VCXCONFIG = "me.connect.vcx.config";
+    private static FileLogHandlerConfiguration fileHandler;
+    private static final String[] VCX_LOGGER_NAMES = new String[]{
+            "com.evernym.sdk.vcx.LibVcx.native",
+            "VcxException",
+            "ConnectionApi",
+            "CredentialApi",
+            "CredentialDefApi",
+            "IssuerApi",
+            "DisclosedProofApi",
+            "ProofApi",
+            "SchemaApi",
+            "TokenApi",
+            "UtilsApi",
+            "VcxApi",
+            "WalletApi"
+    };
 
     private ConnectMeVcx() {
     }
@@ -44,7 +62,8 @@ public class ConnectMeVcx {
      */
     public static @NonNull
     CompletableFuture<Void> init(Config config) {
-        Log.i(TAG, "Initializing ConnectMeVcx");
+        configureLogLevel(config.logLevel);
+        Logger.getInstance().i("Initializing ConnectMeVcx");
         CompletableFuture<Void> result = new CompletableFuture<>();
         Exception error = validate(config);
         if (error != null) {
@@ -54,13 +73,14 @@ public class ConnectMeVcx {
         try {
             Os.setenv("EXTERNAL_STORAGE", Utils.getRootDir(config.context), true);
         } catch (ErrnoException e) {
-            Log.e(TAG, "Failed to set environment variable storage", e);
+            Logger.getInstance().e("Failed to set environment variable storage", e);
         }
 
+        Utils.makeRootDir(config.context);
         // NOTE: api.vcx_set_logger is already initialized by com.evernym.sdk.vcx.LibVcx
-        String logFilePath = setVcxLogger("trace", config.logMaxSize, config.context);
+        String logFilePath = setVcxLogger(config.logMaxSize, config.context);
 
-        Log.d(TAG, "the log file path is: " + logFilePath);
+        Logger.getInstance().d("the log file path is: " + logFilePath);
 
         String wName = config.walletName + "-wallet";
         String poolName = config.walletName + "-pool";
@@ -69,7 +89,7 @@ public class ConnectMeVcx {
                 result.completeExceptionally(err);
                 return null;
             }
-            Log.d(TAG, "wallet key value is: " + walletKey);
+            Logger.getInstance().d("wallet key value is: " + walletKey);
             initWithConfig(wName, walletKey, poolName, config).handle((aVoid, t) -> {
                 if (t != null) {
                     result.completeExceptionally(t);
@@ -82,6 +102,14 @@ public class ConnectMeVcx {
         });
 
         return result;
+    }
+
+    private static void configureLogLevel(LogLevel logLevel) {
+        Logger.getInstance().setLogLevel(logLevel);
+        for (String name : VCX_LOGGER_NAMES) {
+            LoggerFactory.getLogger(name);
+            LoggerConfiguration.configuration().setLogLevel(name, logLevel);
+        }
     }
 
     private static Exception validate(Config config) {
@@ -107,22 +135,22 @@ public class ConnectMeVcx {
         try {
             agencyConfig = AgencyConfig.setConfigParameters(config.agency, walletName, walletKey, walletPath);
         } catch (JSONException e) {
-            Log.e(TAG, "Failed to populate agency config", e);
+            Logger.getInstance().e("Failed to populate agency config", e);
             result.completeExceptionally(e);
         }
-        Log.d(TAG, "agencyConfig is set to: " + agencyConfig);
+        Logger.getInstance().d("agencyConfig is set to: " + agencyConfig);
 
         createOneTimeInfo(agencyConfig, config.context).handle((oneTimeInfo, throwable) -> {
             if (throwable != null) {
                 result.completeExceptionally(throwable);
                 return null;
             }
-            Log.d(TAG, "oneTimeInfo is set to: " + oneTimeInfo);
+            Logger.getInstance().d("oneTimeInfo is set to: " + oneTimeInfo);
 
             String vcxConfig = null;
             if (oneTimeInfo == null) {
                 if (SecurePreferencesHelper.containsLongStringValue(config.context, SECURE_PREF_VCXCONFIG)) {
-                    Log.d(TAG, "found vcxConfig at key me.connect.vcxConfig");
+                    Logger.getInstance().d("found vcxConfig at key me.connect.vcxConfig");
                     vcxConfig = SecurePreferencesHelper.getLongStringValue(config.context, SECURE_PREF_VCXCONFIG, null);
                 } else {
                     throw new RuntimeException("oneTimeInfo is null AND the key me.connect.vcxConfig is empty!!");
@@ -131,7 +159,7 @@ public class ConnectMeVcx {
                 File genesisFilePath = new File(Utils.getRootDir(config.context), "pool_transactions_genesis");
                 if (!genesisFilePath.exists()) {
                     try (FileOutputStream stream = new FileOutputStream(genesisFilePath)) {
-                        Log.d(TAG, "writing poolTxnGenesis to file: " + genesisFilePath.getAbsolutePath());
+                        Logger.getInstance().d("writing poolTxnGenesis to file: " + genesisFilePath.getAbsolutePath());
                         if (config.genesisPool != null) {
                             stream.write(config.genesisPool.getBytes());
                         } else if (config.genesisPoolResId != null) {
@@ -160,11 +188,11 @@ public class ConnectMeVcx {
                     e.printStackTrace();
                 }
 
-                Log.d(TAG, "stored vcxConfig to key me.connect.vcxConfig: " + vcxConfig);
+                Logger.getInstance().d("stored vcxConfig to key me.connect.vcxConfig: " + vcxConfig);
                 SecurePreferencesHelper.setLongStringValue(config.context, SECURE_PREF_VCXCONFIG, vcxConfig);
             }
 
-            Log.d(TAG, "vcxConfig is set to: " + vcxConfig);
+            Logger.getInstance().d("vcxConfig is set to: " + vcxConfig);
             if (vcxConfig == null) {
                 throw new RuntimeException("vcxConfig is null and this is  not allowed!");
             }
@@ -175,7 +203,7 @@ public class ConnectMeVcx {
                     result.completeExceptionally(err);
                     return null;
                 }
-                Log.e(TAG, "init with config return code is: " + returnCode);
+                Logger.getInstance().e("init with config return code is: " + returnCode);
                 result.complete(null);
                 return null;
             });
@@ -186,7 +214,7 @@ public class ConnectMeVcx {
 
 
     public void shutdownVcx(Boolean deleteWallet) {
-        Log.d(TAG, " ==> shutdownVcx() called with: deleteWallet = [" + deleteWallet);
+        Logger.getInstance().d(" ==> shutdownVcx() called with: deleteWallet = [" + deleteWallet);
         try {
             VcxApi.vcxShutdown(deleteWallet);
         } catch (VcxException e) {
@@ -203,7 +231,7 @@ public class ConnectMeVcx {
             String key = Base64.encodeToString(bytes, Base64.NO_WRAP);
             result.complete(key);
         } catch (Exception e) {
-            Log.e(TAG, "createWalletKey: ", e);
+            Logger.getInstance().e("createWalletKey: ", e);
             result.completeExceptionally(e);
         }
         return result;
@@ -211,7 +239,7 @@ public class ConnectMeVcx {
 
     private static CompletableFuture<String> createOneTimeInfo(String agencyConfig, Context context) {
         CompletableFuture<String> result = new CompletableFuture<>();
-        Log.d(TAG, "createOneTimeInfo() called with: agencyConfig = [" + agencyConfig + "]");
+        Logger.getInstance().d("createOneTimeInfo() called with: agencyConfig = [" + agencyConfig + "]");
         // We have top create thew ca cert for the openssl to work properly on android
         Utils.writeCACert(context);
 
@@ -219,10 +247,10 @@ public class ConnectMeVcx {
             UtilsApi.vcxAgentProvisionAsync(agencyConfig)
                     .handle((res, err) -> {
                         if (err != null) {
-                            Log.e(TAG, "createOneTimeInfo: ", err);
+                            Logger.getInstance().e("createOneTimeInfo: ", err);
                             result.complete(null); // todo check
                         } else {
-                            Log.i(TAG, "createOneTimeInfo: " + res);
+                            Logger.getInstance().i("createOneTimeInfo: " + res);
                             result.complete(res);
                         }
                         return null;
@@ -236,7 +264,7 @@ public class ConnectMeVcx {
 
     private static CompletableFuture<Void> init(String config, Context context) {
         CompletableFuture<Void> result = new CompletableFuture<>();
-        Log.d(TAG, " ==> init() called with: config = [" + config + "]");
+        Logger.getInstance().d(" ==> init() called with: config = [" + config + "]");
         // When we restore data, then we are not calling createOneTimeInfo
         // and hence ca-crt is not written within app directory
         // since the logic to write ca cert checks for file existence
@@ -270,27 +298,11 @@ public class ConnectMeVcx {
         return result;
     }
 
-    private static int getLogLevel(String levelName) {
-        if ("Error".equalsIgnoreCase(levelName)) {
-            return 1;
-        } else if ("Warning".equalsIgnoreCase(levelName) || levelName.toLowerCase().contains("warn")) {
-            return 2;
-        } else if ("Info".equalsIgnoreCase(levelName)) {
-            return 3;
-        } else if ("Debug".equalsIgnoreCase(levelName)) {
-            return 4;
-        } else if ("Trace".equalsIgnoreCase(levelName)) {
-            return 5;
-        } else {
-            return 3;
-        }
-    }
 
-    private static String setVcxLogger(String logLevel, int maxFileSizeBytes, Context context) {
-        CompletableFuture<String> result = new CompletableFuture<>();
+    private static String setVcxLogger(int maxFileSizeBytes, Context context) {
         File logFile = new File(Utils.getRootDir(context), "me.connect.rotating.log");
         String logFilePath = logFile.getAbsolutePath();
-        Log.d(TAG, "Setting vcx logger to: " + logFilePath);
+        Logger.getInstance().d("Setting vcx logger to: " + logFilePath);
         initLoggerFile(context, logFilePath, maxFileSizeBytes);
         return logFilePath;
     }
@@ -298,11 +310,13 @@ public class ConnectMeVcx {
     private static void initLoggerFile(final Context context, String logFilePath, int maxFileSizeBytes) {
         // create the log file if it does not exist
         try {
-            if (!new File(logFilePath).exists()) {
-                new FileWriter(logFilePath).close();
+            File file = new File(logFilePath);
+
+            if (!file.exists()) {
+                file.createNewFile();
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (Exception ex) {
+            Logger.getInstance().e("Failed to create log file", ex);
             return;
         }
 
@@ -311,19 +325,19 @@ public class ConnectMeVcx {
         LogFileObserver logFileObserver = new LogFileObserver(logFilePath, maxFileSizeBytes);
         logFileObserver.startWatching();
 
-        pl.brightinventions.slf4android.FileLogHandlerConfiguration fileHandler = pl.brightinventions.slf4android.LoggerConfiguration.fileLogHandler(context);
+        fileHandler = LoggerConfiguration.fileLogHandler(context);
         fileHandler.setFullFilePathPattern(logFilePath);
         fileHandler.setRotateFilesCountLimit(1);
         // Prevent slf4android from rotating the log file as we will handle that. The
         // way that we prevent slf4android from rotating the log file is to set the log
         // file size limit to 1 million bytes higher that our MAX_ALLOWED_FILE_BYTES
         fileHandler.setLogFileSizeLimitInBytes(maxFileSizeBytes + 1000000);
-        pl.brightinventions.slf4android.LoggerConfiguration.configuration().addHandlerToRootLogger(fileHandler);
 
-        // !!TODO: Remove the pl.brightinventions.slf4android.LoggerConfiguration.configuration() console logger
+        for (String name : VCX_LOGGER_NAMES) {
+            LoggerConfiguration.configuration().addHandlerToLogger(name, fileHandler);
+        }
     }
 
-    // todo add log level parameters
     public static final class ConfigBuilder {
         private Context context;
         private String genesisPool;
@@ -331,6 +345,7 @@ public class ConnectMeVcx {
         private String agency;
         private String walletName;
         private Integer logMaxSize;
+        private LogLevel logLevel;
 
         private ConfigBuilder() {
         }
@@ -409,6 +424,20 @@ public class ConnectMeVcx {
             return this;
         }
 
+
+        /**
+         * Set log level. Default value is {@link LogLevel#INFO}
+         * Please note that log level is set globally for slf4j logs.
+         *
+         * @param logLevel
+         * @return
+         */
+        public @NonNull
+        ConfigBuilder withLogLevel(LogLevel logLevel) {
+            this.logLevel = logLevel;
+            return this;
+        }
+
         /**
          * Build {@link Config} instance.
          *
@@ -416,7 +445,7 @@ public class ConnectMeVcx {
          */
         public @NonNull
         Config build() {
-            return new Config(context, genesisPool, genesisPoolResId, agency, walletName, logMaxSize);
+            return new Config(context, genesisPool, genesisPoolResId, agency, walletName, logMaxSize, logLevel);
         }
     }
 
@@ -430,8 +459,10 @@ public class ConnectMeVcx {
         private String agency;
         private String walletName;
         private Integer logMaxSize = LOG_MAX_SIZE_DEFAULT;
+        private LogLevel logLevel = LogLevel.INFO;
 
-        public Config(Context context, String genesisPool, Integer genesisPoolResId, String agency, String walletName, Integer logMaxSize) {
+        public Config(Context context, String genesisPool, Integer genesisPoolResId, String agency, String walletName,
+                      Integer logMaxSize, LogLevel logLevel) {
             this.context = context;
             this.genesisPool = genesisPool;
             this.genesisPoolResId = genesisPoolResId;
@@ -439,6 +470,9 @@ public class ConnectMeVcx {
             this.walletName = walletName;
             if (logMaxSize != null) {
                 this.logMaxSize = logMaxSize;
+            }
+            if (logLevel != null) {
+                this.logLevel = logLevel;
             }
         }
 

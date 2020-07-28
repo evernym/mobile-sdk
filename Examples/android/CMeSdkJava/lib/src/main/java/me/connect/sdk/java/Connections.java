@@ -30,7 +30,7 @@ public class Connections {
     public static @NonNull
     CompletableFuture<String> create(@NonNull String invitationDetails,
                                      @NonNull Connection connectionType) {
-        Log.i(TAG, "Starting connection creation");
+        Logger.getInstance().i("Starting connection creation");
         CompletableFuture<String> result = new CompletableFuture<>();
 
         try {
@@ -44,23 +44,23 @@ public class Connections {
 
             ConnectionApi.vcxCreateConnectionWithInvite(invitationId, invitationDetails).whenComplete((handle, err) -> {
                 if (err != null) {
-                    Log.e(TAG, "Failed to create connection with invite: ", err);
+                    Logger.getInstance().e("Failed to create connection with invite: ", err);
                     result.completeExceptionally(err);
                 }
-                Log.i(TAG, "Received handle: " + handle);
+                Logger.getInstance().i("Received handle: " + handle);
                 try {
                     String connType = connectionType.getConnectionType();
                     ConnectionApi.vcxAcceptInvitation(handle, connType).whenComplete((invite, t) -> {
                         if (t != null) {
-                            Log.e(TAG, "Failed to accept invitation: ", t);
+                            Logger.getInstance().e("Failed to accept invitation: ", t);
                             result.completeExceptionally(t);
                             return;
                         }
-                        Log.i(TAG, "Received invite: " + invite);
+                        Logger.getInstance().i("Received invite: " + invite);
                         try {
                             ConnectionApi.connectionSerialize(handle).whenComplete((serializedConn, e) -> {
                                 if (e != null) {
-                                    Log.e(TAG, "Failed to serialize connection", e);
+                                    Logger.getInstance().e("Failed to serialize connection", e);
                                     result.completeExceptionally(e);
                                 } else {
                                     result.complete(serializedConn);
@@ -89,14 +89,14 @@ public class Connections {
     @ExperimentalWalletBackup
     public static @NonNull
     String awaitStatusChange(@NonNull String serializedConnection, MessageState messageState) {
-        Log.i(TAG, "Awaiting connection state change");
+        Logger.getInstance().i("Awaiting connection state change");
         int count = 1;
         try {
             Integer handle = ConnectionApi.connectionDeserialize(serializedConnection).get();
             while (true) {
-                Log.i(TAG, "Awaiting connection state change: attempt #" + count);
+                Logger.getInstance().i("Awaiting connection state change: attempt #" + count);
                 Integer state = ConnectionApi.vcxConnectionUpdateState(handle).get();
-                Log.i(TAG, "Awaiting connection state change: got state=" + state);
+                Logger.getInstance().i("Awaiting connection state change: got state=" + state);
                 if (messageState.matches(state)) {
                     return ConnectionApi.connectionSerialize(handle).get();
                 }
@@ -104,7 +104,7 @@ public class Connections {
                 Thread.sleep(1000);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to await connection state", e);
+            Logger.getInstance().e("Failed to await connection state", e);
             e.printStackTrace();
         }
         return serializedConnection;

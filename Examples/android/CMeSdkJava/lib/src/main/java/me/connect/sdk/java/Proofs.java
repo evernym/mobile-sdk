@@ -36,23 +36,23 @@ public class Proofs {
      */
     public static @NonNull
     CompletableFuture<List<String>> getRequests(@NonNull String connection) {
-        Log.i(TAG, "Getting proof requests");
+        Logger.getInstance().i("Getting proof requests");
         CompletableFuture<List<String>> result = new CompletableFuture<>();
         try {
             ConnectionApi.connectionDeserialize(connection).whenComplete((conHandle, err) -> {
                 if (err != null) {
-                    Log.e(TAG, "Failed to deserialize connection", err);
+                    Logger.getInstance().e("Failed to deserialize connection", err);
                     result.completeExceptionally(err);
                     return;
                 }
                 try {
                     DisclosedProofApi.proofGetRequests(conHandle).whenComplete((offersJson, er) -> {
                         if (er != null) {
-                            Log.e(TAG, "Failed to get proof requests", er);
+                            Logger.getInstance().e("Failed to get proof requests", er);
                             result.completeExceptionally(er);
                             return;
                         }
-                        Log.i(TAG, "Received proof requests");
+                        Logger.getInstance().i("Received proof requests");
                         try {
                             JSONArray offerArray = new JSONArray(offersJson);
                             List<String> offers = new ArrayList<>();
@@ -66,12 +66,12 @@ public class Proofs {
 
                     });
                 } catch (VcxException ex) {
-                    Log.e(TAG, "Failed to get proof requests", ex);
+                    Logger.getInstance().e("Failed to get proof requests", ex);
                     result.completeExceptionally(ex);
                 }
             });
         } catch (Exception ex) {
-            Log.e(TAG, "Failed to deserialize connection", ex);
+            Logger.getInstance().e("Failed to deserialize connection", ex);
             result.completeExceptionally(ex);
         }
         return result;
@@ -85,16 +85,16 @@ public class Proofs {
      * @return string containing serialized proof request
      */
     public static String awaitStatusChange(String serializedProof, MessageState messageState) {
-        Log.i(TAG, "Awaiting proof state change");
+        Logger.getInstance().i("Awaiting proof state change");
         int count = 1;
         try {
             Integer handle = DisclosedProofApi.proofDeserialize(serializedProof).get();
             while (true) {
-                Log.i(TAG, "Awaiting proof state change: attempt #" + count);
+                Logger.getInstance().i("Awaiting proof state change: attempt #" + count);
                 Integer state0 = DisclosedProofApi.proofUpdateState(handle).get();
-                Log.i(TAG, "Awaiting proof state change: update state=" + state0);
+                Logger.getInstance().i("Awaiting proof state change: update state=" + state0);
                 Integer state = DisclosedProofApi.proofGetState(handle).get();
-                Log.i(TAG, "Awaiting proof state change: got state=" + state);
+                Logger.getInstance().i("Awaiting proof state change: got state=" + state);
                 if (messageState.matches(state)) {
                     return DisclosedProofApi.proofSerialize(handle).get();
                 }
@@ -102,7 +102,7 @@ public class Proofs {
                 Thread.sleep(1000);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to await proof state", e);
+            Logger.getInstance().e("Failed to await proof state", e);
             e.printStackTrace();
         }
         return serializedProof;
@@ -118,19 +118,19 @@ public class Proofs {
     public static @NonNull
     CompletableFuture<String> createWithRequest(@NonNull String sourceId,
                                                 @NonNull String message) {
-        Log.i(TAG, "Retrieving proof request");
+        Logger.getInstance().i("Retrieving proof request");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
             DisclosedProofApi.proofCreateWithRequest(sourceId, message).whenComplete((proofHandle, err) -> {
                 if (err != null) {
-                    Log.e(TAG, "Failed create proof with request: ", err);
+                    Logger.getInstance().e("Failed create proof with request: ", err);
                     result.completeExceptionally(err);
                     return;
                 }
                 try {
                     DisclosedProofApi.proofSerialize(proofHandle).whenComplete((sp, e) -> {
                         if (e != null) {
-                            Log.e(TAG, "Failed to serialize proof request: ", e);
+                            Logger.getInstance().e("Failed to serialize proof request: ", e);
                             result.completeExceptionally(e);
                         } else {
                             result.complete(sp);
@@ -154,19 +154,19 @@ public class Proofs {
      */
     public static @NonNull
     CompletableFuture<String> retrieveAvailableCredentials(@NonNull String serializedProof) {
-        Log.i(TAG, "Retrieving credentials for proof request");
+        Logger.getInstance().i("Retrieving credentials for proof request");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
             DisclosedProofApi.proofDeserialize(serializedProof).whenComplete((proofHandle, err) -> {
                 if (err != null) {
-                    Log.e(TAG, "Failed deserialize proof request: ", err);
+                    Logger.getInstance().e("Failed deserialize proof request: ", err);
                     result.completeExceptionally(err);
                     return;
                 }
                 try {
                     DisclosedProofApi.proofRetrieveCredentials(proofHandle).whenComplete((retrievedCreds, e) -> {
                         if (e != null) {
-                            Log.e(TAG, "Failed to retrieve proof credentials: ", e);
+                            Logger.getInstance().e("Failed to retrieve proof credentials: ", e);
                             result.completeExceptionally(e);
                         } else {
                             result.complete(retrievedCreds);
@@ -195,40 +195,40 @@ public class Proofs {
     @NonNull
     CompletableFuture<String> send(@NonNull String serializedConnection, @NonNull String serializedProof,
                                    @NonNull String selectedCreds, @NonNull String selfAttestedAttributes) {
-        Log.i(TAG, "Sending proof request response");
+        Logger.getInstance().i("Sending proof request response");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
             ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((conHandle, err) -> {
                 if (err != null) {
-                    Log.e(TAG, "Failed to deserialize connection: ", err);
+                    Logger.getInstance().e("Failed to deserialize connection: ", err);
                     result.completeExceptionally(err);
                     return;
                 }
                 try {
                     DisclosedProofApi.proofDeserialize(serializedProof).whenComplete((pHandle, er) -> {
                         if (er != null) {
-                            Log.e(TAG, "Failed to deserialize proof: ", er);
+                            Logger.getInstance().e("Failed to deserialize proof: ", er);
                             result.completeExceptionally(er);
                             return;
                         }
                         try {
                             DisclosedProofApi.proofGenerate(pHandle, selectedCreds, selfAttestedAttributes).whenComplete((v, e) -> {
                                 if (e != null) {
-                                    Log.e(TAG, "Failed to generate proof: ", e);
+                                    Logger.getInstance().e("Failed to generate proof: ", e);
                                     result.completeExceptionally(e);
                                     return;
                                 }
                                 try {
                                     DisclosedProofApi.proofSend(pHandle, conHandle).whenComplete((r, error) -> {
                                         if (error != null) {
-                                            Log.e(TAG, "Failed to send proof: ", error);
+                                            Logger.getInstance().e("Failed to send proof: ", error);
                                             result.completeExceptionally(error);
                                             return;
                                         }
                                         try {
                                             DisclosedProofApi.proofSerialize(pHandle).whenComplete((sp, t) -> {
                                                 if (t != null) {
-                                                    Log.e(TAG, "Failed to serialize proof: ", t);
+                                                    Logger.getInstance().e("Failed to serialize proof: ", t);
                                                     result.completeExceptionally(t);
                                                 } else {
                                                     result.complete(sp);
@@ -266,33 +266,33 @@ public class Proofs {
     public static
     @NonNull
     CompletableFuture<String> reject(@NonNull String serializedConnection, @NonNull String serializedProof) {
-        Log.i(TAG, "Sending proof request response");
+        Logger.getInstance().i("Sending proof request response");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
             ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((conHandle, err) -> {
                 if (err != null) {
-                    Log.e(TAG, "Failed to deserialize connection: ", err);
+                    Logger.getInstance().e("Failed to deserialize connection: ", err);
                     result.completeExceptionally(err);
                     return;
                 }
                 try {
                     DisclosedProofApi.proofDeserialize(serializedProof).whenComplete((pHandle, e) -> {
                         if (e != null) {
-                            Log.e(TAG, "Failed to deserialize proof: ", e);
+                            Logger.getInstance().e("Failed to deserialize proof: ", e);
                             result.completeExceptionally(e);
                             return;
                         }
                         try {
                             DisclosedProofApi.proofReject(pHandle, conHandle).whenComplete((v, er) -> {
                                 if (er != null) {
-                                    Log.e(TAG, "Failed to reject proof: ", er);
+                                    Logger.getInstance().e("Failed to reject proof: ", er);
                                     result.completeExceptionally(er);
                                     return;
                                 }
                                 try {
                                     DisclosedProofApi.proofSerialize(pHandle).whenComplete((sp, t) -> {
                                         if (t != null) {
-                                            Log.e(TAG, "Failed to serialize proof: ", t);
+                                            Logger.getInstance().e("Failed to serialize proof: ", t);
                                             result.completeExceptionally(t);
                                         } else {
                                             result.complete(sp);

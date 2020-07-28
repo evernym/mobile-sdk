@@ -10,6 +10,7 @@ import me.connect.sdk.java.AgencyConfig;
 import me.connect.sdk.java.ConnectMeVcx;
 import me.connect.sdk.java.sample.databinding.MainActivityBinding;
 import me.connect.sdk.java.sample.ui.main.MainPagerAdapter;
+import pl.brightinventions.slf4android.LogLevel;
 
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "MainActivity";
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
                 .withAgency(AgencyConfig.DEFAULT)
                 .withGenesisPool(Constants.POOL_TXN_GENESIS)
                 .withWalletName(Constants.WALLET_NAME)
+                .withLogLevel(LogLevel.DEBUG)
                 .withContext(this)
                 .build();
 

@@ -39,23 +39,23 @@ public class Credentials {
      */
     public static @NonNull
     CompletableFuture<List<String>> getOffers(@NonNull String connection) {
-        Log.i(TAG, "Getting credential offers");
+        Logger.getInstance().i("Getting credential offers");
         CompletableFuture<List<String>> result = new CompletableFuture<>();
         try {
             ConnectionApi.connectionDeserialize(connection).whenComplete((conHandle, err) -> {
                 if (err != null) {
-                    Log.e(TAG, "Failed to deserialize connection", err);
+                    Logger.getInstance().e("Failed to deserialize connection", err);
                     result.completeExceptionally(err);
                     return;
                 }
                 try {
                     CredentialApi.credentialGetOffers(conHandle).whenComplete((offersJson, e) -> {
                         if (e != null) {
-                            Log.e(TAG, "Failed to get credential offers", e);
+                            Logger.getInstance().e("Failed to get credential offers", e);
                             result.completeExceptionally(e);
                             return;
                         }
-                        Log.i(TAG, "Received credential offers");
+                        Logger.getInstance().i("Received credential offers");
                         try {
                             JSONArray offerArray = new JSONArray(offersJson);
                             List<String> offers = new ArrayList<>();
@@ -68,12 +68,12 @@ public class Credentials {
                         }
                     });
                 } catch (VcxException ex) {
-                    Log.e(TAG, "Failed to get credential offers", ex);
+                    Logger.getInstance().e("Failed to get credential offers", ex);
                     result.completeExceptionally(ex);
                 }
             });
         } catch (Exception ex) {
-            Log.e(TAG, "Failed to deserialize connection", ex);
+            Logger.getInstance().e("Failed to deserialize connection", ex);
             result.completeExceptionally(ex);
         }
         return result;
@@ -90,26 +90,26 @@ public class Credentials {
     public static @NonNull
     CompletableFuture<String> createWithOffer(@NonNull String serializedConnection, @NonNull String sourceId,
                                               @NonNull String message) {
-        Log.i(TAG, "Accepting credential offer");
+        Logger.getInstance().i("Accepting credential offer");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
             ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((conHandle, err) -> {
                 if (err != null) {
-                    Log.e(TAG, "Failed to deserialize connection: ", err);
+                    Logger.getInstance().e("Failed to deserialize connection: ", err);
                     result.completeExceptionally(err);
                     return;
                 }
                 try {
                     CredentialApi.credentialCreateWithOffer(sourceId, message).whenComplete((credHandle, er) -> {
                         if (er != null) {
-                            Log.e(TAG, "Failed to create credential with offer: ", er);
+                            Logger.getInstance().e("Failed to create credential with offer: ", er);
                             result.completeExceptionally(er);
                             return;
                         }
                         try {
                             CredentialApi.credentialSerialize(credHandle).whenComplete((sc, e) -> {
                                 if (e != null) {
-                                    Log.e(TAG, "Failed to serialize credentials: ", e);
+                                    Logger.getInstance().e("Failed to serialize credentials: ", e);
                                     result.completeExceptionally(e);
                                 } else {
                                     result.complete(sc);
@@ -139,33 +139,33 @@ public class Credentials {
      */
     public static @NonNull
     CompletableFuture<String> acceptOffer(@NonNull String serializedConnection, @NonNull String serializedCredOffer) {
-        Log.i(TAG, "Accepting credential offer");
+        Logger.getInstance().i("Accepting credential offer");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
             ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((conHandle, err) -> {
                 if (err != null) {
-                    Log.e(TAG, "Failed to deserialize connection: ", err);
+                    Logger.getInstance().e("Failed to deserialize connection: ", err);
                     result.completeExceptionally(err);
                     return;
                 }
                 try {
                     CredentialApi.credentialDeserialize(serializedCredOffer).whenComplete((credHandle, er) -> {
                         if (er != null) {
-                            Log.e(TAG, "Failed to deserialize credential offer: ", er);
+                            Logger.getInstance().e("Failed to deserialize credential offer: ", er);
                             result.completeExceptionally(er);
                             return;
                         }
                         try {
                             CredentialApi.credentialSendRequest(credHandle, conHandle, 0).whenComplete((v, e) -> {
                                 if (e != null) {
-                                    Log.e(TAG, "Failed to send credential request: ", e);
+                                    Logger.getInstance().e("Failed to send credential request: ", e);
                                     result.completeExceptionally(e);
                                     return;
                                 }
                                 try {
                                     ConnectionApi.connectionGetPwDid(conHandle).whenComplete((pwDid, t) -> {
                                         if (t != null) {
-                                            Log.e(TAG, "Failed to get pwDid: ", t);
+                                            Logger.getInstance().e("Failed to get pwDid: ", t);
                                             result.completeExceptionally(t);
                                             return;
                                         }
@@ -177,21 +177,21 @@ public class Credentials {
                                             String jsonMsg = String.format("[{\"pairwiseDID\" : \"%s\", \"uids\": [\"%s\"]}]", pwDid, messageId);
                                             UtilsApi.vcxUpdateMessages(MessageStatusType.ANSWERED, jsonMsg).whenComplete((v1, error) -> {
                                                 if (error != null) {
-                                                    Log.e(TAG, "Failed to update messages", error);
+                                                    Logger.getInstance().e("Failed to update messages", error);
                                                     result.completeExceptionally(error);
                                                     return;
                                                 }
                                                 try {
                                                     CredentialApi.credentialSerialize(credHandle).whenComplete((sc, th) -> {
                                                         if (th != null) {
-                                                            Log.e(TAG, "Failed to serialize credentials: ", th);
+                                                            Logger.getInstance().e("Failed to serialize credentials: ", th);
                                                             result.completeExceptionally(th);
                                                         } else {
                                                             result.complete(sc);
                                                         }
                                                     });
                                                 } catch (VcxException ex) {
-                                                    Log.e(TAG, "Failed to serialize credentials: ", ex);
+                                                    Logger.getInstance().e("Failed to serialize credentials: ", ex);
                                                     result.completeExceptionally(ex);
                                                 }
                                             });
@@ -204,7 +204,7 @@ public class Credentials {
                                 }
                             });
                         } catch (VcxException ex) {
-                            Log.e(TAG, "Failed to send credential request: ", ex);
+                            Logger.getInstance().e("Failed to send credential request: ", ex);
                             result.completeExceptionally(ex);
                         }
                     });
@@ -225,18 +225,18 @@ public class Credentials {
      * @return string containing serialized credential
      */
     public static String awaitStatusChange(String serializedCredential, MessageState messageState) {
-        Log.i(TAG, "Awaiting cred state change");
+        Logger.getInstance().i("Awaiting cred state change");
         int count = 1;
         try {
             Integer handle = CredentialApi.credentialDeserialize(serializedCredential).get();
             // fixme all await methods should be cancellable
             //       need to limit amount of retries or maximum time spent waiting
             while (true) {
-                Log.i(TAG, "Awaiting cred state change: attempt #" + count);
+                Logger.getInstance().i("Awaiting cred state change: attempt #" + count);
                 Integer state0 = CredentialApi.credentialUpdateState(handle).get();
-                Log.i(TAG, "Awaiting cred state change: update state=" + state0);
+                Logger.getInstance().i("Awaiting cred state change: update state=" + state0);
                 Integer state = CredentialApi.credentialGetState(handle).get();
-                Log.i(TAG, "Awaiting cred state change: got state=" + state);
+                Logger.getInstance().i("Awaiting cred state change: got state=" + state);
                 if (messageState.matches(state)) {
                     return CredentialApi.credentialSerialize(handle).get();
                 }
@@ -244,7 +244,7 @@ public class Credentials {
                 Thread.sleep(1000);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to await cred state", e);
+            Logger.getInstance().e("Failed to await cred state", e);
             e.printStackTrace();
         }
         return serializedCredential;

@@ -36,12 +36,12 @@ public class StructuredMessages {
     public static @NonNull
     CompletableFuture<String> answer(@NonNull String serializedConnection, @NonNull String messageId,
                                      @NonNull String answer) {
-        Log.i(TAG, "Respond to structured message");
+        Logger.getInstance().i("Respond to structured message");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
             ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((conHandle, err) -> {
                 if (err != null) {
-                    Log.e(TAG, "Failed to deserialize connection: ", err);
+                    Logger.getInstance().e("Failed to deserialize connection: ", err);
                     result.completeExceptionally(err);
                     return;
                 }
@@ -49,7 +49,7 @@ public class StructuredMessages {
                 try {
                     ConnectionApi.connectionSignData(conHandle, encodedAnswer, encodedAnswer.length).whenComplete((signature, e) -> {
                         if (e != null) {
-                            Log.e(TAG, "Failed to sign data: ", e);
+                            Logger.getInstance().e("Failed to sign data: ", e);
                             result.completeExceptionally(e);
                             return;
                         }
@@ -57,7 +57,7 @@ public class StructuredMessages {
                             MessageHolder msg = MessageUtils.prepareAnswer(encodedAnswer, signature, messageId);
                             ConnectionApi.connectionSendMessage(conHandle, msg.getMessage(), msg.getMessageOptions()).whenComplete((r, t) -> {
                                 if (t != null) {
-                                    Log.e(TAG, "Failed to send message: ", t);
+                                    Logger.getInstance().e("Failed to send message: ", t);
                                     result.completeExceptionally(t);
                                 } else {
                                     result.complete(r);
