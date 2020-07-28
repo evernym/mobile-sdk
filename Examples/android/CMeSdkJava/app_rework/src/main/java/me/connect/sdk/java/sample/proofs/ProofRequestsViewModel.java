@@ -15,8 +15,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 
+import me.connect.sdk.java.Messages;
 import me.connect.sdk.java.Proofs;
 import me.connect.sdk.java.message.MessageState;
+import me.connect.sdk.java.message.MessageType;
 import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Connection;
@@ -114,19 +116,23 @@ public class ProofRequestsViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             List<Connection> connections = db.connectionDao().getAll();
             for (Connection c : connections) {
-                Proofs.getRequests(c.serialized).handle((res, throwable) -> {
+                Messages.getPendingMessages(c.serialized, MessageType.PROOF_REQUEST).handle((res, throwable) -> {
                     if (res != null) {
-                        for (String proofReq : res) {
-                            ProofDataHolder holder = extractRequestedFieldsFromProof(proofReq);
+                        for (String message : res) {
+                            ProofDataHolder holder = extractRequestedFieldsFromProof(message);
                             if (!db.proofRequestDao().checkExists(holder.threadId)) {
-                                Proofs.createWithRequest(UUID.randomUUID().toString(), proofReq).handle((pr, err) -> {
-                                    ProofRequest proof = new ProofRequest();
-                                    proof.serialized = pr;
-                                    proof.name = holder.name;
-                                    proof.connectionId = c.id;
-                                    proof.attributes = holder.attributes;
-                                    proof.threadId = holder.threadId;
-                                    db.proofRequestDao().insertAll(proof);
+                                Proofs.createWithRequest(UUID.randomUUID().toString(), holder.proofReq).handle((pr, err) -> {
+                                    if (err != null) {
+                                        err.printStackTrace();
+                                    } else {
+                                        ProofRequest proof = new ProofRequest();
+                                        proof.serialized = pr;
+                                        proof.name = holder.name;
+                                        proof.connectionId = c.id;
+                                        proof.attributes = holder.attributes;
+                                        proof.threadId = holder.threadId;
+                                        db.proofRequestDao().insertAll(proof);
+                                    }
                                     loadProofRequests();
                                     return null;
                                 });
@@ -140,9 +146,12 @@ public class ProofRequestsViewModel extends AndroidViewModel {
         });
     }
 
-    private ProofDataHolder extractRequestedFieldsFromProof(String proofRequest) {
+    private ProofDataHolder extractRequestedFieldsFromProof(String str) {
         try {
-            JSONObject json = new JSONObject(proofRequest);
+            JSONObject message = new JSONObject(str);
+            JSONObject decryptedPayload = new JSONObject(message.getString("decryptedPayload"));
+            String msg = decryptedPayload.getString("@msg");
+            JSONObject json = new JSONObject(msg);
             JSONObject data = json.getJSONObject("proof_request_data");
             String threadId = json.getString("thread_id");
             String name = data.getString("name");
@@ -157,7 +166,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                     attributes.append(", ");
                 }
             }
-            return new ProofDataHolder(threadId, name, attributes.toString());
+            return new ProofDataHolder(threadId, name, attributes.toString(), msg);
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -168,11 +177,13 @@ public class ProofRequestsViewModel extends AndroidViewModel {
         String threadId;
         String name;
         String attributes;
+        String proofReq;
 
-        public ProofDataHolder(String threadId, String name, String attributes) {
+        public ProofDataHolder(String threadId, String name, String attributes, String proofReq) {
             this.threadId = threadId;
             this.name = name;
             this.attributes = attributes;
+            this.proofReq = proofReq;
         }
     }
 }

@@ -18,6 +18,7 @@ import java.util.List;
 
 import java9.util.concurrent.CompletableFuture;
 import me.connect.sdk.java.message.MessageState;
+import me.connect.sdk.java.message.MessageType;
 
 /**
  * Class containing methods to work with proofs.
@@ -30,10 +31,12 @@ public class Proofs {
 
     /**
      * Get proof requests
+     * Deprecated. Use {@link Messages#getPendingMessages(String, MessageType)} instead.
      *
      * @param connection serialized connection
      * @return {@link CompletableFuture} containing list of proof requests as JSON strings.
      */
+    @Deprecated
     public static @NonNull
     CompletableFuture<List<String>> getRequests(@NonNull String connection) {
         Logger.getInstance().i("Getting proof requests");

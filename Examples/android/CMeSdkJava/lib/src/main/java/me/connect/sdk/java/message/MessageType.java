@@ -1,6 +1,7 @@
 package me.connect.sdk.java.message;
 
 public enum MessageType {
+    CREDENTIAL_OFFER("credOffer", "CRED_OFFER"),
     PROOF_REQUEST("proofReq", "PROOF_REQUEST"),
     QUESTION("Question", "QUESTION");
 

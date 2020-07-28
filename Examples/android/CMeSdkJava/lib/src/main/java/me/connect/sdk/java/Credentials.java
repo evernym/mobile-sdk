@@ -19,6 +19,7 @@ import java.util.List;
 import java9.util.concurrent.CompletableFuture;
 import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.message.MessageStatusType;
+import me.connect.sdk.java.message.MessageType;
 
 /**
  * Class containig methods to work with credentials
@@ -33,6 +34,7 @@ public class Credentials {
 
     /**
      * Get credential offers
+     * Deprecated. Use {@link Messages#getPendingMessages(String, MessageType)}  instead.
      *
      * @param connection serialized connection
      * @return {@link CompletableFuture} containing list of credential offers as JSON strings.
