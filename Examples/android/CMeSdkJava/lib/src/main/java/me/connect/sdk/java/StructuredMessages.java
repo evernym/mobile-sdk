@@ -1,7 +1,6 @@
 package me.connect.sdk.java;
 
 import android.util.Base64;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 import java9.util.concurrent.CompletableFuture;
 import me.connect.sdk.java.message.MessageHolder;
 import me.connect.sdk.java.message.MessageUtils;
-import me.connect.sdk.java.message.StructuredMessage;
+import me.connect.sdk.java.message.StructuredMessageHolder;
 
 /**
  * Class containing methods to work with structured messages;
@@ -79,12 +78,12 @@ public class StructuredMessages {
     }
 
     /**
-     * Temporary method to parse structured question message JSON string and extract {@link StructuredMessage} from it.
+     * Temporary method to parse structured question message JSON string and extract {@link StructuredMessageHolder} from it.
      *
      * @param message JSON string containing Structured question message
-     * @return parsed {@link StructuredMessage}
+     * @return parsed {@link StructuredMessageHolder}
      */
-    public static StructuredMessage extract(String message) {
+    public static StructuredMessageHolder extract(String message) {
         try {
             JSONObject jsonObject = new JSONObject(message);
             String payload = jsonObject.getString("decryptedPayload");
@@ -94,16 +93,16 @@ public class StructuredMessages {
             String id = msg.getString("@id");
             String questionText = msg.getString("question_text");
             String questionDetail = msg.getString("question_detail");
-            ArrayList<StructuredMessage.Response> responses = new ArrayList<>();
+            ArrayList<StructuredMessageHolder.Response> responses = new ArrayList<>();
             JSONArray jsonResponses = msg.getJSONArray("valid_responses");
             for (int i = 0; i < jsonResponses.length(); i++) {
                 JSONObject response = jsonResponses.getJSONObject(i);
                 String text = response.getString("text");
                 String nonce = response.getString("nonce");
-                StructuredMessage.Response res = new StructuredMessage.Response(text, nonce);
+                StructuredMessageHolder.Response res = new StructuredMessageHolder.Response(text, nonce);
                 responses.add(res);
             }
-            return new StructuredMessage(id, questionText, questionDetail, responses, messageId);
+            return new StructuredMessageHolder(id, questionText, questionDetail, responses, messageId);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
