@@ -15,6 +15,7 @@ import com.evernym.sdk.vcx.vcx.VcxApi;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,6 +35,21 @@ public class ConnectMeVcx {
     private static final int WALLET_KEY_LENGTH = 128;
     private static final String SECURE_PREF_VCXCONFIG = "me.connect.vcx.config";
     private static FileLogHandlerConfiguration fileHandler;
+    private static final String[] VCX_LOGGER_NAMES = new String[]{
+            "com.evernym.sdk.vcx.LibVcx.native",
+            "VcxException",
+            "ConnectionApi",
+            "CredentialApi",
+            "CredentialDefApi",
+            "IssuerApi",
+            "DisclosedProofApi",
+            "ProofApi",
+            "SchemaApi",
+            "TokenApi",
+            "UtilsApi",
+            "VcxApi",
+            "WalletApi"
+    };
 
     private ConnectMeVcx() {
     }
@@ -89,9 +105,11 @@ public class ConnectMeVcx {
     }
 
     private static void configureLogLevel(LogLevel logLevel) {
-        // we should probably not reset root log level settings
         Logger.getInstance().setLogLevel(logLevel);
-        LoggerConfiguration.configuration().setRootLogLevel(logLevel);
+        for (String name : VCX_LOGGER_NAMES) {
+            LoggerFactory.getLogger(name);
+            LoggerConfiguration.configuration().setLogLevel(name, logLevel);
+        }
     }
 
     private static Exception validate(Config config) {
@@ -295,7 +313,6 @@ public class ConnectMeVcx {
             File file = new File(logFilePath);
 
             if (!file.exists()) {
-                //new FileWriter(logFilePath).close();
                 file.createNewFile();
             }
         } catch (Exception ex) {
@@ -316,7 +333,9 @@ public class ConnectMeVcx {
         // file size limit to 1 million bytes higher that our MAX_ALLOWED_FILE_BYTES
         fileHandler.setLogFileSizeLimitInBytes(maxFileSizeBytes + 1000000);
 
-        LoggerConfiguration.configuration().addHandlerToRootLogger(fileHandler);
+        for (String name : VCX_LOGGER_NAMES) {
+            LoggerConfiguration.configuration().addHandlerToLogger(name, fileHandler);
+        }
     }
 
     public static final class ConfigBuilder {
@@ -409,6 +428,7 @@ public class ConnectMeVcx {
         /**
          * Set log level. Default value is {@link LogLevel#INFO}
          * Please note that log level is set globally for slf4j logs.
+         *
          * @param logLevel
          * @return
          */
