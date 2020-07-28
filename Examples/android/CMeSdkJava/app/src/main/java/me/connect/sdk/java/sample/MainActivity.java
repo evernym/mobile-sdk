@@ -22,7 +22,7 @@ import me.connect.sdk.java.StructuredMessages;
 import me.connect.sdk.java.connection.QRConnection;
 import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.message.MessageType;
-import me.connect.sdk.java.message.StructuredMessage;
+import me.connect.sdk.java.message.StructuredMessageHolder;
 
 public class MainActivity extends BaseActivity {
 
@@ -123,8 +123,8 @@ public class MainActivity extends BaseActivity {
             for (String question : questions) {
                 try {
                     Log.i(TAG, "Question received: " + question);
-                    StructuredMessage sm = StructuredMessages.extract(question);
-                    StructuredMessage.Response resp = sm.getResponses().get(0);
+                    StructuredMessageHolder sm = StructuredMessages.extract(question);
+                    StructuredMessageHolder.Response resp = sm.getResponses().get(0);
                     String res = StructuredMessages.answer(serializedConn, sm.getMessageId(), resp.getNonce()).get();
                     Log.i(TAG, "Structured message response: " + res);
                 } catch (Exception e) {

@@ -2,14 +2,14 @@ package me.connect.sdk.java.message;
 
 import java.util.List;
 
-public class StructuredMessage {
+public class StructuredMessageHolder {
     final String id;
     final String questionText;
     final String questionDetail;
     final List<Response> responses;
     final String messageId;
 
-    public StructuredMessage(String id, String questionText, String questionDetail, List<Response> responses, String messageId) {
+    public StructuredMessageHolder(String id, String questionText, String questionDetail, List<Response> responses, String messageId) {
         this.id = id;
         this.questionText = questionText;
         this.questionDetail = questionDetail;
