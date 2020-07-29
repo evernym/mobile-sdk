@@ -58,7 +58,14 @@ public class ConnectionsViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             String parsedInvite = parseInvite(invite);
             ConnDataHolder data = extractDataFromInvite(parsedInvite);
-            Connections.create(parsedInvite, new QRConnection())
+            List<String> serializedConns = db.connectionDao().getAllSerializedConnections();
+            Connections.verifyConnectionExists(parsedInvite,serializedConns)
+                    .handle((res, throwable) -> {
+                        liveData.postValue(throwable == null);
+
+                        return null;});
+            //todo temporary commented for testing
+            /*Connections.create(parsedInvite, new QRConnection())
                     .handle((res, throwable) -> {
                         if (res != null) {
                             String serializedCon = Connections.awaitStatusChange(res, MessageState.ACCEPTED);
@@ -71,7 +78,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
                         }
                         liveData.postValue(throwable == null);
                         return res;
-                    });
+                    });*/
         });
     }
 

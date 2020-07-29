@@ -9,6 +9,8 @@ import com.evernym.sdk.vcx.connection.ConnectionApi;
 
 import org.json.JSONObject;
 
+import java.util.List;
+
 import java9.util.concurrent.CompletableFuture;
 import me.connect.sdk.java.connection.Connection;
 import me.connect.sdk.java.message.MessageState;
@@ -19,6 +21,51 @@ import me.connect.sdk.java.message.MessageState;
 public class Connections {
 
     public static final String TAG = "ConnectMeVcx";
+
+    public static @NonNull
+    CompletableFuture<String> verifyConnectionExists(@NonNull String invitationDetails,
+                                                     @NonNull List<String> serializedConnections) {
+        Logger.getInstance().i("Starting invite verification");
+        CompletableFuture<String> result = new CompletableFuture<>();
+        try {
+            JSONObject json = new JSONObject(invitationDetails);
+            String invitationId;
+            if (json.has("id")) {
+                invitationId = json.getString("id");
+            } else {
+                invitationId = json.getString("@id");
+            }
+            ConnectionApi.vcxCreateConnectionWithInvite(invitationId, invitationDetails).whenComplete((handle, err) -> {
+                if (err != null) {
+                    Logger.getInstance().e("Failed to create connection with invite: ", err);
+                    result.completeExceptionally(err);
+                }
+                try {
+                    ConnectionApi.connectionGetTheirPwDid(handle).whenComplete((pwDid, e) -> {
+                        if (e != null) {
+                            Logger.getInstance().e("Failed to obtain pwDid for connection: ", e);
+                            result.completeExceptionally(e);
+                        }
+                        try {
+                            for (String serializedConn : serializedConnections) {
+                                JSONObject connJson = new JSONObject(serializedConn);
+                                // TODO!!
+                                result.complete(pwDid);
+                            }
+                        } catch (Exception ex) {
+                            result.completeExceptionally(ex);
+                        }
+
+                    });
+                } catch (VcxException ex) {
+                    result.completeExceptionally(ex);
+                }
+            });
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
+        }
+        return result;
+    }
 
     /**
      * Creates new connection from invitation.
