@@ -1,23 +1,37 @@
 package me.connect.sdk.java.message;
 
+import java.util.Arrays;
+import java.util.List;
+
+import me.connect.sdk.java.Logger;
+
 public enum MessageType {
-    CREDENTIAL_OFFER("credOffer", "CRED_OFFER"),
-    PROOF_REQUEST("proofReq", "PROOF_REQUEST"),
-    QUESTION("Question", "QUESTION");
 
-    private final String proprietary;
-    private final String aries;
+    CREDENTIAL_OFFER,
+    PROOF_REQUEST,
+    QUESTION;
 
-    MessageType(String proprietary, String aries) {
-        this.proprietary = proprietary;
-        this.aries = aries;
-    }
+    private static final List<String> CREDENTIAL_OFFER_VALUES = Arrays.asList("credOffer", "CRED_OFFER", "credential-offer", "CRED");
+    private static final List<String> PROOF_REQUEST_VALUES = Arrays.asList("proofReq", "PROOF_REQUEST", "presentation-request");
+    private static final List<String> QUESTION_VALUES = Arrays.asList("Question", "QUESTION");
 
-    public String getProprietary() {
-        return proprietary;
-    }
 
-    public String getAries() {
-        return aries;
+    public boolean matches(String type) {
+        List<String> listToCheck;
+        switch (this) {
+            case QUESTION:
+                listToCheck = QUESTION_VALUES;
+                break;
+            case PROOF_REQUEST:
+                listToCheck = PROOF_REQUEST_VALUES;
+                break;
+            case CREDENTIAL_OFFER:
+                listToCheck = CREDENTIAL_OFFER_VALUES;
+                break;
+            default:
+                Logger.getInstance().w("Message type " + this + "matching was not implemented");
+                return false;
+        }
+        return listToCheck.contains(type);
     }
 }

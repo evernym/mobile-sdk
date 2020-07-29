@@ -54,28 +54,11 @@ public class Messages {
                         if (msgsJson != null) {
                             for (int j = 0; j < msgsJson.length(); j++) {
                                 JSONObject message = msgsJson.getJSONObject(j);
-                                String type = message.getString("type");
-                                String msgType;
-                                String messageUid = message.getString("uid");
-                                String payload = message.getString("decryptedPayload");
-                                String msg = new JSONObject(payload).getString("@msg");
-                                //Fixme workaround to check message type in different protocols
-                                if (type.equals("aries")) {
-                                    if (msg.startsWith("[")) { // cred offers have array as msg
-                                        type = MessageType.CREDENTIAL_OFFER.getAries();
-                                    } else {
-                                        JSONObject msgJson = new JSONObject(msg);
-                                        String mt = msgJson.getString("@type");
-                                        if (!mt.startsWith("{")) {
-                                            continue;
-                                        }
-                                        type = new JSONObject(mt).getString("name");
-                                    }
-                                    msgType = messageType.getAries();
-                                } else {
-                                    msgType = messageType.getProprietary();
-                                }
-                                if (type.equals(msgType)) {
+                                JSONObject payload = new JSONObject(message.getString("decryptedPayload"));
+                                String type = payload.getJSONObject("@type").getString("name");
+                                if (messageType.matches(type)) {
+                                    String messageUid = message.getString("uid");
+                                    String msg = payload.getString("@msg");
                                     messages.add(new Message(messageUid, msg));
                                 }
                             }
@@ -92,7 +75,7 @@ public class Messages {
         return result;
     }
 
-    static String prepareUpdateMessage(String pairwiseDid, String messsageId){
+    static String prepareUpdateMessage(String pairwiseDid, String messsageId) {
         return String.format("[{\"pairwiseDID\" : \"%s\", \"uids\": [\"%s\"]}]", pairwiseDid, messsageId);
     }
 }
