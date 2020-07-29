@@ -1,6 +1,5 @@
 package me.connect.sdk.java;
 
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -14,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import java9.util.concurrent.CompletableFuture;
+import me.connect.sdk.java.message.Message;
 import me.connect.sdk.java.message.MessageStatusType;
 import me.connect.sdk.java.message.MessageType;
 
@@ -31,13 +31,13 @@ public class Messages {
      *
      * @param serializedConnection String containing JSON with serialized connection details.
      * @param messageType          Type of messages to retrieve
-     * @return List of messages
+     * @return List of {@link Message}
      */
     public static @NonNull
-    CompletableFuture<List<String>> getPendingMessages(@NonNull String serializedConnection,
-                                                       @NonNull MessageType messageType) {
+    CompletableFuture<List<Message>> getPendingMessages(@NonNull String serializedConnection,
+                                                        @NonNull MessageType messageType) {
         Logger.getInstance().i("Retrieving pending messages");
-        CompletableFuture<List<String>> result = new CompletableFuture<>();
+        CompletableFuture<List<Message>> result = new CompletableFuture<>();
         try {
             String pwDid = new JSONObject(serializedConnection).getJSONObject("data").getString("pw_did");
             UtilsApi.vcxGetMessages(MessageStatusType.PENDING, null, pwDid).whenComplete((messagesString, err) -> {
@@ -47,7 +47,7 @@ public class Messages {
                     return;
                 }
                 try {
-                    List<String> messages = new ArrayList<>();
+                    List<Message> messages = new ArrayList<>();
                     JSONArray messagesJson = new JSONArray(messagesString);
                     for (int i = 0; i < messagesJson.length(); i++) {
                         JSONArray msgsJson = messagesJson.getJSONObject(i).optJSONArray("msgs");
@@ -56,21 +56,27 @@ public class Messages {
                                 JSONObject message = msgsJson.getJSONObject(j);
                                 String type = message.getString("type");
                                 String msgType;
+                                String messageUid = message.getString("uid");
+                                String payload = message.getString("decryptedPayload");
+                                String msg = new JSONObject(payload).getString("@msg");
                                 //Fixme workaround to check message type in different protocols
                                 if (type.equals("aries")) {
-                                    String payload = message.getString("decryptedPayload");
-                                    String msg = new JSONObject(payload).getString("@msg");
-                                    String mt = new JSONObject(msg).getString("@type");
-                                    if (!mt.startsWith("{")) {
-                                        continue;
+                                    if (msg.startsWith("[")) { // cred offers have array as msg
+                                        type = MessageType.CREDENTIAL_OFFER.getAries();
+                                    } else {
+                                        JSONObject msgJson = new JSONObject(msg);
+                                        String mt = msgJson.getString("@type");
+                                        if (!mt.startsWith("{")) {
+                                            continue;
+                                        }
+                                        type = new JSONObject(mt).getString("name");
                                     }
-                                    type = new JSONObject(mt).getString("name");
                                     msgType = messageType.getAries();
                                 } else {
                                     msgType = messageType.getProprietary();
                                 }
                                 if (type.equals(msgType)) {
-                                    messages.add(message.toString());
+                                    messages.add(new Message(messageUid, msg));
                                 }
                             }
                         }

@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
 
 import me.connect.sdk.java.Credentials;
 import me.connect.sdk.java.Messages;
+import me.connect.sdk.java.message.Message;
 import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.message.MessageType;
 import me.connect.sdk.java.sample.SingleLiveData;
@@ -87,9 +88,12 @@ public class CredentialOffersViewModel extends AndroidViewModel {
             List<Connection> connections = db.connectionDao().getAll();
             for (Connection c : connections) {
                 Messages.getPendingMessages(c.serialized, MessageType.CREDENTIAL_OFFER).handle((res, throwable) -> {
+                    if (throwable != null) {
+                        throwable.printStackTrace();
+                    }
                     if (res != null) {
-                        for (String message : res) {
-                            CredDataHolder holder = extractDataFromCredentialsOfferString(message);
+                        for (Message message : res) {
+                            CredDataHolder holder = extractDataFromCredentialsOfferMessage(message);
                             if (!db.credentialOffersDao().checkOfferExists(holder.id, c.id)) {
                                 Credentials.createWithOffer(c.serialized, UUID.randomUUID().toString(), holder.offer).handle((co, err) -> {
                                     if (err != null) {
@@ -116,12 +120,9 @@ public class CredentialOffersViewModel extends AndroidViewModel {
         });
     }
 
-    private CredDataHolder extractDataFromCredentialsOfferString(String str) {
+    private CredDataHolder extractDataFromCredentialsOfferMessage(Message msg) {
         try {
-            JSONObject message = new JSONObject(str);
-            JSONObject decryptedPayload = new JSONObject(message.getString("decryptedPayload"));
-            String msg = decryptedPayload.getString("@msg");
-            JSONObject data = new JSONArray(msg).getJSONObject(0);
+            JSONObject data = new JSONArray(msg.getPayload()).getJSONObject(0);
             String id = data.getString("claim_id");
             String name = data.getString("claim_name");
             JSONObject attributesJson = data.getJSONObject("credential_attrs");
@@ -132,7 +133,7 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                 String value = attributesJson.getString(key);
                 attributes.append(String.format("%s: %s\n", key, value));
             }
-            return new CredDataHolder(id, name, attributes.toString(), msg);
+            return new CredDataHolder(id, name, attributes.toString(), msg.getPayload());
         } catch (JSONException e) {
             e.printStackTrace();
             return null;

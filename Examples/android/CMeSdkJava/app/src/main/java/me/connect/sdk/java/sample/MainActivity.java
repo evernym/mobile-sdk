@@ -20,6 +20,7 @@ import me.connect.sdk.java.PoolTxnGenesis;
 import me.connect.sdk.java.Proofs;
 import me.connect.sdk.java.StructuredMessages;
 import me.connect.sdk.java.connection.QRConnection;
+import me.connect.sdk.java.message.Message;
 import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.message.MessageType;
 import me.connect.sdk.java.message.StructuredMessageHolder;
@@ -119,13 +120,13 @@ public class MainActivity extends BaseActivity {
         EditText editTextConn = (EditText) findViewById(R.id.editTextConn);
         String serializedConn = editTextConn.getText().toString();
         try {
-            List<String> questions = Messages.getPendingMessages(serializedConn, MessageType.QUESTION).get();
-            for (String question : questions) {
+            List<Message> messages = Messages.getPendingMessages(serializedConn, MessageType.QUESTION).get();
+            for (Message m : messages) {
                 try {
-                    Log.i(TAG, "Question received: " + question);
-                    StructuredMessageHolder sm = StructuredMessages.extract(question);
+                    Log.i(TAG, "Question received: " + m.getPayload());
+                    StructuredMessageHolder sm = StructuredMessages.extract(m);
                     StructuredMessageHolder.Response resp = sm.getResponses().get(0);
-                    String res = StructuredMessages.answer(serializedConn, sm.getMessageId(), resp.getNonce()).get();
+                    String res = StructuredMessages.answer(serializedConn, m.getUid(), resp.getNonce()).get();
                     Log.i(TAG, "Structured message response: " + res);
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -21,4 +21,3 @@ public enum MessageType {
         return aries;
     }
 }
-

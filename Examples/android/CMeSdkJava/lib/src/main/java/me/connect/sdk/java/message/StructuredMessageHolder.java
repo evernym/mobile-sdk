@@ -7,14 +7,12 @@ public class StructuredMessageHolder {
     final String questionText;
     final String questionDetail;
     final List<Response> responses;
-    final String messageId;
 
-    public StructuredMessageHolder(String id, String questionText, String questionDetail, List<Response> responses, String messageId) {
+    public StructuredMessageHolder(String id, String questionText, String questionDetail, List<Response> responses) {
         this.id = id;
         this.questionText = questionText;
         this.questionDetail = questionDetail;
         this.responses = responses;
-        this.messageId = messageId;
     }
 
     public String getId() {
@@ -31,10 +29,6 @@ public class StructuredMessageHolder {
 
     public List<Response> getResponses() {
         return responses;
-    }
-
-    public String getMessageId() {
-        return messageId;
     }
 
     public static class Response {

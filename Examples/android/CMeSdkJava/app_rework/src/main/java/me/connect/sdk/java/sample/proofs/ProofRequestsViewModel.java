@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 
 import me.connect.sdk.java.Messages;
 import me.connect.sdk.java.Proofs;
+import me.connect.sdk.java.message.Message;
 import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.message.MessageType;
 import me.connect.sdk.java.sample.SingleLiveData;
@@ -118,8 +119,8 @@ public class ProofRequestsViewModel extends AndroidViewModel {
             for (Connection c : connections) {
                 Messages.getPendingMessages(c.serialized, MessageType.PROOF_REQUEST).handle((res, throwable) -> {
                     if (res != null) {
-                        for (String message : res) {
-                            ProofDataHolder holder = extractRequestedFieldsFromProof(message);
+                        for (Message message : res) {
+                            ProofDataHolder holder = extractRequestedFieldsFromProofMessage(message);
                             if (!db.proofRequestDao().checkExists(holder.threadId)) {
                                 Proofs.createWithRequest(UUID.randomUUID().toString(), holder.proofReq).handle((pr, err) -> {
                                     if (err != null) {
@@ -146,12 +147,9 @@ public class ProofRequestsViewModel extends AndroidViewModel {
         });
     }
 
-    private ProofDataHolder extractRequestedFieldsFromProof(String str) {
+    private ProofDataHolder extractRequestedFieldsFromProofMessage(Message msg) {
         try {
-            JSONObject message = new JSONObject(str);
-            JSONObject decryptedPayload = new JSONObject(message.getString("decryptedPayload"));
-            String msg = decryptedPayload.getString("@msg");
-            JSONObject json = new JSONObject(msg);
+            JSONObject json = new JSONObject(msg.getPayload());
             JSONObject data = json.getJSONObject("proof_request_data");
             String threadId = json.getString("thread_id");
             String name = data.getString("name");
@@ -166,7 +164,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                     attributes.append(", ");
                 }
             }
-            return new ProofDataHolder(threadId, name, attributes.toString(), msg);
+            return new ProofDataHolder(threadId, name, attributes.toString(), msg.getPayload());
         } catch (JSONException e) {
             e.printStackTrace();
             return null;

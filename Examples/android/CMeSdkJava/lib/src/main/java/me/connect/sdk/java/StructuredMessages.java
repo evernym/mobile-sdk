@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import java9.util.concurrent.CompletableFuture;
+import me.connect.sdk.java.message.Message;
 import me.connect.sdk.java.message.MessageHolder;
 import me.connect.sdk.java.message.MessageUtils;
 import me.connect.sdk.java.message.StructuredMessageHolder;
@@ -80,16 +81,12 @@ public class StructuredMessages {
     /**
      * Temporary method to parse structured question message JSON string and extract {@link StructuredMessageHolder} from it.
      *
-     * @param message JSON string containing Structured question message
+     * @param message {@link Message}
      * @return parsed {@link StructuredMessageHolder}
      */
-    public static StructuredMessageHolder extract(String message) {
+    public static StructuredMessageHolder extract(Message message) {
         try {
-            JSONObject jsonObject = new JSONObject(message);
-            String payload = jsonObject.getString("decryptedPayload");
-            String msgString = new JSONObject(payload).getString("@msg");
-            JSONObject msg = new JSONObject(msgString);
-            String messageId = jsonObject.getString("uid");
+            JSONObject msg = new JSONObject(message.getPayload());
             String id = msg.getString("@id");
             String questionText = msg.getString("question_text");
             String questionDetail = msg.getString("question_detail");
@@ -102,7 +99,7 @@ public class StructuredMessages {
                 StructuredMessageHolder.Response res = new StructuredMessageHolder.Response(text, nonce);
                 responses.add(res);
             }
-            return new StructuredMessageHolder(id, questionText, questionDetail, responses, messageId);
+            return new StructuredMessageHolder(id, questionText, questionDetail, responses);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
