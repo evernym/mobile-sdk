@@ -60,7 +60,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                 // We automatically map first of each provided credentials to final structure
                 // This process should be interactive in real app
                 String data = Proofs.mapCredentials(creds);
-                Proofs.send(con.serialized, proof.serialized, data, "{}").handle((s, e) -> {
+                Proofs.send(con.serialized, proof.serialized, data, "{}", proof.messageId).handle((s, e) -> {
                     if (s != null) {
                         String serializedProof = Proofs.awaitStatusChange(s, MessageState.ACCEPTED);
                         proof.accepted = true;
@@ -86,7 +86,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             ProofRequest proof = db.proofRequestDao().getById(proofId);
             Connection con = db.connectionDao().getById(proof.connectionId);
-            Proofs.reject(con.serialized, proof.serialized).handle((s, err) -> {
+            Proofs.reject(con.serialized, proof.serialized, proof.messageId).handle((s, err) -> {
                 if (s != null) {
                     String serializedProof = Proofs.awaitStatusChange(s, MessageState.REJECTED);
                     proof.serialized = serializedProof;
@@ -132,6 +132,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                                         proof.connectionId = c.id;
                                         proof.attributes = holder.attributes;
                                         proof.threadId = holder.threadId;
+                                        proof.messageId = message.getUid();
                                         db.proofRequestDao().insertAll(proof);
                                     }
                                     loadProofRequests();

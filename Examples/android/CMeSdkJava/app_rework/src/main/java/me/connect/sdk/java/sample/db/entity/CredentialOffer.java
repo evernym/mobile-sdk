@@ -31,4 +31,7 @@ public class CredentialOffer implements Serializable {
 
     @ColumnInfo(name = "accepted")
     public Boolean accepted;
+
+    @ColumnInfo(name = "message_id")
+    public String messageId;
 }

@@ -5,6 +5,7 @@ import android.util.Base64;
 import androidx.annotation.NonNull;
 
 import com.evernym.sdk.vcx.connection.ConnectionApi;
+import com.evernym.sdk.vcx.utils.UtilsApi;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java9.util.concurrent.CompletableFuture;
 import me.connect.sdk.java.message.Message;
 import me.connect.sdk.java.message.MessageHolder;
+import me.connect.sdk.java.message.MessageStatusType;
 import me.connect.sdk.java.message.MessageUtils;
 import me.connect.sdk.java.message.StructuredMessageHolder;
 
@@ -60,7 +62,35 @@ public class StructuredMessages {
                                     Logger.getInstance().e("Failed to send message: ", t);
                                     result.completeExceptionally(t);
                                 } else {
-                                    result.complete(r);
+
+
+                                    try {
+                                        ConnectionApi.connectionGetPwDid(conHandle).whenComplete((pwDid, th) -> {
+                                            if (th != null) {
+                                                Logger.getInstance().e("Failed to get pwDid: ", th);
+                                                result.completeExceptionally(th);
+                                                return;
+                                            }
+                                            try {
+                                                String jsonMsg = Messages.prepareUpdateMessage(pwDid, messageId);
+                                                UtilsApi.vcxUpdateMessages(MessageStatusType.ANSWERED, jsonMsg).whenComplete((v1, error) -> {
+                                                    if (error != null) {
+                                                        Logger.getInstance().e("Failed to update messages", error);
+                                                        result.completeExceptionally(error);
+                                                    } else {
+                                                        result.complete(r);
+                                                    }
+
+                                                });
+                                            } catch (Exception ex) {
+                                                result.completeExceptionally(ex);
+                                            }
+                                        });
+                                    } catch (Exception ex) {
+                                        result.completeExceptionally(ex);
+                                    }
+
+
                                 }
                             });
                         } catch (Exception ex) {

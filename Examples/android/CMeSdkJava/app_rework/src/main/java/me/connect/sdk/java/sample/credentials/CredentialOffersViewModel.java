@@ -67,7 +67,7 @@ public class CredentialOffersViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             CredentialOffer offer = db.credentialOffersDao().getById(offerId);
             Connection connection = db.connectionDao().getById(offer.connectionId);
-            Credentials.acceptOffer(connection.serialized, offer.serialized).handle((s, throwable) -> {
+            Credentials.acceptOffer(connection.serialized, offer.serialized, offer.messageId).handle((s, throwable) -> {
                         if (s != null) {
                             String s2 = Credentials.awaitStatusChange(s, MessageState.ACCEPTED);
                             offer.serialized = s2;
@@ -105,6 +105,7 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                                         offer.connectionId = c.id;
                                         offer.attributes = holder.attributes;
                                         offer.serialized = co;
+                                        offer.messageId = message.getUid();
                                         db.credentialOffersDao().insertAll(offer);
                                     }
                                     loadCredentialOffers();

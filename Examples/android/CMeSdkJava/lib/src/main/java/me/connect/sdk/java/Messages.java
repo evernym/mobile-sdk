@@ -91,4 +91,8 @@ public class Messages {
         }
         return result;
     }
+
+    static String prepareUpdateMessage(String pairwiseDid, String messsageId){
+        return String.format("[{\"pairwiseDID\" : \"%s\", \"uids\": [\"%s\"]}]", pairwiseDid, messsageId);
+    }
 }

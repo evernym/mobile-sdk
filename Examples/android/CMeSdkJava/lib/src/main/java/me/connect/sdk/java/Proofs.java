@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import com.evernym.sdk.vcx.VcxException;
 import com.evernym.sdk.vcx.connection.ConnectionApi;
 import com.evernym.sdk.vcx.proof.DisclosedProofApi;
+import com.evernym.sdk.vcx.utils.UtilsApi;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import java9.util.concurrent.CompletableFuture;
 import me.connect.sdk.java.message.MessageState;
+import me.connect.sdk.java.message.MessageStatusType;
 import me.connect.sdk.java.message.MessageType;
 
 /**
@@ -192,12 +194,14 @@ public class Proofs {
      * @param serializedProof        string containing serialized proof request
      * @param selectedCreds          selected credentials to provide proof
      * @param selfAttestedAttributes user-defined attributes to provide proof
+     * @param messageId              messsage ID
      * @return CompletableFuture containing serialized proof
      */
     public static
     @NonNull
     CompletableFuture<String> send(@NonNull String serializedConnection, @NonNull String serializedProof,
-                                   @NonNull String selectedCreds, @NonNull String selfAttestedAttributes) {
+                                   @NonNull String selectedCreds, @NonNull String selfAttestedAttributes,
+                                   @NonNull String messageId) {
         Logger.getInstance().i("Sending proof request response");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
@@ -229,15 +233,38 @@ public class Proofs {
                                             return;
                                         }
                                         try {
-                                            DisclosedProofApi.proofSerialize(pHandle).whenComplete((sp, t) -> {
+                                            ConnectionApi.connectionGetPwDid(conHandle).whenComplete((pwDid, t) -> {
                                                 if (t != null) {
-                                                    Logger.getInstance().e("Failed to serialize proof: ", t);
+                                                    Logger.getInstance().e("Failed to get pwDid: ", t);
                                                     result.completeExceptionally(t);
-                                                } else {
-                                                    result.complete(sp);
+                                                    return;
+                                                }
+                                                try {
+                                                    String jsonMsg = Messages.prepareUpdateMessage(pwDid, messageId);
+                                                    UtilsApi.vcxUpdateMessages(MessageStatusType.ANSWERED, jsonMsg).whenComplete((v1, thr) -> {
+                                                        if (thr != null) {
+                                                            Logger.getInstance().e("Failed to update messages", thr);
+                                                            result.completeExceptionally(thr);
+                                                            return;
+                                                        }
+                                                        try {
+                                                            DisclosedProofApi.proofSerialize(pHandle).whenComplete((sp, th) -> {
+                                                                if (th != null) {
+                                                                    Logger.getInstance().e("Failed to serialize proof: ", th);
+                                                                    result.completeExceptionally(th);
+                                                                } else {
+                                                                    result.complete(sp);
+                                                                }
+                                                            });
+                                                        } catch (VcxException ex) {
+                                                            result.completeExceptionally(ex);
+                                                        }
+                                                    });
+                                                } catch (Exception ex) {
+                                                    result.completeExceptionally(ex);
                                                 }
                                             });
-                                        } catch (VcxException ex) {
+                                        } catch (Exception ex) {
                                             result.completeExceptionally(ex);
                                         }
                                     });
@@ -264,11 +291,13 @@ public class Proofs {
      *
      * @param serializedConnection string containing serialized connection
      * @param serializedProof      string containing serialized proof request
+     * @param messageId            message ID
      * @return CompletableFuture containing serialized proof
      */
     public static
     @NonNull
-    CompletableFuture<String> reject(@NonNull String serializedConnection, @NonNull String serializedProof) {
+    CompletableFuture<String> reject(@NonNull String serializedConnection, @NonNull String serializedProof,
+                                     @NonNull String messageId) {
         Logger.getInstance().i("Sending proof request response");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
@@ -293,15 +322,38 @@ public class Proofs {
                                     return;
                                 }
                                 try {
-                                    DisclosedProofApi.proofSerialize(pHandle).whenComplete((sp, t) -> {
+                                    ConnectionApi.connectionGetPwDid(conHandle).whenComplete((pwDid, t) -> {
                                         if (t != null) {
-                                            Logger.getInstance().e("Failed to serialize proof: ", t);
+                                            Logger.getInstance().e("Failed to get pwDid: ", t);
                                             result.completeExceptionally(t);
-                                        } else {
-                                            result.complete(sp);
+                                            return;
+                                        }
+                                        try {
+                                            String jsonMsg = Messages.prepareUpdateMessage(pwDid, messageId);
+                                            UtilsApi.vcxUpdateMessages(MessageStatusType.ANSWERED, jsonMsg).whenComplete((v1, thr) -> {
+                                                if (thr != null) {
+                                                    Logger.getInstance().e("Failed to update messages", thr);
+                                                    result.completeExceptionally(thr);
+                                                    return;
+                                                }
+                                                try {
+                                                    DisclosedProofApi.proofSerialize(pHandle).whenComplete((sp, th) -> {
+                                                        if (th != null) {
+                                                            Logger.getInstance().e("Failed to serialize proof: ", th);
+                                                            result.completeExceptionally(th);
+                                                        } else {
+                                                            result.complete(sp);
+                                                        }
+                                                    });
+                                                } catch (VcxException ex) {
+                                                    result.completeExceptionally(ex);
+                                                }
+                                            });
+                                        } catch (Exception ex) {
+                                            result.completeExceptionally(ex);
                                         }
                                     });
-                                } catch (VcxException ex) {
+                                } catch (Exception ex) {
                                     result.completeExceptionally(ex);
                                 }
                             });
