@@ -17,7 +17,10 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 
 import me.connect.sdk.java.Credentials;
+import me.connect.sdk.java.Messages;
+import me.connect.sdk.java.message.Message;
 import me.connect.sdk.java.message.MessageState;
+import me.connect.sdk.java.message.MessageType;
 import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Connection;
@@ -64,7 +67,7 @@ public class CredentialOffersViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             CredentialOffer offer = db.credentialOffersDao().getById(offerId);
             Connection connection = db.connectionDao().getById(offer.connectionId);
-            Credentials.acceptOffer(connection.serialized, offer.serialized).handle((s, throwable) -> {
+            Credentials.acceptOffer(connection.serialized, offer.serialized, offer.messageId).handle((s, throwable) -> {
                         if (s != null) {
                             String s2 = Credentials.awaitStatusChange(s, MessageState.ACCEPTED);
                             offer.serialized = s2;
@@ -84,19 +87,27 @@ public class CredentialOffersViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             List<Connection> connections = db.connectionDao().getAll();
             for (Connection c : connections) {
-                Credentials.getOffers(c.serialized).handle((res, throwable) -> {
+                Messages.getPendingMessages(c.serialized, MessageType.CREDENTIAL_OFFER).handle((res, throwable) -> {
+                    if (throwable != null) {
+                        throwable.printStackTrace();
+                    }
                     if (res != null) {
-                        for (String credOffer : res) {
-                            CredDataHolder holder = extractDataFromCredentialsOfferString(credOffer);
+                        for (Message message : res) {
+                            CredDataHolder holder = extractDataFromCredentialsOfferMessage(message);
                             if (!db.credentialOffersDao().checkOfferExists(holder.id, c.id)) {
-                                Credentials.createWithOffer(c.serialized, UUID.randomUUID().toString(), credOffer).handle((co, err) -> {
-                                    CredentialOffer offer = new CredentialOffer();
-                                    offer.claimId = holder.id;
-                                    offer.name = holder.name;
-                                    offer.connectionId = c.id;
-                                    offer.attributes = holder.attributes;
-                                    offer.serialized = co;
-                                    db.credentialOffersDao().insertAll(offer);
+                                Credentials.createWithOffer(c.serialized, UUID.randomUUID().toString(), holder.offer).handle((co, err) -> {
+                                    if (err != null) {
+                                        err.printStackTrace();
+                                    } else {
+                                        CredentialOffer offer = new CredentialOffer();
+                                        offer.claimId = holder.id;
+                                        offer.name = holder.name;
+                                        offer.connectionId = c.id;
+                                        offer.attributes = holder.attributes;
+                                        offer.serialized = co;
+                                        offer.messageId = message.getUid();
+                                        db.credentialOffersDao().insertAll(offer);
+                                    }
                                     loadCredentialOffers();
                                     return null;
                                 });
@@ -110,9 +121,9 @@ public class CredentialOffersViewModel extends AndroidViewModel {
         });
     }
 
-    private CredDataHolder extractDataFromCredentialsOfferString(String str) {
+    private CredDataHolder extractDataFromCredentialsOfferMessage(Message msg) {
         try {
-            JSONObject data = new JSONArray(str).getJSONObject(0);
+            JSONObject data = new JSONArray(msg.getPayload()).getJSONObject(0);
             String id = data.getString("claim_id");
             String name = data.getString("claim_name");
             JSONObject attributesJson = data.getJSONObject("credential_attrs");
@@ -123,7 +134,7 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                 String value = attributesJson.getString(key);
                 attributes.append(String.format("%s: %s\n", key, value));
             }
-            return new CredDataHolder(id, name, attributes.toString());
+            return new CredDataHolder(id, name, attributes.toString(), msg.getPayload());
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -134,11 +145,13 @@ public class CredentialOffersViewModel extends AndroidViewModel {
         String id;
         String name;
         String attributes;
+        String offer;
 
-        public CredDataHolder(String id, String name, String attributes) {
+        public CredDataHolder(String id, String name, String attributes, String offer) {
             this.id = id;
             this.name = name;
             this.attributes = attributes;
+            this.offer = offer;
         }
     }
 }

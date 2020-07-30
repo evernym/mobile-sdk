@@ -19,6 +19,7 @@ import java.util.List;
 import java9.util.concurrent.CompletableFuture;
 import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.message.MessageStatusType;
+import me.connect.sdk.java.message.MessageType;
 
 /**
  * Class containig methods to work with credentials
@@ -33,6 +34,7 @@ public class Credentials {
 
     /**
      * Get credential offers
+     * Deprecated. Use {@link Messages#getPendingMessages(String, MessageType)}  instead.
      *
      * @param connection serialized connection
      * @return {@link CompletableFuture} containing list of credential offers as JSON strings.
@@ -135,10 +137,12 @@ public class Credentials {
      *
      * @param serializedConnection serialized connection string
      * @param serializedCredOffer  serialized credential offer
+     * @param messageId message ID
      * @return serialized credential offer
      */
     public static @NonNull
-    CompletableFuture<String> acceptOffer(@NonNull String serializedConnection, @NonNull String serializedCredOffer) {
+    CompletableFuture<String> acceptOffer(@NonNull String serializedConnection, @NonNull String serializedCredOffer,
+                                          @NonNull String messageId) {
         Logger.getInstance().i("Accepting credential offer");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
@@ -170,11 +174,7 @@ public class Credentials {
                                             return;
                                         }
                                         try {
-                                            String messageId = new JSONObject(serializedCredOffer)
-                                                    .getJSONObject("data")
-                                                    .getJSONObject("credential_offer")
-                                                    .getString("msg_ref_id");
-                                            String jsonMsg = String.format("[{\"pairwiseDID\" : \"%s\", \"uids\": [\"%s\"]}]", pwDid, messageId);
+                                            String jsonMsg = Messages.prepareUpdateMessage(pwDid, messageId);
                                             UtilsApi.vcxUpdateMessages(MessageStatusType.ANSWERED, jsonMsg).whenComplete((v1, error) -> {
                                                 if (error != null) {
                                                     Logger.getInstance().e("Failed to update messages", error);

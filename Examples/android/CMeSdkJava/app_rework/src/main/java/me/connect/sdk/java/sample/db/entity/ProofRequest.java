@@ -26,4 +26,7 @@ public class ProofRequest {
 
     @ColumnInfo(name = "accepted")
     public Boolean accepted;
+
+    @ColumnInfo(name = "message_id")
+    public String messageId;
 }

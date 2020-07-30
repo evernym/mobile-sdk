@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 
 import me.connect.sdk.java.Messages;
 import me.connect.sdk.java.StructuredMessages;
+import me.connect.sdk.java.message.Message;
 import me.connect.sdk.java.message.MessageType;
 import me.connect.sdk.java.message.StructuredMessageHolder;
 import me.connect.sdk.java.message.StructuredMessageHolder.Response;
@@ -56,17 +57,17 @@ public class StructuredMessagesViewModel extends AndroidViewModel {
             for (Connection c : connections) {
                 Messages.getPendingMessages(c.serialized, MessageType.QUESTION).handle((res, throwable) -> {
                     if (res != null) {
-                        for (String msg : res) {
+                        for (Message msg : res) {
                             StructuredMessageHolder holder = StructuredMessages.extract(msg);
                             if (!db.structuredMessageDao().checkMessageExists(holder.getId(), c.id)) {
                                 StructuredMessage sm = new StructuredMessage();
                                 sm.connectionId = c.id;
-                                sm.messageId = holder.getMessageId();
+                                sm.messageId = msg.getUid();
                                 sm.entryId = holder.getId();
                                 sm.questionText = holder.getQuestionText();
                                 sm.questionDetail = holder.getQuestionDetail();
                                 sm.answers = holder.getResponses();
-                                sm.serialized = msg;
+                                sm.serialized = msg.getPayload();
                                 db.structuredMessageDao().insertAll(sm);
                                 loadStructuredMessages();
                             }
