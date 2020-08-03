@@ -77,7 +77,7 @@ public class Connections {
                                         result.completeExceptionally(error);
                                     }
                                     try {
-                                        ConnectionApi.vcxConnectionRedirect(oldHandle, handle).whenComplete((res, t) -> {
+                                        ConnectionApi.vcxConnectionRedirect(handle, oldHandle).whenComplete((res, t) -> {
                                             if (t != null) {
                                                 Logger.getInstance().e("Failed to redirect connection: ", t);
                                                 result.completeExceptionally(t);
