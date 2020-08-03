@@ -23,18 +23,30 @@ public class Connections {
     public static final String TAG = "ConnectMeVcx";
 
     public static @NonNull
-    CompletableFuture<String> verifyConnectionExists(@NonNull String invitationDetails,
-                                                     @NonNull List<String> serializedConnections) {
+    CompletableFuture<Boolean> verifyConnectionExists(@NonNull String invitationDetails,
+                                                      @NonNull List<String> serializedConnections) {
         Logger.getInstance().i("Starting invite verification");
-        CompletableFuture<String> result = new CompletableFuture<>();
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
         try {
             JSONObject json = new JSONObject(invitationDetails);
             String invitationId;
             if (json.has("id")) {
                 invitationId = json.getString("id");
+                connectionVerifyProprietary(result, invitationId, invitationDetails, serializedConnections);
             } else {
                 invitationId = json.getString("@id");
+                // Todo implement aries flow
+                result.completeExceptionally(new Exception("Not implemented for aries yet!"));
             }
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
+        }
+        return result;
+    }
+
+    private static void connectionVerifyProprietary(CompletableFuture<Boolean> result, String invitationId,
+                                                    String invitationDetails, List<String> serializedConnections) {
+        try {
             ConnectionApi.vcxCreateConnectionWithInvite(invitationId, invitationDetails).whenComplete((handle, err) -> {
                 if (err != null) {
                     Logger.getInstance().e("Failed to create connection with invite: ", err);
@@ -47,10 +59,36 @@ public class Connections {
                             result.completeExceptionally(e);
                         }
                         try {
+                            String sameSerializedConn = null;
                             for (String serializedConn : serializedConnections) {
                                 JSONObject connJson = new JSONObject(serializedConn);
-                                // TODO!!
-                                result.complete(pwDid);
+                                String theirPwDid = connJson.getJSONObject("data").getString("their_pw_did");
+                                if (theirPwDid.equals(pwDid)) {
+                                    sameSerializedConn = serializedConn;
+                                    break;
+                                }
+                            }
+                            if (sameSerializedConn == null) {
+                                result.complete(false);
+                            } else {
+                                ConnectionApi.connectionDeserialize(sameSerializedConn).whenComplete((oldHandle, error) -> {
+                                    if (error != null) {
+                                        Logger.getInstance().e("Failed to deserialize stored connection: ", error);
+                                        result.completeExceptionally(error);
+                                    }
+                                    try {
+                                        ConnectionApi.vcxConnectionRedirect(oldHandle, handle).whenComplete((res, t) -> {
+                                            if (t != null) {
+                                                Logger.getInstance().e("Failed to redirect connection: ", t);
+                                                result.completeExceptionally(t);
+                                            } else {
+                                                result.complete(true);
+                                            }
+                                        });
+                                    } catch (Exception ex) {
+                                        result.completeExceptionally(ex);
+                                    }
+                                });
                             }
                         } catch (Exception ex) {
                             result.completeExceptionally(ex);
@@ -64,7 +102,6 @@ public class Connections {
         } catch (Exception ex) {
             result.completeExceptionally(ex);
         }
-        return result;
     }
 
     /**

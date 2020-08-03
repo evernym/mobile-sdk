@@ -24,6 +24,10 @@ import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Connection;
 
+import static me.connect.sdk.java.sample.connections.ConnectionCreateResult.FAILURE;
+import static me.connect.sdk.java.sample.connections.ConnectionCreateResult.REDIRECT;
+import static me.connect.sdk.java.sample.connections.ConnectionCreateResult.SUCCESS;
+
 public class ConnectionsViewModel extends AndroidViewModel {
     private final Database db;
     private MutableLiveData<List<Connection>> connections;
@@ -41,8 +45,8 @@ public class ConnectionsViewModel extends AndroidViewModel {
         return connections;
     }
 
-    public SingleLiveData<Boolean> newConnection(String invite) {
-        SingleLiveData<Boolean> data = new SingleLiveData<>();
+    public SingleLiveData<ConnectionCreateResult> newConnection(String invite) {
+        SingleLiveData<ConnectionCreateResult> data = new SingleLiveData<>();
         createConnection(invite, data);
         return data;
     }
@@ -54,31 +58,40 @@ public class ConnectionsViewModel extends AndroidViewModel {
         });
     }
 
-    private void createConnection(String invite, SingleLiveData<Boolean> liveData) {
+    private void createConnection(String invite, SingleLiveData<ConnectionCreateResult> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             String parsedInvite = parseInvite(invite);
             ConnDataHolder data = extractDataFromInvite(parsedInvite);
             List<String> serializedConns = db.connectionDao().getAllSerializedConnections();
-            Connections.verifyConnectionExists(parsedInvite,serializedConns)
-                    .handle((res, throwable) -> {
-                        liveData.postValue(throwable == null);
-
-                        return null;});
-            //todo temporary commented for testing
-            /*Connections.create(parsedInvite, new QRConnection())
-                    .handle((res, throwable) -> {
-                        if (res != null) {
-                            String serializedCon = Connections.awaitStatusChange(res, MessageState.ACCEPTED);
-                            Connection c = new Connection();
-                            c.name = data.name;
-                            c.icon = data.logo;
-                            c.serialized = serializedCon;
-                            db.connectionDao().insertAll(c);
-                            loadConnections();
+            Connections.verifyConnectionExists(parsedInvite, serializedConns)
+                    .handle((exists, err) -> {
+                        if (err != null) {
+                            liveData.postValue(FAILURE);
+                        } else {
+                            if (exists) {
+                                liveData.postValue(REDIRECT);
+                            } else {
+                                Connections.create(parsedInvite, new QRConnection())
+                                        .handle((res, throwable) -> {
+                                            if (res != null) {
+                                                String serializedCon = Connections.awaitStatusChange(res, MessageState.ACCEPTED);
+                                                Connection c = new Connection();
+                                                c.name = data.name;
+                                                c.icon = data.logo;
+                                                c.serialized = serializedCon;
+                                                db.connectionDao().insertAll(c);
+                                                loadConnections();
+                                            }
+                                            liveData.postValue(throwable == null ? SUCCESS : FAILURE);
+                                            return res;
+                                        });
+                            }
                         }
-                        liveData.postValue(throwable == null);
-                        return res;
-                    });*/
+
+
+                        return null;
+                    });
+            //todo temporary commented for testing
         });
     }
 
