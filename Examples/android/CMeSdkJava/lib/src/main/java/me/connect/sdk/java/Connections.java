@@ -138,10 +138,11 @@ public class Connections {
                 JSONObject state = connJson.getJSONObject("state");
                 JSONObject invitee = state.getJSONObject("Invitee");
                 JSONObject completed = invitee.getJSONObject("Completed");
+                JSONObject invitation = completed.getJSONObject("invitation");
                 List<String> recepientKeys = new ArrayList<>();
-                if (completed.has("invitation")) {
-                    JSONObject invitation = completed.getJSONObject("invitation").getJSONObject("OutofbandInvitation");
-                    String invitationRecipientKey = invitation.getJSONArray("service").getJSONObject(0)
+                if (invitation.has("OutofbandInvitation")) {
+                    JSONObject outOfBandInvite = completed.getJSONObject("invitation").getJSONObject("OutofbandInvitation");
+                    String invitationRecipientKey = outOfBandInvite.getJSONArray("service").getJSONObject(0)
                             .getJSONArray("recipientKeys").getString(0);
                     recepientKeys.add(invitationRecipientKey);
                 }
