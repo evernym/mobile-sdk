@@ -95,7 +95,6 @@ public class ConnectionsViewModel extends AndroidViewModel {
 
                         return null;
                     });
-            //todo temporary commented for testing
         });
     }
 
