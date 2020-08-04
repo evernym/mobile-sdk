@@ -7,8 +7,10 @@ import androidx.annotation.NonNull;
 import com.evernym.sdk.vcx.VcxException;
 import com.evernym.sdk.vcx.connection.ConnectionApi;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import java9.util.concurrent.CompletableFuture;
@@ -21,6 +23,8 @@ import me.connect.sdk.java.message.MessageState;
 public class Connections {
 
     public static final String TAG = "ConnectMeVcx";
+    private static final String ARIES_CONNECTION_TYPE = "connections";
+    private static final String ARIES_OUT_OF_BAND_TYPE = "out-of-band";
 
     public static @NonNull
     CompletableFuture<Boolean> verifyConnectionExists(@NonNull String invitationDetails,
@@ -29,14 +33,12 @@ public class Connections {
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         try {
             JSONObject json = new JSONObject(invitationDetails);
-            String invitationId;
+            // Proprietary protocol uses 'id' field, aries uses '@id' field
             if (json.has("id")) {
-                invitationId = json.getString("id");
+                String invitationId = json.getString("id");
                 connectionVerifyProprietary(result, invitationId, invitationDetails, serializedConnections);
             } else {
-                invitationId = json.getString("@id");
-                // Todo implement aries flow
-                result.completeExceptionally(new Exception("Not implemented for aries yet!"));
+                connectionVerifyAries(result, invitationDetails, serializedConnections);
             }
         } catch (Exception ex) {
             result.completeExceptionally(ex);
@@ -44,6 +46,9 @@ public class Connections {
         return result;
     }
 
+    /**
+     * Check proprietary connection already established and perform redirect if needed
+     */
     private static void connectionVerifyProprietary(CompletableFuture<Boolean> result, String invitationId,
                                                     String invitationDetails, List<String> serializedConnections) {
         try {
@@ -62,6 +67,10 @@ public class Connections {
                             String sameSerializedConn = null;
                             for (String serializedConn : serializedConnections) {
                                 JSONObject connJson = new JSONObject(serializedConn);
+                                String version = connJson.getString("version");
+                                if (!version.equals("1.0")) {
+                                    continue;
+                                }
                                 String theirPwDid = connJson.getJSONObject("data").getString("their_pw_did");
                                 if (theirPwDid.equals(pwDid)) {
                                     sameSerializedConn = serializedConn;
@@ -105,6 +114,92 @@ public class Connections {
     }
 
     /**
+     * Check aries connection already established and perform reuse if needed
+     */
+    private static void connectionVerifyAries(CompletableFuture<Boolean> result, String invitationDetails,
+                                              List<String> serializedConnections) {
+        try {
+            JSONObject iniviteJson = new JSONObject(invitationDetails);
+            String recipientKey;
+            String type = iniviteJson.getString("@type");
+            if (type.contains(ARIES_CONNECTION_TYPE)) {
+                recipientKey = iniviteJson.getJSONArray("recipientKeys").getString(0);
+            } else {
+                recipientKey = iniviteJson.getJSONArray("service").getJSONObject(0).getJSONArray("recipientKeys").getString(0);
+            }
+
+            String sameSerializedConn = null;
+            for (String serializedConn : serializedConnections) {
+                JSONObject connJson = new JSONObject(serializedConn);
+                String version = connJson.getString("version");
+                if (!version.equals("2.0")) {
+                    continue;
+                }
+                JSONObject state = connJson.getJSONObject("state");
+                JSONObject invitee = state.getJSONObject("Invitee");
+                JSONObject completed = invitee.getJSONObject("Completed");
+                List<String> recepientKeys = new ArrayList<>();
+                if (completed.has("invitation")) {
+                    JSONObject invitation = completed.getJSONObject("invitation").getJSONObject("OutofbandInvitation");
+                    String invitationRecipientKey = invitation.getJSONArray("service").getJSONObject(0)
+                            .getJSONArray("recipientKeys").getString(0);
+                    recepientKeys.add(invitationRecipientKey);
+                }
+                JSONObject didDoc = completed.getJSONObject("did_doc");
+                String didDocRecipientKey = didDoc.getJSONArray("service").getJSONObject(0)
+                        .getJSONArray("recipientKeys").getString(0);
+                recepientKeys.add(didDocRecipientKey);
+                if (recepientKeys.contains(recipientKey)) {
+                    sameSerializedConn = serializedConn;
+                    break;
+                }
+            }
+            if (type.contains(ARIES_CONNECTION_TYPE)) {
+                // For Aries invite only existence should be checked
+                result.complete(sameSerializedConn != null);
+            } else if (type.contains(ARIES_OUT_OF_BAND_TYPE)) {
+                // Current implementation assume that 'request~attach' array is not presented
+                JSONArray handshakeProtocols = iniviteJson.optJSONArray("handshake_protocols");
+                if (handshakeProtocols == null) {
+                    result.completeExceptionally(new Exception("Invite does not have 'handshake_protocols' entry."));
+                } else if (sameSerializedConn == null) {
+                    // Connection does not exist, could create new connection
+                    result.complete(false);
+                } else {
+                    // Connection already exists and should be reused
+                    try {
+                        ConnectionApi.connectionDeserialize(sameSerializedConn).whenComplete((handle, err) -> {
+                            if (err != null) {
+                                Logger.getInstance().e("Failed to deserialize stored connection: ", err);
+                                result.completeExceptionally(err);
+                            }
+                            try {
+                                ConnectionApi.connectionSendReuse(handle, invitationDetails).whenComplete((res, e) -> {
+                                    if (e != null) {
+                                        Logger.getInstance().e("Failed to reuse connection: ", e);
+                                        result.completeExceptionally(e);
+                                    } else {
+                                        result.complete(true);
+                                    }
+                                });
+                            } catch (VcxException ex) {
+                                result.completeExceptionally(ex);
+                            }
+                        });
+                    } catch (Exception ex) {
+                        result.completeExceptionally(ex);
+                    }
+                }
+            } else {
+                // unsupported invitation type
+                result.completeExceptionally(new Exception("Unsupported invite aries invite type: " + type));
+            }
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
+        }
+    }
+
+    /**
      * Creates new connection from invitation.
      *
      * @param invitationDetails String containing JSON with invitation details.
@@ -120,13 +215,21 @@ public class Connections {
         try {
             JSONObject json = new JSONObject(invitationDetails);
             String invitationId;
-            if (json.has("id")) {
+            String invitationType = null;
+            if (json.has("id")) { //proprietary
                 invitationId = json.getString("id");
-            } else {
+            } else { // aries
                 invitationId = json.getString("@id");
+                invitationType = json.getString("@type");
             }
 
-            ConnectionApi.vcxCreateConnectionWithInvite(invitationId, invitationDetails).whenComplete((handle, err) -> {
+            CompletableFuture<Integer> creationStep;
+            if (invitationType != null && invitationType.contains(ARIES_OUT_OF_BAND_TYPE)) {
+                creationStep = ConnectionApi.vcxCreateConnectionWithOutofbandInvite(invitationId, invitationDetails);
+            } else {
+                creationStep = ConnectionApi.vcxCreateConnectionWithInvite(invitationId, invitationDetails);
+            }
+            creationStep.whenComplete((handle, err) -> {
                 if (err != null) {
                     Logger.getInstance().e("Failed to create connection with invite: ", err);
                     result.completeExceptionally(err);
@@ -134,7 +237,7 @@ public class Connections {
                 Logger.getInstance().i("Received handle: " + handle);
                 try {
                     String connType = connectionType.getConnectionType();
-                    ConnectionApi.vcxAcceptInvitation(handle, connType).whenComplete((invite, t) -> {
+                    ConnectionApi.vcxConnectionConnect(handle, connType).whenComplete((invite, t) -> {
                         if (t != null) {
                             Logger.getInstance().e("Failed to accept invitation: ", t);
                             result.completeExceptionally(t);

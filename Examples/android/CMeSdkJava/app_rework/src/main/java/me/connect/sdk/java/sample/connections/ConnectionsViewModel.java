@@ -66,6 +66,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
             Connections.verifyConnectionExists(parsedInvite, serializedConns)
                     .handle((exists, err) -> {
                         if (err != null) {
+                            err.printStackTrace();
                             liveData.postValue(FAILURE);
                         } else {
                             if (exists) {
@@ -81,6 +82,9 @@ public class ConnectionsViewModel extends AndroidViewModel {
                                                 c.serialized = serializedCon;
                                                 db.connectionDao().insertAll(c);
                                                 loadConnections();
+                                            }
+                                            if (throwable != null) {
+                                                throwable.printStackTrace();
                                             }
                                             liveData.postValue(throwable == null ? SUCCESS : FAILURE);
                                             return res;
