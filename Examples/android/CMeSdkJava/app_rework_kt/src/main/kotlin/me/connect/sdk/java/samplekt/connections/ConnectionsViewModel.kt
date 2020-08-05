@@ -59,7 +59,7 @@ class ConnectionsViewModel(application: Application) : AndroidViewModel(applicat
             )
             db.connectionDao().insertAll(c)
             loadConnections()
-            liveData.postValue(false)
+            liveData.postValue(true)
         } catch (e: Exception) {
             e.printStackTrace()
             liveData.postValue(false)
