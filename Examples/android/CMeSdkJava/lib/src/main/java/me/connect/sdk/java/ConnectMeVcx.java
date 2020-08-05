@@ -75,7 +75,7 @@ public class ConnectMeVcx {
 
         CompletionStage<Void> first;
         if (!configAlreadyExist(config.context)) {
-            first = initOnce(config);
+            first = createOneTimeInfo(config);
         } else {
             first = CompletableFuture.completedStage(null);
         }
@@ -126,42 +126,13 @@ public class ConnectMeVcx {
         }
     }
 
-    private static CompletableFuture<Void> initOnce(Config config) {
+    private static String prepareAgencyConfig(Config config) throws Exception {
         String walletName = config.walletName + "-wallet";
-        String poolName = config.walletName + "-pool";
-        CompletableFuture<Void> result = new CompletableFuture<>();
         File walletDir = new File(Utils.getRootDir(config.context), "indy_client/wallet");
         walletDir.mkdirs();
-
-        String agencyConfig = null;
         String walletPath = walletDir.getAbsolutePath();
-        try {
-            String walletKey = createWalletKey(WALLET_KEY_LENGTH);
-            agencyConfig = AgencyConfig.setConfigParameters(config.agency, walletName, walletKey, walletPath);
-        } catch (JSONException e) {
-            Logger.getInstance().e("Failed to populate agency config", e);
-            result.completeExceptionally(e);
-        }
-        Logger.getInstance().d("agencyConfig is set to: " + agencyConfig);
-
-        createOneTimeInfo(agencyConfig, config.context).whenComplete((oneTimeInfo, throwable) -> {
-            if (throwable != null) {
-                result.completeExceptionally(throwable);
-                return;
-            }
-            Logger.getInstance().d("oneTimeInfo is set to: " + oneTimeInfo);
-
-            File genesisFile = writeGenesisFile(config);
-            try {
-                String vcxConfig = populateConfig(poolName, oneTimeInfo, genesisFile.getAbsolutePath(),
-                        "3.0", "https://robothash.com/logo.png", "real institution name");
-                SecurePreferencesHelper.setLongStringValue(config.context, SECURE_PREF_VCXCONFIG, vcxConfig);
-                result.complete(null);
-            } catch (Exception e) {
-                result.completeExceptionally(e);
-            }
-        });
-        return result;
+        String walletKey = createWalletKey(WALLET_KEY_LENGTH);
+        return AgencyConfig.setConfigParameters(config.agency, walletName, walletKey, walletPath);
     }
 
     private static String populateConfig(String poolName, String oneTimeInfo, String genesisFilePath,
@@ -219,23 +190,31 @@ public class ConnectMeVcx {
         return Base64.encodeToString(bytes, Base64.NO_WRAP);
     }
 
-    private static CompletableFuture<String> createOneTimeInfo(String agencyConfig, Context context) {
-        CompletableFuture<String> result = new CompletableFuture<>();
-        Logger.getInstance().d("createOneTimeInfo() called with: agencyConfig = [" + agencyConfig + "]");
+    private static CompletableFuture<Void> createOneTimeInfo(Config config) {
+        CompletableFuture<Void> result = new CompletableFuture<>();
         // We have top create thew ca cert for the openssl to work properly on android
-        Utils.writeCACert(context);
+        Utils.writeCACert(config.context);
         try {
-            UtilsApi.vcxAgentProvisionAsync(agencyConfig).whenComplete((res, err) -> {
+            String agencyConfig = prepareAgencyConfig(config);
+            UtilsApi.vcxAgentProvisionAsync(agencyConfig).whenComplete((oneTimeInfo, err) -> {
                 if (err != null) {
                     Logger.getInstance().e("createOneTimeInfo: ", err);
                     result.completeExceptionally(err);
                 } else {
-                    Logger.getInstance().i("createOneTimeInfo: " + res);
-                    result.complete(res);
+                    Logger.getInstance().i("createOneTimeInfo: " + oneTimeInfo);
+                    try {
+                        File genesisFile = writeGenesisFile(config);
+                        String poolName = config.walletName + "-pool";
+                        String vcxConfig = populateConfig(poolName, oneTimeInfo, genesisFile.getAbsolutePath(),
+                                "3.0", "https://robothash.com/logo.png", "real institution name");
+                        SecurePreferencesHelper.setLongStringValue(config.context, SECURE_PREF_VCXCONFIG, vcxConfig);
+                        result.complete(null);
+                    } catch (Exception e) {
+                        result.completeExceptionally(e);
+                    }
                 }
             });
-        } catch (VcxException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
             result.completeExceptionally(e);
         }
         return result;
