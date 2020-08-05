@@ -86,7 +86,6 @@ public class Connections {
      * @param serializedConnection string containing serialized connection
      * @return string containing serialized connection
      */
-    @ExperimentalWalletBackup
     public static @NonNull
     String awaitStatusChange(@NonNull String serializedConnection, MessageState messageState) {
         Logger.getInstance().i("Awaiting connection state change");
