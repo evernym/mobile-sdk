@@ -4,12 +4,18 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.launch
 import me.connect.sdk.java.samplekt.SingleLiveData
 import me.connect.sdk.java.samplekt.db.Database
 import me.connect.sdk.java.samplekt.db.entity.StructuredMessage
 import me.connect.sdk.java.Messages
 import me.connect.sdk.java.StructuredMessages
 import me.connect.sdk.java.message.MessageType
+import me.connect.sdk.java.samplekt.wrap
+import java.lang.Exception
 import java.util.concurrent.Executors
 
 
@@ -24,11 +30,9 @@ class StructuredMessagesViewModel(application: Application) : AndroidViewModel(a
         return structMessages
     }
 
-    private fun loadStructuredMessages() {
-        Executors.newSingleThreadExecutor().execute {
-            val data = db.structuredMessageDao().getAll()
-            structMessages.postValue(data)
-        }
+    private fun loadStructuredMessages() = viewModelScope.launch(Dispatchers.IO) {
+        val data = db.structuredMessageDao().getAll()
+        structMessages.postValue(data)
     }
 
     fun getNewStructuredMessages(): SingleLiveData<Boolean> {
@@ -37,32 +41,35 @@ class StructuredMessagesViewModel(application: Application) : AndroidViewModel(a
         return data
     }
 
-    private fun checkStructMessages(liveData: SingleLiveData<Boolean>) {
-        Executors.newSingleThreadExecutor().execute {
+    private fun checkStructMessages(liveData: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
+        try {
             val connections = db.connectionDao().getAll()
             connections.forEach { c ->
-                Messages.getPendingMessages(c.serialized, MessageType.QUESTION).handle { res, throwable ->
-                    res?.forEach { msg ->
-                        val holder = StructuredMessages.extract(msg)
-                        if (!db.structuredMessageDao().checkMessageExists(holder.id, c.id)) {
-                            val sm = StructuredMessage(
-                                    connectionId = c.id,
-                                    messageId = msg.uid,
-                                    entryId = holder.id,
-                                    questionText = holder.questionText,
-                                    questionDetail = holder.questionDetail,
-                                    answers = holder.responses,
-                                    serialized = msg.payload
-                            )
-                            db.structuredMessageDao().insertAll(sm)
-                            loadStructuredMessages()
-                        }
+                val res = Messages.getPendingMessages(c.serialized, MessageType.QUESTION).wrap().await()
+                res.forEach { msg ->
+                    val holder = StructuredMessages.extract(msg)
+                    if (!db.structuredMessageDao().checkMessageExists(holder.id, c.id)) {
+                        val sm = StructuredMessage(
+                                connectionId = c.id,
+                                messageId = msg.uid,
+                                entryId = holder.id,
+                                questionText = holder.questionText,
+                                questionDetail = holder.questionDetail,
+                                answers = holder.responses,
+                                serialized = msg.payload
+                        )
+                        db.structuredMessageDao().insertAll(sm)
+                        loadStructuredMessages()
                     }
-                    liveData.postValue(true)
                 }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            liveData.postValue(true)
         }
     }
+
 
     fun answerMessage(messageId: Int, nonce: String): SingleLiveData<Boolean> {
         val data = SingleLiveData<Boolean>()
@@ -70,24 +77,21 @@ class StructuredMessagesViewModel(application: Application) : AndroidViewModel(a
         return data
     }
 
-    private fun answerStructMessage(messageId: Int, nonce: String, liveData: SingleLiveData<Boolean>) {
-        Executors.newSingleThreadExecutor().execute {
+    private fun answerStructMessage(messageId: Int, nonce: String, liveData: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
+        try {
             val sm = db.structuredMessageDao().getById(messageId)
             val con = db.connectionDao().getById(sm.connectionId)
-            StructuredMessages.answer(con.serialized, sm.messageId, nonce).handle { res, err ->
-                if (res != null) {
-                    var sa = ""
-                    for (r in sm.answers) {
-                        if (r.nonce == nonce) {
-                            sa = r.text
-                        }
-                        sm.selectedAnswer = sa
-                        db.structuredMessageDao().update(sm)
-                    }
-                }
-                loadStructuredMessages()
-                liveData.postValue(err == null)
-            }
+            val res = StructuredMessages.answer(con.serialized, sm.messageId, nonce).wrap().await()
+            val sa = sm.answers.first { it.nonce == nonce }.text
+            sm.selectedAnswer = sa
+            db.structuredMessageDao().update(sm)
+            loadStructuredMessages()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            liveData.postValue(true)
         }
     }
+
+
 }

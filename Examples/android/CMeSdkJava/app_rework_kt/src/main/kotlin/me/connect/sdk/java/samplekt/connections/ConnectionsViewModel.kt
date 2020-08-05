@@ -7,15 +7,20 @@ import android.webkit.URLUtil
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.launch
 import me.connect.sdk.java.samplekt.SingleLiveData
 import me.connect.sdk.java.samplekt.db.Database
 import me.connect.sdk.java.samplekt.db.entity.Connection
 import me.connect.sdk.java.Connections
 import me.connect.sdk.java.connection.QRConnection
 import me.connect.sdk.java.message.MessageState
+import me.connect.sdk.java.samplekt.wrap
 import org.json.JSONException
 import org.json.JSONObject
-import java.util.concurrent.Executors
+import java.lang.Exception
 
 
 class ConnectionsViewModel(application: Application) : AndroidViewModel(application) {
@@ -35,31 +40,29 @@ class ConnectionsViewModel(application: Application) : AndroidViewModel(applicat
         return data
     }
 
-    private fun loadConnections() {
-        Executors.newSingleThreadExecutor().execute {
-            val data = db.connectionDao().getAll()
-            connections.postValue(data)
-        }
+    private fun loadConnections() = viewModelScope.launch(Dispatchers.IO) {
+        val data = db.connectionDao().getAll()
+        connections.postValue(data)
     }
 
-    private fun createConnection(invite: String, liveData: SingleLiveData<Boolean>) {
-        Executors.newSingleThreadExecutor().execute {
+
+    private fun createConnection(invite: String, liveData: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
+        try {
             val parsedInvite = parseInvite(invite)
             val data = extractDataFromInvite(parsedInvite)
-            Connections.create(parsedInvite, QRConnection())
-                    .handle { res, throwable ->
-                        if (res != null) {
-                            val serializedCon = Connections.awaitStatusChange(res, MessageState.ACCEPTED)
-                            val c = Connection(
-                                    name = data!!.name,
-                                    icon = data.logo,
-                                    serialized = serializedCon
-                            )
-                            db.connectionDao().insertAll(c)
-                            loadConnections()
-                        }
-                        liveData.postValue(throwable == null)
-                    }
+            val res = Connections.create(parsedInvite, QRConnection()).wrap().await()
+            val serializedCon = Connections.awaitStatusChange(res, MessageState.ACCEPTED)
+            val c = Connection(
+                    name = data!!.name,
+                    icon = data.logo,
+                    serialized = serializedCon
+            )
+            db.connectionDao().insertAll(c)
+            loadConnections()
+            liveData.postValue(false)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            liveData.postValue(false)
         }
     }
 

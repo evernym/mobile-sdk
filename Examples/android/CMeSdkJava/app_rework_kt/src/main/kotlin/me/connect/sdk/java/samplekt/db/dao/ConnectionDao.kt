@@ -9,17 +9,17 @@ import me.connect.sdk.java.samplekt.db.entity.Connection
 @Dao
 interface ConnectionDao {
     @Query("SELECT * FROM connection")
-    fun getAll(): List<Connection>
+    suspend fun getAll(): List<Connection>
 
     @Query("SELECT * FROM connection WHERE id = :id")
-    fun getById(id: Int): Connection
+    suspend fun getById(id: Int): Connection
 
     @Insert
-    fun insertAll(vararg connections: Connection)
+    suspend fun insertAll(vararg connections: Connection)
 
     @Update
-    fun update(connection: Connection)
+    suspend fun update(connection: Connection)
 
     @Delete
-    fun delete(connection: Connection)
+    suspend fun delete(connection: Connection)
 }
