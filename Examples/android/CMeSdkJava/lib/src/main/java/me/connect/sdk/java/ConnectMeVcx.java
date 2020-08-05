@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.security.SecureRandom;
 
 import java9.util.concurrent.CompletableFuture;
+import java9.util.concurrent.CompletionStage;
 import pl.brightinventions.slf4android.FileLogHandlerConfiguration;
 import pl.brightinventions.slf4android.LogLevel;
 import pl.brightinventions.slf4android.LoggerConfiguration;
@@ -62,54 +63,39 @@ public class ConnectMeVcx {
      */
     public static @NonNull
     CompletableFuture<Void> init(Config config) {
-        configureLogLevel(config.logLevel);
-        Logger.getInstance().i("Initializing ConnectMeVcx");
+        Logger.getInstance().setLogLevel(config.logLevel);
+        Logger.getInstance().i("Initializing SDK");
         CompletableFuture<Void> result = new CompletableFuture<>();
         Exception error = validate(config);
         if (error != null) {
             result.completeExceptionally(error);
             return result;
         }
-        try {
-            Os.setenv("EXTERNAL_STORAGE", Utils.getRootDir(config.context), true);
-        } catch (ErrnoException e) {
-            Logger.getInstance().e("Failed to set environment variable storage", e);
+        configureLoggerAndFiles(config);
+
+        CompletionStage<Void> first;
+        if (!configAlreadyExist(config.context)) {
+            first = initOnce(config);
+        } else {
+            first = CompletableFuture.completedStage(null);
         }
 
-        Utils.makeRootDir(config.context);
-        // NOTE: api.vcx_set_logger is already initialized by com.evernym.sdk.vcx.LibVcx
-        String logFilePath = setVcxLogger(config.logMaxSize, config.context);
-
-        Logger.getInstance().d("the log file path is: " + logFilePath);
-
-        String wName = config.walletName + "-wallet";
-        String poolName = config.walletName + "-pool";
-        createWalletKey(WALLET_KEY_LENGTH).handle((walletKey, err) -> {
-            if (err != null) {
-                result.completeExceptionally(err);
-                return null;
+        first.whenComplete((res, ex) -> {
+            if (ex != null) {
+                result.completeExceptionally(ex);
+                return;
             }
-            Logger.getInstance().d("wallet key value is: " + walletKey);
-            initWithConfig(wName, walletKey, poolName, config).handle((aVoid, t) -> {
-                if (t != null) {
-                    result.completeExceptionally(t);
+            initialize(config.context).whenComplete((returnCode, err) -> {
+                if (err != null) {
+                    Logger.getInstance().e("Init failed", err);
+                    result.completeExceptionally(err);
                 } else {
+                    Logger.getInstance().i("Init completed");
                     result.complete(null);
                 }
-                return null;
             });
-            return null;
         });
-
         return result;
-    }
-
-    private static void configureLogLevel(LogLevel logLevel) {
-        Logger.getInstance().setLogLevel(logLevel);
-        for (String name : VCX_LOGGER_NAMES) {
-            LoggerFactory.getLogger(name);
-            LoggerConfiguration.configuration().setLogLevel(name, logLevel);
-        }
     }
 
     private static Exception validate(Config config) {
@@ -125,7 +111,24 @@ public class ConnectMeVcx {
         return null;
     }
 
-    private static CompletableFuture<Void> initWithConfig(String walletName, String walletKey, String poolName, Config config) {
+    private static void configureLoggerAndFiles(Config config) {
+        Logger.getInstance().i("Configuring logger and file storage");
+        for (String name : VCX_LOGGER_NAMES) {
+            LoggerFactory.getLogger(name);
+            LoggerConfiguration.configuration().setLogLevel(name, config.logLevel);
+        }
+        Utils.makeRootDir(config.context);
+        setVcxLogger(config.logMaxSize, config.context);
+        try {
+            Os.setenv("EXTERNAL_STORAGE", Utils.getRootDir(config.context), true);
+        } catch (ErrnoException e) {
+            Logger.getInstance().e("Failed to set environment variable storage", e);
+        }
+    }
+
+    private static CompletableFuture<Void> initOnce(Config config) {
+        String walletName = config.walletName + "-wallet";
+        String poolName = config.walletName + "-pool";
         CompletableFuture<Void> result = new CompletableFuture<>();
         File walletDir = new File(Utils.getRootDir(config.context), "indy_client/wallet");
         walletDir.mkdirs();
@@ -133,6 +136,7 @@ public class ConnectMeVcx {
         String agencyConfig = null;
         String walletPath = walletDir.getAbsolutePath();
         try {
+            String walletKey = createWalletKey(WALLET_KEY_LENGTH);
             agencyConfig = AgencyConfig.setConfigParameters(config.agency, walletName, walletKey, walletPath);
         } catch (JSONException e) {
             Logger.getInstance().e("Failed to populate agency config", e);
@@ -140,78 +144,64 @@ public class ConnectMeVcx {
         }
         Logger.getInstance().d("agencyConfig is set to: " + agencyConfig);
 
-        createOneTimeInfo(agencyConfig, config.context).handle((oneTimeInfo, throwable) -> {
+        createOneTimeInfo(agencyConfig, config.context).whenComplete((oneTimeInfo, throwable) -> {
             if (throwable != null) {
                 result.completeExceptionally(throwable);
-                return null;
+                return;
             }
             Logger.getInstance().d("oneTimeInfo is set to: " + oneTimeInfo);
 
-            String vcxConfig = null;
-            if (oneTimeInfo == null) {
-                if (SecurePreferencesHelper.containsLongStringValue(config.context, SECURE_PREF_VCXCONFIG)) {
-                    Logger.getInstance().d("found vcxConfig at key me.connect.vcxConfig");
-                    vcxConfig = SecurePreferencesHelper.getLongStringValue(config.context, SECURE_PREF_VCXCONFIG, null);
-                } else {
-                    throw new RuntimeException("oneTimeInfo is null AND the key me.connect.vcxConfig is empty!!");
-                }
-            } else {
-                File genesisFilePath = new File(Utils.getRootDir(config.context), "pool_transactions_genesis");
-                if (!genesisFilePath.exists()) {
-                    try (FileOutputStream stream = new FileOutputStream(genesisFilePath)) {
-                        Logger.getInstance().d("writing poolTxnGenesis to file: " + genesisFilePath.getAbsolutePath());
-                        if (config.genesisPool != null) {
-                            stream.write(config.genesisPool.getBytes());
-                        } else if (config.genesisPoolResId != null) {
-                            try (InputStream genesisStream = config.context.getResources().openRawResource(config.genesisPoolResId)) {
-                                byte[] buffer = new byte[8 * 1024];
-                                int bytesRead;
-                                while ((bytesRead = genesisStream.read(buffer)) != -1) {
-                                    stream.write(buffer, 0, bytesRead);
-                                }
-                            }
-                        }
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-                try {
-                    JSONObject json = new JSONObject(oneTimeInfo);
-                    json.put("genesis_path", genesisFilePath.getAbsolutePath());
-                    json.put("institution_logo_url", "https://robothash.com/logo.png");
-                    json.put("institution_name", "real institution name");
-                    json.put("pool_name", poolName);
-                    json.put("protocol_version", "2");
-                    json.put("protocol_type", "3.0");
-                    vcxConfig = json.toString();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                Logger.getInstance().d("stored vcxConfig to key me.connect.vcxConfig: " + vcxConfig);
+            File genesisFile = writeGenesisFile(config);
+            try {
+                String vcxConfig = populateConfig(poolName, oneTimeInfo, genesisFile.getAbsolutePath(),
+                        "3.0", "https://robothash.com/logo.png", "real institution name");
                 SecurePreferencesHelper.setLongStringValue(config.context, SECURE_PREF_VCXCONFIG, vcxConfig);
-            }
-
-            Logger.getInstance().d("vcxConfig is set to: " + vcxConfig);
-            if (vcxConfig == null) {
-                throw new RuntimeException("vcxConfig is null and this is  not allowed!");
-            }
-
-            // invoke initWithConfig
-            init(vcxConfig, config.context).handle((returnCode, err) -> {
-                if (err != null) {
-                    result.completeExceptionally(err);
-                    return null;
-                }
-                Logger.getInstance().e("init with config return code is: " + returnCode);
                 result.complete(null);
-                return null;
-            });
-            return null;
+            } catch (Exception e) {
+                result.completeExceptionally(e);
+            }
         });
         return result;
     }
 
+    private static String populateConfig(String poolName, String oneTimeInfo, String genesisFilePath,
+                                         String protocolType, String logoUrl, String name) throws JSONException {
+        JSONObject json = new JSONObject(oneTimeInfo);
+        json.put("genesis_path", genesisFilePath);
+        json.put("institution_logo_url", logoUrl);
+        json.put("institution_name", name);
+        json.put("pool_name", poolName);
+        json.put("protocol_version", "2");
+        json.put("protocol_type", protocolType);
+        return json.toString();
+    }
+
+    private static File writeGenesisFile(Config config) {
+        File genesisFile = new File(Utils.getRootDir(config.context), "pool_transactions_genesis");
+        if (!genesisFile.exists()) {
+            try (FileOutputStream stream = new FileOutputStream(genesisFile)) {
+                Logger.getInstance().d("writing poolTxnGenesis to file: " + genesisFile.getAbsolutePath());
+                if (config.genesisPool != null) {
+                    stream.write(config.genesisPool.getBytes());
+                } else if (config.genesisPoolResId != null) {
+                    try (InputStream genesisStream = config.context.getResources().openRawResource(config.genesisPoolResId)) {
+                        byte[] buffer = new byte[8 * 1024];
+                        int bytesRead;
+                        while ((bytesRead = genesisStream.read(buffer)) != -1) {
+                            stream.write(buffer, 0, bytesRead);
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return genesisFile;
+    }
+
+    private static boolean configAlreadyExist(Context context) {
+        return SecurePreferencesHelper.containsLongStringValue(context, SECURE_PREF_VCXCONFIG);
+    }
 
     public void shutdownVcx(Boolean deleteWallet) {
         Logger.getInstance().d(" ==> shutdownVcx() called with: deleteWallet = [" + deleteWallet);
@@ -222,19 +212,11 @@ public class ConnectMeVcx {
         }
     }
 
-    private static CompletableFuture<String> createWalletKey(int lengthOfKey) {
-        CompletableFuture<String> result = new CompletableFuture<>();
-        try {
-            SecureRandom random = new SecureRandom();
-            byte[] bytes = new byte[lengthOfKey];
-            random.nextBytes(bytes);
-            String key = Base64.encodeToString(bytes, Base64.NO_WRAP);
-            result.complete(key);
-        } catch (Exception e) {
-            Logger.getInstance().e("createWalletKey: ", e);
-            result.completeExceptionally(e);
-        }
-        return result;
+    private static String createWalletKey(int lengthOfKey) {
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[lengthOfKey];
+        random.nextBytes(bytes);
+        return Base64.encodeToString(bytes, Base64.NO_WRAP);
     }
 
     private static CompletableFuture<String> createOneTimeInfo(String agencyConfig, Context context) {
@@ -242,19 +224,16 @@ public class ConnectMeVcx {
         Logger.getInstance().d("createOneTimeInfo() called with: agencyConfig = [" + agencyConfig + "]");
         // We have top create thew ca cert for the openssl to work properly on android
         Utils.writeCACert(context);
-
         try {
-            UtilsApi.vcxAgentProvisionAsync(agencyConfig)
-                    .handle((res, err) -> {
-                        if (err != null) {
-                            Logger.getInstance().e("createOneTimeInfo: ", err);
-                            result.complete(null); // todo check
-                        } else {
-                            Logger.getInstance().i("createOneTimeInfo: " + res);
-                            result.complete(res);
-                        }
-                        return null;
-                    });
+            UtilsApi.vcxAgentProvisionAsync(agencyConfig).whenComplete((res, err) -> {
+                if (err != null) {
+                    Logger.getInstance().e("createOneTimeInfo: ", err);
+                    result.completeExceptionally(err);
+                } else {
+                    Logger.getInstance().i("createOneTimeInfo: " + res);
+                    result.complete(res);
+                }
+            });
         } catch (VcxException e) {
             e.printStackTrace();
             result.completeExceptionally(e);
@@ -262,29 +241,26 @@ public class ConnectMeVcx {
         return result;
     }
 
-    private static CompletableFuture<Void> init(String config, Context context) {
+    private static CompletableFuture<Void> initialize(Context context) {
         CompletableFuture<Void> result = new CompletableFuture<>();
-        Logger.getInstance().d(" ==> init() called with: config = [" + config + "]");
         // When we restore data, then we are not calling createOneTimeInfo
         // and hence ca-crt is not written within app directory
         // since the logic to write ca cert checks for file existence
         // we won't have to pay too much cost for calling this function inside init
         Utils.writeCACert(context);
-
         try {
             int retCode = VcxApi.initSovToken();
             if (retCode != 0) {
                 result.completeExceptionally(new Exception("Could not init: " + retCode));
             } else {
-                VcxApi.vcxInitWithConfig(config)
-                        .handle((integer, err) -> {
-                            if (err != null) {
-                                result.completeExceptionally(err);
-                            } else {
-                                result.complete(null);
-                            }
-                            return null;
-                        });
+                String config = SecurePreferencesHelper.getLongStringValue(context, SECURE_PREF_VCXCONFIG, null);
+                VcxApi.vcxInitWithConfig(config).whenComplete((integer, err) -> {
+                    if (err != null) {
+                        result.completeExceptionally(err);
+                    } else {
+                        result.complete(null);
+                    }
+                });
             }
         } catch (AlreadyInitializedException e) {
             // even if we get already initialized exception
@@ -299,12 +275,11 @@ public class ConnectMeVcx {
     }
 
 
-    private static String setVcxLogger(int maxFileSizeBytes, Context context) {
+    private static void setVcxLogger(int maxFileSizeBytes, Context context) {
         File logFile = new File(Utils.getRootDir(context), "me.connect.rotating.log");
         String logFilePath = logFile.getAbsolutePath();
         Logger.getInstance().d("Setting vcx logger to: " + logFilePath);
         initLoggerFile(context, logFilePath, maxFileSizeBytes);
-        return logFilePath;
     }
 
     private static void initLoggerFile(final Context context, String logFilePath, int maxFileSizeBytes) {
