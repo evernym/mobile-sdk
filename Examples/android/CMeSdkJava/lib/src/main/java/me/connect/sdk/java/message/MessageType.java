@@ -11,7 +11,7 @@ public enum MessageType {
     PROOF_REQUEST,
     QUESTION;
 
-    private static final List<String> CREDENTIAL_OFFER_VALUES = Arrays.asList("credOffer", "CRED_OFFER", "credential-offer", "CRED");
+    private static final List<String> CREDENTIAL_OFFER_VALUES = Arrays.asList("credOffer", "CRED_OFFER", "credential-offer");
     private static final List<String> PROOF_REQUEST_VALUES = Arrays.asList("proofReq", "PROOF_REQUEST", "presentation-request");
     private static final List<String> QUESTION_VALUES = Arrays.asList("Question", "QUESTION");
 
