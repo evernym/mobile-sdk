@@ -15,6 +15,9 @@ public interface ConnectionDao {
     @Query("SELECT * FROM connection")
     List<Connection> getAll();
 
+    @Query("SELECT serialized FROM connection")
+    List<String> getAllSerializedConnections();
+
     @Query("SELECT * FROM connection WHERE id = :id")
     Connection getById(int id);
 

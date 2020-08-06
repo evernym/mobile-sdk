@@ -80,8 +80,19 @@ public class ConnectionsFragment extends Fragment {
         binding.buttonAddConnection.setEnabled(false);
         binding.buttonQr.setEnabled(false);
         model.newConnection(invite).observeOnce(getViewLifecycleOwner(), status -> {
-            Toast.makeText(getActivity(), "New connection processed", Toast.LENGTH_SHORT).show();
-            if (status) {
+            String msg;
+            switch (status) {
+                case SUCCESS:
+                    msg = "Connection created";
+                    break;
+                case REDIRECT:
+                    msg = "Connection redirected";
+                    break;
+                default:
+                    msg = "Connection failed";
+            }
+            Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
+            if (status != ConnectionCreateResult.FAILURE) {
                 binding.editTextConnection.setText(null);
             }
             binding.buttonAddConnection.setEnabled(true);
