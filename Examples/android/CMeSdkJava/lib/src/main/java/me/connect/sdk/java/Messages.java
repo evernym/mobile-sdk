@@ -3,6 +3,8 @@ package me.connect.sdk.java;
 
 import androidx.annotation.NonNull;
 
+import com.evernym.sdk.vcx.VcxException;
+import com.evernym.sdk.vcx.connection.ConnectionApi;
 import com.evernym.sdk.vcx.utils.UtilsApi;
 
 import org.json.JSONArray;
@@ -39,36 +41,59 @@ public class Messages {
         Logger.getInstance().i("Retrieving pending messages");
         CompletableFuture<List<Message>> result = new CompletableFuture<>();
         try {
-            String pwDid = new JSONObject(serializedConnection).getJSONObject("data").getString("pw_did");
-            UtilsApi.vcxGetMessages(MessageStatusType.PENDING, null, pwDid).whenComplete((messagesString, err) -> {
-                if (err != null) {
-                    Logger.getInstance().e("Failed to retrieve messages: ", err);
-                    result.completeExceptionally(err);
+            ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((handle, er) -> {
+                if (er != null) {
+                    Logger.getInstance().e("Failed to deserialize connection: ", er);
+                    result.completeExceptionally(er);
                     return;
                 }
                 try {
-                    List<Message> messages = new ArrayList<>();
-                    JSONArray messagesJson = new JSONArray(messagesString);
-                    for (int i = 0; i < messagesJson.length(); i++) {
-                        JSONArray msgsJson = messagesJson.getJSONObject(i).optJSONArray("msgs");
-                        if (msgsJson != null) {
-                            for (int j = 0; j < msgsJson.length(); j++) {
-                                JSONObject message = msgsJson.getJSONObject(j);
-                                JSONObject payload = new JSONObject(message.getString("decryptedPayload"));
-                                String type = payload.getJSONObject("@type").getString("name");
-                                if (messageType.matches(type)) {
-                                    String messageUid = message.getString("uid");
-                                    String msg = payload.getString("@msg");
-                                    messages.add(new Message(messageUid, msg));
-                                }
-                            }
+                    ConnectionApi.connectionGetPwDid(handle).whenComplete((pwDid, e) -> {
+                        if (e != null) {
+                            Logger.getInstance().e("Failed to get pwDid: ", e);
+                            result.completeExceptionally(e);
+                            return;
                         }
-                    }
-                    result.complete(messages);
-                } catch (JSONException ex) {
+                        try {
+                            UtilsApi.vcxGetMessages(MessageStatusType.PENDING, null, pwDid).whenComplete((messagesString, err) -> {
+                                if (err != null) {
+                                    Logger.getInstance().e("Failed to retrieve messages: ", err);
+                                    result.completeExceptionally(err);
+                                    return;
+                                }
+                                try {
+                                    List<Message> messages = new ArrayList<>();
+                                    JSONArray messagesJson = new JSONArray(messagesString);
+                                    for (int i = 0; i < messagesJson.length(); i++) {
+                                        JSONArray msgsJson = messagesJson.getJSONObject(i).optJSONArray("msgs");
+                                        if (msgsJson != null) {
+                                            for (int j = 0; j < msgsJson.length(); j++) {
+                                                JSONObject message = msgsJson.getJSONObject(j);
+                                                JSONObject payload = new JSONObject(message.getString("decryptedPayload"));
+                                                String type = payload.getJSONObject("@type").getString("name");
+                                                if (messageType.matches(type)) {
+                                                    String messageUid = message.getString("uid");
+                                                    String msg = payload.getString("@msg");
+                                                    messages.add(new Message(messageUid, msg));
+                                                }
+                                            }
+                                        }
+                                    }
+                                    result.complete(messages);
+                                } catch (JSONException ex) {
+                                    result.completeExceptionally(ex);
+                                }
+                            });
+                        } catch (VcxException ex) {
+                            ex.printStackTrace();
+                        }
+                    });
+                } catch (Exception ex) {
                     result.completeExceptionally(ex);
                 }
             });
+
+
         } catch (Exception ex) {
             result.completeExceptionally(ex);
         }
