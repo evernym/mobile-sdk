@@ -11,6 +11,9 @@ interface ConnectionDao {
     @Query("SELECT * FROM connection")
     suspend fun getAll(): List<Connection>
 
+    @Query("SELECT serialized FROM connection")
+    suspend fun getAllSerializedConnections(): List<String>
+
     @Query("SELECT * FROM connection WHERE id = :id")
     suspend fun getById(id: Int): Connection
 

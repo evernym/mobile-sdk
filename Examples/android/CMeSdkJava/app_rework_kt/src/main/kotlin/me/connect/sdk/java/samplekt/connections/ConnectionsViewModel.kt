@@ -17,6 +17,7 @@ import me.connect.sdk.java.samplekt.db.entity.Connection
 import me.connect.sdk.java.Connections
 import me.connect.sdk.java.connection.QRConnection
 import me.connect.sdk.java.message.MessageState
+import me.connect.sdk.java.samplekt.connections.ConnectionCreateResult.*
 import me.connect.sdk.java.samplekt.wrap
 import org.json.JSONException
 import org.json.JSONObject
@@ -34,8 +35,8 @@ class ConnectionsViewModel(application: Application) : AndroidViewModel(applicat
         return connections
     }
 
-    fun newConnection(invite: String): SingleLiveData<Boolean> {
-        val data = SingleLiveData<Boolean>()
+    fun newConnection(invite: String): SingleLiveData<ConnectionCreateResult> {
+        val data = SingleLiveData<ConnectionCreateResult>()
         createConnection(invite, data)
         return data
     }
@@ -46,10 +47,16 @@ class ConnectionsViewModel(application: Application) : AndroidViewModel(applicat
     }
 
 
-    private fun createConnection(invite: String, liveData: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
+    private fun createConnection(invite: String, liveData: SingleLiveData<ConnectionCreateResult>) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val parsedInvite = parseInvite(invite)
             val data = extractDataFromInvite(parsedInvite)
+            val serializedConnections = db.connectionDao().getAllSerializedConnections();
+            val exists = Connections.verifyConnectionExists(parsedInvite, serializedConnections).wrap().await()
+            if (exists) {
+                liveData.postValue(REDIRECT)
+                return@launch
+            }
             val res = Connections.create(parsedInvite, QRConnection()).wrap().await()
             val serializedCon = Connections.awaitStatusChange(res, MessageState.ACCEPTED)
             val c = Connection(
@@ -59,10 +66,10 @@ class ConnectionsViewModel(application: Application) : AndroidViewModel(applicat
             )
             db.connectionDao().insertAll(c)
             loadConnections()
-            liveData.postValue(true)
+            liveData.postValue(SUCCESS)
         } catch (e: Exception) {
             e.printStackTrace()
-            liveData.postValue(false)
+            liveData.postValue(FAILURE)
         }
     }
 
@@ -83,7 +90,8 @@ class ConnectionsViewModel(application: Application) : AndroidViewModel(applicat
             val json = JSONObject(invite)
             if (json.has("label")) {
                 val label = json.getString("label")
-                return ConnDataHolder(label, null)
+                val logo = if (json.has("profileUrl")) json.getString("profileUrl") else null
+                return ConnDataHolder(label, logo)
             }
             val data = json.optJSONObject("s")
             if (data != null) {
