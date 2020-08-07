@@ -117,7 +117,11 @@ public class ConnectionsViewModel extends AndroidViewModel {
             JSONObject json = new JSONObject(invite);
             if (json.has("label")) {
                 String label = json.getString("label");
-                return new ConnDataHolder(label, null);
+                String logo = null;
+                if (json.has("profileUrl")) {
+                    logo = json.getString("profileUrl");
+                }
+                return new ConnDataHolder(label, logo);
             }
             JSONObject data = json.optJSONObject("s");
             if (data != null) {

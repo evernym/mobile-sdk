@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.zxing.integration.android.IntentIntegrator
+import me.connect.sdk.java.samplekt.connections.ConnectionCreateResult.*
 import me.connect.sdk.java.samplekt.db.entity.Connection
 import me.connect.sdk.java.samplekt.databinding.ConnectionsFragmentBinding
 
@@ -20,7 +21,7 @@ class ConnectionsFragment : Fragment() {
     private val model: ConnectionsViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                               savedInstanceState: Bundle?): View {
+                              savedInstanceState: Bundle?): View {
         binding = ConnectionsFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -61,11 +62,16 @@ class ConnectionsFragment : Fragment() {
     private fun performNewConnection(invite: String) {
         binding.buttonAddConnection.isEnabled = false
         binding.buttonQr.isEnabled = false
-        model.newConnection(invite).observeOnce(viewLifecycleOwner, Observer { status: Boolean ->
-            Toast.makeText(activity, "New connection processed", Toast.LENGTH_SHORT).show()
-            if (status) {
+        model.newConnection(invite).observeOnce(viewLifecycleOwner, Observer { status ->
+            val msg = when (status) {
+                SUCCESS -> "Connection created"
+                REDIRECT -> "Connection redirected"
+                FAILURE -> "Connection failed"
+            }
+            if (status != FAILURE) {
                 binding.editTextConnection.text = null
             }
+            Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
             binding.buttonAddConnection.isEnabled = true
             binding.buttonQr.isEnabled = true
         })
