@@ -2,8 +2,24 @@
 
 # Connect.Me Mobile SDK
 
-Welcome to the Connect.Me Mobile SDK!
+## Introduction
+The tools in this repository will help you to build mobile identity agents to hold verifiable credentials in a self sovereign identity ecosystem. These identity agents will be compatible with standards such as:
+* [Trust Over IP](https://trustoverip.org/)
+* [Hyperledger Aries](https://www.hyperledger.org/use/aries)
+* [DIDComm](https://identity.foundation/working-groups/did-comm.html)
+* [W3C Verifiable Credentials](https://www.w3.org/2017/vc/WG/) (UNDER DEVELOPMENT)
+* [W3C Decentralized Identifiers](https://w3c.github.io/did-core/) (UNDER DEVELOPMENT)
 
+These tools depend on the Evernym Consumer Agency SaaS service to act as a communication mediator in the cloud which provides a persistent address for communication and herd anonymity. Access to the Consumer Agency is provided to Evernym customers (see the section "[Getting Help](#getting-help)").
+
+
+## Getting Help
+This SDK is currently in "Beta" status.
+
+Evernym provides commercial support to customers. If you would like help from Evernym, please [contact us](https://www.evernym.com/our-team/#contact).
+
+
+## Getting Started
 Connecting and exchanging encrypted data between an Agency (server side) and an Edge Client (mobile application) consists of several steps and is supported by a secured, encrypted protocol library (VCX). 
 
 After project setup and adding dependency libraries, perform the the following steps: 
@@ -25,6 +41,7 @@ After project setup and adding dependency libraries, perform the the following s
     - No problem! Just do this. -->
 
 ### Helpful links
+- [VCX Errors](VcxErrors.md) &#8212; The list of all possible VCX errors and their definitions. 
 - <a href="https://github.com/evernym/mobile-starter" target="_blank">Mobile Starter Kit</a> &#8212; Current repo of mobile starter kit
 - <a href="https://drive.google.com/drive/folders/1-ySuVqU7q79jG2epoVJH4bFU1CqWVGnR?usp=sharing" target="_blank">
     Starter files</a> &#8212; Current location of AAR and Cocoapods
@@ -32,3 +49,4 @@ After project setup and adding dependency libraries, perform the the following s
     Old SDK docs</a>
 - <a href=" https://docs.google.com/document/d/1HAa27qArYlU0NO1VbEjA8ANXmVHl-b7fxa40e21I5L8/edit" target="_blank">
     Connector App</a> &#8212; Helpful resource to see how an older version of Connect.Me works
+
