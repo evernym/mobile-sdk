@@ -22,6 +22,9 @@
 		AA9291672487C52200CE2F64 /* CMConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = AA9291602487C52200CE2F64 /* CMConfig.m */; };
 		AA9291682487C52200CE2F64 /* ProductionPoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = AA9291612487C52200CE2F64 /* ProductionPoolTxnGenesis.m */; };
 		AA9291692487C52200CE2F64 /* CMConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = AA9291642487C52200CE2F64 /* CMConnection.m */; };
+		AAFB4A7B24F6739000FDE5D9 /* CMMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = AAFB4A7524F6738F00FDE5D9 /* CMMessage.m */; };
+		AAFB4A7C24F6739000FDE5D9 /* CMCredential.m in Sources */ = {isa = PBXBuildFile; fileRef = AAFB4A7624F6739000FDE5D9 /* CMCredential.m */; };
+		AAFB4A7D24F6739000FDE5D9 /* CMProofRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = AAFB4A7A24F6739000FDE5D9 /* CMProofRequest.m */; };
 		AB0E017E326DF6040A2D2938 /* libPods-CMeSdkObjc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7B1AE519C579F0EB1F4FAF /* libPods-CMeSdkObjc.a */; };
 		AC4C0D60BB16B78C375EAD06 /* libPods-CMeSdkObjcTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61C99F1A9B6A05EC1B7E5A1A /* libPods-CMeSdkObjcTests.a */; };
 /* End PBXBuildFile section */
@@ -78,6 +81,12 @@
 		AA9291632487C52200CE2F64 /* CMUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMUtilities.h; sourceTree = "<group>"; };
 		AA9291642487C52200CE2F64 /* CMConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMConnection.m; sourceTree = "<group>"; };
 		AA9291652487C52200CE2F64 /* CMConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMConfig.h; sourceTree = "<group>"; };
+		AAFB4A7524F6738F00FDE5D9 /* CMMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMMessage.m; sourceTree = "<group>"; };
+		AAFB4A7624F6739000FDE5D9 /* CMCredential.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMCredential.m; sourceTree = "<group>"; };
+		AAFB4A7724F6739000FDE5D9 /* CMMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMMessage.h; sourceTree = "<group>"; };
+		AAFB4A7824F6739000FDE5D9 /* CMCredential.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMCredential.h; sourceTree = "<group>"; };
+		AAFB4A7924F6739000FDE5D9 /* CMProofRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMProofRequest.h; sourceTree = "<group>"; };
+		AAFB4A7A24F6739000FDE5D9 /* CMProofRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMProofRequest.m; sourceTree = "<group>"; };
 		B302B7F5FAC0C1E964B66ED4 /* Pods-CMeSdkObjcTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjcTests/Pods-CMeSdkObjcTests.release.xcconfig"; sourceTree = "<group>"; };
 		E1200BCCD8ACD48971467097 /* Pods-CMeSdkObjc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjc.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjc/Pods-CMeSdkObjc.debug.xcconfig"; sourceTree = "<group>"; };
 		F18B0531CD0E6287F0DEFD61 /* Pods-CMeSdkObjc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjc.release.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjc/Pods-CMeSdkObjc.release.xcconfig"; sourceTree = "<group>"; };
@@ -175,6 +184,12 @@
 		AA92915D2487C4EF00CE2F64 /* VCXHelpers */ = {
 			isa = PBXGroup;
 			children = (
+				AAFB4A7824F6739000FDE5D9 /* CMCredential.h */,
+				AAFB4A7624F6739000FDE5D9 /* CMCredential.m */,
+				AAFB4A7724F6739000FDE5D9 /* CMMessage.h */,
+				AAFB4A7524F6738F00FDE5D9 /* CMMessage.m */,
+				AAFB4A7924F6739000FDE5D9 /* CMProofRequest.h */,
+				AAFB4A7A24F6739000FDE5D9 /* CMProofRequest.m */,
 				AA9291652487C52200CE2F64 /* CMConfig.h */,
 				AA9291602487C52200CE2F64 /* CMConfig.m */,
 				AA92915E2487C52200CE2F64 /* CMConnection.h */,
@@ -436,9 +451,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AAFB4A7C24F6739000FDE5D9 /* CMCredential.m in Sources */,
 				8E509FE92281EFC60098812A /* ViewController.m in Sources */,
 				AA9291692487C52200CE2F64 /* CMConnection.m in Sources */,
 				AA9291682487C52200CE2F64 /* ProductionPoolTxnGenesis.m in Sources */,
+				AAFB4A7D24F6739000FDE5D9 /* CMProofRequest.m in Sources */,
+				AAFB4A7B24F6739000FDE5D9 /* CMMessage.m in Sources */,
 				AA9291662487C52200CE2F64 /* CMUtilities.m in Sources */,
 				8E13456322A040C800B6DE1F /* PoolTxnGenesis.m in Sources */,
 				8E509FF42281EFC80098812A /* main.m in Sources */,

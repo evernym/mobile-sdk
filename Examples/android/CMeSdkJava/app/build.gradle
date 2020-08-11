@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "me.connect.sdk.java"
+        applicationId "me.connect.sdk.java.sample"
         minSdkVersion 23
         targetSdkVersion 28
         versionCode 1
@@ -32,13 +32,10 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'com.evernym:vcx:0.2.44181735-7986c43@aar'
+    implementation project(":lib")
     implementation 'com.google.firebase:firebase-core:16.0.9'
     implementation 'com.google.firebase:firebase-messaging:18.0.0'
-    implementation 'net.sourceforge.streamsupport:android-retrofuture:1.7.1'
-    implementation 'net.sourceforge.streamsupport:android-retrostreams:1.7.1'
     implementation 'com.getkeepsafe.relinker:relinker:1.3.1@aar'
-    implementation 'de.adorsys.android:securestoragelibrary:1.1.0'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
