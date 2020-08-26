@@ -1,4 +1,4 @@
-package me.connect.sdk.java.sample.ui.main;
+package me.connect.sdk.java.sample;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
+import me.connect.sdk.java.sample.backups.BackupsFragment;
 import me.connect.sdk.java.sample.connections.ConnectionsFragment;
 import me.connect.sdk.java.sample.credentials.CredentialOffersFragment;
 import me.connect.sdk.java.sample.proofs.ProofRequestsFragment;
@@ -29,7 +30,7 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
             case 3:
                 return StructuredMessagesFragment.newInstance();
             case 4:
-                return WalletBackupsFragment.newInstance();
+                return BackupsFragment.newInstance();
             default:
                 return null;
         }

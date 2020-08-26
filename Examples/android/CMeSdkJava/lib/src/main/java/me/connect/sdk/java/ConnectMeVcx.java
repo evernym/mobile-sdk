@@ -127,7 +127,7 @@ public class ConnectMeVcx {
     }
 
     private static String prepareAgencyConfig(Config config) throws Exception {
-        String walletName = config.walletName + "-wallet";
+        String walletName = Utils.makeWalletName(config.walletName);
         File walletDir = new File(Utils.getRootDir(config.context), "indy_client/wallet");
         walletDir.mkdirs();
         String walletPath = walletDir.getAbsolutePath();
@@ -204,7 +204,7 @@ public class ConnectMeVcx {
                     Logger.getInstance().i("createOneTimeInfo: " + oneTimeInfo);
                     try {
                         File genesisFile = writeGenesisFile(config);
-                        String poolName = config.walletName + "-pool";
+                        String poolName = Utils.makePoolName(config.walletName);
                         String vcxConfig = populateConfig(poolName, oneTimeInfo, genesisFile.getAbsolutePath(),
                                 "3.0", "https://robothash.com/logo.png", "real institution name");
                         SecurePreferencesHelper.setLongStringValue(config.context, SECURE_PREF_VCXCONFIG, vcxConfig);

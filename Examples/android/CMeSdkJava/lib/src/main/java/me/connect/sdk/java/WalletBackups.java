@@ -7,6 +7,10 @@ import androidx.annotation.NonNull;
 import com.evernym.sdk.vcx.VcxException;
 import com.evernym.sdk.vcx.wallet.WalletApi;
 
+import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.model.enums.EncryptionMethod;
+
 import org.json.JSONObject;
 
 import java.io.File;
@@ -17,10 +21,61 @@ import java9.util.concurrent.CompletableFuture;
 /**
  * Class containing methods to work with backups
  */
-class WalletBackups {
+public class WalletBackups {
     public static final String TAG = "ConnectMeVcx";
 
     private WalletBackups() {
+    }
+
+    /**
+     * Create backup archive for specified wallet
+     *
+     * @param context     context
+     * @param walletName  name of the wallet
+     * @param backupKey   key to encrypt archive
+     * @param archiveName name of the archive file
+     * @return Completable future with resulting file path string
+     */
+    public static @NonNull
+    CompletableFuture<String> create(@NonNull Context context, @NonNull String walletName, @NonNull String backupKey,
+                                     @NonNull String archiveName) {
+        CompletableFuture<String> result = new CompletableFuture<>();
+        try {
+            String walletPath = Utils.getRootDir(context) + File.separator + "indy_client/wallet" + File.separator + Utils.makeWalletName(walletName);
+            String archivePath = Utils.getRootDir(context) + File.separator + archiveName + ".zip";
+            ZipFile zipFile = new ZipFile(archivePath, backupKey.toCharArray());
+            File walletFolder = new File(walletPath);
+            ZipParameters zipParams = new ZipParameters();
+            zipParams.setEncryptFiles(true);
+            zipParams.setEncryptionMethod(EncryptionMethod.AES);
+            zipFile.addFolder(walletFolder, zipParams);
+            result.complete(archivePath);
+        } catch (Exception e) {
+            result.completeExceptionally(e);
+        }
+        return result;
+    }
+
+    /**
+     * Restore wallet archive
+     *
+     * @param context     context
+     * @param backupKey   key to decrypt archive
+     * @param archivePath path to archive file
+     * @return CompletableFuture
+     */
+    public static @NonNull
+    CompletableFuture<Void> restore(@NonNull Context context, @NonNull String backupKey, @NonNull String archivePath) {
+        CompletableFuture<Void> result = new CompletableFuture<>();
+        try {
+            String root = Utils.getRootDir(context) + File.separator + "indy_client/wallet";
+            ZipFile zipFile = new ZipFile(archivePath, backupKey.toCharArray());
+            zipFile.extractAll(root);
+            result.complete(null);
+        } catch (Exception e) {
+            result.completeExceptionally(e);
+        }
+        return result;
     }
 
     /**
