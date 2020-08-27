@@ -9,7 +9,6 @@ import android.widget.Toast;
 import me.connect.sdk.java.AgencyConfig;
 import me.connect.sdk.java.ConnectMeVcx;
 import me.connect.sdk.java.sample.databinding.MainActivityBinding;
-import me.connect.sdk.java.sample.ui.main.MainPagerAdapter;
 import pl.brightinventions.slf4android.LogLevel;
 
 public class MainActivity extends AppCompatActivity {

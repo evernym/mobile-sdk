@@ -1,10 +1,11 @@
-package me.connect.sdk.java.samplekt.main
+package me.connect.sdk.java.samplekt
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import me.connect.sdk.java.samplekt.connections.ConnectionsFragment
 import me.connect.sdk.java.samplekt.credentials.CredentialOffersFragment
+import me.connect.sdk.java.samplekt.backups.BackupsFragment
 import me.connect.sdk.java.samplekt.proofs.ProofRequestsFragment
 import me.connect.sdk.java.samplekt.structmessages.StructuredMessagesFragment
 
@@ -15,7 +16,7 @@ class MainPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
         1 -> CredentialOffersFragment.newInstance()
         2 -> ProofRequestsFragment.newInstance()
         3 -> StructuredMessagesFragment.newInstance()
-        4 -> WalletBackupsFragment.newInstance()
+        4 -> BackupsFragment.newInstance()
         else -> ConnectionsFragment.newInstance()
     }
 
