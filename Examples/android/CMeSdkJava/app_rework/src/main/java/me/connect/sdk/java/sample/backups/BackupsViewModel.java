@@ -21,15 +21,15 @@ public class BackupsViewModel extends AndroidViewModel {
         db = Database.getInstance(application);
     }
 
-    public SingleLiveData<String> performBackup() {
+    public SingleLiveData<String> performBackup(String backupKey) {
         SingleLiveData<String> data = new SingleLiveData<>();
-        backup(data);
+        backup(backupKey, data);
         return data;
     }
 
-    private void backup(SingleLiveData<String> liveData) {
+    private void backup(String backupKey, SingleLiveData<String> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            WalletBackups.create(getApplication(), Constants.WALLET_NAME, "secret_key", "backup").handle((res, err) -> {
+            WalletBackups.create(getApplication(), Constants.WALLET_NAME, backupKey, "backup").handle((res, err) -> {
                 if (res != null) {
                     Backup backup = new Backup();
                     backup.id = 1;
@@ -45,16 +45,16 @@ public class BackupsViewModel extends AndroidViewModel {
         });
     }
 
-    public SingleLiveData<String> performRestore() {
+    public SingleLiveData<String> performRestore(String backupKey) {
         SingleLiveData<String> data = new SingleLiveData<>();
-        restore(data);
+        restore(backupKey, data);
         return data;
     }
 
-    private void restore(SingleLiveData<String> liveData) {
+    private void restore(String backupKey, SingleLiveData<String> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             Backup backup = db.backupDao().getById(1);
-            WalletBackups.restore(getApplication(), "secret_key", backup.path).handle((res, err) -> {
+            WalletBackups.restore(getApplication(), backupKey, backup.path).handle((res, err) -> {
                 if (err == null) {
                     liveData.postValue("Success");
                 } else {

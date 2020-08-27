@@ -46,13 +46,15 @@ public class BackupsFragment extends Fragment {
         });
 
         binding.buttonCreate.setOnClickListener(v -> {
-            model.performBackup().observeOnce(getViewLifecycleOwner(), res -> {
+            String backupKey = binding.backupKey.getText().toString();
+            model.performBackup(backupKey).observeOnce(getViewLifecycleOwner(), res -> {
                 binding.status.setText(res);
             });
         });
 
         binding.buttonRestore.setOnClickListener(v -> {
-            model.performRestore().observeOnce(getViewLifecycleOwner(), res -> {
+            String backupKey = binding.backupKey.getText().toString();
+            model.performRestore(backupKey).observeOnce(getViewLifecycleOwner(), res -> {
                 binding.status.setText(res);
             });
         });

@@ -30,10 +30,12 @@ class BackupsFragment : Fragment() {
             binding.status.text = text
         })
         binding.buttonCreate.setOnClickListener {
-            model.performBackup().observeOnce(viewLifecycleOwner, Observer { binding.status.text = it })
+            val backupKey = binding.backupKey.text.toString()
+            model.performBackup(backupKey).observeOnce(viewLifecycleOwner, Observer { binding.status.text = it })
         }
         binding.buttonRestore.setOnClickListener {
-            model.performRestore().observeOnce(viewLifecycleOwner, Observer { binding.status.text = it })
+            val backupKey = binding.backupKey.text.toString()
+            model.performRestore(backupKey).observeOnce(viewLifecycleOwner, Observer { binding.status.text = it })
         }
     }
 

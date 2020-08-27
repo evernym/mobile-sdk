@@ -15,15 +15,15 @@ import me.connect.sdk.java.samplekt.db.entity.Backup
 class BackupsViewModel(application: Application) : AndroidViewModel(application) {
     private val db = Database.getInstance(application)
 
-    fun performBackup(): SingleLiveData<String> {
+    fun performBackup(backupKey: String): SingleLiveData<String> {
         val data = SingleLiveData<String>()
-        backup(data)
+        backup(backupKey, data)
         return data
     }
 
-    private fun backup(liveData: SingleLiveData<String>) = viewModelScope.launch(Dispatchers.IO) {
+    private fun backup(backupKey: String, liveData: SingleLiveData<String>) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val res = WalletBackups.create(getApplication(), Constants.WALLET_NAME, "secret_key", "backup").get()
+            val res = WalletBackups.create(getApplication(), Constants.WALLET_NAME, backupKey, "backup").get()
             val backup = Backup(
                     id = 1,
                     path = res
@@ -36,16 +36,16 @@ class BackupsViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun performRestore(): SingleLiveData<String> {
+    fun performRestore(backupKey: String): SingleLiveData<String> {
         val data = SingleLiveData<String>()
-        restore(data)
+        restore(backupKey, data)
         return data
     }
 
-    private fun restore(liveData: SingleLiveData<String>) = viewModelScope.launch(Dispatchers.IO) {
+    private fun restore(backupKey: String, liveData: SingleLiveData<String>) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val backup = db.backupDao().getById(1)!!
-            WalletBackups.restore(getApplication(), "secret_key", backup.path).get()
+            WalletBackups.restore(getApplication(), backupKey, backup.path).get()
             liveData.postValue("Success")
         } catch (e: Exception) {
             e.printStackTrace()
