@@ -1,0 +1,11 @@
+PROVISIONED_FILE="/home/indy/.indy_client/vcxconfig.json"
+VCX_CONFIG_PATH=/home/indy/vcxconfig.json
+AGENCY_URL="https://eas01.pps.evernym.com"
+INSTITUTION_NAME="NHSX Passport Agent"             
+INSTITUTION_LOGO="https://cdn.digitalhealth.net/wp-content/uploads/2019/07/NHSX-Logo.png"
+ENTERPRISE_SEED="NHSISSUERPB112345678SSI234567899"
+WALLET_NAME="LIBVCX_SDK_WALLET"
+WALLET_KEY="951987"
+SCHEMA_ID="ESdniwdKtNBNwgUKrFqdfm:2:NHSX Covid-19 Team1584698219794:1.0"
+CREDENTIAL_DEFINITION_NAME="NHS X Employing Organisation ID Check v1.2"
+CREDENTIAL_PROOF_NAME="NHS X Employing Organisation ID Check v1.2 Proof"
