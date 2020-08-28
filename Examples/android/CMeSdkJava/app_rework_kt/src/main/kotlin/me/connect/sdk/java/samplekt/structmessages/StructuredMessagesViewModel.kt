@@ -16,7 +16,6 @@ import me.connect.sdk.java.StructuredMessages
 import me.connect.sdk.java.message.MessageType
 import me.connect.sdk.java.samplekt.wrap
 import java.lang.Exception
-import java.util.concurrent.Executors
 
 
 class StructuredMessagesViewModel(application: Application) : AndroidViewModel(application) {
@@ -56,7 +55,8 @@ class StructuredMessagesViewModel(application: Application) : AndroidViewModel(a
                                 questionText = holder.questionText,
                                 questionDetail = holder.questionDetail,
                                 answers = holder.responses,
-                                serialized = msg.payload
+                                serialized = msg.payload,
+                                type = holder.type
                         )
                         db.structuredMessageDao().insertAll(sm)
                         loadStructuredMessages()
@@ -71,19 +71,18 @@ class StructuredMessagesViewModel(application: Application) : AndroidViewModel(a
     }
 
 
-    fun answerMessage(messageId: Int, nonce: String): SingleLiveData<Boolean> {
+    fun answerMessage(messageId: Int, answer: String): SingleLiveData<Boolean> {
         val data = SingleLiveData<Boolean>()
-        answerStructMessage(messageId, nonce, data)
+        answerStructMessage(messageId, answer, data)
         return data
     }
 
-    private fun answerStructMessage(messageId: Int, nonce: String, liveData: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
+    private fun answerStructMessage(messageId: Int, answer: String, liveData: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val sm = db.structuredMessageDao().getById(messageId)
             val con = db.connectionDao().getById(sm.connectionId)
-            val res = StructuredMessages.answer(con.serialized, sm.messageId, nonce).wrap().await()
-            val sa = sm.answers.first { it.nonce == nonce }.text
-            sm.selectedAnswer = sa
+            StructuredMessages.answer(con.serialized, sm.messageId, sm.type, sm.serialized, answer).wrap().await()
+            sm.selectedAnswer = answer;
             db.structuredMessageDao().update(sm)
             loadStructuredMessages()
         } catch (e: Exception) {

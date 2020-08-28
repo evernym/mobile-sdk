@@ -36,4 +36,7 @@ public class StructuredMessage {
 
     @ColumnInfo(name = "selected_answer")
     public String selectedAnswer;
+
+    @ColumnInfo(name = "type")
+    public String type;
 }

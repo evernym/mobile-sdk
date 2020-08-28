@@ -34,5 +34,8 @@ data class StructuredMessage(
         var answers: List<Response>,
 
         @ColumnInfo(name = "selected_answer")
-        var selectedAnswer: String? = null
+        var selectedAnswer: String? = null,
+
+        @ColumnInfo(name = "type")
+        var type: String
 )
