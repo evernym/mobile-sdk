@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "Started SDK initialization", Toast.LENGTH_SHORT).show()
         val config: ConnectMeVcx.Config = ConnectMeVcx.Config.builder()
                 .withAgency(AgencyConfig.DEFAULT)
-                .withGenesisPool(Constants.POOL_TXN_GENESIS)
+                .withGenesisPool(R.raw.genesis)
                 .withWalletName(Constants.WALLET_NAME)
                 .withLogLevel(LogLevel.DEBUG)
                 .withContext(this)
