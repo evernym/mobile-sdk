@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
         ConnectMeVcx.Config config = ConnectMeVcx.Config.builder()
                 .withAgency(AgencyConfig.DEFAULT)
-                .withGenesisPool(Constants.POOL_TXN_GENESIS)
+                .withGenesisPool(R.raw.genesis)
                 .withWalletName(Constants.WALLET_NAME)
                 .withLogLevel(LogLevel.DEBUG)
                 .withContext(this)
