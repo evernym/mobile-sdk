@@ -1,4 +1,3 @@
-include ':app_rework_kt'
-include ':app_rework'
-include ':lib'
 include ':app'
+include ':app_kt'
+include ':lib'
