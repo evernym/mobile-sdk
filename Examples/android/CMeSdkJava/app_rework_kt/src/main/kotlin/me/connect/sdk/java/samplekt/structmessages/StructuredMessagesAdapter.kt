@@ -36,7 +36,7 @@ class StructuredMessagesAdapter(private val itemClickListener: ItemClickListener
                 holder.buttonHolder.addView(btn)
                 btn.setOnClickListener { v ->
                     holder.buttonHolder.children.forEach { it.isEnabled = false }
-                    itemClickListener.onAnswerClick(message.id, response.nonce)
+                    itemClickListener.onAnswerClick(message.id, response.text)
                 }
             }
         }
@@ -59,6 +59,6 @@ class StructuredMessagesAdapter(private val itemClickListener: ItemClickListener
     }
 
     interface ItemClickListener {
-        fun onAnswerClick(entryId: Int, nonce: String)
+        fun onAnswerClick(entryId: Int, answer: String)
     }
 }

@@ -39,8 +39,8 @@ public class StructuredMessagesFragment extends Fragment {
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         binding.messagesList.setLayoutManager(layoutManager);
-        StructuredMessagesAdapter adapter = new StructuredMessagesAdapter((entryId, nonce) -> {
-            answer(entryId, nonce);
+        StructuredMessagesAdapter adapter = new StructuredMessagesAdapter((entryId, answer) -> {
+            answer(entryId, answer);
         });
         binding.messagesList.setAdapter(adapter);
 
@@ -55,8 +55,8 @@ public class StructuredMessagesFragment extends Fragment {
         });
     }
 
-    private void answer(int entryId, String nonce) {
-        model.answerMessage(entryId, nonce).observeOnce(getViewLifecycleOwner(), ok -> {
+    private void answer(int entryId, String answer) {
+        model.answerMessage(entryId, answer).observeOnce(getViewLifecycleOwner(), ok -> {
             Toast.makeText(getActivity(), "Struct message processed", Toast.LENGTH_SHORT).show();
         });
     }

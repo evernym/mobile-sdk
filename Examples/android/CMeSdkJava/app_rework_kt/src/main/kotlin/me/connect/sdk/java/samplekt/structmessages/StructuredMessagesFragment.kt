@@ -28,7 +28,7 @@ class StructuredMessagesFragment : Fragment() {
         val layoutManager = LinearLayoutManager(context)
         binding.messagesList.layoutManager = layoutManager
         val listener = object : ItemClickListener {
-            override fun onAnswerClick(entryId: Int, nonce: String) = answer(entryId, nonce)
+            override fun onAnswerClick(entryId: Int, answer: String) = answer(entryId, answer)
         }
         val adapter = StructuredMessagesAdapter(listener)
         binding.messagesList.adapter = adapter

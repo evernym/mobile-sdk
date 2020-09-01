@@ -1,7 +1,5 @@
 package me.connect.sdk.java;
 
-import android.content.Context;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 

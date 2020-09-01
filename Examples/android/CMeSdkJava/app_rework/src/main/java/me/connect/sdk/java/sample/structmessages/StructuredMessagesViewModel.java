@@ -15,7 +15,6 @@ import me.connect.sdk.java.StructuredMessages;
 import me.connect.sdk.java.message.Message;
 import me.connect.sdk.java.message.MessageType;
 import me.connect.sdk.java.message.StructuredMessageHolder;
-import me.connect.sdk.java.message.StructuredMessageHolder.Response;
 import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Connection;
@@ -67,6 +66,7 @@ public class StructuredMessagesViewModel extends AndroidViewModel {
                                 sm.questionText = holder.getQuestionText();
                                 sm.questionDetail = holder.getQuestionDetail();
                                 sm.answers = holder.getResponses();
+                                sm.type = holder.getType();
                                 sm.serialized = msg.getPayload();
                                 db.structuredMessageDao().insertAll(sm);
                                 loadStructuredMessages();
@@ -80,27 +80,21 @@ public class StructuredMessagesViewModel extends AndroidViewModel {
         });
     }
 
-    public SingleLiveData<Boolean> answerMessage(int messageId, String nonce) {
+    public SingleLiveData<Boolean> answerMessage(int messageId, String answer) {
         SingleLiveData<Boolean> data = new SingleLiveData<>();
-        answerStructMessage(messageId, nonce, data);
+        answerStructMessage(messageId, answer, data);
         return data;
     }
 
-    private void answerStructMessage(int messageId, String nonce, SingleLiveData<Boolean> liveData) {
+    private void answerStructMessage(int messageId, String answer, SingleLiveData<Boolean> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             StructuredMessage sm = db.structuredMessageDao().getById(messageId);
 
             Connection con = db.connectionDao().getById(sm.connectionId);
-            StructuredMessages.answer(con.serialized, sm.messageId, nonce).handle((res, err) -> {
-                if (res != null) {
-                    String sa = "";
-                    for (Response r : sm.answers) {
-                        if (r.getNonce().equals(nonce)) {
-                            sa = r.getText();
-                        }
-                        sm.selectedAnswer = sa;
-                        db.structuredMessageDao().update(sm);
-                    }
+            StructuredMessages.answer(con.serialized, sm.messageId, sm.type, sm.serialized, answer).handle((res, err) -> {
+                if (err == null) {
+                    sm.selectedAnswer = answer;
+                    db.structuredMessageDao().update(sm);
                 }
                 loadStructuredMessages();
                 liveData.postValue(err == null);

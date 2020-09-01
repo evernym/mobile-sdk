@@ -55,7 +55,7 @@ public class StructuredMessagesAdapter extends RecyclerView.Adapter<StructuredMe
                         View view = holder.buttonHolder.getChildAt(i);
                         view.setEnabled(false);
                     }
-                    itemClickListener.onAnswerClick(message.id, response.getNonce());
+                    itemClickListener.onAnswerClick(message.id, response.getText());
                 });
             }
         }
@@ -87,6 +87,6 @@ public class StructuredMessagesAdapter extends RecyclerView.Adapter<StructuredMe
     }
 
     public interface ItemClickListener {
-        void onAnswerClick(int entryId, String nonce);
+        void onAnswerClick(int entryId, String answer);
     }
 }

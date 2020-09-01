@@ -4,15 +4,21 @@ import java.util.List;
 
 public class StructuredMessageHolder {
     final String id;
+    final String type;
     final String questionText;
     final String questionDetail;
     final List<Response> responses;
 
-    public StructuredMessageHolder(String id, String questionText, String questionDetail, List<Response> responses) {
+    public StructuredMessageHolder(String id, String type, String questionText, String questionDetail, List<Response> responses) {
         this.id = id;
+        this.type = type;
         this.questionText = questionText;
         this.questionDetail = questionDetail;
         this.responses = responses;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public String getId() {
