@@ -95,7 +95,7 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                         for (Message message : res) {
                             CredDataHolder holder = extractDataFromCredentialsOfferMessage(message);
                             if (!db.credentialOffersDao().checkOfferExists(holder.id, c.id)) {
-                                Credentials.createWithOffer(c.serialized, UUID.randomUUID().toString(), holder.offer).handle((co, err) -> {
+                                Credentials.createWithOffer(UUID.randomUUID().toString(), holder.offer).handle((co, err) -> {
                                     if (err != null) {
                                         err.printStackTrace();
                                     } else {
