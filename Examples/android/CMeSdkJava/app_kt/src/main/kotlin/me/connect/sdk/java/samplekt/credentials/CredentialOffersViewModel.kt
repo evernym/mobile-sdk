@@ -75,7 +75,7 @@ class CredentialOffersViewModel(application: Application) : AndroidViewModel(app
                 res.forEach { message ->
                     val holder = extractDataFromCredentialsOfferMessage(message)
                     if (!db.credentialOffersDao().checkOfferExists(holder!!.id, c.id)) {
-                        val co = Credentials.createWithOffer(c.serialized, UUID.randomUUID().toString(), holder.offer).wrap().await()
+                        val co = Credentials.createWithOffer(UUID.randomUUID().toString(), holder.offer).wrap().await()
                         val offer = CredentialOffer(
                                 claimId = holder.id,
                                 name = holder.name,
