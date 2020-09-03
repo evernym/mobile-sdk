@@ -11,6 +11,7 @@ import androidx.annotation.RawRes;
 import com.evernym.sdk.vcx.VcxException;
 import com.evernym.sdk.vcx.utils.UtilsApi;
 import com.evernym.sdk.vcx.vcx.AlreadyInitializedException;
+import com.evernym.sdk.vcx.vcx.InvalidAgencyResponseException;
 import com.evernym.sdk.vcx.vcx.VcxApi;
 
 import org.json.JSONException;
@@ -290,6 +291,33 @@ public class ConnectMeVcx {
         for (String name : VCX_LOGGER_NAMES) {
             LoggerConfiguration.configuration().addHandlerToLogger(name, fileHandler);
         }
+    }
+
+    public static CompletableFuture<Void> updateAgentInfo(String id, String token) {
+        CompletableFuture<Void> result = new CompletableFuture<>();
+        try {
+            JSONObject config = new JSONObject();
+            config.put("id", id);
+            config.put("value", "FCM:" + token);
+            UtilsApi.vcxUpdateAgentInfo(config.toString()).whenComplete((v, err) -> {
+                if (err != null) {
+                    Logger.getInstance().e("Failed to update agent info", err);
+                    // Fixme workaround due to issues on agency side
+                    if (err instanceof InvalidAgencyResponseException
+                            && ((InvalidAgencyResponseException) err).getSdkCause().contains("data did not match any variant of untagged enum MessageTypes")) {
+                        result.complete(null);
+                    } else {
+                        result.completeExceptionally(err);
+                    }
+                } else {
+                    result.complete(null);
+                }
+            });
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
+        }
+        return result;
+
     }
 
     public static final class ConfigBuilder {
