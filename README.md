@@ -1,6 +1,6 @@
 <a href="https://www.evernym.com/"><img src="https://pbs.twimg.com/profile_images/1022255393395929088/0eYH-Os__400x400.jpg" title="Evernym" style="width: 150px"></a>
 
-# Connect.Me Mobile SDK
+# Mobile SDK
 
 ## Introduction
 The tools in this repository will help you to build mobile identity agents to hold verifiable credentials in a self sovereign identity ecosystem. These identity agents will be compatible with standards such as:
@@ -48,5 +48,5 @@ After project setup and adding dependency libraries, perform the the following s
 - <a href=" https://docs.google.com/document/d/1HAa27qArYlU0NO1VbEjA8ANXmVHl-b7fxa40e21I5L8/edit" target="_blank">
     Old SDK docs</a>
 - <a href=" https://docs.google.com/document/d/1HAa27qArYlU0NO1VbEjA8ANXmVHl-b7fxa40e21I5L8/edit" target="_blank">
-    Connector App</a> &#8212; Helpful resource to see how an older version of Connect.Me works
+    Connector App</a> &#8212; Helpful resource to see how an older version of mobile SDK works
 
