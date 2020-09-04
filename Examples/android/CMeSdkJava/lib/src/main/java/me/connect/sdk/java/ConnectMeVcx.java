@@ -301,12 +301,12 @@ public class ConnectMeVcx {
             config.put("value", "FCM:" + token);
             UtilsApi.vcxUpdateAgentInfo(config.toString()).whenComplete((v, err) -> {
                 if (err != null) {
-                    Logger.getInstance().e("Failed to update agent info", err);
                     // Fixme workaround due to issues on agency side
                     if (err instanceof InvalidAgencyResponseException
                             && ((InvalidAgencyResponseException) err).getSdkCause().contains("data did not match any variant of untagged enum MessageTypes")) {
                         result.complete(null);
                     } else {
+                        Logger.getInstance().e("Failed to update agent info", err);
                         result.completeExceptionally(err);
                     }
                 } else {

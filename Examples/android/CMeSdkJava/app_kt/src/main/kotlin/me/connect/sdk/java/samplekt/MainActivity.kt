@@ -8,6 +8,7 @@ import me.connect.sdk.java.AgencyConfig
 import me.connect.sdk.java.ConnectMeVcx
 import me.connect.sdk.java.samplekt.databinding.MainActivityBinding
 import pl.brightinventions.slf4android.LogLevel
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
@@ -38,12 +39,33 @@ class MainActivity : AppCompatActivity() {
 
         ConnectMeVcx.init(config).handleAsync { _, err ->
             val message = if (err == null) {
+                sendToken();
                 "SDK initialized successfully."
             } else {
                 Log.e(TAG, "Sdk not initialized: ", err)
                 "SDK was not initialized!"
             }
             runOnUiThread { Toast.makeText(this, message, Toast.LENGTH_SHORT).show() }
+        }
+    }
+
+    private fun sendToken() {
+        val prefs = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE)
+        val tokenSent = prefs.getBoolean(Constants.FCM_TOKEN_SENT, false)
+        if (tokenSent) {
+            return
+        }
+        prefs.getString(Constants.FCM_TOKEN, null)?.let { token ->
+            ConnectMeVcx.updateAgentInfo(UUID.randomUUID().toString(), token).whenComplete { _, err ->
+                if (err == null) {
+                    Log.d(TAG, "FCM token updated successfully")
+                    prefs.edit()
+                            .putBoolean(Constants.FCM_TOKEN_SENT, true)
+                            .apply()
+                } else {
+                    Log.e(TAG, "FCM token was not updated: ", err)
+                }
+            }
         }
     }
 }
