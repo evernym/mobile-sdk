@@ -197,7 +197,14 @@ public class ConnectMeVcx {
         Utils.writeCACert(config.context);
         try {
             String agencyConfig = prepareAgencyConfig(config);
-            UtilsApi.vcxAgentProvisionAsync(agencyConfig).whenComplete((oneTimeInfo, err) -> {
+            CompletionStage<String> provisioningStep;
+            if (config.provisionToken != null) {
+                String oneTimeInfo = UtilsApi.vcxAgentProvisionWithToken(agencyConfig, config.provisionToken);
+                provisioningStep = CompletableFuture.completedStage(oneTimeInfo);
+            } else {
+                provisioningStep = UtilsApi.vcxAgentProvisionAsync(agencyConfig);
+            }
+            provisioningStep.whenComplete((oneTimeInfo, err) -> {
                 if (err != null) {
                     Logger.getInstance().e("createOneTimeInfo: ", err);
                     result.completeExceptionally(err);
@@ -328,6 +335,8 @@ public class ConnectMeVcx {
         private String walletName;
         private Integer logMaxSize;
         private LogLevel logLevel;
+        private String provisionToken;
+
 
         private ConfigBuilder() {
         }
@@ -421,13 +430,26 @@ public class ConnectMeVcx {
         }
 
         /**
+         * Set provision token
+         *
+         * @param provisionToken provisionToken
+         * @return
+         */
+        public @NonNull
+        ConfigBuilder withProvisionToken(String provisionToken) {
+            this.provisionToken = provisionToken;
+            return this;
+        }
+
+        /**
          * Build {@link Config} instance.
          *
          * @return {@link Config} instance
          */
         public @NonNull
         Config build() {
-            return new Config(context, genesisPool, genesisPoolResId, agency, walletName, logMaxSize, logLevel);
+            return new Config(context, genesisPool, genesisPoolResId, agency, walletName, logMaxSize, logLevel,
+                    provisionToken);
         }
     }
 
@@ -442,9 +464,10 @@ public class ConnectMeVcx {
         private String walletName;
         private Integer logMaxSize = LOG_MAX_SIZE_DEFAULT;
         private LogLevel logLevel = LogLevel.INFO;
+        private String provisionToken;
 
         public Config(Context context, String genesisPool, Integer genesisPoolResId, String agency, String walletName,
-                      Integer logMaxSize, LogLevel logLevel) {
+                      Integer logMaxSize, LogLevel logLevel, String provisionToken) {
             this.context = context;
             this.genesisPool = genesisPool;
             this.genesisPoolResId = genesisPoolResId;
@@ -456,6 +479,7 @@ public class ConnectMeVcx {
             if (logLevel != null) {
                 this.logLevel = logLevel;
             }
+            this.provisionToken = provisionToken;
         }
 
         /**

@@ -1,15 +1,17 @@
 package me.connect.sdk.java.samplekt.db.dao
 
-
+import androidx.lifecycle.LiveData
 import androidx.room.*
-
 import me.connect.sdk.java.samplekt.db.entity.Connection
 
 
 @Dao
 interface ConnectionDao {
     @Query("SELECT * FROM connection")
-    suspend fun getAll(): List<Connection>
+    suspend fun getAllAsync(): List<Connection>
+
+    @Query("SELECT * FROM connection")
+    fun getAll(): LiveData<List<Connection>>
 
     @Query("SELECT serialized FROM connection")
     suspend fun getAllSerializedConnections(): List<String>

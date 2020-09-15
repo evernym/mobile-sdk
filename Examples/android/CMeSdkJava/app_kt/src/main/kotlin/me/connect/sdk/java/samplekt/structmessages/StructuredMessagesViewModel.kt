@@ -20,19 +20,11 @@ import java.lang.Exception
 
 class StructuredMessagesViewModel(application: Application) : AndroidViewModel(application) {
     private val db = Database.getInstance(application)
-    private val structMessages by lazy {
-        MutableLiveData<List<StructuredMessage>>()
+    private val structMessagesLiveData by lazy {
+        db.structuredMessageDao().getAll()
     }
 
-    fun getStructuredMessages(): LiveData<List<StructuredMessage>> {
-        loadStructuredMessages()
-        return structMessages
-    }
-
-    private fun loadStructuredMessages() = viewModelScope.launch(Dispatchers.IO) {
-        val data = db.structuredMessageDao().getAll()
-        structMessages.postValue(data)
-    }
+    fun getStructuredMessages(): LiveData<List<StructuredMessage>> = structMessagesLiveData
 
     fun getNewStructuredMessages(): SingleLiveData<Boolean> {
         val data = SingleLiveData<Boolean>()
@@ -42,7 +34,7 @@ class StructuredMessagesViewModel(application: Application) : AndroidViewModel(a
 
     private fun checkStructMessages(liveData: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val connections = db.connectionDao().getAll()
+            val connections = db.connectionDao().getAllAsync()
             connections.forEach { c ->
                 val res = Messages.getPendingMessages(c.serialized, MessageType.QUESTION).wrap().await()
                 res.forEach { msg ->
@@ -59,7 +51,6 @@ class StructuredMessagesViewModel(application: Application) : AndroidViewModel(a
                                 type = holder.type
                         )
                         db.structuredMessageDao().insertAll(sm)
-                        loadStructuredMessages()
                     }
                 }
             }
@@ -84,7 +75,6 @@ class StructuredMessagesViewModel(application: Application) : AndroidViewModel(a
             StructuredMessages.answer(con.serialized, sm.messageId, sm.type, sm.serialized, answer).wrap().await()
             sm.selectedAnswer = answer;
             db.structuredMessageDao().update(sm)
-            loadStructuredMessages()
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {

@@ -26,26 +26,18 @@ import java.lang.Exception
 
 class ConnectionsViewModel(application: Application) : AndroidViewModel(application) {
     private val db: Database = Database.getInstance(application)
-    private val connections: MutableLiveData<List<Connection>> by lazy {
+    private val connectionsLiveData by lazy {
         MutableLiveData<List<Connection>>()
+        db.connectionDao().getAll()
     }
 
-    fun getConnections(): LiveData<List<Connection>> {
-        loadConnections()
-        return connections
-    }
+    fun getConnections(): LiveData<List<Connection>> = connectionsLiveData
 
     fun newConnection(invite: String): SingleLiveData<ConnectionCreateResult> {
         val data = SingleLiveData<ConnectionCreateResult>()
         createConnection(invite, data)
         return data
     }
-
-    private fun loadConnections() = viewModelScope.launch(Dispatchers.IO) {
-        val data = db.connectionDao().getAll()
-        connections.postValue(data)
-    }
-
 
     private fun createConnection(invite: String, liveData: SingleLiveData<ConnectionCreateResult>) = viewModelScope.launch(Dispatchers.IO) {
         try {
@@ -65,7 +57,6 @@ class ConnectionsViewModel(application: Application) : AndroidViewModel(applicat
                     serialized = serializedCon
             )
             db.connectionDao().insertAll(c)
-            loadConnections()
             liveData.postValue(SUCCESS)
         } catch (e: Exception) {
             e.printStackTrace()

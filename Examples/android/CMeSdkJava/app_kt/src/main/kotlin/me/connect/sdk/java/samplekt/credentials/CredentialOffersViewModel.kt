@@ -24,19 +24,11 @@ import java.util.*
 
 class CredentialOffersViewModel(application: Application) : AndroidViewModel(application) {
     private val db: Database = Database.getInstance(application)
-    private val credentialOffers: MutableLiveData<List<CredentialOffer>> by lazy {
-        MutableLiveData<List<CredentialOffer>>()
+    private val credentialOffersLiveData by lazy {
+        db.credentialOffersDao().getAll()
     }
 
-    fun getCredentialOffers(): LiveData<List<CredentialOffer>> {
-        loadCredentialOffers()
-        return credentialOffers
-    }
-
-    private fun loadCredentialOffers() = viewModelScope.launch(Dispatchers.IO) {
-        val data = db.credentialOffersDao().getAll()
-        credentialOffers.postValue(data)
-    }
+    fun getCredentialOffers(): LiveData<List<CredentialOffer>> = credentialOffersLiveData
 
     fun getNewCredentialOffers(): SingleLiveData<Boolean> {
         val data = SingleLiveData<Boolean>()
@@ -59,7 +51,6 @@ class CredentialOffersViewModel(application: Application) : AndroidViewModel(app
             offer.serialized = s2
             offer.accepted = true
             db.credentialOffersDao().update(offer)
-            loadCredentialOffers()
             data.postValue(true)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -69,7 +60,7 @@ class CredentialOffersViewModel(application: Application) : AndroidViewModel(app
 
     private fun checkCredentialOffers(liveData: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val connections = db.connectionDao().getAll()
+            val connections = db.connectionDao().getAllAsync()
             connections.forEach { c ->
                 val res = Messages.getPendingMessages(c.serialized, MessageType.CREDENTIAL_OFFER).wrap().await()
                 res.forEach { message ->
@@ -88,7 +79,6 @@ class CredentialOffersViewModel(application: Application) : AndroidViewModel(app
                     }
                 }
             }
-            loadCredentialOffers()
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {

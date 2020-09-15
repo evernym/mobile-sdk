@@ -5,7 +5,6 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,11 +24,12 @@ import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Connection;
 import me.connect.sdk.java.sample.db.entity.CredentialOffer;
+import me.connect.sdk.java.sample.messages.CredDataHolder;
 
 // todo handle errors
 public class CredentialOffersViewModel extends AndroidViewModel {
     private final Database db;
-    private MutableLiveData<List<CredentialOffer>> credentialOffers;
+    private LiveData<List<CredentialOffer>> credentialOffers;
 
     public CredentialOffersViewModel(@NonNull Application application) {
         super(application);
@@ -38,17 +38,9 @@ public class CredentialOffersViewModel extends AndroidViewModel {
 
     public LiveData<List<CredentialOffer>> getCredentialOffers() {
         if (credentialOffers == null) {
-            credentialOffers = new MutableLiveData<>();
+            credentialOffers = db.credentialOffersDao().getAll();
         }
-        loadCredentialOffers();
         return credentialOffers;
-    }
-
-    private void loadCredentialOffers() {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            List<CredentialOffer> data = db.credentialOffersDao().getAll();
-            credentialOffers.postValue(data);
-        });
     }
 
     public SingleLiveData<Boolean> getNewCredentialOffers() {
@@ -74,7 +66,6 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                             offer.accepted = true;
                             db.credentialOffersDao().update(offer);
                         }
-                        loadCredentialOffers();
                         data.postValue(throwable == null);
                         return null;
                     }
@@ -82,10 +73,9 @@ public class CredentialOffersViewModel extends AndroidViewModel {
         });
     }
 
-
     private void checkCredentialOffers(SingleLiveData<Boolean> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            List<Connection> connections = db.connectionDao().getAll();
+            List<Connection> connections = db.connectionDao().getAllAsync();
             for (Connection c : connections) {
                 Messages.getPendingMessages(c.serialized, MessageType.CREDENTIAL_OFFER).handle((res, throwable) -> {
                     if (throwable != null) {
@@ -93,7 +83,7 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                     }
                     if (res != null) {
                         for (Message message : res) {
-                            CredDataHolder holder = extractDataFromCredentialsOfferMessage(message);
+                            CredDataHolder holder = CredDataHolder.extractDataFromCredentialsOfferMessage(message);
                             if (!db.credentialOffersDao().checkOfferExists(holder.id, c.id)) {
                                 Credentials.createWithOffer(c.serialized, UUID.randomUUID().toString(), holder.offer).handle((co, err) -> {
                                     if (err != null) {
@@ -108,7 +98,6 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                                         offer.messageId = message.getUid();
                                         db.credentialOffersDao().insertAll(offer);
                                     }
-                                    loadCredentialOffers();
                                     return null;
                                 });
                             }
@@ -119,39 +108,5 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                 });
             }
         });
-    }
-
-    private CredDataHolder extractDataFromCredentialsOfferMessage(Message msg) {
-        try {
-            JSONObject data = new JSONArray(msg.getPayload()).getJSONObject(0);
-            String id = data.getString("claim_id");
-            String name = data.getString("claim_name");
-            JSONObject attributesJson = data.getJSONObject("credential_attrs");
-            StringBuilder attributes = new StringBuilder();
-            Iterator<String> keys = attributesJson.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                String value = attributesJson.getString(key);
-                attributes.append(String.format("%s: %s\n", key, value));
-            }
-            return new CredDataHolder(id, name, attributes.toString(), msg.getPayload());
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    static class CredDataHolder {
-        String id;
-        String name;
-        String attributes;
-        String offer;
-
-        public CredDataHolder(String id, String name, String attributes, String offer) {
-            this.id = id;
-            this.name = name;
-            this.attributes = attributes;
-            this.offer = offer;
-        }
     }
 }

@@ -1,5 +1,6 @@
 package me.connect.sdk.java.sample.db.dao;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -14,7 +15,7 @@ import me.connect.sdk.java.sample.db.entity.StructuredMessage;
 public interface StructuredMessageDao {
 
     @Query("SELECT * FROM structuredmessage")
-    List<StructuredMessage> getAll();
+    LiveData<List<StructuredMessage>> getAll();
 
     @Query("SELECT * FROM structuredmessage WHERE id = :id")
     StructuredMessage getById(int id);

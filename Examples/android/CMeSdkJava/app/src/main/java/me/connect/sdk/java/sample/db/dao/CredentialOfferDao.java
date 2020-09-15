@@ -1,5 +1,6 @@
 package me.connect.sdk.java.sample.db.dao;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -14,7 +15,7 @@ import me.connect.sdk.java.sample.db.entity.CredentialOffer;
 @Dao
 public interface CredentialOfferDao {
     @Query("SELECT * FROM credentialoffer")
-    List<CredentialOffer> getAll();
+    LiveData<List<CredentialOffer>> getAll();
 
     @Query("SELECT * FROM credentialoffer WHERE id = :id")
     CredentialOffer getById(int id);

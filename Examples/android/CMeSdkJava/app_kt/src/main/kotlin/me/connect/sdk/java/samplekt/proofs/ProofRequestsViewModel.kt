@@ -21,19 +21,15 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.lang.Exception
 import java.util.*
-import java.util.concurrent.Executors
 
 
 class ProofRequestsViewModel(application: Application) : AndroidViewModel(application) {
     private val db: Database = Database.getInstance(application)
-    private val proofRequests by lazy {
-        MutableLiveData<List<ProofRequest>>()
+    private val proofRequestsLiveData by lazy {
+        db.proofRequestDao().getAll()
     }
 
-    fun getProofRequests(): LiveData<List<ProofRequest>> {
-        loadProofRequests()
-        return proofRequests
-    }
+    fun getProofRequests(): LiveData<List<ProofRequest>>  = proofRequestsLiveData
 
     fun acceptProofRequest(proofId: Int): SingleLiveData<Boolean> {
         val data = SingleLiveData<Boolean>()
@@ -54,7 +50,6 @@ class ProofRequestsViewModel(application: Application) : AndroidViewModel(applic
             proof.accepted = true
             proof.serialized = serializedProof
             db.proofRequestDao().update(proof)
-            loadProofRequests()
             liveData.postValue(true)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -78,17 +73,11 @@ class ProofRequestsViewModel(application: Application) : AndroidViewModel(applic
             proof.serialized = serializedProof
             proof.accepted = false
             db.proofRequestDao().update(proof)
-            loadProofRequests()
             liveData.postValue(true)
         } catch (e: Exception) {
             e.printStackTrace()
             liveData.postValue(false)
         }
-    }
-
-    private fun loadProofRequests() = viewModelScope.launch(Dispatchers.IO) {
-        val data = db.proofRequestDao().getAll()
-        proofRequests.postValue(data)
     }
 
     fun getNewProofRequests(): SingleLiveData<Boolean> {
@@ -99,7 +88,7 @@ class ProofRequestsViewModel(application: Application) : AndroidViewModel(applic
 
     private fun checkProofRequests(data: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val connections = db.connectionDao().getAll()
+            val connections = db.connectionDao().getAllAsync()
             connections.forEach { c ->
                 val res = Messages.getPendingMessages(c.serialized, MessageType.PROOF_REQUEST).wrap().await()
                 res.forEach { message ->
@@ -118,7 +107,6 @@ class ProofRequestsViewModel(application: Application) : AndroidViewModel(applic
                     }
                 }
             }
-            loadProofRequests()
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
