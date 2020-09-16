@@ -41,12 +41,11 @@ After project setup and adding dependency libraries, perform the the following s
     - No problem! Just do this. -->
 
 ### Helpful links
+- Connect.Me Public Beta &#8212; Most of the features of the Evernym Mobile SDK are showcased in [Connect.Me](https://connect.me/). You can use upcoming releases of Connect.Me by clicking the appropriate link from your device.
+  - IOS: https://testflight.apple.com/join/bmbX21Kq
+  - Android: https://play.google.com/apps/testing/me.connect
 - [VCX Errors](VcxErrors.md) &#8212; The list of all possible VCX errors and their definitions. 
 - <a href="https://github.com/evernym/mobile-starter" target="_blank">Mobile Starter Kit</a> &#8212; Current repo of mobile starter kit
-- <a href="https://drive.google.com/drive/folders/1-ySuVqU7q79jG2epoVJH4bFU1CqWVGnR?usp=sharing" target="_blank">
-    Starter files</a> &#8212; Current location of AAR and Cocoapods
-- <a href=" https://docs.google.com/document/d/1HAa27qArYlU0NO1VbEjA8ANXmVHl-b7fxa40e21I5L8/edit" target="_blank">
-    Old SDK docs</a>
-- <a href=" https://docs.google.com/document/d/1HAa27qArYlU0NO1VbEjA8ANXmVHl-b7fxa40e21I5L8/edit" target="_blank">
-    Connector App</a> &#8212; Helpful resource to see how an older version of mobile SDK works
-
+- <a href="https://drive.google.com/drive/folders/1-ySuVqU7q79jG2epoVJH4bFU1CqWVGnR?usp=sharing" target="_blank">Starter files</a> &#8212; Current location of AAR and Cocoapods
+- <a href="https://docs.google.com/document/d/1HAa27qArYlU0NO1VbEjA8ANXmVHl-b7fxa40e21I5L8/edit" target="_blank">Old SDK docs</a>
+- <a href="https://github.com/sovrin-foundation/connector-app" target="_blank">Sovrin Connector App</a> &#8212; Helpful resource to see how an older version of mobile SDK works.
