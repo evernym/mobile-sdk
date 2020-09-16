@@ -1,5 +1,7 @@
 <a href="https://www.evernym.com/"><img src="https://pbs.twimg.com/profile_images/1022255393395929088/0eYH-Os__400x400.jpg" title="Evernym" style="width: 150px"></a>
 
+**Notice: On October 20, 2020, all new installations of a mobile application built with Evernym’s Mobile SDK will require an access token to provision with Evernym’s cloud services.**
+
 # Mobile SDK
 
 ## Introduction
