@@ -6,3 +6,6 @@ vui-server/indy*
 vui-server/node*
 vcx/*
 vcx*
+
+### OSX ###
+.DS_Store
