@@ -106,7 +106,7 @@ When Connect.Me application gets attribute with `_link` postfix, it tries to ren
 }  
 ```
 
-![](https://github.com/evernym/mobile-starter/blob/master/wiki-images/CredentialOfferExample.png =400x)
+![](wiki-images/CredentialOfferExample.png =400px)
 
 #### Proof request
 
@@ -129,7 +129,7 @@ When Connect.Me application gets attribute with `_link` postfix, it tries to ren
 }
 ```
 
-![](https://github.com/evernym/mobile-starter/blob/master/wiki-images/ProofRequestExample.png =400x)
+![](wiki-images/ProofRequestExample.png =400px)
 
 ## Supported mime types
 
