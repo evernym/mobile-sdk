@@ -3,7 +3,7 @@
 //  CMeSdkObjc
 //
 //  Created by Predrag Jevtic on 6/18/20.
-//  Copyright © 2020 Norman Jarvis. All rights reserved.
+//  Copyright © 2020 Evernym Inc. All rights reserved.
 //
 
 #import "CMProofRequest.h"

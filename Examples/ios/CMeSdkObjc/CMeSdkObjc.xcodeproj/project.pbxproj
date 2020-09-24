@@ -18,10 +18,16 @@
 		8E509FFE2281EFC80098812A /* CMeSdkObjcTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E509FFD2281EFC80098812A /* CMeSdkObjcTests.m */; };
 		8E50A0092281EFC80098812A /* CMeSdkObjcUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E50A0082281EFC80098812A /* CMeSdkObjcUITests.m */; };
 		8E81258E22835662008D5CC3 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8E81258D22835662008D5CC3 /* GoogleService-Info.plist */; };
+		AA547B22251CA4290024E0CA /* LocalStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = AA547B20251CA4290024E0CA /* LocalStorage.m */; };
 		AA9291662487C52200CE2F64 /* CMUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = AA92915F2487C52200CE2F64 /* CMUtilities.m */; };
 		AA9291672487C52200CE2F64 /* CMConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = AA9291602487C52200CE2F64 /* CMConfig.m */; };
 		AA9291682487C52200CE2F64 /* ProductionPoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = AA9291612487C52200CE2F64 /* ProductionPoolTxnGenesis.m */; };
 		AA9291692487C52200CE2F64 /* CMConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = AA9291642487C52200CE2F64 /* CMConnection.m */; };
+		AAE1A25A251298F800EB172A /* StagingPoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE1A259251298F800EB172A /* StagingPoolTxnGenesis.m */; };
+		AAE1A2632512AA0C00EB172A /* ProofDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE1A25B2512AA0B00EB172A /* ProofDetailsViewController.m */; };
+		AAE1A2642512AA0C00EB172A /* MessageTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE1A25C2512AA0B00EB172A /* MessageTableViewCell.m */; };
+		AAE1A2652512AA0C00EB172A /* ConnectionDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE1A25E2512AA0B00EB172A /* ConnectionDetailsViewController.m */; };
+		AAE1A2662512AA0C00EB172A /* ProofAttributeTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE1A25F2512AA0B00EB172A /* ProofAttributeTableViewCell.m */; };
 		AAFB4A7B24F6739000FDE5D9 /* CMMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = AAFB4A7524F6738F00FDE5D9 /* CMMessage.m */; };
 		AAFB4A7C24F6739000FDE5D9 /* CMCredential.m in Sources */ = {isa = PBXBuildFile; fileRef = AAFB4A7624F6739000FDE5D9 /* CMCredential.m */; };
 		AAFB4A7D24F6739000FDE5D9 /* CMProofRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = AAFB4A7A24F6739000FDE5D9 /* CMProofRequest.m */; };
@@ -73,6 +79,8 @@
 		8E50A00A2281EFC80098812A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E81258D22835662008D5CC3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		8EDE89A82281F26300B7300F /* CMeSdkObjc.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CMeSdkObjc.entitlements; sourceTree = "<group>"; };
+		AA547B20251CA4290024E0CA /* LocalStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocalStorage.m; sourceTree = "<group>"; };
+		AA547B21251CA4290024E0CA /* LocalStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalStorage.h; sourceTree = "<group>"; };
 		AA92915E2487C52200CE2F64 /* CMConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMConnection.h; sourceTree = "<group>"; };
 		AA92915F2487C52200CE2F64 /* CMUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMUtilities.m; sourceTree = "<group>"; };
 		AA9291602487C52200CE2F64 /* CMConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMConfig.m; sourceTree = "<group>"; };
@@ -81,6 +89,16 @@
 		AA9291632487C52200CE2F64 /* CMUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMUtilities.h; sourceTree = "<group>"; };
 		AA9291642487C52200CE2F64 /* CMConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMConnection.m; sourceTree = "<group>"; };
 		AA9291652487C52200CE2F64 /* CMConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMConfig.h; sourceTree = "<group>"; };
+		AAE1A258251298F800EB172A /* StagingPoolTxnGenesis.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StagingPoolTxnGenesis.h; sourceTree = "<group>"; };
+		AAE1A259251298F800EB172A /* StagingPoolTxnGenesis.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StagingPoolTxnGenesis.m; sourceTree = "<group>"; };
+		AAE1A25B2512AA0B00EB172A /* ProofDetailsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProofDetailsViewController.m; sourceTree = "<group>"; };
+		AAE1A25C2512AA0B00EB172A /* MessageTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MessageTableViewCell.m; sourceTree = "<group>"; };
+		AAE1A25D2512AA0B00EB172A /* ProofAttributeTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProofAttributeTableViewCell.h; sourceTree = "<group>"; };
+		AAE1A25E2512AA0B00EB172A /* ConnectionDetailsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionDetailsViewController.m; sourceTree = "<group>"; };
+		AAE1A25F2512AA0B00EB172A /* ProofAttributeTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProofAttributeTableViewCell.m; sourceTree = "<group>"; };
+		AAE1A2602512AA0B00EB172A /* ConnectionDetailsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionDetailsViewController.h; sourceTree = "<group>"; };
+		AAE1A2612512AA0C00EB172A /* MessageTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessageTableViewCell.h; sourceTree = "<group>"; };
+		AAE1A2622512AA0C00EB172A /* ProofDetailsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProofDetailsViewController.h; sourceTree = "<group>"; };
 		AAFB4A7524F6738F00FDE5D9 /* CMMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMMessage.m; sourceTree = "<group>"; };
 		AAFB4A7624F6739000FDE5D9 /* CMCredential.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMCredential.m; sourceTree = "<group>"; };
 		AAFB4A7724F6739000FDE5D9 /* CMMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMMessage.h; sourceTree = "<group>"; };
@@ -150,6 +168,14 @@
 				8E509FE42281EFC60098812A /* AppDelegate.h */,
 				8E509FE52281EFC60098812A /* AppDelegate.m */,
 				8E509FE72281EFC60098812A /* ViewController.h */,
+				AAE1A2602512AA0B00EB172A /* ConnectionDetailsViewController.h */,
+				AAE1A25E2512AA0B00EB172A /* ConnectionDetailsViewController.m */,
+				AAE1A2612512AA0C00EB172A /* MessageTableViewCell.h */,
+				AAE1A25C2512AA0B00EB172A /* MessageTableViewCell.m */,
+				AAE1A25D2512AA0B00EB172A /* ProofAttributeTableViewCell.h */,
+				AAE1A25F2512AA0B00EB172A /* ProofAttributeTableViewCell.m */,
+				AAE1A2622512AA0C00EB172A /* ProofDetailsViewController.h */,
+				AAE1A25B2512AA0B00EB172A /* ProofDetailsViewController.m */,
 				8E509FE82281EFC60098812A /* ViewController.m */,
 				AA92915D2487C4EF00CE2F64 /* VCXHelpers */,
 				8E509FEA2281EFC60098812A /* Main.storyboard */,
@@ -198,6 +224,10 @@
 				AA92915F2487C52200CE2F64 /* CMUtilities.m */,
 				AA9291622487C52200CE2F64 /* ProductionPoolTxnGenesis.h */,
 				AA9291612487C52200CE2F64 /* ProductionPoolTxnGenesis.m */,
+				AAE1A258251298F800EB172A /* StagingPoolTxnGenesis.h */,
+				AAE1A259251298F800EB172A /* StagingPoolTxnGenesis.m */,
+				AA547B21251CA4290024E0CA /* LocalStorage.h */,
+				AA547B20251CA4290024E0CA /* LocalStorage.m */,
 			);
 			path = VCXHelpers;
 			sourceTree = "<group>";
@@ -452,15 +482,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				AAFB4A7C24F6739000FDE5D9 /* CMCredential.m in Sources */,
+				AAE1A25A251298F800EB172A /* StagingPoolTxnGenesis.m in Sources */,
 				8E509FE92281EFC60098812A /* ViewController.m in Sources */,
 				AA9291692487C52200CE2F64 /* CMConnection.m in Sources */,
+				AAE1A2632512AA0C00EB172A /* ProofDetailsViewController.m in Sources */,
+				AAE1A2662512AA0C00EB172A /* ProofAttributeTableViewCell.m in Sources */,
 				AA9291682487C52200CE2F64 /* ProductionPoolTxnGenesis.m in Sources */,
 				AAFB4A7D24F6739000FDE5D9 /* CMProofRequest.m in Sources */,
 				AAFB4A7B24F6739000FDE5D9 /* CMMessage.m in Sources */,
 				AA9291662487C52200CE2F64 /* CMUtilities.m in Sources */,
+				AAE1A2642512AA0C00EB172A /* MessageTableViewCell.m in Sources */,
 				8E13456322A040C800B6DE1F /* PoolTxnGenesis.m in Sources */,
 				8E509FF42281EFC80098812A /* main.m in Sources */,
+				AAE1A2652512AA0C00EB172A /* ConnectionDetailsViewController.m in Sources */,
 				8E509FE62281EFC60098812A /* AppDelegate.m in Sources */,
+				AA547B22251CA4290024E0CA /* LocalStorage.m in Sources */,
 				AA9291672487C52200CE2F64 /* CMConfig.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

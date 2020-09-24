@@ -3,7 +3,7 @@
 //  CMeSdkObjc
 //
 //  Created by Predrag Jevtic on 5/28/20.
-//  Copyright © 2020 Norman Jarvis. All rights reserved.
+//  Copyright © 2020 Evernym Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -13,9 +13,13 @@ typedef enum { QR = 0, SMS, } ConnectionType;
 
 @interface CMConnection: NSObject
 
-+(NSString*) getPwDid;
-+(NSString*) getSerializedConnection;
++(NSString*)getPwDid: (NSString*) serializedConnection;
 
-+(void) connect: (NSString*)connectJSON connectionType: (ConnectionType*)type phoneNumber: (NSString*)phone withCompletionHandler: (ResponseBlock)completionBlock;
++(void) connect: (NSString*)connectJSON connectionType: (ConnectionType*)type phoneNumber: (NSString*)phone withCompletionHandler: (ResponseWithObject)completionBlock;
+-(NSDictionary*)parseInvitationLink: (NSString*)link;
+
++(NSString*)connectionID: connectValues;
++(NSString*) connectionName: (NSDictionary*)connection;
++ (void)removeConnection: (NSString*) connection withCompletionHandler: (ResponseBlock) completionBlock;
 
 @end

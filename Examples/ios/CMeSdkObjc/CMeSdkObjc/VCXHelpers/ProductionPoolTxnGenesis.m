@@ -3,7 +3,7 @@
 //  CMeSdkObjc
 //
 //  Created by Predrag Jevtic on 28/05/2020.
-//  Copyright © 2020 Norman Jarvis. All rights reserved.
+//  Copyright © 2020 Evernym Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>

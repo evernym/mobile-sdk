@@ -3,7 +3,7 @@
 //  CMeSdkObjc
 //
 //  Created by Predrag Jevtic on 6/11/20.
-//  Copyright © 2020 Norman Jarvis. All rights reserved.
+//  Copyright © 2020 Evernym Inc. All rights reserved.
 //
 
 #import "CMMessage.h"
@@ -17,9 +17,9 @@
     NSString* messageType = CMMessageStatusTypeValue(type);
     
     NSLog(@"Connection details %@", connection);
-    
+
     [appDelegate.sdkApi downloadMessages: messageType uid_s: nil pwdids: pwDid completion: ^(NSError *error, NSString *messages) {
-        NSLog(@"Received messages %@", messages);
+        NSLog(@"Received Messages: %@ for type %@",  messages, messageType);
         NSMutableArray* msgList = [@[] mutableCopy];
         if(messages) {
             NSArray* msgArray = [CMUtilities jsonToArray: messages];

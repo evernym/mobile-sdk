@@ -3,7 +3,7 @@
 //  CMeSdkObjc
 //
 //  Created by Predrag Jevtic on 6/11/20.
-//  Copyright © 2020 Norman Jarvis. All rights reserved.
+//  Copyright © 2020 Evernym Inc. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *logoWidthConstraint;
 
 @property NSDictionary* message;
+@property NSArray* messageObjects;
 
 - (void) updateCell: (NSDictionary*) message withSender: (NSDictionary*) sender;
 

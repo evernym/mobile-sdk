@@ -3,7 +3,7 @@
 //  CMeSdkObjc
 //
 //  Created by Predrag Jevtic on 6/11/20.
-//  Copyright © 2020 Norman Jarvis. All rights reserved.
+//  Copyright © 2020 Evernym Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -15,7 +15,6 @@
 
 + (void)acceptCredOffer: (NSDictionary*) messageObj forConnection: (NSDictionary*) connection withCompletionHandler: (ResponseBlock) completionBlock {
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    NSUserDefaults *standardUserDefaults = [NSUserDefaults standardUserDefaults];
     NSError* error;
     
     @try {
@@ -23,7 +22,7 @@
         NSString *messageId = messageObj[@"uid"];
         NSString *pw_did = connection[@"data"][@"pw_did"];
         
-        [appDelegate.sdkApi connectionDeserialize: [CMUtilities toJsonString: connection] completion:^(NSError *error, NSInteger connectionHandle) {
+        [appDelegate.sdkApi connectionDeserialize: connection[@"serializedConnection"] completion:^(NSError *error, NSInteger connectionHandle) {
             if (error != nil && error.code != 0) {
                 completionBlock(nil, error);
                 return;
@@ -57,15 +56,13 @@
                                     completionBlock(nil, error);
                                     return;
                                 }
-                                NSLog(@"Successfully sent the credential request for credentialHandle: %ld AND for connectionHandle: %id", credentailHandle, (int)connectionHandle);
+                                NSLog(@"Successfully sent the credential request for credentialHandle: %ld AND for connectionHandle: %id", (long)credentailHandle, (int)connectionHandle);
                                 
-                                [appDelegate.sdkApi updateMessages: @"MS-104"  pwdidsJson: [NSString stringWithFormat: @"[{\"pairwiseDID\":\"%@\",\"uids\":[\"%@\"]}]", pw_did, messageId] completion: ^(NSError *error) {
+                                [appDelegate.sdkApi updateMessages: @"MS-104" pwdidsJson: [NSString stringWithFormat: @"[{\"pairwiseDID\":\"%@\",\"uids\":[\"%@\"]}]", pw_did, messageId] completion: ^(NSError *error) {
                                     if (error != nil && error.code !=0) {
                                         NSLog(@"Error occured while updating message status - %@ :: %ld", error, (long)error.code);
-                                        completionBlock(nil, error);
-                                        return;
                                     }
-                                    NSLog(@"Updated messages for message: %@ and credentialHandle: %ld", messageId, credentialHandle);
+                                    NSLog(@"Updated messages for message: %@ and credentialHandle: %ld", messageId, (long)credentialHandle);
                                     NSLog(@"Credential offer accepted successfuly!");
                                     completionBlock(serializedCredential_cString, nil);
                                 }];

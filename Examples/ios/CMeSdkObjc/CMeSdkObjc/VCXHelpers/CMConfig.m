@@ -3,7 +3,7 @@
 //  CMeSdkObjc
 //
 //  Created by Predrag Jevtic on 28/05/2020.
-//  Copyright © 2020 Norman Jarvis. All rights reserved.
+//  Copyright © 2020 Evernym Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -11,23 +11,37 @@
 #import "CMUtilities.h"
 #import "AppDelegate.h"
 #import "ProductionPoolTxnGenesis.h"
+#import "StagingPoolTxnGenesis.h"
 
 @implementation CMConfig
 
 // Define your wallet name constant here
-NSString* walletName = @"Lor6Ohwaichoow9p1"; //@"PleaseSetYourConnectMeWalletName";
+NSString* walletName = @"Lor6Ohwaichool"; //@"PleaseSetYourConnectMeWalletName";
 
 // Below settings will depend on your choosen environment
 // Selected here is Production Enviroment
 CMEnvironment environment = Production;
-NSString* agencyUrl = @"http://agency.evernym.com";
-NSString* agencyDid = @"DwXzE7GdE5DNfsrRXJChSD";
-NSString* agencyVerKey = @"844sJfb2snyeEugKvpY7Y4jZJk9LT6BnS6bnuKoiqbip";
 
 +(NSString*)agencyConfig {
     NSString* walletKey = [CMConfig walletKey];
 
-    return [NSString stringWithFormat: @"{\"agency_url\":\"%@\",\"agency_did\":\"%@\",\"agency_verkey\":\"%@\",\"wallet_name\":\"%@\",\"wallet_key\":\"%@\",\"agent_seed\":null,\"enterprise_seed\":null}", agencyUrl, agencyDid, agencyVerKey, walletName, walletKey];
+    NSDictionary* configs = @{
+        @"1": @{
+                @"agencyUrl": @"https://agency.evernym.com",
+                @"agencyDid": @"DwXzE7GdE5DNfsrRXJChSD",
+                @"agencyVerKey": @"844sJfb2snyeEugKvpY7Y4jZJk9LT6BnS6bnuKoiqbip",
+        },
+        @"2": @{
+        @"agencyUrl": @"https://agency.pstg.evernym.com",
+        @"agencyDid": @"LqnB96M6wBALqRZsrTTwda",
+        @"agencyVerKey": @"BpDPZHLbJFu67sWujecoreojiWZbi2dgf4xnYemUzFvB",
+    }};
+
+    NSString* agencyUrl = [[configs objectForKey:[NSString stringWithFormat:@"%i", environment]] valueForKey: @"agencyUrl"];
+    NSString* agencyDid = [[configs objectForKey:[NSString stringWithFormat:@"%i", environment]] valueForKey: @"agencyDid"];
+    NSString* agencyVerKey = [[configs objectForKey:[NSString stringWithFormat:@"%i", environment]] valueForKey: @"agencyVerKey"];
+
+    return [NSString stringWithFormat: @"{\"agency_url\":\"%@\",\"agency_did\":\"%@\",\"agency_verkey\":\"%@\",\"wallet_name\":\"%@\",\"wallet_key\":\"%@\",\"agent_seed\":null,\"enterprise_seed\":null,\"protocol_type\":\"3.0\"}", agencyUrl, agencyDid, agencyVerKey, walletName, walletKey];
 }
 
 +(NSString*)walletKey {
@@ -57,6 +71,10 @@ NSString* agencyVerKey = @"844sJfb2snyeEugKvpY7Y4jZJk9LT6BnS6bnuKoiqbip";
             return @"pool_transactions_genesis_DEMO";
             break;
 
+        case Staging:
+            return @"pool_transactions_genesis_STAG";
+            break;
+
         default:
             return @"pool_transactions_genesis_PROD";
             break;
@@ -68,6 +86,8 @@ NSString* agencyVerKey = @"844sJfb2snyeEugKvpY7Y4jZJk9LT6BnS6bnuKoiqbip";
         // Add additional environment gneesis files
 
         // Default is Production genesis file:
+        case Staging:
+            return stagingPoolTxnGenesisDef;
         default:
             return productionPoolTxnGenesisDef;
             break;
@@ -141,7 +161,7 @@ NSString* agencyVerKey = @"844sJfb2snyeEugKvpY7Y4jZJk9LT6BnS6bnuKoiqbip";
 
 +(void)init {
     [VcxLogger setDefaultLogger: @"TRACE"];
-    ConnectMeVcx *sdkApi = [(AppDelegate*)[[UIApplication   sharedApplication] delegate] sdkApi];
+    ConnectMeVcx *sdkApi = [(AppDelegate*)[[UIApplication sharedApplication] delegate] sdkApi];
 
     [VcxLogger setLogger: ^(NSObject *context, NSNumber *level, NSString *target, NSString *message, NSString *modulePath, NSString *file, NSNumber *line) {
         NSLog(@"[Inside VcxLogger.setLogger callback] %@    %@:%@ | %@", [levelMappings valueForKey: [NSString stringWithFormat: @"%@", level]], file, line, message);
@@ -150,7 +170,7 @@ NSString* agencyVerKey = @"844sJfb2snyeEugKvpY7Y4jZJk9LT6BnS6bnuKoiqbip";
     [sdkApi initSovToken];
     NSString* agencyConfig = [CMConfig agencyConfig];
     NSLog(@"Agency config %@", agencyConfig);
-    
+
     [sdkApi agentProvisionAsync: agencyConfig completion: ^(NSError *error, NSString *oneTimeInfo) {
         if (error && error.code > 0) {
             return [CMUtilities printError: error];
@@ -169,7 +189,8 @@ NSString* agencyVerKey = @"844sJfb2snyeEugKvpY7Y4jZJk9LT6BnS6bnuKoiqbip";
             }
                 AppDelegate* appDelegate = (AppDelegate*)[[UIApplication   sharedApplication] delegate];
                 appDelegate.sdkInited = true;
-            [CMUtilities printSuccess:@[@"VCX Config Successful! :)"]];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"vcxInitialized" object: nil userInfo: nil];
+            [CMUtilities printSuccess:@[@"######## VCX Config Successful! :) #########"]];
         }];
     }];
 }

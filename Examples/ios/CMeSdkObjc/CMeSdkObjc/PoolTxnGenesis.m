@@ -3,7 +3,7 @@
 //  CMeSdkObjc
 //
 //  Created by Norman Jarvis on 5/30/19.
-//  Copyright © 2019 Norman Jarvis. All rights reserved.
+//  Copyright © 2019 Evernym Inc. All rights reserved.
 //
 
 #import "PoolTxnGenesis.h"

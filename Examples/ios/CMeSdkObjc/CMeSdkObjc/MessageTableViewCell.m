@@ -3,19 +3,18 @@
 //  CMeSdkObjc
 //
 //  Created by Predrag Jevtic on 6/11/20.
-//  Copyright © 2020 Norman Jarvis. All rights reserved.
+//  Copyright © 2020 Evernym Inc. All rights reserved.
 //
 
 #import "MessageTableViewCell.h"
 #import "CMUtilities.h"
 
 @implementation MessageTableViewCell
-@synthesize message;
 
+@synthesize message, messageObjects;
 
 - (void)awakeFromNib {
     [super awakeFromNib];
-    
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
@@ -27,32 +26,32 @@
 - (void) updateCell: (NSDictionary*) message withSender: (NSDictionary*) sender {
     self.message = message;
     NSDictionary* messageData = [CMUtilities jsonToDictionary: message[@"decryptedPayload"]];
-    NSArray* messageObjData = [CMUtilities jsonToArray: messageData[@"@msg"]];
-    NSLog(@"message data %@", messageObjData);
+    messageObjects = [CMUtilities jsonToArray: messageData[@"@msg"]];
+    NSLog(@"message data %@", messageObjects);
     
     [self loadImage: sender];
-    
-    if([message[@"type"] isEqual: @"credOffer"]) {
-        self.titleLbl.text = [NSString stringWithFormat:@"Attributes: %lu", (unsigned long)[messageObjData[0][@"credential_attrs"] count]];
-        self.typeLbl.text = @"Credential offer - Press to accept";
+
+    NSString* messageType = message[@"type"];
+
+    if([@[@"credOffer", @"cred"] containsObject: messageType]) {
+        [self populateCredentialCell];
         return;
     }
-    
-    if([message[@"type"] isEqual: @"cred"]) {
-        NSDictionary* credentialData = [CMUtilities jsonToDictionary: [CMUtilities jsonToDictionary: message[@"decryptedPayload"]][@"@msg"]];
-        NSDictionary* values = [CMUtilities jsonToDictionary: credentialData[@"libindy_cred"]][@"values"];
-        self.titleLbl.text = [NSString stringWithFormat:@"Values: %lu", [values count]];
-        self.typeLbl.text = @"Credential";
-        return;
+    if([messageType isEqual: @"aries"]) {
+        NSDictionary* messageObj = [CMUtilities jsonToDictionary: messageData[@"@msg"]];
+        NSData* sigData = [CMUtilities decode64String: messageObj[@"connection~sig"][@"sig_data"]];
+        NSString* signature = [[NSString alloc] initWithData: sigData encoding: NSASCIIStringEncoding];
+        self.typeLbl.text = @"Credential Request";
+        NSLog(@"aries %@", signature);
     }
-    
-    if([message[@"type"] isEqual: @"credReq"]) {
+    if([messageType isEqual: @"credReq"]) {
 //        self.titleLbl.text = [NSString stringWithFormat:@"Values: %lu", [values count]];
         NSLog(@"credenialReq %@", message);
         self.typeLbl.text = @"Credential Request";
+        return;
     }
     
-    if([message[@"type"] isEqual: @"proofReq"]) {
+    if([messageType isEqual: @"proofReq"]) {
         NSDictionary* data = [CMUtilities jsonToDictionary: messageData[@"@msg"]];
         self.titleLbl.text = data[@"name"];
         self.typeLbl.text = @"Proof request - Press to populate";
@@ -60,6 +59,13 @@
         self.logoWidthConstraint.constant = 0;
         return;
     }
+}
+
+-(void)populateCredentialCell {
+    NSDictionary* credentialData = [CMUtilities jsonToDictionary: [CMUtilities jsonToDictionary: message[@"decryptedPayload"]][@"@msg"]];
+    NSDictionary* values = [CMUtilities jsonToDictionary: credentialData[@"libindy_cred"]][@"values"];
+    self.titleLbl.text = [NSString stringWithFormat:@"Values: %lu", (unsigned long)[values count]];
+    self.typeLbl.text = @"Credential";
 }
 
 - (void)loadImage: (NSDictionary*) sender {
