@@ -74,7 +74,7 @@ public class Messages {
                                                 if (messageType.matches(type)) {
                                                     String messageUid = message.getString("uid");
                                                     String msg = payload.getString("@msg");
-                                                    messages.add(new Message(messageUid, msg));
+                                                    messages.add(new Message(messageUid, msg, type));
                                                 }
                                             }
                                         }

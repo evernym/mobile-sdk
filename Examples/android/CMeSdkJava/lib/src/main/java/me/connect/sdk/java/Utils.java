@@ -111,6 +111,14 @@ class Utils {
         return context.getFilesDir().getAbsolutePath() + File.separator + ROOT_DIR;
     }
 
+    static String makeWalletName(String name) {
+        return String.format("%s-wallet", name);
+    }
+
+    static String makePoolName(String name) {
+        return String.format("%s-pool", name);
+    }
+
     static boolean makeRootDir(Context context) {
         String rootDir = getRootDir(context);
         return new File(rootDir).mkdirs();
