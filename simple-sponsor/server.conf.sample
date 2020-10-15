@@ -2,6 +2,8 @@
 sponsor_id = Sponsor id
 nonce_len = 16
 wallet_name = wallet_name
-key = secret_key
+wallet_key = wallet_key
+verkey = secret_key
 seed = seed
 port = 4321
+did = did

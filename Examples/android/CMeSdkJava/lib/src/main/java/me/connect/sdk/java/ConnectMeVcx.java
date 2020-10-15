@@ -133,18 +133,17 @@ public class ConnectMeVcx {
         walletDir.mkdirs();
         String walletPath = walletDir.getAbsolutePath();
         String walletKey = createWalletKey(WALLET_KEY_LENGTH);
-        return AgencyConfig.setConfigParameters(config.agency, walletName, walletKey, walletPath);
+        return AgencyConfig.setConfigParameters(config.agency, walletName, walletKey, walletPath, "3.0");
     }
 
     private static String populateConfig(String poolName, String oneTimeInfo, String genesisFilePath,
-                                         String protocolType, String logoUrl, String name) throws JSONException {
+                                         String logoUrl, String name) throws JSONException {
         JSONObject json = new JSONObject(oneTimeInfo);
         json.put("genesis_path", genesisFilePath);
         json.put("institution_logo_url", logoUrl);
         json.put("institution_name", name);
         json.put("pool_name", poolName);
         json.put("protocol_version", "2");
-        json.put("protocol_type", protocolType);
         return json.toString();
     }
 
@@ -200,21 +199,26 @@ public class ConnectMeVcx {
             CompletionStage<String> provisioningStep;
             if (config.provisionToken != null) {
                 String oneTimeInfo = UtilsApi.vcxAgentProvisionWithToken(agencyConfig, config.provisionToken);
+                // Fixme workaround to handle exception not thrown on previous step
+                //       Assume that `null` value is an error
+                if (oneTimeInfo == null) {
+                    throw new Exception("oneTimeInfo is null");
+                }
                 provisioningStep = CompletableFuture.completedStage(oneTimeInfo);
             } else {
                 provisioningStep = UtilsApi.vcxAgentProvisionAsync(agencyConfig);
             }
             provisioningStep.whenComplete((oneTimeInfo, err) -> {
                 if (err != null) {
-                    Logger.getInstance().e("createOneTimeInfo: ", err);
+                    Logger.getInstance().e("createOneTimeInfo failed: ", err);
                     result.completeExceptionally(err);
                 } else {
-                    Logger.getInstance().i("createOneTimeInfo: " + oneTimeInfo);
+                    Logger.getInstance().i("createOneTimeInfo called: " + oneTimeInfo);
                     try {
                         File genesisFile = writeGenesisFile(config);
                         String poolName = Utils.makePoolName(config.walletName);
                         String vcxConfig = populateConfig(poolName, oneTimeInfo, genesisFile.getAbsolutePath(),
-                                "3.0", "https://robothash.com/logo.png", "real institution name");
+                                "https://robothash.com/logo.png", "real institution name");
                         SecurePreferencesHelper.setLongStringValue(config.context, SECURE_PREF_VCXCONFIG, vcxConfig);
                         result.complete(null);
                     } catch (Exception e) {

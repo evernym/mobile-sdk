@@ -10,6 +10,7 @@ import android.widget.Toast;
 import org.json.JSONObject;
 
 import java.util.UUID;
+import java.util.concurrent.Executors;
 
 import me.connect.sdk.java.AgencyConfig;
 import me.connect.sdk.java.ConnectMeVcx;
@@ -20,6 +21,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 import pl.brightinventions.slf4android.LogLevel;
 
 public class MainActivity extends AppCompatActivity {
@@ -43,38 +45,40 @@ public class MainActivity extends AppCompatActivity {
 
     private void initSdk() {
         Toast.makeText(this, "Started SDK initialization", Toast.LENGTH_SHORT).show();
-        String token = null;
-        if (!provisionTokenRetrieved()) {
-            try {
-                token = retrieveToken();
-            } catch (Exception ex) {
-                Log.e(TAG, "Failed to retrieve token: ", ex);
-            }
-        } else {
-            token = getSavedToken();
-        }
-        // Todo retry policy if token not retrieved
-        ConnectMeVcx.Config config = ConnectMeVcx.Config.builder()
-                .withAgency(AgencyConfig.DEFAULT)
-                .withGenesisPool(R.raw.genesis)
-                .withWalletName(Constants.WALLET_NAME)
-                .withLogLevel(LogLevel.DEBUG)
-                .withContext(this)
-                .withProvisionToken(token)
-                .build();
-
-        // Todo progress bar could be added
-        ConnectMeVcx.init(config).handleAsync((res, err) -> {
-            String message;
-            if (err == null) {
-                message = "SDK initialized successfully.";
-                sendToken();
+        Executors.newSingleThreadExecutor().execute(() -> {
+            String token = null;
+            if (!provisionTokenRetrieved()) {
+                try {
+                    token = retrieveToken();
+                } catch (Exception ex) {
+                    Log.e(TAG, "Failed to retrieve token: ", ex);
+                }
             } else {
-                message = "SDK was not initialized!";
-                Log.e(TAG, "Sdk not initialized: ", err);
+                token = getSavedToken();
             }
-            runOnUiThread(() -> Toast.makeText(this, message, Toast.LENGTH_SHORT).show());
-            return null;
+
+            ConnectMeVcx.Config config = ConnectMeVcx.Config.builder()
+                    .withAgency(AgencyConfig.TEAM1)
+                    .withGenesisPool(R.raw.team1)
+                    .withWalletName(Constants.WALLET_NAME)
+                    .withLogLevel(LogLevel.DEBUG)
+                    .withContext(this)
+                    .withProvisionToken(token)
+                    .build();
+
+            // Todo progress bar could be added
+            ConnectMeVcx.init(config).handleAsync((res, err) -> {
+                String message;
+                if (err == null) {
+                    message = "SDK initialized successfully.";
+                    sendToken();
+                } else {
+                    message = "SDK was not initialized!";
+                    Log.e(TAG, "Sdk not initialized: ", err);
+                }
+                runOnUiThread(() -> Toast.makeText(this, message, Toast.LENGTH_SHORT).show());
+                return null;
+            });
         });
     }
 
@@ -82,11 +86,12 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
         boolean tokenSent = prefs.getBoolean(Constants.FCM_TOKEN_SENT, false);
         if (tokenSent) {
+            Log.d(TAG, "FCM token already sent");
             return;
         }
         String token = prefs.getString(Constants.FCM_TOKEN, null);
         if (token != null) {
-            ConnectMeVcx.updateAgentInfo(UUID.randomUUID().toString(), token).whenComplete((res, err) -> {
+            ConnectMeVcx.updateAgentInfo("1", token).whenComplete((res, err) -> {
                 if (err == null) {
                     Log.d(TAG, "FCM token updated successfully");
                     prefs.edit()
@@ -110,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String retrieveToken() throws Exception {
+        Log.d(TAG, "Retrieving token");
         SharedPreferences prefs = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
         String sponseeId = prefs.getString(Constants.SPONSEE_ID, null);
         if (sponseeId == null) {
@@ -121,8 +127,9 @@ public class MainActivity extends AppCompatActivity {
         JSONObject json = new JSONObject();
         json.put("sponseeId", sponseeId);
 
-        //todo make standalone method
-        OkHttpClient client = new OkHttpClient();
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(logging).build();
         RequestBody body = RequestBody.create(json.toString(), MediaType.get("application/json"));
         Request request = new Request.Builder()
                 .url(Constants.SERVER_URL)
@@ -133,16 +140,12 @@ public class MainActivity extends AppCompatActivity {
             throw new Exception("Response failed with code " + response.code());
         }
         String token = response.body().string();
-        Log.d(TAG, "Retrieved token: "+ token);
-        /* Todo uncomment this when server is registered
+        Log.d(TAG, "Retrieved token: " + token);
         prefs.edit()
                 .putString(Constants.PROVISION_TOKEN, token)
                 .putBoolean(Constants.PROVISION_TOKEN_RETRIEVED, true)
                 .apply();
 
         return token;
-        */
-        return null;
     }
-
 }
