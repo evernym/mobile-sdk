@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -18,6 +18,19 @@
 		8E509FFE2281EFC80098812A /* CMeSdkObjcTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E509FFD2281EFC80098812A /* CMeSdkObjcTests.m */; };
 		8E50A0092281EFC80098812A /* CMeSdkObjcUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E50A0082281EFC80098812A /* CMeSdkObjcUITests.m */; };
 		8E81258E22835662008D5CC3 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8E81258D22835662008D5CC3 /* GoogleService-Info.plist */; };
+		AA547B22251CA4290024E0CA /* LocalStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = AA547B20251CA4290024E0CA /* LocalStorage.m */; };
+		AA9291662487C52200CE2F64 /* CMUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = AA92915F2487C52200CE2F64 /* CMUtilities.m */; };
+		AA9291672487C52200CE2F64 /* CMConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = AA9291602487C52200CE2F64 /* CMConfig.m */; };
+		AA9291682487C52200CE2F64 /* ProductionPoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = AA9291612487C52200CE2F64 /* ProductionPoolTxnGenesis.m */; };
+		AA9291692487C52200CE2F64 /* CMConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = AA9291642487C52200CE2F64 /* CMConnection.m */; };
+		AAE1A25A251298F800EB172A /* StagingPoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE1A259251298F800EB172A /* StagingPoolTxnGenesis.m */; };
+		AAE1A2632512AA0C00EB172A /* ProofDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE1A25B2512AA0B00EB172A /* ProofDetailsViewController.m */; };
+		AAE1A2642512AA0C00EB172A /* MessageTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE1A25C2512AA0B00EB172A /* MessageTableViewCell.m */; };
+		AAE1A2652512AA0C00EB172A /* ConnectionDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE1A25E2512AA0B00EB172A /* ConnectionDetailsViewController.m */; };
+		AAE1A2662512AA0C00EB172A /* ProofAttributeTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE1A25F2512AA0B00EB172A /* ProofAttributeTableViewCell.m */; };
+		AAFB4A7B24F6739000FDE5D9 /* CMMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = AAFB4A7524F6738F00FDE5D9 /* CMMessage.m */; };
+		AAFB4A7C24F6739000FDE5D9 /* CMCredential.m in Sources */ = {isa = PBXBuildFile; fileRef = AAFB4A7624F6739000FDE5D9 /* CMCredential.m */; };
+		AAFB4A7D24F6739000FDE5D9 /* CMProofRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = AAFB4A7A24F6739000FDE5D9 /* CMProofRequest.m */; };
 		AB0E017E326DF6040A2D2938 /* libPods-CMeSdkObjc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7B1AE519C579F0EB1F4FAF /* libPods-CMeSdkObjc.a */; };
 		AC4C0D60BB16B78C375EAD06 /* libPods-CMeSdkObjcTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61C99F1A9B6A05EC1B7E5A1A /* libPods-CMeSdkObjcTests.a */; };
 /* End PBXBuildFile section */
@@ -66,6 +79,32 @@
 		8E50A00A2281EFC80098812A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E81258D22835662008D5CC3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		8EDE89A82281F26300B7300F /* CMeSdkObjc.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CMeSdkObjc.entitlements; sourceTree = "<group>"; };
+		AA547B20251CA4290024E0CA /* LocalStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocalStorage.m; sourceTree = "<group>"; };
+		AA547B21251CA4290024E0CA /* LocalStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalStorage.h; sourceTree = "<group>"; };
+		AA92915E2487C52200CE2F64 /* CMConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMConnection.h; sourceTree = "<group>"; };
+		AA92915F2487C52200CE2F64 /* CMUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMUtilities.m; sourceTree = "<group>"; };
+		AA9291602487C52200CE2F64 /* CMConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMConfig.m; sourceTree = "<group>"; };
+		AA9291612487C52200CE2F64 /* ProductionPoolTxnGenesis.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProductionPoolTxnGenesis.m; sourceTree = "<group>"; };
+		AA9291622487C52200CE2F64 /* ProductionPoolTxnGenesis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProductionPoolTxnGenesis.h; sourceTree = "<group>"; };
+		AA9291632487C52200CE2F64 /* CMUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMUtilities.h; sourceTree = "<group>"; };
+		AA9291642487C52200CE2F64 /* CMConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMConnection.m; sourceTree = "<group>"; };
+		AA9291652487C52200CE2F64 /* CMConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMConfig.h; sourceTree = "<group>"; };
+		AAE1A258251298F800EB172A /* StagingPoolTxnGenesis.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StagingPoolTxnGenesis.h; sourceTree = "<group>"; };
+		AAE1A259251298F800EB172A /* StagingPoolTxnGenesis.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StagingPoolTxnGenesis.m; sourceTree = "<group>"; };
+		AAE1A25B2512AA0B00EB172A /* ProofDetailsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProofDetailsViewController.m; sourceTree = "<group>"; };
+		AAE1A25C2512AA0B00EB172A /* MessageTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MessageTableViewCell.m; sourceTree = "<group>"; };
+		AAE1A25D2512AA0B00EB172A /* ProofAttributeTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProofAttributeTableViewCell.h; sourceTree = "<group>"; };
+		AAE1A25E2512AA0B00EB172A /* ConnectionDetailsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionDetailsViewController.m; sourceTree = "<group>"; };
+		AAE1A25F2512AA0B00EB172A /* ProofAttributeTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProofAttributeTableViewCell.m; sourceTree = "<group>"; };
+		AAE1A2602512AA0B00EB172A /* ConnectionDetailsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionDetailsViewController.h; sourceTree = "<group>"; };
+		AAE1A2612512AA0C00EB172A /* MessageTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessageTableViewCell.h; sourceTree = "<group>"; };
+		AAE1A2622512AA0C00EB172A /* ProofDetailsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProofDetailsViewController.h; sourceTree = "<group>"; };
+		AAFB4A7524F6738F00FDE5D9 /* CMMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMMessage.m; sourceTree = "<group>"; };
+		AAFB4A7624F6739000FDE5D9 /* CMCredential.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMCredential.m; sourceTree = "<group>"; };
+		AAFB4A7724F6739000FDE5D9 /* CMMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMMessage.h; sourceTree = "<group>"; };
+		AAFB4A7824F6739000FDE5D9 /* CMCredential.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMCredential.h; sourceTree = "<group>"; };
+		AAFB4A7924F6739000FDE5D9 /* CMProofRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMProofRequest.h; sourceTree = "<group>"; };
+		AAFB4A7A24F6739000FDE5D9 /* CMProofRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMProofRequest.m; sourceTree = "<group>"; };
 		B302B7F5FAC0C1E964B66ED4 /* Pods-CMeSdkObjcTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjcTests/Pods-CMeSdkObjcTests.release.xcconfig"; sourceTree = "<group>"; };
 		E1200BCCD8ACD48971467097 /* Pods-CMeSdkObjc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjc.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjc/Pods-CMeSdkObjc.debug.xcconfig"; sourceTree = "<group>"; };
 		F18B0531CD0E6287F0DEFD61 /* Pods-CMeSdkObjc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjc.release.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjc/Pods-CMeSdkObjc.release.xcconfig"; sourceTree = "<group>"; };
@@ -129,7 +168,16 @@
 				8E509FE42281EFC60098812A /* AppDelegate.h */,
 				8E509FE52281EFC60098812A /* AppDelegate.m */,
 				8E509FE72281EFC60098812A /* ViewController.h */,
+				AAE1A2602512AA0B00EB172A /* ConnectionDetailsViewController.h */,
+				AAE1A25E2512AA0B00EB172A /* ConnectionDetailsViewController.m */,
+				AAE1A2612512AA0C00EB172A /* MessageTableViewCell.h */,
+				AAE1A25C2512AA0B00EB172A /* MessageTableViewCell.m */,
+				AAE1A25D2512AA0B00EB172A /* ProofAttributeTableViewCell.h */,
+				AAE1A25F2512AA0B00EB172A /* ProofAttributeTableViewCell.m */,
+				AAE1A2622512AA0C00EB172A /* ProofDetailsViewController.h */,
+				AAE1A25B2512AA0B00EB172A /* ProofDetailsViewController.m */,
 				8E509FE82281EFC60098812A /* ViewController.m */,
+				AA92915D2487C4EF00CE2F64 /* VCXHelpers */,
 				8E509FEA2281EFC60098812A /* Main.storyboard */,
 				8E509FED2281EFC80098812A /* Assets.xcassets */,
 				8E509FEF2281EFC80098812A /* LaunchScreen.storyboard */,
@@ -157,6 +205,31 @@
 				8E50A00A2281EFC80098812A /* Info.plist */,
 			);
 			path = CMeSdkObjcUITests;
+			sourceTree = "<group>";
+		};
+		AA92915D2487C4EF00CE2F64 /* VCXHelpers */ = {
+			isa = PBXGroup;
+			children = (
+				AAFB4A7824F6739000FDE5D9 /* CMCredential.h */,
+				AAFB4A7624F6739000FDE5D9 /* CMCredential.m */,
+				AAFB4A7724F6739000FDE5D9 /* CMMessage.h */,
+				AAFB4A7524F6738F00FDE5D9 /* CMMessage.m */,
+				AAFB4A7924F6739000FDE5D9 /* CMProofRequest.h */,
+				AAFB4A7A24F6739000FDE5D9 /* CMProofRequest.m */,
+				AA9291652487C52200CE2F64 /* CMConfig.h */,
+				AA9291602487C52200CE2F64 /* CMConfig.m */,
+				AA92915E2487C52200CE2F64 /* CMConnection.h */,
+				AA9291642487C52200CE2F64 /* CMConnection.m */,
+				AA9291632487C52200CE2F64 /* CMUtilities.h */,
+				AA92915F2487C52200CE2F64 /* CMUtilities.m */,
+				AA9291622487C52200CE2F64 /* ProductionPoolTxnGenesis.h */,
+				AA9291612487C52200CE2F64 /* ProductionPoolTxnGenesis.m */,
+				AAE1A258251298F800EB172A /* StagingPoolTxnGenesis.h */,
+				AAE1A259251298F800EB172A /* StagingPoolTxnGenesis.m */,
+				AA547B21251CA4290024E0CA /* LocalStorage.h */,
+				AA547B20251CA4290024E0CA /* LocalStorage.m */,
+			);
+			path = VCXHelpers;
 			sourceTree = "<group>";
 		};
 		C6BD478857A8606748A31652 /* Pods */ = {
@@ -408,10 +481,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AAFB4A7C24F6739000FDE5D9 /* CMCredential.m in Sources */,
+				AAE1A25A251298F800EB172A /* StagingPoolTxnGenesis.m in Sources */,
 				8E509FE92281EFC60098812A /* ViewController.m in Sources */,
+				AA9291692487C52200CE2F64 /* CMConnection.m in Sources */,
+				AAE1A2632512AA0C00EB172A /* ProofDetailsViewController.m in Sources */,
+				AAE1A2662512AA0C00EB172A /* ProofAttributeTableViewCell.m in Sources */,
+				AA9291682487C52200CE2F64 /* ProductionPoolTxnGenesis.m in Sources */,
+				AAFB4A7D24F6739000FDE5D9 /* CMProofRequest.m in Sources */,
+				AAFB4A7B24F6739000FDE5D9 /* CMMessage.m in Sources */,
+				AA9291662487C52200CE2F64 /* CMUtilities.m in Sources */,
+				AAE1A2642512AA0C00EB172A /* MessageTableViewCell.m in Sources */,
 				8E13456322A040C800B6DE1F /* PoolTxnGenesis.m in Sources */,
 				8E509FF42281EFC80098812A /* main.m in Sources */,
+				AAE1A2652512AA0C00EB172A /* ConnectionDetailsViewController.m in Sources */,
 				8E509FE62281EFC60098812A /* AppDelegate.m in Sources */,
+				AA547B22251CA4290024E0CA /* LocalStorage.m in Sources */,
+				AA9291672487C52200CE2F64 /* CMConfig.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
