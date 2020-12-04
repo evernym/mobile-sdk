@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         }
         String token = prefs.getString(Constants.FCM_TOKEN, null);
         if (token != null) {
-            ConnectMeVcx.updateAgentInfo("1", token).whenComplete((res, err) -> {
+            ConnectMeVcx.updateAgentInfo(UUID.randomUUID().toString(), token).whenComplete((res, err) -> {
                 if (err == null) {
                     Log.d(TAG, "FCM token updated successfully");
                     prefs.edit()
@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         Response response = client.newCall(request).execute();
         if (!response.isSuccessful()) {
-            throw new Exception("Response failed with code " + response.code());
+            throw new Exception("Response failed with code " + response.code() + ". Please make sure to change your sponsor's server URL in Constants.java if you haven't.");
         }
         String token = response.body().string();
         Log.d(TAG, "Retrieved token: " + token);

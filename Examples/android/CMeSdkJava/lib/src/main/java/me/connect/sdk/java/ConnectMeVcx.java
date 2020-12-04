@@ -308,6 +308,7 @@ public class ConnectMeVcx {
         CompletableFuture<Void> result = new CompletableFuture<>();
         try {
             JSONObject config = new JSONObject();
+            config.put("type", 3);
             config.put("id", id);
             config.put("value", "FCM:" + token);
             UtilsApi.vcxUpdateAgentInfo(config.toString()).whenComplete((v, err) -> {

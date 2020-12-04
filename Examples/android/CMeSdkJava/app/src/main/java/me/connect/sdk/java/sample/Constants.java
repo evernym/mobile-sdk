@@ -8,5 +8,6 @@ public interface Constants {
     String SPONSEE_ID = "sponsee_id";
     String PROVISION_TOKEN = "provision_token";
     String PROVISION_TOKEN_RETRIEVED = "provision_token_retrieved";
-    String SERVER_URL = "http://localhost:4320/generate";
+    //URL of your server as sponsor that would return signed provision token
+    String SERVER_URL = "http://172.17.0.3:4320/generate";
 }
