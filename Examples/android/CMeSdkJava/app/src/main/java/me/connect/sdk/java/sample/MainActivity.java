@@ -116,6 +116,14 @@ public class MainActivity extends AppCompatActivity {
 
     private String retrieveToken() throws Exception {
         Log.d(TAG, "Retrieving token");
+
+        if (Constants.SERVER_URL.equals(Constants.PLACEHOLDER_SERVER_URL)) {
+            runOnUiThread(() -> {
+                Toast.makeText(this, "Error while provisioning. Sponsor's server url is not set", Toast.LENGTH_LONG).show();
+            });
+            throw new Exception("Sponsor's server url seems to be not set, please set your server url in constants file to provision the app.");
+        }
+
         SharedPreferences prefs = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
         String sponseeId = prefs.getString(Constants.SPONSEE_ID, null);
         if (sponseeId == null) {
@@ -137,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         Response response = client.newCall(request).execute();
         if (!response.isSuccessful()) {
-            throw new Exception("Response failed with code " + response.code() + ". Please make sure to change your sponsor's server URL in Constants.java if you haven't.");
+            throw new Exception("Response failed with code " + response.code());
         }
         String token = response.body().string();
         Log.d(TAG, "Retrieved token: " + token);
