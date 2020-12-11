@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.evernym.sdk.vcx.StringUtils;
+import com.evernym.sdk.vcx.utils.UtilsApi;
+
 import org.json.JSONObject;
 
 import java.util.UUID;
@@ -51,7 +54,8 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     token = retrieveToken();
                 } catch (Exception ex) {
-                    Log.e(TAG, "Failed to retrieve token: ", ex);
+                    Log.e(TAG, "Failed to retrieve token, init cannot continue: ", ex);
+                    return;
                 }
             } else {
                 token = getSavedToken();
@@ -117,11 +121,11 @@ public class MainActivity extends AppCompatActivity {
     private String retrieveToken() throws Exception {
         Log.d(TAG, "Retrieving token");
 
-        if (Constants.SERVER_URL.equals(Constants.PLACEHOLDER_SERVER_URL)) {
+        if (StringUtils.isNullOrWhiteSpace(Constants.SERVER_URL) || Constants.SERVER_URL.equals(Constants.PLACEHOLDER_SERVER_URL)) {
             runOnUiThread(() -> {
-                Toast.makeText(this, "Error while provisioning. Sponsor's server url is not set", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Error: sponsor server URL is not set.", Toast.LENGTH_LONG).show();
             });
-            throw new Exception("Sponsor's server url seems to be not set, please set your server url in constants file to provision the app.");
+            throw new Exception("Sponsor's server URL seems to be not set, please set your server URL in constants file to provision the app.");
         }
 
         SharedPreferences prefs = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
