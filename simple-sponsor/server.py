@@ -64,7 +64,7 @@ async def run():
     logging.info("Open wallet")
     handle = await wallet.open_wallet(conf, cred)
     try:
-        did_json = '{"did": "%s", "seed": "%s"}'%(cfg["did"], cfg["seed"])
+        did_json = '{"seed": "%s"}'%(cfg["seed"])
         DID, verkey = await did.create_and_store_my_did(handle, did_json)
         logging.info("DID: " + DID)
         logging.info("Verkey: " + verkey)
