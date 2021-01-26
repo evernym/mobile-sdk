@@ -17,4 +17,7 @@ public class Connection {
 
     @ColumnInfo(name = "icon")
     public String icon;
+
+    @ColumnInfo(name = "pwdid")
+    public String pwDid;
 }

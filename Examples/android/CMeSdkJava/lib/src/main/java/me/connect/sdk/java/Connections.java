@@ -271,6 +271,20 @@ public class Connections {
         return result;
     }
 
+    public static @NonNull
+    String getPwDid(@NonNull String serializedConnection) {
+        String pwDid = null;
+        try {
+            Integer handle = ConnectionApi.connectionDeserialize(serializedConnection).get();
+            pwDid = ConnectionApi.connectionGetPwDid(handle).get();
+        } catch (Exception e) {
+            Logger.getInstance().e("Failed to get connection pwDID", e);
+            e.printStackTrace();
+        }
+        return pwDid;
+    }
+
+
     /**
      * Loops indefinitely until connection status is not changed
      *

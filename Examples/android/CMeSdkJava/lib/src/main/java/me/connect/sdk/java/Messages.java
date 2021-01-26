@@ -74,7 +74,8 @@ public class Messages {
                                                 if (messageType.matches(type)) {
                                                     String messageUid = message.getString("uid");
                                                     String msg = payload.getString("@msg");
-                                                    messages.add(new Message(messageUid, msg, type));
+                                                    String status = message.getString("statusCode");
+                                                    messages.add(new Message(messageUid, msg, type,status));
                                                 }
                                             }
                                         }
@@ -95,6 +96,50 @@ public class Messages {
 
 
         } catch (Exception ex) {
+            result.completeExceptionally(ex);
+        }
+        return result;
+    }
+
+    /**
+     * Download message.
+     *
+     * @param messageId message ID
+     * @return List of {@link Message}
+     */
+    public static CompletableFuture<List<Message>> downloadMessage(@NonNull String messageId) {
+        CompletableFuture<List<Message>> result = new CompletableFuture<>();
+        try {
+
+            UtilsApi.vcxGetMessage(messageId).whenComplete((messageString, err) -> {
+                if (err != null) {
+                    Logger.getInstance().e("Failed to get message: ", err);
+                    return;
+                }
+                try {
+                    List<Message> messages = new ArrayList<>();
+                    JSONArray messagesJson = new JSONArray(messageString);
+                    for (int i = 0; i < messagesJson.length(); i++) {
+                        JSONArray msgsJson = messagesJson.getJSONObject(i).optJSONArray("msgs");
+                        if (msgsJson != null) {
+                            for (int j = 0; j < msgsJson.length(); j++) {
+                                JSONObject message = msgsJson.getJSONObject(j);
+                                JSONObject payload = new JSONObject(message.getString("decryptedPayload"));
+                                String type = payload.getJSONObject("@type").getString("name");
+                                String messageUid = message.getString("uid");
+                                String status = message.getString("statusCode");
+                                String msg = payload.getString("@msg");
+                                messages.add(new Message(messageUid, msg, type, status));
+                            }
+                        }
+                    }
+                    result.complete(messages);
+                } catch (JSONException ex) {
+                    result.completeExceptionally(ex);
+                }
+
+            });
+        } catch (VcxException ex) {
             result.completeExceptionally(ex);
         }
         return result;

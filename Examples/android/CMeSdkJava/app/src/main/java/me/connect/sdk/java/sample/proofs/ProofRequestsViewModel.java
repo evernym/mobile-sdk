@@ -5,7 +5,6 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,10 +23,11 @@ import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Connection;
 import me.connect.sdk.java.sample.db.entity.ProofRequest;
+import me.connect.sdk.java.sample.messages.ProofDataHolder;
 
 public class ProofRequestsViewModel extends AndroidViewModel {
     private final Database db;
-    private MutableLiveData<List<ProofRequest>> proofRequests;
+    private LiveData<List<ProofRequest>> proofRequests;
 
     public ProofRequestsViewModel(@NonNull Application application) {
         super(application);
@@ -36,9 +36,8 @@ public class ProofRequestsViewModel extends AndroidViewModel {
 
     public LiveData<List<ProofRequest>> getProofRequests() {
         if (proofRequests == null) {
-            proofRequests = new MutableLiveData<>();
+            proofRequests = db.proofRequestDao().getAll();
         }
-        loadProofRequests();
         return proofRequests;
     }
 
@@ -67,7 +66,6 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                         proof.serialized = serializedProof;
                         db.proofRequestDao().update(proof);
                     }
-                    loadProofRequests();
                     liveData.postValue(e == null);
                     return null;
                 });
@@ -93,17 +91,9 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                     proof.accepted = false;
                     db.proofRequestDao().update(proof);
                 }
-                loadProofRequests();
                 liveData.postValue(err == null);
                 return null;
             });
-        });
-    }
-
-    private void loadProofRequests() {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            List<ProofRequest> data = db.proofRequestDao().getAll();
-            proofRequests.postValue(data);
         });
     }
 
@@ -115,12 +105,12 @@ public class ProofRequestsViewModel extends AndroidViewModel {
 
     private void checkProofRequests(SingleLiveData<Boolean> data) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            List<Connection> connections = db.connectionDao().getAll();
+            List<Connection> connections = db.connectionDao().getAllAsync();
             for (Connection c : connections) {
                 Messages.getPendingMessages(c.serialized, MessageType.PROOF_REQUEST).handle((res, throwable) -> {
                     if (res != null) {
                         for (Message message : res) {
-                            ProofDataHolder holder = extractRequestedFieldsFromProofMessage(message);
+                            ProofDataHolder holder = ProofDataHolder.extractRequestedFieldsFromProofMessage(message);
                             if (!db.proofRequestDao().checkExists(holder.threadId)) {
                                 Proofs.createWithRequest(UUID.randomUUID().toString(), holder.proofReq).handle((pr, err) -> {
                                     if (err != null) {
@@ -135,7 +125,6 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                                         proof.messageId = message.getUid();
                                         db.proofRequestDao().insertAll(proof);
                                     }
-                                    loadProofRequests();
                                     return null;
                                 });
                             }
@@ -146,43 +135,5 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                 });
             }
         });
-    }
-
-    private ProofDataHolder extractRequestedFieldsFromProofMessage(Message msg) {
-        try {
-            JSONObject json = new JSONObject(msg.getPayload());
-            JSONObject data = json.getJSONObject("proof_request_data");
-            String threadId = json.getString("thread_id");
-            String name = data.getString("name");
-            JSONObject requestedAttrs = data.getJSONObject("requested_attributes");
-            Iterator<String> keys = requestedAttrs.keys();
-            StringBuilder attributes = new StringBuilder();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                String value = requestedAttrs.getJSONObject(key).getString("name");
-                attributes.append(value);
-                if (keys.hasNext()) {
-                    attributes.append(", ");
-                }
-            }
-            return new ProofDataHolder(threadId, name, attributes.toString(), msg.getPayload());
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    static class ProofDataHolder {
-        String threadId;
-        String name;
-        String attributes;
-        String proofReq;
-
-        public ProofDataHolder(String threadId, String name, String attributes, String proofReq) {
-            this.threadId = threadId;
-            this.name = name;
-            this.attributes = attributes;
-            this.proofReq = proofReq;
-        }
     }
 }

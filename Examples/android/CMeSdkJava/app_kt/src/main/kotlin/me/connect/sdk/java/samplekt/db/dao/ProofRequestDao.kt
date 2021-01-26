@@ -1,5 +1,6 @@
 package me.connect.sdk.java.samplekt.db.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import me.connect.sdk.java.samplekt.db.entity.ProofRequest
 
@@ -7,7 +8,7 @@ import me.connect.sdk.java.samplekt.db.entity.ProofRequest
 @Dao
 interface ProofRequestDao {
     @Query("SELECT * FROM proofrequest")
-    suspend fun getAll(): List<ProofRequest>
+    fun getAll(): LiveData<List<ProofRequest>>
 
     @Query("SELECT * FROM proofrequest where id = :id")
     suspend fun getById(id: Int): ProofRequest

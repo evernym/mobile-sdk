@@ -6,44 +6,35 @@ import android.util.Base64
 import android.webkit.URLUtil
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
-import me.connect.sdk.java.samplekt.SingleLiveData
-import me.connect.sdk.java.samplekt.db.Database
-import me.connect.sdk.java.samplekt.db.entity.Connection
 import me.connect.sdk.java.Connections
 import me.connect.sdk.java.connection.QRConnection
 import me.connect.sdk.java.message.MessageState
+import me.connect.sdk.java.samplekt.SingleLiveData
 import me.connect.sdk.java.samplekt.connections.ConnectionCreateResult.*
+import me.connect.sdk.java.samplekt.db.Database
+import me.connect.sdk.java.samplekt.db.entity.Connection
 import me.connect.sdk.java.samplekt.wrap
 import org.json.JSONException
 import org.json.JSONObject
-import java.lang.Exception
 
 
 class ConnectionsViewModel(application: Application) : AndroidViewModel(application) {
     private val db: Database = Database.getInstance(application)
-    private val connections: MutableLiveData<List<Connection>> by lazy {
-        MutableLiveData<List<Connection>>()
+    private val connectionsLiveData: LiveData<List<Connection>> by lazy {
+        db.connectionDao().getAll()
     }
 
-    fun getConnections(): LiveData<List<Connection>> {
-        loadConnections()
-        return connections
-    }
+    fun getConnections(): LiveData<List<Connection>> = connectionsLiveData
+
 
     fun newConnection(invite: String): SingleLiveData<ConnectionCreateResult> {
         val data = SingleLiveData<ConnectionCreateResult>()
         createConnection(invite, data)
         return data
-    }
-
-    private fun loadConnections() = viewModelScope.launch(Dispatchers.IO) {
-        val data = db.connectionDao().getAll()
-        connections.postValue(data)
     }
 
 
@@ -59,13 +50,14 @@ class ConnectionsViewModel(application: Application) : AndroidViewModel(applicat
             }
             val res = Connections.create(parsedInvite, QRConnection()).wrap().await()
             val serializedCon = Connections.awaitStatusChange(res, MessageState.ACCEPTED)
+            val pwDid = Connections.getPwDid(serializedCon)
             val c = Connection(
                     name = data!!.name,
                     icon = data.logo,
-                    serialized = serializedCon
+                    serialized = serializedCon,
+                    pwDid = pwDid
             )
             db.connectionDao().insertAll(c)
-            loadConnections()
             liveData.postValue(SUCCESS)
         } catch (e: Exception) {
             e.printStackTrace()

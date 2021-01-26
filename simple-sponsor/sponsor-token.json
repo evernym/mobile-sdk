@@ -1,0 +1,7 @@
+{
+    "name": "Testing sponsor server 1",
+    "id": "Testing sponsor server 1",
+    "keys": [{"verKey":"92u6fktGgGvyYdnrmL4H9YJuB67BoKfEgehfpS3s96Cy"}],
+    "endpoint": "http://voz.dsr-corporation.com:60132/message",
+    "active": true
+}

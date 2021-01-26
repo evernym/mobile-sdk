@@ -1,5 +1,6 @@
 package me.connect.sdk.java.samplekt.db.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import me.connect.sdk.java.samplekt.db.entity.CredentialOffer
 
@@ -7,7 +8,7 @@ import me.connect.sdk.java.samplekt.db.entity.CredentialOffer
 @Dao
 interface CredentialOfferDao {
     @Query("SELECT * FROM credentialoffer")
-    suspend fun getAll(): List<CredentialOffer>
+    fun getAll(): LiveData<List<CredentialOffer>>
 
     @Query("SELECT * FROM credentialoffer WHERE id = :id")
     suspend fun getById(id: Int): CredentialOffer

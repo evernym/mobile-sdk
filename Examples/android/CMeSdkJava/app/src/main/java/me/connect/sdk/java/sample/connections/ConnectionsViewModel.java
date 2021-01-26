@@ -8,7 +8,6 @@ import android.webkit.URLUtil;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,7 +29,7 @@ import static me.connect.sdk.java.sample.connections.ConnectionCreateResult.SUCC
 
 public class ConnectionsViewModel extends AndroidViewModel {
     private final Database db;
-    private MutableLiveData<List<Connection>> connections;
+    private LiveData<List<Connection>> connections;
 
     public ConnectionsViewModel(@NonNull Application application) {
         super(application);
@@ -39,9 +38,8 @@ public class ConnectionsViewModel extends AndroidViewModel {
 
     public LiveData<List<Connection>> getConnections() {
         if (connections == null) {
-            connections = new MutableLiveData<>();
+            connections = db.connectionDao().getAll();
         }
-        loadConnections();
         return connections;
     }
 
@@ -49,13 +47,6 @@ public class ConnectionsViewModel extends AndroidViewModel {
         SingleLiveData<ConnectionCreateResult> data = new SingleLiveData<>();
         createConnection(invite, data);
         return data;
-    }
-
-    private void loadConnections() {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            List<Connection> data = db.connectionDao().getAll();
-            connections.postValue(data);
-        });
     }
 
     private void createConnection(String invite, SingleLiveData<ConnectionCreateResult> liveData) {
@@ -76,12 +67,13 @@ public class ConnectionsViewModel extends AndroidViewModel {
                                         .handle((res, throwable) -> {
                                             if (res != null) {
                                                 String serializedCon = Connections.awaitStatusChange(res, MessageState.ACCEPTED);
+                                                String pwDid = Connections.getPwDid(serializedCon);
                                                 Connection c = new Connection();
                                                 c.name = data.name;
                                                 c.icon = data.logo;
+                                                c.pwDid = pwDid;
                                                 c.serialized = serializedCon;
                                                 db.connectionDao().insertAll(c);
-                                                loadConnections();
                                             }
                                             if (throwable != null) {
                                                 throwable.printStackTrace();
