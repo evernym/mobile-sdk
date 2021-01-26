@@ -1,5 +1,6 @@
 package me.connect.sdk.java.sample.db.dao;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -13,7 +14,7 @@ import me.connect.sdk.java.sample.db.entity.ProofRequest;
 @Dao
 public interface ProofRequestDao {
     @Query("SELECT * FROM proofrequest")
-    List<ProofRequest> getAll();
+    LiveData<List<ProofRequest>> getAll();
 
     @Query("SELECT * FROM proofrequest where id = :id")
     ProofRequest getById(int id);

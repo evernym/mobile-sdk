@@ -22,7 +22,7 @@ import me.connect.sdk.java.sample.db.entity.StructuredMessage;
 
 public class StructuredMessagesViewModel extends AndroidViewModel {
     private final Database db;
-    private MutableLiveData<List<StructuredMessage>> structMessages;
+    private LiveData<List<StructuredMessage>> structMessages;
 
     public StructuredMessagesViewModel(@NonNull Application application) {
         super(application);
@@ -31,17 +31,9 @@ public class StructuredMessagesViewModel extends AndroidViewModel {
 
     public LiveData<List<StructuredMessage>> getStructuredMessages() {
         if (structMessages == null) {
-            structMessages = new MutableLiveData<>();
+            structMessages = db.structuredMessageDao().getAll();
         }
-        loadStructuredMessages();
         return structMessages;
-    }
-
-    private void loadStructuredMessages() {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            List<StructuredMessage> data = db.structuredMessageDao().getAll();
-            structMessages.postValue(data);
-        });
     }
 
     public SingleLiveData<Boolean> getNewStructuredMessages() {
@@ -52,7 +44,7 @@ public class StructuredMessagesViewModel extends AndroidViewModel {
 
     private void checkStructMessages(SingleLiveData<Boolean> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            List<Connection> connections = db.connectionDao().getAll();
+            List<Connection> connections = db.connectionDao().getAllAsync();
             for (Connection c : connections) {
                 Messages.getPendingMessages(c.serialized, MessageType.QUESTION).handle((res, throwable) -> {
                     if (res != null) {
@@ -69,7 +61,6 @@ public class StructuredMessagesViewModel extends AndroidViewModel {
                                 sm.type = holder.getType();
                                 sm.serialized = msg.getPayload();
                                 db.structuredMessageDao().insertAll(sm);
-                                loadStructuredMessages();
                             }
                         }
                     }
@@ -96,7 +87,6 @@ public class StructuredMessagesViewModel extends AndroidViewModel {
                     sm.selectedAnswer = answer;
                     db.structuredMessageDao().update(sm);
                 }
-                loadStructuredMessages();
                 liveData.postValue(err == null);
                 return null;
             });
