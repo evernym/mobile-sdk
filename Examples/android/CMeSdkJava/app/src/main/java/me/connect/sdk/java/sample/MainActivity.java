@@ -1,14 +1,13 @@
 package me.connect.sdk.java.sample;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.evernym.sdk.vcx.StringUtils;
-import com.evernym.sdk.vcx.utils.UtilsApi;
 
 import org.json.JSONObject;
 
@@ -17,7 +16,6 @@ import java.util.concurrent.Executors;
 
 import me.connect.sdk.java.AgencyConfig;
 import me.connect.sdk.java.ConnectMeVcx;
-import me.connect.sdk.java.SecurePreferencesHelper;
 import me.connect.sdk.java.sample.databinding.MainActivityBinding;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;

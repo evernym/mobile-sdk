@@ -18,5 +18,8 @@ data class Connection(
         var name: String,
 
         @ColumnInfo(name = "icon")
-        var icon: String?
+        var icon: String?,
+
+        @ColumnInfo(name = "pwdid")
+        var pwDid: String
 )
