@@ -4,6 +4,12 @@
 - To push notify a message to your customer's app (`Sponsee`), you will need to setup your own Push Notification System and handle Message Forwarding on your back-end.
 - You as the `Sponsor` will receive messages via Message Forwarding from Evernym's Cloud Service. These messages will contain enough info to enable to you push-notify your cutomer (`Sponsee`)
 ### Message Forwarding
+
+<p align="center">
+ <img src="https://github.com/evernym/mobile-sdk/blob/master/wiki-images/Push%20Notifications%20Diagram.png">
+</p>
+
+
 - Evernym's Cloud Service is not able to push notify your (`Sponsor's`) application (e.g. `Sponsee's` app install) because the appropriate push notification (e.g. Firebase) key is not available for Evernym's Cloud Service. \
 Evernym's Cloud Service will need to forward the customer's (`Sponsee's`) incoming message to you (`Sponsor`) so that you can properly push notify your customer. 
 
