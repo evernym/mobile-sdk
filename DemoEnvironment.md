@@ -10,4 +10,4 @@
 }
 ```
 
-  [<< Continue with wallet initialization](2.InitializingTheWallet.md#selecting-the-ledger-and-agency)
+  [<< Continue with initialization](2.Initialization.md)

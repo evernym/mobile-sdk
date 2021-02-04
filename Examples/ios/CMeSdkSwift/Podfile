@@ -1,5 +1,5 @@
 # Uncomment the next line to define a global platform for your project
-platform :ios, '9.0'
+platform :ios, '10.0'
 source 'https://github.com/CocoaPods/Specs.git'
 source 'git@github.com:evernym/mobile-sdk.git'
 
@@ -8,10 +8,10 @@ target 'CMeSdkSwift' do
   use_frameworks!
 
   # Pods for ConnectMe
-  pod 'vcx', :path => 'https://github.com/evernym/VCX-Cocoapods'
-
+  pod 'vcx', :path => '../../../vcx.podspec'
   pod 'Firebase/Analytics'
   pod 'Firebase/Messaging'
+  pod 'QRCodeReaderViewController'
 
   target 'CMeSdkSwiftTests' do
     inherit! :search_paths

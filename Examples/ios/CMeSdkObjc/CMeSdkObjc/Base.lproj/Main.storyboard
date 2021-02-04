@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="o3f-D5-7as">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="o3f-D5-7as">
     <device id="retina6_5" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -52,6 +52,32 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dWQ-Qx-YPg">
                                 <rect key="frame" x="15" y="98" width="384" height="180"/>
                                 <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VTt-eS-0Qp">
+                                        <rect key="frame" x="196" y="115.33333333333334" width="188" height="44"/>
+                                        <color key="backgroundColor" red="0.52549019610000003" green="0.72549019609999998" blue="0.23137254900000001" alpha="1" colorSpace="calibratedRGB"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="44" id="4cQ-WJ-dyW"/>
+                                        </constraints>
+                                        <state key="normal" title="Scan QR code">
+                                            <color key="titleColor" white="1" alpha="0.95813160210000003" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="scanQR:" destination="BYZ-38-t0r" eventType="touchUpInside" id="2NJ-e0-dlN"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UUF-6p-g10">
+                                        <rect key="frame" x="0.0" y="115.33333333333334" width="188" height="44"/>
+                                        <color key="backgroundColor" red="0.52549019607843139" green="0.72549019607843135" blue="0.23137254901960785" alpha="1" colorSpace="calibratedRGB"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="44" id="3Q4-4h-jan"/>
+                                        </constraints>
+                                        <state key="normal" title="Add Connection">
+                                            <color key="titleColor" white="1" alpha="0.95813160210000003" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="addNewConn:" destination="BYZ-38-t0r" eventType="touchUpInside" id="uVy-Je-RLg"/>
+                                        </connections>
+                                    </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="New Connection" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="l6h-Nu-ngO">
                                         <rect key="frame" x="0.0" y="0.0" width="374" height="20.333333333333332"/>
                                         <accessibility key="accessibilityConfiguration" label="New Connection"/>
@@ -69,31 +95,21 @@
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                     </textView>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UUF-6p-g10">
-                                        <rect key="frame" x="0.0" y="115.33333333333334" width="384" height="44"/>
-                                        <color key="backgroundColor" red="0.52549019607843139" green="0.72549019607843135" blue="0.23137254901960785" alpha="1" colorSpace="calibratedRGB"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="44" id="3Q4-4h-jan"/>
-                                        </constraints>
-                                        <state key="normal" title="Add Connection">
-                                            <color key="titleColor" white="1" alpha="0.95813160210000003" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        </state>
-                                        <connections>
-                                            <action selector="addNewConn:" destination="BYZ-38-t0r" eventType="touchUpInside" id="uVy-Je-RLg"/>
-                                        </connections>
-                                    </button>
                                 </subviews>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
+                                    <constraint firstItem="VTt-eS-0Qp" firstAttribute="centerY" secondItem="UUF-6p-g10" secondAttribute="centerY" id="0Hm-Ut-qaB"/>
                                     <constraint firstAttribute="trailing" secondItem="E0h-Nt-z7x" secondAttribute="trailing" id="Kem-j1-htr"/>
                                     <constraint firstItem="UUF-6p-g10" firstAttribute="leading" secondItem="dWQ-Qx-YPg" secondAttribute="leading" id="L8c-91-iKR"/>
                                     <constraint firstItem="E0h-Nt-z7x" firstAttribute="top" secondItem="l6h-Nu-ngO" secondAttribute="bottom" constant="5" id="MGf-Kx-8I3"/>
+                                    <constraint firstItem="UUF-6p-g10" firstAttribute="width" secondItem="dWQ-Qx-YPg" secondAttribute="width" multiplier="0.49" id="ObR-KG-wG2"/>
                                     <constraint firstAttribute="height" constant="180" id="T8J-CZ-Kww"/>
                                     <constraint firstItem="UUF-6p-g10" firstAttribute="top" secondItem="E0h-Nt-z7x" secondAttribute="bottom" constant="10" id="Vop-PW-Fyr"/>
                                     <constraint firstAttribute="trailing" secondItem="l6h-Nu-ngO" secondAttribute="trailing" constant="10" id="YWd-Vr-WCE"/>
-                                    <constraint firstAttribute="trailing" secondItem="UUF-6p-g10" secondAttribute="trailing" id="cfr-oA-mJI"/>
                                     <constraint firstItem="l6h-Nu-ngO" firstAttribute="leading" secondItem="dWQ-Qx-YPg" secondAttribute="leading" id="fMX-QU-U6y"/>
                                     <constraint firstItem="E0h-Nt-z7x" firstAttribute="leading" secondItem="dWQ-Qx-YPg" secondAttribute="leading" id="iWu-bQ-Vaf"/>
+                                    <constraint firstAttribute="trailing" secondItem="VTt-eS-0Qp" secondAttribute="trailing" id="j7m-hc-Njs"/>
+                                    <constraint firstItem="VTt-eS-0Qp" firstAttribute="width" secondItem="dWQ-Qx-YPg" secondAttribute="width" multiplier="0.49" id="pyp-Mo-GLi"/>
                                     <constraint firstItem="l6h-Nu-ngO" firstAttribute="top" secondItem="dWQ-Qx-YPg" secondAttribute="top" id="uVj-vZ-7AT"/>
                                 </constraints>
                             </view>
@@ -123,7 +139,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1078.2608695652175" y="132.58928571428572"/>
+            <point key="canvasLocation" x="1139" y="133"/>
         </scene>
         <!--Connection Details View Controller-->
         <scene sceneID="gr6-sp-sku">
@@ -220,7 +236,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="g6G-c2-Egb" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1863.2" y="132.68365817091455"/>
+            <point key="canvasLocation" x="1923" y="133"/>
         </scene>
         <!--Proof Details View Controller-->
         <scene sceneID="TNL-91-lpe">
@@ -322,7 +338,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qKZ-Ik-hJQ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2604" y="132.68365817091455"/>
+            <point key="canvasLocation" x="2664" y="133"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="2Zw-UX-Szx">
@@ -340,7 +356,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="eax-E7-GT3" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="140" y="132.68365817091455"/>
+            <point key="canvasLocation" x="200" y="133"/>
         </scene>
     </scenes>
     <resources>

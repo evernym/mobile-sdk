@@ -13,6 +13,7 @@
 @property (weak, nonatomic) IBOutlet UITextView *addConnConfigTextView;
 
 - (IBAction)addNewConn:(id)sender;
+- (IBAction)scanQR: (UIButton*) sender;
 
 @end
 

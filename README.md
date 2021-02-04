@@ -27,27 +27,21 @@ Connecting and exchanging encrypted data between an Agency (server side) and an 
 After project setup and adding dependency libraries, perform the the following steps: 
 
 1. [Initialize the mobile SDK](1.ProjectSetup.md) - VCX library in app runtime 
-2. [Initialize the wallet](2.InitializingTheWallet.md) and communicate with a specific Agency (web server)
+2. [Initialize the wallet](2.Initialization.md) and communicate with a specific Agency (web server)
 3. [Accept the invitation and establish a connection](3.Connections.md) with the entity  
 4. [Accept the offered credential](4.Credentials.md)
 5. [Accept and respond to a proof request](5.Proofs.md)
 6. [Exchange secured structured messages](6.StructuredMessages.md)
 7. [Connection Redirection](7.ConnectionRedirection.md)
-   
+8. [Messages.md](8.Messages.md)
+9. [CredentialsWithAttachments.md](9.CredentialsWithAttachments.md)
+
 ![Mobile SDK Flow](wiki-images/ConnectMeMobileSDK.png)
 
-
-<!--To be created in response to customer feedback ## FAQ
- 
-- **How do I do *specifically* so and so?**
-    - No problem! Just do this. -->
-
 ### Helpful links
+- [Frequently asked questions](FAQ.md)
 - Connect.Me Public Beta &#8212; Most of the features of the Evernym Mobile SDK are showcased in [Connect.Me](https://connect.me/). You can use upcoming releases of Connect.Me by clicking the appropriate link from your device.
-  - IOS: https://testflight.apple.com/join/bmbX21Kq
-  - Android: https://play.google.com/apps/testing/me.connect
+  - IOS: [https://testflight.apple.com/join/bmbX21Kq](https://testflight.apple.com/join/bmbX21Kq)
+  - Android: [https://play.google.com/apps/testing/me.connect](https://play.google.com/apps/testing/me.connect)
 - [VCX Errors](VcxErrors.md) &#8212; The list of all possible VCX errors and their definitions. 
-- <a href="https://github.com/evernym/mobile-starter" target="_blank">Mobile Starter Kit</a> &#8212; Current repo of mobile starter kit
-- <a href="https://drive.google.com/drive/folders/1-ySuVqU7q79jG2epoVJH4bFU1CqWVGnR?usp=sharing" target="_blank">Starter files</a> &#8212; Current location of AAR and Cocoapods
-- <a href="https://docs.google.com/document/d/1HAa27qArYlU0NO1VbEjA8ANXmVHl-b7fxa40e21I5L8/edit" target="_blank">Old SDK docs</a>
 - <a href="https://github.com/sovrin-foundation/connector-app" target="_blank">Sovrin Connector App</a> &#8212; Helpful resource to see how an older version of mobile SDK works.
