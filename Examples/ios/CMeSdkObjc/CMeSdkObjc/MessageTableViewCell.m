@@ -63,7 +63,13 @@
 
 -(void)populateCredentialCell {
     NSDictionary* credentialData = [CMUtilities jsonToDictionary: [CMUtilities jsonToDictionary: message[@"decryptedPayload"]][@"@msg"]];
-    NSDictionary* values = [CMUtilities jsonToDictionary: credentialData[@"libindy_cred"]][@"values"];
+    NSMutableDictionary* values = [@{} mutableCopy];
+    if ([[credentialData allKeys] containsObject: @"libindy_cred"]){
+        values = [CMUtilities jsonToDictionary: credentialData[@"libindy_cred"]][@"values"];
+    }
+    if ([[credentialData allKeys] containsObject: @"libindy_offer"]){
+//        values = [CMUtilities jsonToDictionary: credentialData[@"libindy_offer"]][@"values"];
+    }
     self.titleLbl.text = [NSString stringWithFormat:@"Values: %lu", (unsigned long)[values count]];
     self.typeLbl.text = @"Credential";
 }

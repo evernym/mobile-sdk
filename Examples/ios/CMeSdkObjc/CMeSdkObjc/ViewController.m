@@ -7,10 +7,11 @@
 //
 
 #import "ViewController.h"
-#import "AppDelegate.h"
+#import "MobileSDK.h"
 #import "CMConnection.h"
 #import "ConnectionDetailsViewController.h"
 #import "LocalStorage.h"
+#import "QRCodeReaderViewController.h"
 
 @interface ViewController ()
 
@@ -46,8 +47,8 @@ UIGestureRecognizer *tapper;
     [tableView reloadData];
     [[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(vcxInitialized) name:@"vcxInitialized" object: nil];
 
-    _isInitialized = [(AppDelegate*)[[UIApplication   sharedApplication] delegate] sdkInited];
-    addConnectionBtn.enabled = _isInitialized;
+    _isInitialized = [[MobileSDK shared] sdkInited];
+    addConnectionBtn.enabled = [[MobileSDK shared] sdkInited];
 }
 
 - (void) viewWillDisappear:(BOOL)animated {
@@ -61,7 +62,12 @@ UIGestureRecognizer *tapper;
 - (IBAction)addNewConn: (id)sender {
     if(addConnConfigTextView.text.length > 3 && ![addConnConfigTextView.text isEqual: @"enter code here"]) {
         [CMConnection connect: addConnConfigTextView.text connectionType: QR phoneNumber: @"" withCompletionHandler: ^(NSDictionary *connectionData, NSError *error) {
+            if (error != nil && error > 0) {
+                NSLog(@"Error %@", error.localizedDescription);
+                return;
+            }
             if(connectionData) {
+                self.addConnConfigTextView.text = @"";
                 [self performSegueWithIdentifier: @"openConnectionDetails" sender: connectionData];
             }
         }];
@@ -149,6 +155,28 @@ UIGestureRecognizer *tapper;
     }
 }
 
+- (IBAction)scanQR: (UIButton*) sender {
+    if(!_isInitialized) {
+        NSLog(@"Please wait for VCX to initialize!");
+        return;
+    }
+    // Create the reader object
+    QRCodeReader *reader = [QRCodeReader readerWithMetadataObjectTypes:@[AVMetadataObjectTypeQRCode]];
+    QRCodeReaderViewController *vc = [QRCodeReaderViewController readerWithCancelButtonTitle:@"Cancel" codeReader: reader startScanningAtLoad:YES showSwitchCameraButton:YES showTorchButton:YES];
+    vc.modalPresentationStyle = UIModalPresentationFormSheet;
+
+    [self.navigationController presentViewController: vc animated: YES completion:^{
+        NSLog(@"QR code scanner presented");
+    }];
+
+    [reader setCompletionWithBlock:^(NSString *scanResult) {
+        NSLog(@"%@", scanResult);
+        self.addConnConfigTextView.text = scanResult;
+        [self addNewConn: sender];
+        [self dismissViewControllerAnimated: vc completion:^{
+            NSLog(@"QR code scanner dissmised");
+        }];
+    }];
+}
+
 @end
-
-

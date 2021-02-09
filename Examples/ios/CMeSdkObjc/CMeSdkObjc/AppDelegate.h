@@ -8,13 +8,12 @@
 
 #import <UIKit/UIKit.h>
 #import "vcx/vcx.h"
+@import Firebase;
 #import <UserNotifications/UserNotifications.h>
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate, FIRMessagingDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
-@property (strong, nonatomic) ConnectMeVcx *sdkApi;
-@property (nonatomic) BOOL sdkInited;
 
 @end
 

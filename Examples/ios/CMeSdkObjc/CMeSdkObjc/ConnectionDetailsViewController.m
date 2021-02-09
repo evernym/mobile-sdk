@@ -37,7 +37,7 @@
     // in push notification, we will also receive messageID, which will be used for downloading details for that specific messageID
     // here (without push notification) we will download all messages for given connection
 
-    for (int i = 0; i < 6; i += 1) {
+    for (int i = 0; i <= 6; i += 1) {
         [CMMessage downloadMessages: connection andType: i andMessageID: nil withCompletionHandler: ^(NSArray *messages, NSError *error) {
             NSLog(@"Received Messages: %@ for type %i",  messages, i);
             if([messages count] < 1){

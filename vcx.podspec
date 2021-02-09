@@ -1,8 +1,6 @@
-zipfile = "#{__dir__}/vcx.libvcxall_0.9.0-415d5e3af_universal.zip"
-
 Pod::Spec.new do |s|
   s.name             = 'vcx'
-  s.version          = '0.0.173'
+  s.version          = '1.4.0'
   s.summary          = 'The Objective-C wrapper around the libvcx shared library.'
 
   s.description      = <<-DESC
@@ -13,12 +11,11 @@ through to the libvcx shared library.
 
   s.homepage         = 'https://www.evernym.com/'
   s.author           = { 'evernym-ios-dev' => 'iosdev@evernym.com' }
-  # s.source           = { :http => 'file://'+ __dir__ + 'vcx.libvcxall_0.8.72522192-e42d787e1_universal.zip' }
   s.source = { :git => 'git@github.com:evernym/mobile-sdk.git' }
   s.source_files  = "src", "src/**/*.{h,m,swift}"
   s.requires_arc  = true
 
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '10.0'
   s.ios.vendored_frameworks="vcx/vcx.framework"
   s.compiler_flags = '-ObjC'
   s.public_header_files = 'vcx/vcx.framework/include/*.h'

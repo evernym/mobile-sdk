@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -16,6 +16,24 @@
 		8EAE24C52282059000F49443 /* CMeSdkSwiftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EAE24C42282059000F49443 /* CMeSdkSwiftTests.swift */; };
 		8EAE24D02282059000F49443 /* CMeSdkSwiftUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EAE24CF2282059000F49443 /* CMeSdkSwiftUITests.swift */; };
 		9E3B97700342E314B45F2D7C /* Pods_CMeSdkSwiftTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E38E5751FEEF929B42B3A33F /* Pods_CMeSdkSwiftTests.framework */; };
+		AAD4B56B25CB66680009588A /* MobileSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B55725CB66670009588A /* MobileSDK.m */; };
+		AAD4B56C25CB66680009588A /* ProductionPoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B55925CB66670009588A /* ProductionPoolTxnGenesis.m */; };
+		AAD4B56D25CB66680009588A /* CMConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B55A25CB66670009588A /* CMConfig.m */; };
+		AAD4B56E25CB66680009588A /* CMProofRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B55D25CB66670009588A /* CMProofRequest.m */; };
+		AAD4B56F25CB66680009588A /* CMMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B55F25CB66670009588A /* CMMessage.m */; };
+		AAD4B57025CB66680009588A /* CMConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B56025CB66670009588A /* CMConnection.m */; };
+		AAD4B57125CB66680009588A /* CMUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B56125CB66670009588A /* CMUtilities.m */; };
+		AAD4B57225CB66680009588A /* StagingPoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B56225CB66670009588A /* StagingPoolTxnGenesis.m */; };
+		AAD4B57325CB66680009588A /* CMCredential.m in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B56525CB66680009588A /* CMCredential.m */; };
+		AAD4B57425CB66680009588A /* LocalStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B56A25CB66680009588A /* LocalStorage.m */; };
+		AAD4B57D25CB69710009588A /* MessageTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B57B25CB69710009588A /* MessageTableViewCell.swift */; };
+		AAD4B57E25CB69710009588A /* MessageTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = AAD4B57C25CB69710009588A /* MessageTableViewCell.xib */; };
+		AAD4B58425CB69880009588A /* ProofAttributeTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B58225CB69880009588A /* ProofAttributeTableViewCell.swift */; };
+		AAD4B58525CB69880009588A /* ProofAttributeTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = AAD4B58325CB69880009588A /* ProofAttributeTableViewCell.xib */; };
+		AAD4B58B25CB70480009588A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AAD4B58925CB70480009588A /* GoogleService-Info.plist */; };
+		AAD4B58C25CB70480009588A /* GoogleService-InfoTemplate.plist in Resources */ = {isa = PBXBuildFile; fileRef = AAD4B58A25CB70480009588A /* GoogleService-InfoTemplate.plist */; };
+		AAD4B5BE25CB7CC60009588A /* ConnectionDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B5BD25CB7CC60009588A /* ConnectionDetailsViewController.swift */; };
+		AAD4B5C325CB95B70009588A /* ProofDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B5C225CB95B70009588A /* ProofDetailsViewController.swift */; };
 		E3598AA1529F3F9A8D414C04 /* Pods_CMeSdkSwiftUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92222F28015B863EEE067CBC /* Pods_CMeSdkSwiftUITests.framework */; };
 /* End PBXBuildFile section */
 
@@ -58,6 +76,35 @@
 		8EB557BA22820895009F625F /* CMeSdkSwift-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CMeSdkSwift-Bridging-Header.h"; sourceTree = "<group>"; };
 		92222F28015B863EEE067CBC /* Pods_CMeSdkSwiftUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CMeSdkSwiftUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9246816491E26704DCD6341E /* Pods-CMeSdkSwiftUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkSwiftUITests.release.xcconfig"; path = "Target Support Files/Pods-CMeSdkSwiftUITests/Pods-CMeSdkSwiftUITests.release.xcconfig"; sourceTree = "<group>"; };
+		AAD4B55725CB66670009588A /* MobileSDK.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MobileSDK.m; path = ../../../VCXHelpers/MobileSDK.m; sourceTree = "<group>"; };
+		AAD4B55825CB66670009588A /* CMUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CMUtilities.h; path = ../../../VCXHelpers/CMUtilities.h; sourceTree = "<group>"; };
+		AAD4B55925CB66670009588A /* ProductionPoolTxnGenesis.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ProductionPoolTxnGenesis.m; path = ../../../VCXHelpers/ProductionPoolTxnGenesis.m; sourceTree = "<group>"; };
+		AAD4B55A25CB66670009588A /* CMConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CMConfig.m; path = ../../../VCXHelpers/CMConfig.m; sourceTree = "<group>"; };
+		AAD4B55B25CB66670009588A /* CMCredential.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CMCredential.h; path = ../../../VCXHelpers/CMCredential.h; sourceTree = "<group>"; };
+		AAD4B55C25CB66670009588A /* CMConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CMConfig.h; path = ../../../VCXHelpers/CMConfig.h; sourceTree = "<group>"; };
+		AAD4B55D25CB66670009588A /* CMProofRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CMProofRequest.m; path = ../../../VCXHelpers/CMProofRequest.m; sourceTree = "<group>"; };
+		AAD4B55E25CB66670009588A /* StagingPoolTxnGenesis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StagingPoolTxnGenesis.h; path = ../../../VCXHelpers/StagingPoolTxnGenesis.h; sourceTree = "<group>"; };
+		AAD4B55F25CB66670009588A /* CMMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CMMessage.m; path = ../../../VCXHelpers/CMMessage.m; sourceTree = "<group>"; };
+		AAD4B56025CB66670009588A /* CMConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CMConnection.m; path = ../../../VCXHelpers/CMConnection.m; sourceTree = "<group>"; };
+		AAD4B56125CB66670009588A /* CMUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CMUtilities.m; path = ../../../VCXHelpers/CMUtilities.m; sourceTree = "<group>"; };
+		AAD4B56225CB66670009588A /* StagingPoolTxnGenesis.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = StagingPoolTxnGenesis.m; path = ../../../VCXHelpers/StagingPoolTxnGenesis.m; sourceTree = "<group>"; };
+		AAD4B56325CB66680009588A /* LocalStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LocalStorage.h; path = ../../../VCXHelpers/LocalStorage.h; sourceTree = "<group>"; };
+		AAD4B56425CB66680009588A /* CMProofRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CMProofRequest.h; path = ../../../VCXHelpers/CMProofRequest.h; sourceTree = "<group>"; };
+		AAD4B56525CB66680009588A /* CMCredential.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CMCredential.m; path = ../../../VCXHelpers/CMCredential.m; sourceTree = "<group>"; };
+		AAD4B56625CB66680009588A /* MobileSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MobileSDK.h; path = ../../../VCXHelpers/MobileSDK.h; sourceTree = "<group>"; };
+		AAD4B56725CB66680009588A /* ProductionPoolTxnGenesis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProductionPoolTxnGenesis.h; path = ../../../VCXHelpers/ProductionPoolTxnGenesis.h; sourceTree = "<group>"; };
+		AAD4B56825CB66680009588A /* CMConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CMConnection.h; path = ../../../VCXHelpers/CMConnection.h; sourceTree = "<group>"; };
+		AAD4B56925CB66680009588A /* CMMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CMMessage.h; path = ../../../VCXHelpers/CMMessage.h; sourceTree = "<group>"; };
+		AAD4B56A25CB66680009588A /* LocalStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LocalStorage.m; path = ../../../VCXHelpers/LocalStorage.m; sourceTree = "<group>"; };
+		AAD4B57B25CB69710009588A /* MessageTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageTableViewCell.swift; sourceTree = "<group>"; };
+		AAD4B57C25CB69710009588A /* MessageTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MessageTableViewCell.xib; sourceTree = "<group>"; };
+		AAD4B58225CB69880009588A /* ProofAttributeTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProofAttributeTableViewCell.swift; sourceTree = "<group>"; };
+		AAD4B58325CB69880009588A /* ProofAttributeTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ProofAttributeTableViewCell.xib; sourceTree = "<group>"; };
+		AAD4B58925CB70480009588A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		AAD4B58A25CB70480009588A /* GoogleService-InfoTemplate.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-InfoTemplate.plist"; sourceTree = "<group>"; };
+		AAD4B59025CB70600009588A /* CMeSdkSwift.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CMeSdkSwift.entitlements; sourceTree = "<group>"; };
+		AAD4B5BD25CB7CC60009588A /* ConnectionDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionDetailsViewController.swift; sourceTree = "<group>"; };
+		AAD4B5C225CB95B70009588A /* ProofDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProofDetailsViewController.swift; sourceTree = "<group>"; };
 		B7A6B6F06729797F9A7C11ED /* Pods-CMeSdkSwiftUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkSwiftUITests.debug.xcconfig"; path = "Target Support Files/Pods-CMeSdkSwiftUITests/Pods-CMeSdkSwiftUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		E38E5751FEEF929B42B3A33F /* Pods_CMeSdkSwiftTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CMeSdkSwiftTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -125,9 +172,19 @@
 		8EAE24AE2282058F00F49443 /* CMeSdkSwift */ = {
 			isa = PBXGroup;
 			children = (
+				AAD4B59025CB70600009588A /* CMeSdkSwift.entitlements */,
+				AAF9BFA525C8F19C00E4C1F4 /* Helpers */,
 				8EAE24AF2282058F00F49443 /* AppDelegate.swift */,
+				AAD4B58925CB70480009588A /* GoogleService-Info.plist */,
+				AAD4B58A25CB70480009588A /* GoogleService-InfoTemplate.plist */,
 				8EB557BA22820895009F625F /* CMeSdkSwift-Bridging-Header.h */,
 				8EAE24B12282058F00F49443 /* ViewController.swift */,
+				AAD4B5BD25CB7CC60009588A /* ConnectionDetailsViewController.swift */,
+				AAD4B57B25CB69710009588A /* MessageTableViewCell.swift */,
+				AAD4B58225CB69880009588A /* ProofAttributeTableViewCell.swift */,
+				AAD4B58325CB69880009588A /* ProofAttributeTableViewCell.xib */,
+				AAD4B5C225CB95B70009588A /* ProofDetailsViewController.swift */,
+				AAD4B57C25CB69710009588A /* MessageTableViewCell.xib */,
 				8EAE24B32282058F00F49443 /* Main.storyboard */,
 				8EAE24B62282059000F49443 /* Assets.xcassets */,
 				8EAE24B82282059000F49443 /* LaunchScreen.storyboard */,
@@ -164,8 +221,34 @@
 				B7A6B6F06729797F9A7C11ED /* Pods-CMeSdkSwiftUITests.debug.xcconfig */,
 				9246816491E26704DCD6341E /* Pods-CMeSdkSwiftUITests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		AAF9BFA525C8F19C00E4C1F4 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				AAD4B55C25CB66670009588A /* CMConfig.h */,
+				AAD4B55A25CB66670009588A /* CMConfig.m */,
+				AAD4B56825CB66680009588A /* CMConnection.h */,
+				AAD4B56025CB66670009588A /* CMConnection.m */,
+				AAD4B55B25CB66670009588A /* CMCredential.h */,
+				AAD4B56525CB66680009588A /* CMCredential.m */,
+				AAD4B56925CB66680009588A /* CMMessage.h */,
+				AAD4B55F25CB66670009588A /* CMMessage.m */,
+				AAD4B56425CB66680009588A /* CMProofRequest.h */,
+				AAD4B55D25CB66670009588A /* CMProofRequest.m */,
+				AAD4B55825CB66670009588A /* CMUtilities.h */,
+				AAD4B56125CB66670009588A /* CMUtilities.m */,
+				AAD4B56325CB66680009588A /* LocalStorage.h */,
+				AAD4B56A25CB66680009588A /* LocalStorage.m */,
+				AAD4B56625CB66680009588A /* MobileSDK.h */,
+				AAD4B55725CB66670009588A /* MobileSDK.m */,
+				AAD4B56725CB66680009588A /* ProductionPoolTxnGenesis.h */,
+				AAD4B55925CB66670009588A /* ProductionPoolTxnGenesis.m */,
+				AAD4B55E25CB66670009588A /* StagingPoolTxnGenesis.h */,
+				AAD4B56225CB66670009588A /* StagingPoolTxnGenesis.m */,
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -276,9 +359,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AAD4B58525CB69880009588A /* ProofAttributeTableViewCell.xib in Resources */,
 				8EAE24BA2282059000F49443 /* LaunchScreen.storyboard in Resources */,
+				AAD4B57E25CB69710009588A /* MessageTableViewCell.xib in Resources */,
+				AAD4B58C25CB70480009588A /* GoogleService-InfoTemplate.plist in Resources */,
 				8EAE24B72282059000F49443 /* Assets.xcassets in Resources */,
 				8EAE24B52282058F00F49443 /* Main.storyboard in Resources */,
+				AAD4B58B25CB70480009588A /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -390,7 +477,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				8EAE24B22282058F00F49443 /* ViewController.swift in Sources */,
+				AAD4B5BE25CB7CC60009588A /* ConnectionDetailsViewController.swift in Sources */,
+				AAD4B57225CB66680009588A /* StagingPoolTxnGenesis.m in Sources */,
+				AAD4B57025CB66680009588A /* CMConnection.m in Sources */,
 				8EAE24B02282058F00F49443 /* AppDelegate.swift in Sources */,
+				AAD4B56D25CB66680009588A /* CMConfig.m in Sources */,
+				AAD4B57425CB66680009588A /* LocalStorage.m in Sources */,
+				AAD4B56C25CB66680009588A /* ProductionPoolTxnGenesis.m in Sources */,
+				AAD4B57D25CB69710009588A /* MessageTableViewCell.swift in Sources */,
+				AAD4B56E25CB66680009588A /* CMProofRequest.m in Sources */,
+				AAD4B56F25CB66680009588A /* CMMessage.m in Sources */,
+				AAD4B57325CB66680009588A /* CMCredential.m in Sources */,
+				AAD4B5C325CB95B70009588A /* ProofDetailsViewController.swift in Sources */,
+				AAD4B57125CB66680009588A /* CMUtilities.m in Sources */,
+				AAD4B56B25CB66680009588A /* MobileSDK.m in Sources */,
+				AAD4B58425CB69880009588A /* ProofAttributeTableViewCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -566,9 +667,28 @@
 			baseConfigurationReference = 83EC30CFA82B9174C0F72CDE /* Pods-CMeSdkSwift.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = CMeSdkSwift/CMeSdkSwift.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ES8QU3D2A4;
 				ENABLE_BITCODE = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCore/FirebaseCore.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCoreDiagnostics/FirebaseCoreDiagnostics.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseInstallations/FirebaseInstallations.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseInstanceID/FirebaseInstanceID.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseMessaging/FirebaseMessaging.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/GoogleDataTransport/GoogleDataTransport.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/GoogleUtilities/GoogleUtilities.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/PromisesObjC/FBLPromises.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/Protobuf/Protobuf.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/nanopb/nanopb.framework/Headers\"",
+					"\"${PODS_ROOT}/Headers/Public\"",
+					"\"${PODS_ROOT}/Headers/Public/Firebase\"",
+					"$(inherited)",
+					"${PODS_ROOT}/Firebase/CoreOnly/Sources",
+					"\"${PODS_TARGET_SRCROOT}/Sources/FBLPromises/include\"",
+				);
 				INFOPLIST_FILE = CMeSdkSwift/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -588,6 +708,7 @@
 			baseConfigurationReference = 055A446D7F00FA5545F842E8 /* Pods-CMeSdkSwift.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = CMeSdkSwift/CMeSdkSwift.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ES8QU3D2A4;
 				ENABLE_BITCODE = NO;
