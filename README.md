@@ -24,24 +24,30 @@ Evernym provides commercial support to customers. If you would like help from Ev
 ## Getting Started
 Connecting and exchanging encrypted data between an Agency (server side) and an Edge Client (mobile application) consists of several steps and is supported by a secured, encrypted protocol library (VCX). 
 
-After project setup and adding dependency libraries, perform the the following steps: 
+Going through this tutorial we will create a simple application which will allow us to accept and present verifiable encyrted credentials.
 
-1. [Initialize the mobile SDK](1.ProjectSetup.md) - VCX library in app runtime 
-2. [Initialize the wallet](2.Initialization.md) and communicate with a specific Agency (web server)
-3. [Accept the invitation and establish a connection](3.Connections.md) with the entity  
-4. [Accept the offered credential](4.Credentials.md)
-5. [Accept and respond to a proof request](5.Proofs.md)
-6. [Exchange secured structured messages](6.StructuredMessages.md)
+Before starting, please read the [Base Concepts document](0.Base Concepts.md) containing explanations for terms that will be frequently used in this guide.
+
+1. [Create a new App](1.ProjectSetup.md)
+1. [Initialize Wallet and Agent](2.Initialization.md) on a specific Agency (web server)
+2. [Establish a connection](3.Connections.md) with an another user  
+3. [Accept offered credential](4.Credentials.md)
+4. [Respond to a proof request](5.Proofs.md)
+5. [Exchange secured structured messages](6.StructuredMessages.md)
 7. [Connection Redirection](7.ConnectionRedirection.md)
-8. [Messages.md](8.Messages.md)
-9. [CredentialsWithAttachments.md](9.CredentialsWithAttachments.md)
 
 ![Mobile SDK Flow](wiki-images/ConnectMeMobileSDK.png)
 
+#### Additional Sources:
+* [Configuration](Configuration.md) &#8212; The list of all VCX library configuration options. 
+* [Errors](VcxErrors.md) &#8212; The list of all possible VCX errors and their definitions. 
+* [New Messages Processing](Messages.md)
+* [Credentials With Attachments](CredentialsWithAttachments.md)
+* [Push Notifications](PushNotifications.md)
+* [Frequently asked questions](FAQ.md)
+
 ### Helpful links
-- [Frequently asked questions](FAQ.md)
 - Connect.Me Public Beta &#8212; Most of the features of the Evernym Mobile SDK are showcased in [Connect.Me](https://connect.me/). You can use upcoming releases of Connect.Me by clicking the appropriate link from your device.
   - IOS: [https://testflight.apple.com/join/bmbX21Kq](https://testflight.apple.com/join/bmbX21Kq)
   - Android: [https://play.google.com/apps/testing/me.connect](https://play.google.com/apps/testing/me.connect)
-- [VCX Errors](VcxErrors.md) &#8212; The list of all possible VCX errors and their definitions. 
 - <a href="https://github.com/sovrin-foundation/connector-app" target="_blank">Sovrin Connector App</a> &#8212; Helpful resource to see how an older version of mobile SDK works.
