@@ -177,6 +177,7 @@ CMEnvironment environment = Production;
 
     if(token != nil) {
         [self initializeMobileSDK: agencyConfig withProvisioningToken: token];
+        return;
     }
 
     // retrieve provisioning token from sponsor service
@@ -196,19 +197,20 @@ CMEnvironment environment = Production;
 
 +(void) initializeMobileSDK: (NSString*) agencyConfig withProvisioningToken: (NSString*) provisioningToken {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
+    NSMutableDictionary* config = [[CMUtilities jsonToDictionary: agencyConfig] mutableCopy];
 
     if(provisioningToken != nil) {
-        const char* oneTimeInfo = [sdkApi agentProvisionWithToken:agencyConfig token: provisioningToken];
+        const char* oneTimeInfo = [sdkApi agentProvisionWithToken: agencyConfig token: provisioningToken];
 
         if(oneTimeInfo == nil) {
             NSLog(@"OneTimeInfo is null");
-            return;
         }
 
-        return;
+        NSDictionary* oneTimeInfoDict = [CMUtilities jsonToDictionary: [NSString stringWithUTF8String: oneTimeInfo]];
+        [config addEntriesFromDictionary: oneTimeInfoDict];
     }
 
-    [sdkApi agentProvisionAsync: agencyConfig completion: ^(NSError *error, NSString *oneTimeInfo) {
+    [sdkApi agentProvisionAsync: [CMUtilities toJsonString: config] completion: ^(NSError *error, NSString *oneTimeInfo) {
         if (error && error.code > 0) {
             return [CMUtilities printError: error];
         }
@@ -224,6 +226,19 @@ CMEnvironment environment = Production;
             if (error && error.code > 0) {
                 return [CMUtilities printError: error];
             }
+
+            // Register sponsee device to Evernym service with sponseeID in order to start receiving push notifications
+            // to your sponsor service
+            NSDictionary* agentInfo = @{
+                @"type": @3,
+                @"id": [[[NSUUID alloc] init] UUIDString],
+                @"value": [NSString stringWithFormat: @"FCM:%@", [LocalStorage getValueForKey: @"sponseeID"]]
+            };
+            [sdkApi agentUpdateInfo: [CMUtilities toJsonString:agentInfo] completion:^(NSError *error) {
+                if (error && error.code > 0) {
+                    return [CMUtilities printError: error];
+                }
+            }];
 
             [MobileSDK shared].sdkInited = true;
             [[NSNotificationCenter defaultCenter] postNotificationName:@"vcxInitialized" object: nil userInfo: nil];
@@ -287,7 +302,7 @@ CMEnvironment environment = Production;
     NSString* sponseeID = [[[NSUUID alloc] init] UUIDString];
     [LocalStorage setValue: sponseeID forKey: @"sponseeID"];
 
-    [CMUtilities sendPostRequest: sponsorServerURL withBody:@{@"sponseeId": sponseeID} andCompletion:^(NSDictionary *responseObject, NSError *error) {
+    [CMUtilities sendPostRequest: sponsorServerURL withBody:@{@"sponseeId": sponseeID, @"pushToken": [LocalStorage getValueForKey:@"pushToken"] } andCompletion:^(NSDictionary *responseObject, NSError *error) {
         if(error != nil) {
             return completionBlock(nil, error);
         }
