@@ -1,0 +1,12 @@
+name: mobile-sdk
+on: [push, pull_request]
+jobs:
+  lint:
+    name: license-data-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: Check License version
+        run: |
+          ./devops/license-date-check.sh
