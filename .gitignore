@@ -5,7 +5,7 @@ vui-server/lib*
 vui-server/indy*
 vui-server/node*
 vcx/*
-vcx*
+!Specs/vcx/*
 
 ### OSX ###
 .DS_Store
