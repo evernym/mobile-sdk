@@ -1,0 +1,11 @@
+Examples/android/CMeSdkKotlin/.idea
+Examples/android/CMeSdkJava/.idea/
+.idea
+vui-server/lib*
+vui-server/indy*
+vui-server/node*
+vcx/*
+!Specs/vcx/*
+
+### OSX ###
+.DS_Store

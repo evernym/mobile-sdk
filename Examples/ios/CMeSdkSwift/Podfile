@@ -1,0 +1,26 @@
+# Uncomment the next line to define a global platform for your project
+platform :ios, '10.0'
+source 'https://github.com/CocoaPods/Specs.git'
+source 'git@github.com:evernym/mobile-sdk.git'
+
+target 'CMeSdkSwift' do
+  # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
+  use_frameworks!
+
+  # Pods for ConnectMe
+  pod 'vcx', :path => '../../../vcx.podspec'
+  pod 'Firebase/Analytics'
+  pod 'Firebase/Messaging'
+  pod 'QRCodeReaderViewController'
+
+  target 'CMeSdkSwiftTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+  target 'CMeSdkSwiftUITests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+end
