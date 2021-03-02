@@ -1,4 +1,4 @@
-# Demo environment
+# Demo environment: this is the default environment
 
 > Agency configuration: 
 ```js 

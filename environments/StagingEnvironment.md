@@ -1,4 +1,4 @@
-# Staging environment
+# Staging environment: it is unlikely you will use this environment
 
 > Agency configuration: 
 
