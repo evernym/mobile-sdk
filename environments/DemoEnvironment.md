@@ -10,4 +10,4 @@
     }
 ```
 
-  [<< Continue with initialization](2.Initialization.md)
+  [<< Continue with initialization](docs/2.Initialization.md)

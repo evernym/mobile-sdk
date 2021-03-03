@@ -1,6 +1,6 @@
 ### Push Notifications
 
-- Key definitions can be found [here](./2.Initialization.m#definitions)
+- Key definitions can be found [here](./2.Initialization.md#definitions)
 
 - Before you can get started with this, you as the `Sponsor` need to be [onboarded](./2.Initialization.md#sponsor-ie-you-onboarding-with-evernyms-cloud-service) with Evernym's Cloud Service. You as the sponsor will need to provide an endpoint during this process.
 
@@ -17,7 +17,7 @@
 - Instead, you will need to host your own push notification service, and receive forwarded messages from each `Sponsee`'s cloud agent. This is done by registering with Evernym as a `Sponsor`. See below.
 
 1 Sponsor Registration with Evernym's Cloud Service
- - As mentioned (https://github.com/evernym/mobile-sdk/blob/master/2.%20Initialization.md#sponsor-registration-with-evernyms-cloud-service), you as a `Sponsor` will need to register with Evernym's Cloud Service. An endpoint is provided during this registration. \
+ - [As mentioned](2.Initialization.md#sponsor-registration-with-evernyms-cloud-service), you as a `Sponsor` will need to register with Evernym's Cloud Service. An endpoint is provided during this registration. \
  This `endpoint` will be whatever address you (`Sponsor`) want Evernym's Cloud Service to use to forward, via HTTPs, incoming messages meant for the end customer (`Sponsee`).
  - Your (`Sponsor's`) responsibility is to handle these forwarded messages by push notifying your customer's (`Sponsee's`) app or using some other preferred communication mechanism. \
  This means you (`Sponsor`) will have to implement a communication mechanism (e.g. Push Notification Service) with your customer (`Sponsee`).
