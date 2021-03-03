@@ -9,7 +9,7 @@ To get messages, following steps should be performed:
 3. Get messages
 4. Parse result
 
-> **NOTE:** library should be initialized before using messages API. See [initialization documentation](2.%20Initialization.md)
+> **NOTE:** library should be initialized before using messages API. See [initialization documentation](2.Initialization.md)
 
 ## 1. Deserialize connection
 

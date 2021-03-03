@@ -1,8 +1,8 @@
 ### Push Notifications
 
-- Key definitions can be found [here](./2.Initialization.m#definitions)
+- Key definitions can be found [here](2.Initialization.md#definitions)
 
-- Before you can get started with this, you as the `Sponsor` need to be [onboarded](./2.Initialization.md#sponsor-ie-you-onboarding-with-evernyms-cloud-service) with Evernym's Cloud Service. You as the sponsor will need to provide an endpoint during this process.
+- Before you can get started with this, you as the `Sponsor` need to be [onboarded](2.Initialization.md#sponsor-ie-you-onboarding-with-evernyms-cloud-service) with Evernym's Cloud Service. You as the sponsor will need to provide an endpoint during this process.
 
 - To push notify a message to your customer's app (`Sponsee`), you will need to setup your own Push Notification System and handle Message Forwarding on your back-end.
 
@@ -10,20 +10,20 @@
 
 ### Message Forwarding
 
-![](./wiki-images/Push%20Notifications%20Diagram.png)
+![](/wiki-images/Push%20Notifications%20Diagram.png)
 
 - Each instance of the mobile SDK (each Sponsee) has an associated cloud agent which provides a store-and-forward function for messages traffic to and from your app.
 - Evernym does not handle your push notification service because it would require us to hold push notification keys to your app (`Sponsee`).
 - Instead, you will need to host your own push notification service, and receive forwarded messages from each `Sponsee`'s cloud agent. This is done by registering with Evernym as a `Sponsor`. See below.
 
 1 Sponsor Registration with Evernym's Cloud Service
- - As mentioned (https://github.com/evernym/mobile-sdk/blob/master/2.%20Initialization.md#sponsor-registration-with-evernyms-cloud-service), you as a `Sponsor` will need to register with Evernym's Cloud Service. An endpoint is provided during this registration. \
+ - [As mentioned](2.Initialization.md#sponsor-registration-with-evernyms-cloud-service), you as a `Sponsor` will need to register with Evernym's Cloud Service. An endpoint is provided during this registration. \
  This `endpoint` will be whatever address you (`Sponsor`) want Evernym's Cloud Service to use to forward, via HTTPs, incoming messages meant for the end customer (`Sponsee`).
  - Your (`Sponsor's`) responsibility is to handle these forwarded messages by push notifying your customer's (`Sponsee's`) app or using some other preferred communication mechanism. \
  This means you (`Sponsor`) will have to implement a communication mechanism (e.g. Push Notification Service) with your customer (`Sponsee`).
 
 2 Sponsee Provisioning 
- - As mentioned [here](./2.Initialization.md#mobile-sdk-customer-provisioning-overview), a customer (`Sponsee`) will need to provision with Evernym's Cloud Service using a token signed by you (`Sponsor`).
+ - As mentioned [here](2.Initialization.md#mobile-sdk-customer-provisioning-overview), a customer (`Sponsee`) will need to provision with Evernym's Cloud Service using a token signed by you (`Sponsor`).
  
  - After provisioning is complete, the customer's application (`Sponsee`) will need to call MSDK method to set communication method with the agent.
      * Android - `UtilsApi.vcxUpdateAgentInfo(config)`

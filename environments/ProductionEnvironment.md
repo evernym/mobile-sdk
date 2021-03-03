@@ -1,4 +1,4 @@
-# Production environment
+# Production environment: use with a production support agreement
 
 > Agency configuration: 
 ```js 

@@ -1,4 +1,4 @@
-# Staging environment
+# Staging environment: only use this environment if you are instructed to by Evernym support
 
 > Agency configuration: 
 

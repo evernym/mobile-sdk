@@ -1,6 +1,6 @@
 ### Helpful links
 
-- [https://github.com/evernym/mobile-sdk/tree/master/Examples](https://github.com/evernym/mobile-sdk/tree/master/Examples) - Examples for iOS and Android steps with
+- [https://github.com/evernym/mobile-sdk/tree/master/examples](https://github.com/evernym/mobile-sdk/tree/master/examples) - Examples for iOS and Android steps with
 
 - [Push notifications iOS](https://developer.apple.com/documentation/usernotifications)
 

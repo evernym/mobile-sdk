@@ -11,7 +11,7 @@ Since our VCX library is still not publicly available, you will need to use our 
 
 2. Unzip and copy content of the file from above to **vcx** folder in root of mobile SDK. 
 
-3. Go to Examples/iOS/CMeSdkObjc or Examples/iOS/CMeSdkSwift and from terminal run: 
+3. Go to examples/iOS/CMeSdkObjc or examples/iOS/CMeSdkSwift and from terminal run: 
 `pod install --repo-update`.
 
 4. When script completes, your Xcode workspace (CMeSdkSwift.xcworkspace) should contain Vcx cocapod library in this place inside your Xcode (in Project Navigator list on left, ⌘1): 
@@ -24,7 +24,7 @@ Since our VCX library is still not publicly available, you will need to use our 
          - Pod
          - Support Files
 
-![Pod structure in Xcode](../wiki-images/pod-structure.png)
+![Pod structure in Xcode](/wiki-images/pod-structure.png)
 
 
 > **Note**: 
