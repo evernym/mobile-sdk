@@ -16,7 +16,7 @@ These tools depend on the Evernym Consumer Agency SaaS service to act as a commu
 
 
 ## Getting Help
-This SDK is currently in "Beta" status.
+This SDK is currently in "Beta" status, but open for Developers to make PR and RFC.
 
 Evernym provides commercial support to customers. If you would like help from Evernym, please [contact us](https://www.evernym.com/our-team/#contact).
 
