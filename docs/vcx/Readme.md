@@ -24,7 +24,7 @@ Since our VCX library is still not publicly available, you will need to use our 
          - Pod
          - Support Files
 
-![Pod structure in Xcode](../wiki-images/pod-structure.png)
+![Pod structure in Xcode](/wiki-images/pod-structure.png)
 
 
 > **Note**: 
