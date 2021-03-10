@@ -150,6 +150,9 @@ public class MainActivity extends AppCompatActivity {
             throw new Exception("Response failed with code " + response.code());
         }
         String token = response.body().string();
+        if (token == null) {
+            throw new Exception("Token is not received ");
+        }
         Log.d(TAG, "Retrieved token: " + token);
         prefs.edit()
                 .putString(Constants.PROVISION_TOKEN, token)
