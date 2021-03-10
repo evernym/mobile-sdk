@@ -11,5 +11,5 @@ WORKDIR /app
 RUN sh zeromq-setup.sh
 
 RUN pip3 install -r requirements.txt
-EXPOSE 4320
-ENTRYPOINT [ "/bin/bash" ]
+EXPOSE 4321
+CMD [ "python3", "server.py" ]
