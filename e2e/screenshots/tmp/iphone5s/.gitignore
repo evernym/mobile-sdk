@@ -1,0 +1,3 @@
+# Use this file to commit this directory to git, but none of it's contents
+*
+!.gitignore

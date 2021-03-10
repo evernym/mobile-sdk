@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Default Suite">
+    <test name="test" preserve-order="true" parallel="false">
+        <classes>
+            <class name="test.java.Tests.StartUpTest"/>
+            <class name="test.java.Tests.AppElementsTest"/>
+            <!--<class name="test.java.Tests.PushNotificationTest"/>-->
+            <class name="test.java.Tests.ConnectionTest"/>
+            <class name="test.java.Tests.RedirectionTest"/>
+            <class name="test.java.Tests.CredentialTest"/>
+            <class name="test.java.Tests.ProofDemoTest"/>
+            <class name="test.java.Tests.ProofCasesTest"/>
+            <class name="test.java.Tests.QuestionTest"/>
+            <class name="test.java.Tests.DeletionTest"/>
+
+            <!--<class name="test.java.Tests.DummyTest"/>-->
+        </classes>
+    </test>
+</suite>
