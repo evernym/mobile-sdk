@@ -206,7 +206,7 @@ public class ConnectMeVcx {
                 }
                 provisioningStep = CompletableFuture.completedStage(oneTimeInfo);
             } else {
-                provisioningStep = UtilsApi.vcxAgentProvisionAsync(agencyConfig);
+                throw new Exception("ProvisionToken is not received ");
             }
             provisioningStep.whenComplete((oneTimeInfo, err) -> {
                 if (err != null) {

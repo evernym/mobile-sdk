@@ -77,6 +77,7 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
     [CMMessage downloadMessages: connection andType: 2 andMessageID: messageID withCompletionHandler:^(NSArray *messageList, NSError *error) {
         NSLog(@"messageList %@ %@", messageList, error);
         // TODO: Handle message furhter
+        
     }];
 }
 
@@ -85,7 +86,7 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
 
     NSLog(@"FCM registration token: %@", fcmToken);
     // TODO: Upload push notification token to sponsor server
-    [LocalStorage setValue: fcmToken forKey:@"pushToken"];
+    [LocalStorage store:@"pushToken" andString: fcmToken];
 }
 
 
