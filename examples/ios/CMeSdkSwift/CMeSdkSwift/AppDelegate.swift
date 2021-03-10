@@ -47,7 +47,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         print("push token", deviceToken)
-        LocalStorage.setValue(String(data: deviceToken, encoding: .utf8), forKey: "pushToken")
+        if let token = String(data: deviceToken, encoding: .utf8) {
+            LocalStorage.store("pushToken", andString: token)
+        }
     }
 
     func handleRemoteNotification(_ application: UIApplication, remoteNotif: [AnyHashable: Any]) {
