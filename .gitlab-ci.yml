@@ -79,18 +79,18 @@ license-data-check:
   tags:
     - docker-machine
 
-yarn-test:
-  stage: test
-  image: ${CI_REGISTRY_IMAGE}/ubuntu18:${CI_COMMIT_REF_SLUG}
-  script:
-    - sed -i 's/peerDependencies/dependencies/g' package.json
-    - yarn config set ignore-engines true
-    - yarn install
-    - yarn lint
-    - yarn test
-  only:
-    refs:
-      - branches
-      - tags
-  tags:
-    - docker-machine
+# yarn-test:
+#   stage: test
+#   image: ${CI_REGISTRY_IMAGE}/ubuntu18:${CI_COMMIT_REF_SLUG}
+#   script:
+#     - sed -i 's/peerDependencies/dependencies/g' package.json
+#     - yarn config set ignore-engines true
+#     - yarn install
+#     - yarn lint
+#     - yarn test
+#   only:
+#     refs:
+#       - branches
+#       - tags
+#   tags:
+#     - docker-machine
