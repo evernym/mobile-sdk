@@ -60,18 +60,18 @@ ubuntu-build:
   tags:
     - docker-machine
   variables:
-    DOCKERFILE_PATH: devops/images/ubuntu18.dockerfile
+    DOCKERFILE_PATH: ci/devops/images/ubuntu18.dockerfile
     DOCKER_IMAGE_NAME: ubuntu18
   only:
     changes:
-      - devops/images/ubuntu18.dockerfile
+      - ci/devops/images/ubuntu18.dockerfile
 
 # Jobs
 ## - Check license file - ##
 license-data-check:
   stage: check
   image: ${CI_REGISTRY_IMAGE}/ubuntu18:${CI_COMMIT_REF_SLUG}
-  script: ./devops/license-date-check.sh
+  script: ci/devops/license-date-check.sh
   only:
     refs:
       - branches
