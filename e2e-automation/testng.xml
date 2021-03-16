@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suite name="E2EAutomationTest" verbose="1">
+	<test name="Smoke" preserve-order="true">
+		<classes>
+			<class name="test.java.Tests.ConnectionTest" />
+			<class name="test.java.Tests.CredentialTest" />
+			<class name="test.java.Tests.BackupRestoreTest" />
+			<class name="test.java.Tests.ProofDemoTest" />
+			<listeners>
+				<listener class-name="test.java.utility.CustomTestNGReporter" />
+			</listeners>
+		</classes>
+	</test>
+</suite>
+
+

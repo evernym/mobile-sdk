@@ -1,0 +1,77 @@
+.devicefarm-test-launch:
+  stage: devicefarm-test
+  image: ${CI_REGISTRY_IMAGE}/devicefarm:${CI_COMMIT_REF_SLUG}
+  dependencies:
+    - build-android-master
+    - build-ios-master
+  variables:
+    ANDROID_APK_PATH: 'android/app/build/outputs/apk/release/app-arm64-v8a-release.apk'
+    IOS_IPA_PATH: 'ios/ConnectMe.ipa'
+  tags:
+    - docker-machine
+    - large
+  before_script:
+    - mkdir ~/.aws
+    - cp ${AWS_DEVICEFARM_CONFIG} ~/.aws/config
+    - cp ${AWS_DEVICEFARM_CREDENTIALS} ~/.aws/credentials
+
+devicefarm-test-launch-android-weekly:
+  extends: .devicefarm-test-launch
+  dependencies:
+    - build-android-master
+  rules:
+   - if: '$SCHEDULED_RUN == "true"'
+     when: always
+  script:
+    - ./e2e-automation/appium-launcher/run-appium-tests.sh ${ANDROID_APK_PATH} awsAndroid android_top5 false 1l0x0ABFgOp1yftFie5I1xSVinB_24DGzexnMYUDoi5Wsb2R5
+
+devicefarm-test-launch-ios-weekly:
+  extends: .devicefarm-test-launch
+  dependencies:
+    - build-ios-master
+  rules:
+    - if: '$SCHEDULED_RUN == "true"'
+      when: always
+  script:
+    - ./e2e-automation/appium-launcher/run-appium-tests.sh ${IOS_IPA_PATH} awsiOS ios_top5 false 1iJaXfMlZOJKhCqqLHSn09L6fkq_3rPWVgnjc8rDUsV4qbeJo
+
+devicefarm-test-launch-android-master:
+  extends: .devicefarm-test-launch
+  dependencies:
+    - build-android-master
+  script:
+    - ./e2e-automation/appium-launcher/run-appium-tests.sh ${ANDROID_APK_PATH} awsAndroid galaxyS10 false
+  only:
+    refs:
+      - master@dev/connectme/ConnectMe
+
+devicefarm-test-launch-ios-master:
+  extends: .devicefarm-test-launch
+  dependencies:
+    - build-ios-master
+  script:
+    - ./e2e-automation/appium-launcher/run-appium-tests.sh ${IOS_IPA_PATH} awsiOS iphone11 false
+  only:
+    refs:
+      - master@dev/connectme/ConnectMe
+
+devicefarm-test-launch-android-merge_requests:
+  extends: .devicefarm-test-launch
+  dependencies:
+    - build-android-merge-request
+  script:
+    - ./e2e-automation/appium-launcher/run-appium-tests.sh ${ANDROID_APK_PATH} awsAndroid galaxyS10 true
+  only:
+    refs:
+      - merge_requests
+
+devicefarm-test-launch-ios-merge_requests:
+  extends: .devicefarm-test-launch
+  dependencies:
+    - build-ios-merge-request
+  script:
+    - ./e2e-automation/appium-launcher/run-appium-tests.sh ${IOS_IPA_PATH} awsiOS iphone11 true
+  only:
+    refs:
+      - merge_requests
+
