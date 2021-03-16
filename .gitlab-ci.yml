@@ -11,7 +11,7 @@ stages:
     - docker-machine
     - micro
   image:
-    name: ${CI_REGISTRY_IMAGE}/ubuntu18:${CI_COMMIT_REF_SLUG}
+    name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   script:
     - if [ "$CI_COMMIT_REF_SLUG" == 'master' ]; then KANIKO_ARGS="--destination $CI_REGISTRY_IMAGE/${DOCKER_IMAGE_NAME}:latest $KANIKO_ARGS"; fi

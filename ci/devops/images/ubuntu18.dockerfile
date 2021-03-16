@@ -11,3 +11,6 @@ RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - \
     
 # Install Yarn
 RUN npm install -g yarn
+
+# test change
+RUN npm install -g yarn
