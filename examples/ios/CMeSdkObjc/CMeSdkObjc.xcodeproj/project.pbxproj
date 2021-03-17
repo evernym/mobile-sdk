@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8B02DFBECB82F36B40C09FFE /* libPods-CMeSdkObjcUITests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E4910AF686557FC034B1261 /* libPods-CMeSdkObjcUITests.a */; };
+		2F3A478E9B877926C3FE542F /* Pods_CMeSdkObjcUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B87475662495C90309CBDCB5 /* Pods_CMeSdkObjcUITests.framework */; };
+		45063ECF961867FD85F6D699 /* Pods_CMeSdkObjc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F2FED9B74B5DBC8193263460 /* Pods_CMeSdkObjc.framework */; };
+		4B16FA2258A8B8B30321F45F /* Pods_CMeSdkObjcTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6358E363E85142D56F58C5D /* Pods_CMeSdkObjcTests.framework */; };
 		8E13456322A040C800B6DE1F /* PoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E13456222A040C800B6DE1F /* PoolTxnGenesis.m */; };
 		8E509FE62281EFC60098812A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E509FE52281EFC60098812A /* AppDelegate.m */; };
 		8E509FE92281EFC60098812A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E509FE82281EFC60098812A /* ViewController.m */; };
@@ -17,7 +19,6 @@
 		8E509FF42281EFC80098812A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E509FF32281EFC80098812A /* main.m */; };
 		8E509FFE2281EFC80098812A /* CMeSdkObjcTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E509FFD2281EFC80098812A /* CMeSdkObjcTests.m */; };
 		8E50A0092281EFC80098812A /* CMeSdkObjcUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E50A0082281EFC80098812A /* CMeSdkObjcUITests.m */; };
-		8E81258E22835662008D5CC3 /* GoogleService-InfoTemplate.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8E81258D22835662008D5CC3 /* GoogleService-InfoTemplate.plist */; };
 		AAE1A2632512AA0C00EB172A /* ProofDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE1A25B2512AA0B00EB172A /* ProofDetailsViewController.m */; };
 		AAE1A2642512AA0C00EB172A /* MessageTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE1A25C2512AA0B00EB172A /* MessageTableViewCell.m */; };
 		AAE1A2652512AA0C00EB172A /* ConnectionDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE1A25E2512AA0B00EB172A /* ConnectionDetailsViewController.m */; };
@@ -32,9 +33,7 @@
 		AAF9BF6625C8EB4C00E4C1F4 /* CMMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = AAF9BF5A25C8EB4C00E4C1F4 /* CMMessage.m */; };
 		AAF9BF6725C8EB4C00E4C1F4 /* CMCredential.m in Sources */ = {isa = PBXBuildFile; fileRef = AAF9BF5C25C8EB4C00E4C1F4 /* CMCredential.m */; };
 		AAF9BFD225C8F2A400E4C1F4 /* MobileSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = AAF9BFD125C8F2A400E4C1F4 /* MobileSDK.m */; };
-		AAF9C05125CA36B000E4C1F4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AAF9C05025CA36B000E4C1F4 /* GoogleService-Info.plist */; };
-		AB0E017E326DF6040A2D2938 /* libPods-CMeSdkObjc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7B1AE519C579F0EB1F4FAF /* libPods-CMeSdkObjc.a */; };
-		AC4C0D60BB16B78C375EAD06 /* libPods-CMeSdkObjcTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61C99F1A9B6A05EC1B7E5A1A /* libPods-CMeSdkObjcTests.a */; };
+		DD045F0B26023AD90067D6AF /* DevTeam1PoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = DD045F0A26023AD90067D6AF /* DevTeam1PoolTxnGenesis.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,9 +56,6 @@
 /* Begin PBXFileReference section */
 		1CF1DD4D658053A9DE7AA8ED /* Pods-CMeSdkObjcUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjcUITests/Pods-CMeSdkObjcUITests.release.xcconfig"; sourceTree = "<group>"; };
 		1F99172894208622D0564741 /* Pods-CMeSdkObjcUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcUITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjcUITests/Pods-CMeSdkObjcUITests.debug.xcconfig"; sourceTree = "<group>"; };
-		2E4910AF686557FC034B1261 /* libPods-CMeSdkObjcUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CMeSdkObjcUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		3A7B1AE519C579F0EB1F4FAF /* libPods-CMeSdkObjc.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CMeSdkObjc.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		61C99F1A9B6A05EC1B7E5A1A /* libPods-CMeSdkObjcTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CMeSdkObjcTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7BF2544064FF2885D7CE7E13 /* Pods-CMeSdkObjcTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjcTests/Pods-CMeSdkObjcTests.debug.xcconfig"; sourceTree = "<group>"; };
 		8E13456122A040C800B6DE1F /* PoolTxnGenesis.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PoolTxnGenesis.h; sourceTree = "<group>"; };
 		8E13456222A040C800B6DE1F /* PoolTxnGenesis.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PoolTxnGenesis.m; sourceTree = "<group>"; };
@@ -79,8 +75,8 @@
 		8E50A0042281EFC80098812A /* CMeSdkObjcUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CMeSdkObjcUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E50A0082281EFC80098812A /* CMeSdkObjcUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CMeSdkObjcUITests.m; sourceTree = "<group>"; };
 		8E50A00A2281EFC80098812A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8E81258D22835662008D5CC3 /* GoogleService-InfoTemplate.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-InfoTemplate.plist"; sourceTree = "<group>"; };
 		8EDE89A82281F26300B7300F /* CMeSdkObjc.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CMeSdkObjc.entitlements; sourceTree = "<group>"; };
+		A6358E363E85142D56F58C5D /* Pods_CMeSdkObjcTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CMeSdkObjcTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAE1A25B2512AA0B00EB172A /* ProofDetailsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProofDetailsViewController.m; sourceTree = "<group>"; };
 		AAE1A25C2512AA0B00EB172A /* MessageTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MessageTableViewCell.m; sourceTree = "<group>"; };
 		AAE1A25D2512AA0B00EB172A /* ProofAttributeTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProofAttributeTableViewCell.h; sourceTree = "<group>"; };
@@ -109,10 +105,13 @@
 		AAF9BF5E25C8EB4C00E4C1F4 /* CMConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CMConfig.h; path = ../../../VCXHelpers/CMConfig.h; sourceTree = "<group>"; };
 		AAF9BFD025C8F2A400E4C1F4 /* MobileSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MobileSDK.h; path = ../../../VCXHelpers/MobileSDK.h; sourceTree = "<group>"; };
 		AAF9BFD125C8F2A400E4C1F4 /* MobileSDK.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MobileSDK.m; path = ../../../VCXHelpers/MobileSDK.m; sourceTree = "<group>"; };
-		AAF9C05025CA36B000E4C1F4 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		B302B7F5FAC0C1E964B66ED4 /* Pods-CMeSdkObjcTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjcTests/Pods-CMeSdkObjcTests.release.xcconfig"; sourceTree = "<group>"; };
+		B87475662495C90309CBDCB5 /* Pods_CMeSdkObjcUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CMeSdkObjcUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD045F0926023A7C0067D6AF /* DevTeam1PoolTxnGenesis.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DevTeam1PoolTxnGenesis.h; sourceTree = "<group>"; };
+		DD045F0A26023AD90067D6AF /* DevTeam1PoolTxnGenesis.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DevTeam1PoolTxnGenesis.m; sourceTree = "<group>"; };
 		E1200BCCD8ACD48971467097 /* Pods-CMeSdkObjc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjc.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjc/Pods-CMeSdkObjc.debug.xcconfig"; sourceTree = "<group>"; };
 		F18B0531CD0E6287F0DEFD61 /* Pods-CMeSdkObjc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjc.release.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjc/Pods-CMeSdkObjc.release.xcconfig"; sourceTree = "<group>"; };
+		F2FED9B74B5DBC8193263460 /* Pods_CMeSdkObjc.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CMeSdkObjc.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,7 +119,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AB0E017E326DF6040A2D2938 /* libPods-CMeSdkObjc.a in Frameworks */,
+				45063ECF961867FD85F6D699 /* Pods_CMeSdkObjc.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -128,7 +127,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AC4C0D60BB16B78C375EAD06 /* libPods-CMeSdkObjcTests.a in Frameworks */,
+				4B16FA2258A8B8B30321F45F /* Pods_CMeSdkObjcTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -136,7 +135,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8B02DFBECB82F36B40C09FFE /* libPods-CMeSdkObjcUITests.a in Frameworks */,
+				2F3A478E9B877926C3FE542F /* Pods_CMeSdkObjcUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -169,8 +168,6 @@
 			isa = PBXGroup;
 			children = (
 				8EDE89A82281F26300B7300F /* CMeSdkObjc.entitlements */,
-				8E81258D22835662008D5CC3 /* GoogleService-InfoTemplate.plist */,
-				AAF9C05025CA36B000E4C1F4 /* GoogleService-Info.plist */,
 				8E509FE42281EFC60098812A /* AppDelegate.h */,
 				8E509FE52281EFC60098812A /* AppDelegate.m */,
 				8E509FE72281EFC60098812A /* ViewController.h */,
@@ -236,6 +233,8 @@
 				AAF9BF5925C8EB4C00E4C1F4 /* ProductionPoolTxnGenesis.m */,
 				AAF9BF5025C8EB4B00E4C1F4 /* StagingPoolTxnGenesis.h */,
 				AAF9BF4E25C8EB4B00E4C1F4 /* StagingPoolTxnGenesis.m */,
+				DD045F0926023A7C0067D6AF /* DevTeam1PoolTxnGenesis.h */,
+				DD045F0A26023AD90067D6AF /* DevTeam1PoolTxnGenesis.m */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -256,9 +255,9 @@
 		E4F41F88EDEF2442ECA33564 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				3A7B1AE519C579F0EB1F4FAF /* libPods-CMeSdkObjc.a */,
-				61C99F1A9B6A05EC1B7E5A1A /* libPods-CMeSdkObjcTests.a */,
-				2E4910AF686557FC034B1261 /* libPods-CMeSdkObjcUITests.a */,
+				F2FED9B74B5DBC8193263460 /* Pods_CMeSdkObjc.framework */,
+				A6358E363E85142D56F58C5D /* Pods_CMeSdkObjcTests.framework */,
+				B87475662495C90309CBDCB5 /* Pods_CMeSdkObjcUITests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -376,8 +375,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8E509FF12281EFC80098812A /* LaunchScreen.storyboard in Resources */,
-				8E81258E22835662008D5CC3 /* GoogleService-InfoTemplate.plist in Resources */,
-				AAF9C05125CA36B000E4C1F4 /* GoogleService-Info.plist in Resources */,
 				8E509FEE2281EFC80098812A /* Assets.xcassets in Resources */,
 				8E509FEC2281EFC60098812A /* Main.storyboard in Resources */,
 			);
@@ -502,6 +499,7 @@
 				AAF9BF6725C8EB4C00E4C1F4 /* CMCredential.m in Sources */,
 				AAF9BF6425C8EB4C00E4C1F4 /* LocalStorage.m in Sources */,
 				8E509FF42281EFC80098812A /* main.m in Sources */,
+				DD045F0B26023AD90067D6AF /* DevTeam1PoolTxnGenesis.m in Sources */,
 				AAE1A2652512AA0C00EB172A /* ConnectionDetailsViewController.m in Sources */,
 				AAF9BF6625C8EB4C00E4C1F4 /* CMMessage.m in Sources */,
 				AAF9BF6025C8EB4C00E4C1F4 /* CMConnection.m in Sources */,

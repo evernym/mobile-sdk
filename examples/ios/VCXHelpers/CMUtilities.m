@@ -111,7 +111,7 @@
     NSLog(@"Error message: %@", error);
 }
 
-+(void)sendPostRequest: (NSString*)serverURL withBody: (NSDictionary*) data andCompletion: (ResponseWithObject) completionBlock  {
++(void)sendPostRequest: (NSString*)serverURL withBody: (NSDictionary*) data andCompletion: (ResponseBlock) completionBlock  {
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
     [request setHTTPMethod:@"POST"];
     [request setURL: [NSURL URLWithString:serverURL]];
@@ -121,20 +121,17 @@
 
     //RESPONSE DATA
     NSURLSession *session = [NSURLSession sharedSession];
-    NSURL *URL = [NSURL URLWithString: serverURL];
 
-    NSURLSessionTask *task = [session dataTaskWithURL:URL completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+    NSURLSessionTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if(error != nil) {
             NSLog(@"Error getting %@: %@", serverURL, error.localizedDescription);
             return completionBlock(nil, error);
         }
             NSString *str = [[NSString alloc] initWithData: data encoding:NSUTF8StringEncoding];
             NSLog(@"responseData: %@", str);
-            NSDictionary* json = [NSJSONSerialization JSONObjectWithData: data options:kNilOptions error: nil];
-            return completionBlock(json, nil);
+            return completionBlock(str, nil);
     }];
     [task resume];
 }
 
 @end
-
