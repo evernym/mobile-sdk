@@ -9,6 +9,9 @@ target 'CMeSdkObjc' do
    use_frameworks!
 
   # Pods for CMeSdkObjc
+  # Below line will be enabled when we go public with our cocoapod
+  # pod 'vcx', '0.0.198'
+  # Below line will be removed when we go public with our cocoapod
   pod 'vcx', :path => '../../../vcx.podspec'
   pod 'Firebase/Analytics'
   pod 'Firebase/Messaging'

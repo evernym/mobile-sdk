@@ -35,3 +35,10 @@ You can change path to the vcx folder to better suite your needs. In that case, 
 - Move vcx.pospec to the folder where you pointed in Podifle
 - if you want to use new versions of VCX library, update path to the file and version on MobileSDK server in vcx.podspec, in the root of the MobileSDK folder (currently is `0.0.165` and path is `s.source = { :git => 'git@github.com:evernym/VCX-Cocoapods.git' }`)
 - Move vcx folder (with downloaded library) to the same folder where your vcx.podspec is moved
+
+<!-- 
+Once we have publicly available cocoapod then we need to do the following
+
+- Uncomment line in Podfile which has a comment
+- Run `pod repo update`
+- Run `pod install` -->

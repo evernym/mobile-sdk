@@ -12,7 +12,11 @@
 
 @implementation CMMessage
 
-+ (void)downloadMessages: (NSDictionary*) connection andType: (CMMessageStatusType) type andMessageID: (nullable NSString*) messageID withCompletionHandler: (ResponseWithArray) completionBlock {
++ (void)downloadMessages: (NSDictionary*) connection
+                 andType: (CMMessageStatusType) type
+            andMessageID: (nullable NSString*) messageID
+   withCompletionHandler: (ResponseWithArray) completionBlock {
+    
     NSString* pwDid = [CMConnection getPwDid: connection[@"serializedConnection"]];
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
     NSString* messageType = CMMessageStatusTypeValue(type);

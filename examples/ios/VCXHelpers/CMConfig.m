@@ -19,11 +19,11 @@
 
 // Define your wallet name constant here
 NSString* walletName = @"Lor6Ohwaichool"; //@"PleaseSetYourConnectMeWalletName";
-NSString* sponsorServerURL = @"placeholder";
+NSString* sponsorServerURL = @"http://127.0.0.1:4321";
 
 // Below settings will depend on your choosen environment
 // Selected here is Production Enviroment
-CMEnvironment environment = Production;
+CMEnvironment environment = DevTeam1;
 
 +(NSString*)agencyConfig {
     NSString* walletKey = [CMConfig walletKey];
@@ -39,10 +39,15 @@ CMEnvironment environment = Production;
                 @"agencyDid": @"LqnB96M6wBALqRZsrTTwda",
                 @"agencyVerKey": @"BpDPZHLbJFu67sWujecoreojiWZbi2dgf4xnYemUzFvB",
         },
+//        @"3": @{
+//                @"agencyUrl": @"https://agency-team1.pdev.evernym.com",
+//                @"agencyDid": @"TGLBMTcW9fHdkSqown9jD8",
+//                @"agencyVerKey": @"FKGV9jKvorzKPtPJPNLZkYPkLhiS1VbxdvBgd1RjcQHR",
+//        }
         @"3": @{
-                @"agencyUrl": @"https://agency-team1.pdev.evernym.com",
-                @"agencyDid": @"TGLBMTcW9fHdkSqown9jD8",
-                @"agencyVerKey": @"FKGV9jKvorzKPtPJPNLZkYPkLhiS1VbxdvBgd1RjcQHR",
+                @"agencyUrl": @"https://agency.pdev.evernym.com",
+                @"agencyDid": @"LiLBGgFarh954ZtTByLM1C",
+                @"agencyVerKey": @"Bk9wFrud3rz8v3nAFKGib6sQs8zHWzZxfst7Wh3Mbc9W",
         }
     };
     

@@ -1,23 +1,21 @@
 PODS:
   - QRCodeReaderViewController (4.0.2)
-  - vcx (1.4.0)
+  - vcx (0.0.198)
 
 DEPENDENCIES:
   - QRCodeReaderViewController
-  - vcx (from `../../../vcx.podspec`)
+  - vcx (= 0.0.198)
 
 SPEC REPOS:
+  "git@gitlab.corp.evernym.com:dev/vcx/indy-sdk.git":
+    - vcx
   https://github.com/CocoaPods/Specs.git:
     - QRCodeReaderViewController
 
-EXTERNAL SOURCES:
-  vcx:
-    :path: "../../../vcx.podspec"
-
 SPEC CHECKSUMS:
   QRCodeReaderViewController: e8f27d035b3e72b1d4b1c61ff66458287e3be0ff
-  vcx: 6ed1ec0bf4b7e18d73c9832d2e0972a604b9f679
+  vcx: 6b83de72c3fa993d6a546ac1b1616289a64491e9
 
-PODFILE CHECKSUM: 81ec363c23da46840c70380807ada2c775c84041
+PODFILE CHECKSUM: 3b11f15e98b726d0fa8094e0ab33c1a1fa12c309
 
 COCOAPODS: 1.10.0

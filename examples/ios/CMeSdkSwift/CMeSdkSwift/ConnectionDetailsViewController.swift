@@ -26,28 +26,35 @@ class ConnectionDetailsViewController: UIViewController {
         // in push notification, we will also receive messageID, which will be used for downloading details for that specific messageID
         // here (without push notification) we will download all messages for given connection
         guard let connection = self.connection else { return }
-        for i in 0...6 {
-            CMMessage.downloadMessages(connection, andType: CMMessageStatusType(rawValue: CMMessageStatusType.RawValue(i)), andMessageID: nil) { (messages, error) in
-                print("Received Messages",  messages as Any, i)
-                guard
-                    let downloadedMessages = messages,
-                    downloadedMessages.count > 1
-                else { return }
-
-                self.messages = downloadedMessages.filter {
-                    guard
-                        let msg = $0 as? [String: Any],
-                        let msgType = msg["ty[e"] as? String
-
-                    else { return false }
-
-                    return !["ACCEPT_CONN_REQ", "connReq", "connReqAnswer"].contains(msgType)
+        
+        CMMessage.downloadMessages(connection, andType: Received, andMessageID: nil) { (messages, error) in
+            print("Received Messages",  messages as Any)
+            guard
+                let downloadedMessages = messages,
+                downloadedMessages.count >= 1
+            else { return }
+            
+            for message in downloadedMessages {
+                let decryptedMessage = (message as! [String: Any])["decryptedPayload"] as! String;
+                let uid = (message as! [String: Any])["uid"] as! String
+                guard var decryptedMessageJson = (try? JSONSerialization.jsonObject(with: Data(decryptedMessage.utf8), options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] else {
+                    print("Could not convert to json")
+                    return
                 }
-
-                self.tableView.reloadData()
+                decryptedMessageJson["uid"] = uid;
+                let messageType = decryptedMessageJson["@type"] as! [String: String]
+                let messageTypeName = messageType["name"]!
+                if (messageTypeName == "credential-offer") {
+                    CMCredential.acceptCredOffer(decryptedMessageJson, forConnection: connection) { (message, error) in
+                        
+                    }
+                } else if (["proof_request", "proof-request", "presentation-request"].contains(messageTypeName)) {
+                    
+                }
             }
         }
     }
+
     func openMessageControllerForType(_ messageType: String, message: [String: Any]) {
         switch messageType {
         case "proofReq":

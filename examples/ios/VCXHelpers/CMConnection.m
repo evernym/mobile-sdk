@@ -28,14 +28,17 @@
     return connValues[@"data"][@"pw_did"];
 }
 
-+(void)connect: (NSString*)connectJSON connectionType: (int)connectionType phoneNumber: (NSString*) phone withCompletionHandler: (ResponseWithObject) completionBlock {
++(void)connect: (NSString*)invitation
+connectionType: (int)connectionType
+   phoneNumber: (NSString*) phone
+withCompletionHandler: (ResponseWithObject) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
 
-    NSDictionary *connectValues = [CMUtilities jsonToDictionary: connectJSON];
+    NSDictionary *connectValues = [CMUtilities jsonToDictionary: invitation];
 
     if([[connectValues allKeys] count] < 1) {
-        connectValues = [CMConnection parseInvitationLink: connectJSON];
-        connectJSON = [CMUtilities toJsonString: connectValues];
+        connectValues = [CMConnection parseInvitationLink: invitation];
+        invitation = [CMUtilities toJsonString: connectValues];
     }
 
     if([connectValues count] < 1) {
@@ -48,12 +51,16 @@
 
     [LocalStorage store: @"tempConnection" andObject: connectValues];
 
-    [sdkApi connectionCreateWithInvite: [self connectionID: connectValues] inviteDetails: connectJSON completion: ^(NSError *error, NSInteger connectionHandle) {
+    [sdkApi connectionCreateWithInvite: [self connectionID: connectValues]
+                         inviteDetails: invitation
+                            completion: ^(NSError *error, NSInteger connectionHandle) {
         if (error && error.code > 0) {
             if(error && error.code != 1010) {
                 return completionBlock(nil, error);
             }
-            [sdkApi connectionSendReuse: (int)connectionHandle invite: connectJSON withCompletion:^(NSError *error) {
+            [sdkApi connectionSendReuse: (int)connectionHandle
+                                 invite: invitation
+                         withCompletion: ^(NSError *error) {
                 if (error && error.code > 0) {
                     return completionBlock(nil, error);
                 }
@@ -61,50 +68,72 @@
         }
 
         [CMUtilities printSuccess: @[@"createConnectionWithInvite",  [NSNumber numberWithLong: connectionHandle]]];
-
-        [sdkApi connectionConnect: (int)connectionHandle connectionType: [NSString stringWithFormat:@"{\"connection_type\":\"%@\",\"phone\":%@\"\"}", [CMConnection connectionByType: connectionType], phone] completion: ^(NSError *error, NSString *inviteDetails) {
+        
+        NSString *connectType = [NSString stringWithFormat:@"{\"connection_type\":\"%@\",\"phone\":%@\"\"}",
+                                    [CMConnection connectionByType: connectionType], phone];
+        [sdkApi connectionConnect: (int)connectionHandle
+                   connectionType: connectType
+                       completion: ^(NSError *error, NSString *inviteDetails) {
 
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
             [CMUtilities printSuccess: @[@"connectionConnect", inviteDetails]];
 
-            [sdkApi connectionSerialize: (int)connectionHandle completion: ^(NSError *error, NSString *state) {
-                if (error && error.code > 0) {
-                    return completionBlock(nil, error);
-                }
-
-                [sdkApi connectionGetState: (int)connectionHandle completion:^(NSError *error, NSInteger state) {
-                    if (error && error.code > 0) {
-                        return completionBlock(nil, error);
-                    }
-
-                    if(state != 4) {
-                        [sdkApi connectionUpdateState: (int)connectionHandle withCompletion:^(NSError *error, NSInteger state) {
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                    while (true) {
+                        dispatch_semaphore_t acceptedWaitSemaphore = dispatch_semaphore_create(0);
+                        __block NSInteger connectionState = 0;
+                        
+                        [sdkApi connectionGetState: (int)connectionHandle completion:^(NSError *error, NSInteger state) {
                             if (error && error.code > 0) {
+                                dispatch_semaphore_signal(acceptedWaitSemaphore);
                                 return completionBlock(nil, error);
                             }
+
+                            if(state != 4) {
+                                [sdkApi connectionUpdateState: (int)connectionHandle withCompletion:^(NSError *error, NSInteger state) {
+                                    if (error && error.code > 0) {
+                                        dispatch_semaphore_signal(acceptedWaitSemaphore);
+                                        return completionBlock(nil, error);
+                                    }
+                                    connectionState = state;
+                                    dispatch_semaphore_signal(acceptedWaitSemaphore);
+                                }];
+                            } else {
+                                connectionState = state;
+                                dispatch_semaphore_signal(acceptedWaitSemaphore);
+                            }
                         }];
+                        
+                        dispatch_semaphore_wait(acceptedWaitSemaphore, DISPATCH_TIME_FOREVER);
+                        if (connectionState == 4) {
+                            
+                            [sdkApi connectionSerialize: (int)connectionHandle completion: ^(NSError *error, NSString *connectionSerialized) {
+                                if (error && error.code > 0) {
+                                    return completionBlock(nil, error);
+                                }
+                                [CMUtilities printSuccess: @[@"Connection invitation success", connectionSerialized]];
+
+                                // Store the serialized connection
+                                NSDictionary* invitation = [LocalStorage getObjectForKey: @"tempConnection" shouldCreate: true];
+
+                                NSMutableDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
+                                NSDictionary* connectionObj = @{
+                                    @"serializedConnection": connectionSerialized,
+                                    @"invitation": invitation
+                                };
+
+                                [connections setValue: connectionObj forKey: [self connectionID: connectionObj]];
+                                [LocalStorage store: @"connections" andObject: connections];
+                                [LocalStorage deleteObjectForKey: @"tempConnection"];
+
+                                return completionBlock(connectionObj, nil);
+                            }];
+                            break;
+                        }
                     }
-                }];
-
-                [CMUtilities printSuccess: @[@"Connection invitation success", state]];
-
-                // Store the serialized connection
-                NSDictionary* invitation = [LocalStorage getObjectForKey: @"tempConnection" shouldCreate: true];
-
-                NSMutableDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
-                NSDictionary* connectionObj = @{
-                    @"serializedConnection": state,
-                    @"invitation": invitation
-                };
-
-                [connections setValue: connectionObj forKey: [self connectionID: connectionObj]];
-                [LocalStorage store: @"connections" andObject: connections];
-                [LocalStorage deleteObjectForKey: @"tempConnection"];
-
-                return completionBlock(connectionObj, nil);
-            }];
+                });
         }];
     }];
 }
