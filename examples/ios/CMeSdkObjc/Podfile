@@ -1,6 +1,7 @@
 # Uncomment the next line to define a global platform for your project
- platform :ios, '10.0'
-source 'https://github.com/CocoaPods/Specs.git'
+platform :ios, '10.0'
+
+source 'https://cdn.cocoapods.org/'
 source 'git@github.com:evernym/mobile-sdk.git'
 
 target 'CMeSdkObjc' do
@@ -8,6 +9,9 @@ target 'CMeSdkObjc' do
    use_frameworks!
 
   # Pods for CMeSdkObjc
+  # Below line will be enabled when we go public with our cocoapod
+  # pod 'vcx', '0.0.198'
+  # Below line will be removed when we go public with our cocoapod
   pod 'vcx', :path => '../../../vcx.podspec'
   pod 'Firebase/Analytics'
   pod 'Firebase/Messaging'

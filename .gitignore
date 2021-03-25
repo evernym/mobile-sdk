@@ -9,3 +9,7 @@ vcx/*
 
 ### OSX ###
 .DS_Store
+
+.settings
+.classpath
+.project

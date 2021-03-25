@@ -27,7 +27,7 @@ typedef void (^ResponseWithArray)(NSArray *responseArray, NSError *error);
 +(void)printError: (NSError*)error;
 +(void)printErrorMessage: (NSString*)error;
 +(void)printSuccess: (NSArray*)message;
-+(void)sendPostRequest: (NSString*)serverURL withBody: (NSDictionary*) data andCompletion: (ResponseWithObject) completionBlock;
++(void)sendPostRequest: (NSString*)serverURL withBody: (NSDictionary*) data andCompletion: (ResponseBlock) completionBlock;
 
 @end
 
