@@ -57,12 +57,10 @@ public class Connections {
 
     private static String findExistingConnection(String newInvite, List<String> serializedConnections) throws Exception {
         String existingConnection = null;
-        boolean newInviteIsAries = isAriesInvitation(newInvite);
         for (String sc : serializedConnections) {
             int handle = ConnectionApi.connectionDeserialize(sc).get();
             String storedInvite = ConnectionApi.connectionInviteDetails(handle, 0).get();
-            boolean storedInviteIsAries = isAriesInvitation(storedInvite);
-            if (newInviteIsAries == storedInviteIsAries && compareInvites(newInvite, storedInvite, newInviteIsAries)) {
+            if (compareInvites(newInvite, storedInvite)) {
                 existingConnection = sc;
             }
             ConnectionApi.connectionRelease(handle);
@@ -73,23 +71,48 @@ public class Connections {
         return existingConnection;
     }
 
-    private static boolean compareInvites(String newInvite, String storedInvite, Boolean isAries) throws Exception {
+    private static boolean compareInvites(String newInvite, String storedInvite) throws Exception {
+        boolean newInviteIsAries = isAriesInvitation(newInvite);
+        boolean storedInviteIsAries = isAriesInvitation(storedInvite);
         JSONObject newJson = new JSONObject(newInvite);
         JSONObject storedJson = new JSONObject(storedInvite);
-        String storedDid;
-        String newDid;
-        if (isAries) {
-            newDid = newJson.getJSONArray("recipientKeys").getString(0);
-            storedDid = storedJson.getJSONArray("recipientKeys").getString(0);
-        } else {
-            if (newJson.has("senderDetail")) {
-                newDid = newJson.getJSONObject("senderDetail").getString("DID");
-            } else { // use abbreviated
-                newDid = newJson.getJSONObject("s").getString("d");
+
+        if (newInviteIsAries && storedInviteIsAries) {
+            String newPublicDid = newJson.optString("public_did");
+            String storedPublicDid = storedJson.optString("public_did");
+            if (!storedPublicDid.isEmpty()) {
+                return storedPublicDid.equals(newPublicDid);
+            } else {
+                String newDid = newJson.getJSONArray("recipientKeys").getString(0);
+                String storedDid = storedJson.getJSONArray("recipientKeys").optString(0);
+                return storedDid.equals(newDid);
             }
-            storedDid = storedJson.getJSONObject("senderDetail").getString("DID");
         }
-        return newDid.equals(storedDid);
+
+        if (!newInviteIsAries && !storedInviteIsAries) {
+            if (newJson.has("senderDetail")) {
+                String newPublicDid = newJson.getJSONObject("senderDetail").optString("publicDID");
+                String storedPublicDid = storedJson.getJSONObject("senderDetail").optString("publicDID");
+                if (!storedPublicDid.isEmpty()) {
+                    return storedPublicDid.equals(newPublicDid);
+                } else {
+                    String storedDid = storedJson.getJSONObject("senderDetail").getString("DID");
+                    String newDid = newJson.getJSONObject("senderDetail").getString("DID");
+                    return storedDid.equals(newDid);
+                }
+            } else { // use abbreviated
+                String newPublicDid = newJson.getJSONObject("s").optString("publicDID");
+                String storedPublicDid = storedJson.getJSONObject("senderDetail").optString("publicDID");
+                if (!storedPublicDid.isEmpty()) {
+                    return storedPublicDid.equals(newPublicDid);
+                } else {
+                    String storedDid = storedJson.getJSONObject("senderDetail").getString("DID");
+                    String newDid = newJson.getJSONObject("s").getString("d");
+                    return storedDid.equals(newDid);
+                }
+            }
+        }
+        return false;
     }
 
 
