@@ -1,5 +1,10 @@
 # Changelog
 
+# Release notes - MSDK 1.4.1 - Mar 22 2021
+
+## Bugs
+* [MSDK-398] - Provisioning with token does not work after its enforcing (disabling of old provisioning protocol) on the Agency side.
+
 # Release notes - MSDK 1.4.0 - Nov 24 2020
 
 ## Bugs
