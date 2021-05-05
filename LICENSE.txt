@@ -9,7 +9,7 @@ Licensor:             Evernym, Inc.
 Licensed Work:        Evernym Mobile SDK
                       and the components thereof, to the extent and only to  
                       the extent contained in the code repository set forth at  
-                      https://github.com/evernym/mobile-sdk
+                      https://gitlab.com/evernym/mobile/mobile-sdk
                       ("Code Repository").  
                       The Licensed Work is (c) 2020 Evernym, Inc.
 
