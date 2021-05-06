@@ -41,10 +41,11 @@ Before starting, please read the [Base Concepts document](docs/0.Base Concepts.m
 #### Additional Sources:
 * [Configuration](docs/Configuration.md) &#8212; The list of all VCX library configuration options. 
 * [Errors](docs/vcx/VcxErrors.md) &#8212; The list of all possible VCX errors and their definitions. 
-* [New Messages Processing](docs/vcx/Messages.md)
+* [New Messages Processing](docs/8.Messages.md)
 * [Credentials With Attachments](docs/9.CredentialsWithAttachments.md)
 * [Push Notifications](docs/PushNotifications.md)
 * [Frequently asked questions](docs/FAQ.md)
+* [Advanced Techniques](docs/Advanced.md)
 
 ### Helpful links
 - Connect.Me Public Beta &#8212; Most of the features of the Evernym Mobile SDK are showcased in [Connect.Me](https://connect.me/). You can use upcoming releases of Connect.Me by clicking the appropriate link from your device.

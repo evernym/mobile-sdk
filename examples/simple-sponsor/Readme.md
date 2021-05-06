@@ -1,10 +1,10 @@
-# VCX for Python
+# Simple Sponsor
 
 This is a simple HTTP server performing generation and signing of tokens which can be used for provisioning of a cloud agents.
 
 #### Prerequisite
 
-- Sponsor registered in Evernym's Cloud Service
+- Sponsor registered in Evernym's Cloud Service [see](../../docs/2.Initialization.md#sponsor-ie-you-onboarding-with-evernyms-cloud-service).
 - Ngrok
 - Python3
 
@@ -33,3 +33,9 @@ This is a simple HTTP server performing generation and signing of tokens which c
 
 Started server provides `/generate` POST endpoint without params and empty body (example: `http://b620a27d5ce0.ngrok.io/generate`).
 You need to call this endpoint in your application to get provision token.
+
+#### Flow
+
+1. A client application generates a unique identifier and put it into a request as `sponseeId` to generate a provision token.
+2. Sponsor backend generates token and optionally do mapping of `sponseeId` to some internal info's (like push notification endpoint - not included in current sample)
+3. Sponsor backend returns generated token (`sponseeId` is just set by the value from the original request).
