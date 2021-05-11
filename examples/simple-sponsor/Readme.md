@@ -10,7 +10,7 @@ This is a simple HTTP server performing generation and signing of tokens which c
 
 #### Preparation
 
-1. Rename `server.conf.sample` file to `server.conf` or create a new one and change the following fields with your Sponsor information:
+1. Rename `server.conf.sample` file to `server.conf` or create a new one and change the following fields with your Sponsor information (note: do not use quotes for values):
     * `sponsor_id` - an ID given to you from Evernym's Support Team after the Sponsor onboarding process is complete.
     * `seed` - seed used for generation of your `DID/Verkey` pair used for Sponsor onboarding.
     * `verkey` - generate `Verkey`
@@ -31,7 +31,17 @@ This is a simple HTTP server performing generation and signing of tokens which c
 
 #### How to use
 
-Started server provides `/generate` POST endpoint without params and empty body (example: `http://b620a27d5ce0.ngrok.io/generate`).
+Started server provides `/generate` POST endpoint without query params and the following body:
+```
+{
+    `sponseeId`: 'string'  - a unique identifier of a requester
+}
+```
+
+Example: 
+* url - `http://b620a27d5ce0.ngrok.io/generate`
+* body - `{'sponseeId': '545516d9-9c5d-4bae-84c6-a74989499cc5'}`
+
 You need to call this endpoint in your application to get provision token.
 
 #### Flow
@@ -39,3 +49,4 @@ You need to call this endpoint in your application to get provision token.
 1. A client application generates a unique identifier and put it into a request as `sponseeId` to generate a provision token.
 2. Sponsor backend generates token and optionally do mapping of `sponseeId` to some internal info's (like push notification endpoint - not included in current sample)
 3. Sponsor backend returns generated token (`sponseeId` is just set by the value from the original request).
+
