@@ -241,7 +241,7 @@ public class Proofs {
                                                 }
                                                 try {
                                                     String jsonMsg = Messages.prepareUpdateMessage(pwDid, messageId);
-                                                    UtilsApi.vcxUpdateMessages(MessageStatusType.ANSWERED, jsonMsg).whenComplete((v1, thr) -> {
+                                                    UtilsApi.vcxUpdateMessages(MessageStatusType.REVIEWED, jsonMsg).whenComplete((v1, thr) -> {
                                                         if (thr != null) {
                                                             Logger.getInstance().e("Failed to update messages", thr);
                                                             result.completeExceptionally(thr);
@@ -330,7 +330,7 @@ public class Proofs {
                                         }
                                         try {
                                             String jsonMsg = Messages.prepareUpdateMessage(pwDid, messageId);
-                                            UtilsApi.vcxUpdateMessages(MessageStatusType.ANSWERED, jsonMsg).whenComplete((v1, thr) -> {
+                                            UtilsApi.vcxUpdateMessages(MessageStatusType.REVIEWED, jsonMsg).whenComplete((v1, thr) -> {
                                                 if (thr != null) {
                                                     Logger.getInstance().e("Failed to update messages", thr);
                                                     result.completeExceptionally(thr);

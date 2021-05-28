@@ -6,5 +6,5 @@ public interface MessageStatusType {
     String PENDING = "MS-103";
     String ACCEPTED = "MS-104";
     String REJECTED = "MS-105";
-    String ANSWERED = "MS-106";
+    String REVIEWED = "MS-106";
 }

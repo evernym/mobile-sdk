@@ -175,7 +175,7 @@ public class Credentials {
                                         }
                                         try {
                                             String jsonMsg = Messages.prepareUpdateMessage(pwDid, messageId);
-                                            UtilsApi.vcxUpdateMessages(MessageStatusType.ANSWERED, jsonMsg).whenComplete((v1, error) -> {
+                                            UtilsApi.vcxUpdateMessages(MessageStatusType.REVIEWED, jsonMsg).whenComplete((v1, error) -> {
                                                 if (error != null) {
                                                     Logger.getInstance().e("Failed to update messages", error);
                                                     result.completeExceptionally(error);
