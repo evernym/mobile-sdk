@@ -113,21 +113,7 @@ We are working also on improving service related to push notifications, we shoul
 
 ### Processing push notifications on mobile device
 
-Once you (Sponsor) receive a message on your webhook. You can send push notification to your customer's app. Inside the app you can use method ```downloadMessages``` in ObjC or ```UtilsApi.vcxGetMessages``` in Java, for pulling all messages waiting on cloud agent. Parameters for this method are as follows:
+Once you (Sponsor) receive a message on your webhook. You can send push notification to your customer's app. 
+Inside the app you can use method ```downloadMessages``` in ObjC or ```UtilsApi.vcxGetMessages``` in Java, for pulling either all messages waiting on cloud agent, or a specific one matching to received notification.
 
-```text
-messageStatus: optional, comma separated - query for messages with the specified status.
-  Statuses:
-   MS-101 - Created
-   MS-102 - Sent
-   MS-103 - Received
-   MS-104 - Accepted
-   MS-105 - Rejected
-   MS-106 - Reviewed
-
-uids: optional, comma separated - query for messages with the specified uids.
-
-pwdids: optional, comma separated - DID's pointing to specific connection.
-```
-
-This returns a JSON object which can be parsed into an array of messages, each of which contains a JSON object that itself can be parsed into the message payload.
+See [messages documentation](8.Messages.md) for message download information.
