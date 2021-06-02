@@ -41,7 +41,8 @@ dependencies {
     implementation "androidx.annotation:annotation-experimental:1.0.0"
     implementation "androidx.annotation:annotation-experimental-lint:1.0.0"
     implementation "net.lingala.zip4j:zip4j:2.6.1"
-
+    implementation 'com.squareup.okhttp3:okhttp:4.8.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.8.1'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'

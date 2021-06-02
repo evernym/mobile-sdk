@@ -1,8 +1,5 @@
 package me.connect.sdk.java;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 public class AgencyConfig {
     private AgencyConfig() {
     }
