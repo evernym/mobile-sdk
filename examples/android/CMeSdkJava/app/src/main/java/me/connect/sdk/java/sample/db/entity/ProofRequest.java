@@ -12,8 +12,8 @@ public class ProofRequest {
     @ColumnInfo(name="thread_id")
     public String threadId;
 
-    @ColumnInfo(name = "connection_id")
-    public int connectionId;
+    @ColumnInfo(name = "pwdid")
+    public String pwDid;
 
     @ColumnInfo(name = "serialized")
     public String serialized;

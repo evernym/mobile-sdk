@@ -6,6 +6,8 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
+import com.evernym.sdk.vcx.VcxException;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,7 +60,7 @@ public class CredentialOffersViewModel extends AndroidViewModel {
     private void acceptCredentialOffer(int offerId, SingleLiveData<Boolean> data) {
         Executors.newSingleThreadExecutor().execute(() -> {
             CredentialOffer offer = db.credentialOffersDao().getById(offerId);
-            Connection connection = db.connectionDao().getById(offer.connectionId);
+            Connection connection = db.connectionDao().getByPwDid(offer.pwDid);
             Credentials.acceptOffer(connection.serialized, offer.serialized, offer.messageId).handle((s, throwable) -> {
                         if (s != null) {
                             String s2 = Credentials.awaitStatusChange(s, MessageState.ACCEPTED);
@@ -75,24 +77,24 @@ public class CredentialOffersViewModel extends AndroidViewModel {
 
     private void checkCredentialOffers(SingleLiveData<Boolean> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            List<Connection> connections = db.connectionDao().getAllAsync();
-            for (Connection c : connections) {
-                Messages.getPendingMessages(c.serialized, MessageType.CREDENTIAL_OFFER).handle((res, throwable) -> {
-                    if (throwable != null) {
-                        throwable.printStackTrace();
-                    }
-                    if (res != null) {
-                        for (Message message : res) {
-                            CredDataHolder holder = CredDataHolder.extractDataFromCredentialsOfferMessage(message);
-                            if (!db.credentialOffersDao().checkOfferExists(holder.id, c.id)) {
-                                Credentials.createWithOffer(c.serialized, UUID.randomUUID().toString(), holder.offer).handle((co, err) -> {
+            Messages.getPendingMessages(MessageType.CREDENTIAL_OFFER).handle((res, throwable) -> {
+                if (throwable != null) {
+                    throwable.printStackTrace();
+                }
+                if (res != null) {
+                    for (Message message : res) {
+                        CredDataHolder holder = CredDataHolder.extractDataFromCredentialsOfferMessage(message);
+                        String pwDid = message.getPwDid();
+                        if (!db.credentialOffersDao().checkOfferExists(pwDid)) {
+                            try {
+                                Credentials.createWithOffer(UUID.randomUUID().toString(), holder.offer).handle((co, err) -> {
                                     if (err != null) {
                                         err.printStackTrace();
                                     } else {
                                         CredentialOffer offer = new CredentialOffer();
                                         offer.claimId = holder.id;
                                         offer.name = holder.name;
-                                        offer.connectionId = c.id;
+                                        offer.pwDid = pwDid;
                                         offer.attributes = holder.attributes;
                                         offer.serialized = co;
                                         offer.messageId = message.getUid();
@@ -100,13 +102,15 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                                     }
                                     return null;
                                 });
+                            } catch (VcxException e) {
+                                e.printStackTrace();
                             }
                         }
                     }
-                    liveData.postValue(true);
-                    return res;
-                });
-            }
+                }
+                liveData.postValue(true);
+                return res;
+            });
         });
     }
 }

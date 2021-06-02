@@ -50,7 +50,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
     private void acceptProofReq(int proofId, SingleLiveData<Boolean> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             ProofRequest proof = db.proofRequestDao().getById(proofId);
-            Connection con = db.connectionDao().getById(proof.connectionId);
+            Connection con = db.connectionDao().getByPwDid(proof.pwDid);
             Proofs.retrieveAvailableCredentials(proof.serialized).handle((creds, err) -> {
                 if (err != null) {
                     liveData.postValue(false);
@@ -83,7 +83,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
     private void rejectProofReq(int proofId, SingleLiveData<Boolean> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             ProofRequest proof = db.proofRequestDao().getById(proofId);
-            Connection con = db.connectionDao().getById(proof.connectionId);
+            Connection con = db.connectionDao().getByPwDid(proof.pwDid);
             Proofs.reject(con.serialized, proof.serialized, proof.messageId).handle((s, err) -> {
                 if (s != null) {
                     String serializedProof = Proofs.awaitStatusChange(s, MessageState.REJECTED);
@@ -105,35 +105,33 @@ public class ProofRequestsViewModel extends AndroidViewModel {
 
     private void checkProofRequests(SingleLiveData<Boolean> data) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            List<Connection> connections = db.connectionDao().getAllAsync();
-            for (Connection c : connections) {
-                Messages.getPendingMessages(c.serialized, MessageType.PROOF_REQUEST).handle((res, throwable) -> {
-                    if (res != null) {
-                        for (Message message : res) {
-                            ProofDataHolder holder = ProofDataHolder.extractRequestedFieldsFromProofMessage(message);
-                            if (!db.proofRequestDao().checkExists(holder.threadId)) {
-                                Proofs.createWithRequest(UUID.randomUUID().toString(), holder.proofReq).handle((pr, err) -> {
-                                    if (err != null) {
-                                        err.printStackTrace();
-                                    } else {
-                                        ProofRequest proof = new ProofRequest();
-                                        proof.serialized = pr;
-                                        proof.name = holder.name;
-                                        proof.connectionId = c.id;
-                                        proof.attributes = holder.attributes;
-                                        proof.threadId = holder.threadId;
-                                        proof.messageId = message.getUid();
-                                        db.proofRequestDao().insertAll(proof);
-                                    }
-                                    return null;
-                                });
-                            }
+            Messages.getPendingMessages(MessageType.PROOF_REQUEST).handle((res, throwable) -> {
+                if (res != null) {
+                    for (Message message : res) {
+                        ProofDataHolder holder = ProofDataHolder.extractRequestedFieldsFromProofMessage(message);
+                        String pwDid = message.getPwDid();
+                        if (!db.proofRequestDao().checkExists(holder.threadId)) {
+                            Proofs.createWithRequest(UUID.randomUUID().toString(), holder.proofReq).handle((pr, err) -> {
+                                if (err != null) {
+                                    err.printStackTrace();
+                                } else {
+                                    ProofRequest proof = new ProofRequest();
+                                    proof.serialized = pr;
+                                    proof.name = holder.name;
+                                    proof.pwDid = pwDid;
+                                    proof.attributes = holder.attributes;
+                                    proof.threadId = holder.threadId;
+                                    proof.messageId = message.getUid();
+                                    db.proofRequestDao().insertAll(proof);
+                                }
+                                return null;
+                            });
                         }
                     }
-                    data.postValue(true);
-                    return null;
-                });
-            }
+                }
+                data.postValue(true);
+                return null;
+            });
         });
     }
 }

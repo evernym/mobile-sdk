@@ -22,7 +22,7 @@ interface ConnectionDao {
     suspend fun getById(id: Int): Connection
 
     @Query("SELECT * FROM connection WHERE pwdid = :pwDid")
-    suspend fun getByPwDid(pwDid: Int): Connection
+    suspend fun getByPwDid(pwDid: String): Connection
 
     @Insert
     suspend fun insertAll(vararg connections: Connection)

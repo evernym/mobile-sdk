@@ -31,72 +31,47 @@ public class Messages {
     /**
      * Retrieve pending messages.
      *
-     * @param serializedConnection String containing JSON with serialized connection details.
      * @param messageType          Type of messages to retrieve
      * @return List of {@link Message}
      */
     public static @NonNull
-    CompletableFuture<List<Message>> getPendingMessages(@NonNull String serializedConnection,
-                                                        @NonNull MessageType messageType) {
+    CompletableFuture<List<Message>> getPendingMessages(@NonNull MessageType messageType) {
         Logger.getInstance().i("Retrieving pending messages");
         CompletableFuture<List<Message>> result = new CompletableFuture<>();
         try {
-            ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((handle, er) -> {
-                if (er != null) {
-                    Logger.getInstance().e("Failed to deserialize connection: ", er);
-                    result.completeExceptionally(er);
+            UtilsApi.vcxGetMessages(MessageStatusType.PENDING, null, null).whenComplete((messagesString, err) -> {
+                if (err != null) {
+                    Logger.getInstance().e("Failed to retrieve messages: ", err);
+                    result.completeExceptionally(err);
                     return;
                 }
                 try {
-                    ConnectionApi.connectionGetPwDid(handle).whenComplete((pwDid, e) -> {
-                        if (e != null) {
-                            Logger.getInstance().e("Failed to get pwDid: ", e);
-                            result.completeExceptionally(e);
-                            return;
-                        }
-                        try {
-                            UtilsApi.vcxGetMessages(MessageStatusType.PENDING, null, pwDid).whenComplete((messagesString, err) -> {
-                                if (err != null) {
-                                    Logger.getInstance().e("Failed to retrieve messages: ", err);
-                                    result.completeExceptionally(err);
-                                    return;
+                    List<Message> messages = new ArrayList<>();
+                    JSONArray messagesJson = new JSONArray(messagesString);
+                    for (int i = 0; i < messagesJson.length(); i++) {
+                        JSONArray msgsJson = messagesJson.getJSONObject(i).optJSONArray("msgs");
+                        String pairwiseDID = messagesJson.getJSONObject(i).getString("pairwiseDID");
+                        if (msgsJson != null) {
+                            for (int j = 0; j < msgsJson.length(); j++) {
+                                JSONObject message = msgsJson.getJSONObject(j);
+                                JSONObject payload = new JSONObject(message.getString("decryptedPayload"));
+                                String type = payload.getJSONObject("@type").getString("name");
+                                if (messageType.matches(type)) {
+                                    String messageUid = message.getString("uid");
+                                    String msg = payload.getString("@msg");
+                                    String status = message.getString("statusCode");
+                                    messages.add(new Message(pairwiseDID, messageUid, msg, type,status));
                                 }
-                                try {
-                                    List<Message> messages = new ArrayList<>();
-                                    JSONArray messagesJson = new JSONArray(messagesString);
-                                    for (int i = 0; i < messagesJson.length(); i++) {
-                                        JSONArray msgsJson = messagesJson.getJSONObject(i).optJSONArray("msgs");
-                                        if (msgsJson != null) {
-                                            for (int j = 0; j < msgsJson.length(); j++) {
-                                                JSONObject message = msgsJson.getJSONObject(j);
-                                                JSONObject payload = new JSONObject(message.getString("decryptedPayload"));
-                                                String type = payload.getJSONObject("@type").getString("name");
-                                                if (messageType.matches(type)) {
-                                                    String messageUid = message.getString("uid");
-                                                    String msg = payload.getString("@msg");
-                                                    String status = message.getString("statusCode");
-                                                    messages.add(new Message(messageUid, msg, type,status));
-                                                }
-                                            }
-                                        }
-                                    }
-                                    result.complete(messages);
-                                } catch (JSONException ex) {
-                                    result.completeExceptionally(ex);
-                                }
-                            });
-                        } catch (VcxException ex) {
-                            ex.printStackTrace();
+                            }
                         }
-                    });
-                } catch (Exception ex) {
+                    }
+                    result.complete(messages);
+                } catch (JSONException ex) {
                     result.completeExceptionally(ex);
                 }
             });
-
-
-        } catch (Exception ex) {
-            result.completeExceptionally(ex);
+        } catch (VcxException ex) {
+            ex.printStackTrace();
         }
         return result;
     }
@@ -121,6 +96,7 @@ public class Messages {
                     JSONArray messagesJson = new JSONArray(messageString);
                     for (int i = 0; i < messagesJson.length(); i++) {
                         JSONArray msgsJson = messagesJson.getJSONObject(i).optJSONArray("msgs");
+                        String pairwiseDID = messagesJson.getJSONObject(i).getString("pairwiseDID");
                         if (msgsJson != null) {
                             for (int j = 0; j < msgsJson.length(); j++) {
                                 JSONObject message = msgsJson.getJSONObject(j);
@@ -129,7 +105,7 @@ public class Messages {
                                 String messageUid = message.getString("uid");
                                 String status = message.getString("statusCode");
                                 String msg = payload.getString("@msg");
-                                messages.add(new Message(messageUid, msg, type, status));
+                                messages.add(new Message(pairwiseDID, messageUid, msg, type, status));
                             }
                         }
                     }

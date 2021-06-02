@@ -44,30 +44,28 @@ public class StructuredMessagesViewModel extends AndroidViewModel {
 
     private void checkStructMessages(SingleLiveData<Boolean> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            List<Connection> connections = db.connectionDao().getAllAsync();
-            for (Connection c : connections) {
-                Messages.getPendingMessages(c.serialized, MessageType.QUESTION).handle((res, throwable) -> {
-                    if (res != null) {
-                        for (Message msg : res) {
-                            StructuredMessageHolder holder = StructuredMessages.extract(msg);
-                            if (!db.structuredMessageDao().checkMessageExists(holder.getId(), c.id)) {
-                                StructuredMessage sm = new StructuredMessage();
-                                sm.connectionId = c.id;
-                                sm.messageId = msg.getUid();
-                                sm.entryId = holder.getId();
-                                sm.questionText = holder.getQuestionText();
-                                sm.questionDetail = holder.getQuestionDetail();
-                                sm.answers = holder.getResponses();
-                                sm.type = holder.getType();
-                                sm.serialized = msg.getPayload();
-                                db.structuredMessageDao().insertAll(sm);
-                            }
+            Messages.getPendingMessages(MessageType.QUESTION).handle((res, throwable) -> {
+                if (res != null) {
+                    for (Message msg : res) {
+                        StructuredMessageHolder holder = StructuredMessages.extract(msg);
+                        String pwDid = msg.getPwDid();
+                        if (!db.structuredMessageDao().checkMessageExists(pwDid)) {
+                            StructuredMessage sm = new StructuredMessage();
+                            sm.pwDid = pwDid;
+                            sm.messageId = msg.getUid();
+                            sm.entryId = holder.getId();
+                            sm.questionText = holder.getQuestionText();
+                            sm.questionDetail = holder.getQuestionDetail();
+                            sm.answers = holder.getResponses();
+                            sm.type = holder.getType();
+                            sm.serialized = msg.getPayload();
+                            db.structuredMessageDao().insertAll(sm);
                         }
                     }
-                    liveData.postValue(true);
-                    return null;
-                });
-            }
+                }
+                liveData.postValue(true);
+                return null;
+            });
         });
     }
 
@@ -81,7 +79,7 @@ public class StructuredMessagesViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             StructuredMessage sm = db.structuredMessageDao().getById(messageId);
 
-            Connection con = db.connectionDao().getById(sm.connectionId);
+            Connection con = db.connectionDao().getByPwDid(sm.pwDid);
             StructuredMessages.answer(con.serialized, sm.messageId, sm.type, sm.serialized, answer).handle((res, err) -> {
                 if (err == null) {
                     sm.selectedAnswer = answer;

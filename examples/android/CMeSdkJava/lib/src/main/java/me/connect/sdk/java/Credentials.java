@@ -84,51 +84,35 @@ public class Credentials {
     /**
      * Create credential offer
      *
-     * @param serializedConnection serialized connection string
      * @param sourceId             custom string for this cred offer
      * @param message              credential offer string
      * @return serialized credential offer
      */
     public static @NonNull
-    CompletableFuture<String> createWithOffer(@NonNull String serializedConnection, @NonNull String sourceId,
-                                              @NonNull String message) {
+    CompletableFuture<String> createWithOffer(@NonNull String sourceId,
+                                              @NonNull String message) throws VcxException {
         Logger.getInstance().i("Accepting credential offer");
         CompletableFuture<String> result = new CompletableFuture<>();
-        try {
-            ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((conHandle, err) -> {
-                if (err != null) {
-                    Logger.getInstance().e("Failed to deserialize connection: ", err);
-                    result.completeExceptionally(err);
-                    return;
-                }
-                try {
-                    CredentialApi.credentialCreateWithOffer(sourceId, message).whenComplete((credHandle, er) -> {
-                        if (er != null) {
-                            Logger.getInstance().e("Failed to create credential with offer: ", er);
-                            result.completeExceptionally(er);
-                            return;
-                        }
-                        try {
-                            CredentialApi.credentialSerialize(credHandle).whenComplete((sc, e) -> {
-                                if (e != null) {
-                                    Logger.getInstance().e("Failed to serialize credentials: ", e);
-                                    result.completeExceptionally(e);
-                                } else {
-                                    result.complete(sc);
-                                }
+        CredentialApi.credentialCreateWithOffer(sourceId, message).whenComplete((credHandle, er) -> {
+            if (er != null) {
+                Logger.getInstance().e("Failed to create credential with offer: ", er);
+                result.completeExceptionally(er);
+                return;
+            }
+            try {
+                CredentialApi.credentialSerialize(credHandle).whenComplete((sc, e) -> {
+                    if (e != null) {
+                        Logger.getInstance().e("Failed to serialize credentials: ", e);
+                        result.completeExceptionally(e);
+                    } else {
+                        result.complete(sc);
+                    }
 
-                            });
-                        } catch (VcxException ex) {
-                            result.completeExceptionally(ex);
-                        }
-                    });
-                } catch (Exception ex) {
-                    result.completeExceptionally(ex);
-                }
-            });
-        } catch (Exception ex) {
-            result.completeExceptionally(ex);
-        }
+                });
+            } catch (VcxException ex) {
+                result.completeExceptionally(ex);
+            }
+        });
         return result;
     }
 

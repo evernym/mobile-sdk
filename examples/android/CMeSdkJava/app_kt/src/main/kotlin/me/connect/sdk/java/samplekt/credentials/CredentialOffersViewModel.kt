@@ -42,7 +42,7 @@ class CredentialOffersViewModel(application: Application) : AndroidViewModel(app
     private fun acceptCredentialOffer(offerId: Int, data: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val offer = db.credentialOffersDao().getById(offerId)
-            val connection = db.connectionDao().getById(offer.connectionId)
+            val connection = db.connectionDao().getByPwDid(offer.pwDid)
             val s = Credentials.acceptOffer(connection.serialized, offer.serialized, offer.messageId).wrap().await()
             val s2: String = Credentials.awaitStatusChange(s, MessageState.ACCEPTED)
             offer.serialized = s2
@@ -57,23 +57,21 @@ class CredentialOffersViewModel(application: Application) : AndroidViewModel(app
 
     private fun checkCredentialOffers(liveData: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val connections = db.connectionDao().getAllAsync()
-            connections.forEach { c ->
-                val res = Messages.getPendingMessages(c.serialized, MessageType.CREDENTIAL_OFFER).wrap().await()
-                res.forEach { message ->
-                    val holder = CredDataHolder.extractDataFromCredentialsOfferMessage(message)
-                    if (!db.credentialOffersDao().checkOfferExists(holder!!.id, c.id)) {
-                        val co = Credentials.createWithOffer(c.serialized, UUID.randomUUID().toString(), holder.offer).wrap().await()
-                        val offer = CredentialOffer(
-                                claimId = holder.id,
-                                name = holder.name,
-                                connectionId = c.id,
-                                attributes = holder.attributes,
-                                serialized = co,
-                                messageId = message.uid
-                        )
-                        db.credentialOffersDao().insertAll(offer)
-                    }
+            val res = Messages.getPendingMessages(MessageType.CREDENTIAL_OFFER).wrap().await()
+            res.forEach { message ->
+                val holder = CredDataHolder.extractDataFromCredentialsOfferMessage(message)
+                val pwDid: String = message.pwDid
+                if (!db.credentialOffersDao().checkOfferExists(pwDid)) {
+                    val co = Credentials.createWithOffer(UUID.randomUUID().toString(), holder!!.offer).wrap().await()
+                    val offer = CredentialOffer(
+                            claimId = holder.id,
+                            name = holder.name,
+                            pwDid = pwDid,
+                            attributes = holder.attributes,
+                            serialized = co,
+                            messageId = message.uid
+                    )
+                    db.credentialOffersDao().insertAll(offer)
                 }
             }
         } catch (e: Exception) {

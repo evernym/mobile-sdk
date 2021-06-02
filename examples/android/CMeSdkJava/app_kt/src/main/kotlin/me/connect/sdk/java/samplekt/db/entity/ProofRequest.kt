@@ -14,8 +14,8 @@ data class ProofRequest(
         @ColumnInfo(name = "thread_id")
         var threadId: String,
 
-        @ColumnInfo(name = "connection_id")
-        var connectionId: Int,
+        @ColumnInfo(name = "pwdid")
+        var pwDid: String,
 
         @ColumnInfo(name = "serialized")
         var serialized: String,
