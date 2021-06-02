@@ -52,3 +52,6 @@ Before starting, please read the [Base Concepts document](docs/0.Base Concepts.m
   - IOS: [https://testflight.apple.com/join/bmbX21Kq](https://testflight.apple.com/join/bmbX21Kq)
   - Android: [https://play.google.com/apps/testing/me.connect](https://play.google.com/apps/testing/me.connect)
 - <a href="https://github.com/sovrin-foundation/connector-app" target="_blank">Sovrin Connector App</a> &#8212; Helpful resource to see how an older version of mobile SDK works.
+
+## Acknowledgements
+This effort is part of a project that has received funding from the European Union’s Horizon 2020 research and innovation program under grant agreement No 871932 delivered through our participation in the eSSIF-Lab, which aims to advance the broad adoption of self-sovereign identity for the benefit of all.
