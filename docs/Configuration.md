@@ -92,9 +92,9 @@ Please note that if values for those options are passed it will be just transmit
       This field will be filled even if the value for `name` was not passed.
       If no value specified, the `<CHANGE_ME>` value will be set.  
     
-* `logo_url` - (optional) url containing a logo associated with the user.
+* `logo` - (optional) url containing a logo associated with the user.
       Please note that result JSON will contain a field with a different name `institution_logo_url`. 
-      This field will be filled even if the value for `logo_url` was not passed.
+      This field will be filled even if the value for `logo` was not passed.
       If no value specified, the `<CHANGE_ME>` value will be set.  
 
 * `webhook_url` - (optional) an address to be used by provisioned Agent in order to send events notifications.
