@@ -78,13 +78,14 @@ public class ConnectMeVcx {
      * @return {@link CompletableFuture}
      */
     public static @NonNull
-    CompletableFuture<Void> init(Context context, Constants constants, @RawRes int genesis) throws JSONException {
+    CompletableFuture<Void> init(Context context, Constants constants, @RawRes int genesisPool) throws JSONException {
+
         Logger.getInstance().setLogLevel(LogLevel.DEBUG);
         Logger.getInstance().i("Initializing SDK");
         CompletableFuture<Void> result = new CompletableFuture<>();
 
         CompletionStage<Void> first;
-        first = createOneTimeInfo(context, constants, genesis);
+        first = createOneTimeInfo(context, constants, genesisPool);
 
         first.whenComplete((res, ex) -> {
             if (ex != null) {
@@ -118,6 +119,7 @@ public class ConnectMeVcx {
 
         CompletionStage<Void> first;
         first = CompletableFuture.completedStage(null);
+        configureLoggerAndFiles(context);
         first.whenComplete((res, ex) -> {
             if (ex != null) {
                 result.completeExceptionally(ex);
@@ -149,14 +151,14 @@ public class ConnectMeVcx {
         return null;
     }
 
-    private static void configureLoggerAndFiles(Context context, Integer logMaxSize) {
+    private static void configureLoggerAndFiles(Context context) {
         Logger.getInstance().i("Configuring logger and file storage");
         for (String name : VCX_LOGGER_NAMES) {
             LoggerFactory.getLogger(name);
             LoggerConfiguration.configuration().setLogLevel(name, LogLevel.DEBUG);
         }
         Utils.makeRootDir(context);
-        setVcxLogger(logMaxSize, context);
+        setVcxLogger(LOG_MAX_SIZE_DEFAULT, context);
         try {
             Os.setenv("EXTERNAL_STORAGE", Utils.getRootDir(context), true);
         } catch (ErrnoException e) {
@@ -283,7 +285,7 @@ public class ConnectMeVcx {
     private static CompletableFuture<Void> createOneTimeInfo(
             Context context,
             Constants constants,
-            @RawRes int genesis
+            @RawRes int genesisPool
     ) throws JSONException {
         Activity activity = (Activity) context;
 
@@ -298,11 +300,11 @@ public class ConnectMeVcx {
         String walletPath = walletDir.getAbsolutePath();
         JSONObject storageConfig = new JSONObject().put("path", walletPath);
 
-        File genesisFile = writeGenesisFile(context, genesis);
+        File genesisFile = writeGenesisFile(context, genesisPool);
         String poolName = Utils.makePoolName(constants.WALLET_NAME);
 
         ConnectMeVcx.Config config = ConnectMeVcx.Config.builder()
-                .withGenesisPool(genesis)
+                .withGenesisPool(genesisPool)
                 .withWalletName(walletName)
                 .withLogoUrl("https://robothash.com/logo.png")
                 .withInstitutionName("real institution name")
@@ -319,7 +321,7 @@ public class ConnectMeVcx {
             result.completeExceptionally(error);
             return result;
         }
-        configureLoggerAndFiles(context, config.logMaxSize);
+        configureLoggerAndFiles(context);
 
         // We have top create thew ca cert for the openssl to work properly on android
         Utils.writeCACert(context);
@@ -357,7 +359,8 @@ public class ConnectMeVcx {
                 } else {
                     Logger.getInstance().i("createOneTimeInfo called: " + oneTimeInfo);
                     try {
-                        SecurePreferencesHelper.setLongStringValue(context, SECURE_PREF_VCXCONFIG, oneTimeInfo);
+                        String vcxConfig  = config.addedFiledToVcxConfig(oneTimeInfo);
+                        SecurePreferencesHelper.setLongStringValue(context, SECURE_PREF_VCXCONFIG, vcxConfig);
                         result.complete(null);
                     } catch (Exception e) {
                         result.completeExceptionally(e);
@@ -609,7 +612,6 @@ public class ConnectMeVcx {
         private Integer genesisPoolResId;
         private String agency;
         private String walletName;
-        private Integer logMaxSize;
         private LogLevel logLevel;
         private String logoUrl;
         private String institutionName;
@@ -669,18 +671,6 @@ public class ConnectMeVcx {
         public @NonNull
         ConfigBuilder withWalletName(@NonNull String walletName) {
             this.walletName = walletName;
-            return this;
-        }
-
-        /**
-         * Set log max size in bytes. Default value is {@link #LOG_MAX_SIZE_DEFAULT}.
-         *
-         * @param logMaxSize max log file size in bytes
-         * @return {@link ConfigBuilder} instance
-         */
-        public @NonNull
-        ConfigBuilder withLogMaxSize(int logMaxSize) {
-            this.logMaxSize = logMaxSize;
             return this;
         }
 
@@ -810,7 +800,6 @@ public class ConnectMeVcx {
                     genesisPoolResId,
                     agency,
                     walletName,
-                    logMaxSize,
                     logLevel,
                     logoUrl,
                     institutionName,
@@ -832,7 +821,6 @@ public class ConnectMeVcx {
         private Integer genesisPoolResId;
         private String agency = AgencyConfig.DEFAULT;
         private String walletName;
-        private Integer logMaxSize = LOG_MAX_SIZE_DEFAULT;
         private LogLevel logLevel = LogLevel.INFO;
         private String logoUrl;
         private String institutionName;
@@ -847,7 +835,6 @@ public class ConnectMeVcx {
                       Integer genesisPoolResId,
                       String agency,
                       String walletName,
-                      Integer logMaxSize,
                       LogLevel logLevel,
                       String logoUrl,
                       String institutionName,
@@ -860,13 +847,7 @@ public class ConnectMeVcx {
         ) {
             this.genesisPool = genesisPool;
             this.genesisPoolResId = genesisPoolResId;
-            if (agency != null) {
-                this.logMaxSize = logMaxSize;
-            }
             this.walletName = walletName;
-            if (logMaxSize != null) {
-                this.logMaxSize = logMaxSize;
-            }
             if (logLevel != null) {
                 this.logLevel = logLevel;
             }
@@ -892,7 +873,7 @@ public class ConnectMeVcx {
         }
 
         /**
-         * Creates agency config from current config for {@link Config} and make wallet dir.
+         * Creates agency config from current config {@link Config} and make wallet dir.
          *
          * @return {@link AgencyConfig} with advanced fields
          */
@@ -905,9 +886,19 @@ public class ConnectMeVcx {
             agencyConfig.put("path", this.genesisPath);
             agencyConfig.put("logo", this.logoUrl);
             agencyConfig.put("name", this.institutionName);
-            agencyConfig.put("pool_name", this.poolName);
-            agencyConfig.put("protocol_version", this.protocolVersion);
             return agencyConfig.toString();
+        }
+
+        /**
+         * Add pool name and protocol version to config from current config {@link Config}.
+         *
+         * @return {@link AgencyConfig} with advanced fields
+         */
+        public String addedFiledToVcxConfig(String config) throws JSONException {
+            JSONObject vcxConfig = new JSONObject(config);
+            vcxConfig.put("pool_name", this.poolName);
+            vcxConfig.put("protocol_version", this.protocolVersion);
+            return vcxConfig.toString();
         }
     }
 }
