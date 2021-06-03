@@ -902,9 +902,9 @@ public class ConnectMeVcx {
             agencyConfig.put("wallet_key", this.walletKey);
             agencyConfig.put("storage_config", this.storageConfig);
             agencyConfig.put("protocol_type", "3.0");
-            agencyConfig.put("genesis_path", this.genesisPath);
-            agencyConfig.put("institution_logo_url", this.logoUrl);
-            agencyConfig.put("institution_name", this.institutionName);
+            agencyConfig.put("path", this.genesisPath);
+            agencyConfig.put("logo", this.logoUrl);
+            agencyConfig.put("name", this.institutionName);
             agencyConfig.put("pool_name", this.poolName);
             agencyConfig.put("protocol_version", this.protocolVersion);
             return agencyConfig.toString();
