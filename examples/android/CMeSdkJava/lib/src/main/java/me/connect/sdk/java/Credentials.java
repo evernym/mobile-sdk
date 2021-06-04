@@ -1,7 +1,5 @@
 package me.connect.sdk.java;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 
 import com.evernym.sdk.vcx.VcxException;
@@ -34,7 +32,7 @@ public class Credentials {
 
     /**
      * Get credential offers
-     * Deprecated. Use {@link Messages#getPendingMessages(String, MessageType)}  instead.
+     * Deprecated. Use {@link Messages} Messages.getPendingMessages(String, MessageType) instead.
      *
      * @param connection serialized connection
      * @return {@link CompletableFuture} containing list of credential offers as JSON strings.
@@ -90,29 +88,33 @@ public class Credentials {
      */
     public static @NonNull
     CompletableFuture<String> createWithOffer(@NonNull String sourceId,
-                                              @NonNull String message) throws VcxException {
+                                              @NonNull String message) {
         Logger.getInstance().i("Accepting credential offer");
         CompletableFuture<String> result = new CompletableFuture<>();
-        CredentialApi.credentialCreateWithOffer(sourceId, message).whenComplete((credHandle, er) -> {
-            if (er != null) {
-                Logger.getInstance().e("Failed to create credential with offer: ", er);
-                result.completeExceptionally(er);
-                return;
-            }
-            try {
-                CredentialApi.credentialSerialize(credHandle).whenComplete((sc, e) -> {
-                    if (e != null) {
-                        Logger.getInstance().e("Failed to serialize credentials: ", e);
-                        result.completeExceptionally(e);
-                    } else {
-                        result.complete(sc);
-                    }
+        try {
+            CredentialApi.credentialCreateWithOffer(sourceId, message).whenComplete((credHandle, er) -> {
+                if (er != null) {
+                    Logger.getInstance().e("Failed to create credential with offer: ", er);
+                    result.completeExceptionally(er);
+                    return;
+                }
+                try {
+                    CredentialApi.credentialSerialize(credHandle).whenComplete((sc, e) -> {
+                        if (e != null) {
+                            Logger.getInstance().e("Failed to serialize credentials: ", e);
+                            result.completeExceptionally(e);
+                        } else {
+                            result.complete(sc);
+                        }
 
-                });
-            } catch (VcxException ex) {
-                result.completeExceptionally(ex);
-            }
-        });
+                    });
+                } catch (VcxException ex) {
+                    result.completeExceptionally(ex);
+                }
+            });
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
+        }
         return result;
     }
 

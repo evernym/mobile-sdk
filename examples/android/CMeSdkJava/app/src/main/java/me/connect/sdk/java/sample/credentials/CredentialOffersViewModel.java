@@ -6,13 +6,6 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
-import com.evernym.sdk.vcx.VcxException;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -105,7 +98,7 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                                     }
                                     return null;
                                 });
-                            } catch (VcxException e) {
+                            } catch (Exception e) {
                                 e.printStackTrace();
                             }
                         }
