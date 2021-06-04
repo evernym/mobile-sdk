@@ -70,7 +70,7 @@ public class CredentialOffersViewModel extends AndroidViewModel {
 
     private void checkCredentialOffers(SingleLiveData<Boolean> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            Messages.getPendingMessages(MessageType.CREDENTIAL_OFFER).handle((res, throwable) -> {
+            Messages.getPendingMessages(MessageType.CREDENTIAL_OFFER, null, null).handle((res, throwable) -> {
                 if (throwable != null) {
                     throwable.printStackTrace();
                 }

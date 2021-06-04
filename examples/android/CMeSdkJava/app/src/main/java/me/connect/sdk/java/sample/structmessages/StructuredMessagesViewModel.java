@@ -44,7 +44,7 @@ public class StructuredMessagesViewModel extends AndroidViewModel {
 
     private void checkStructMessages(SingleLiveData<Boolean> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            Messages.getPendingMessages(MessageType.QUESTION).handle((res, throwable) -> {
+            Messages.getPendingMessages(MessageType.QUESTION, null, null).handle((res, throwable) -> {
                 if (res != null) {
                     for (Message msg : res) {
                         StructuredMessageHolder holder = StructuredMessages.extract(msg);

@@ -105,7 +105,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
 
     private void checkProofRequests(SingleLiveData<Boolean> data) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            Messages.getPendingMessages(MessageType.PROOF_REQUEST).handle((res, throwable) -> {
+            Messages.getPendingMessages(MessageType.PROOF_REQUEST, null, null).handle((res, throwable) -> {
                 if (throwable != null) {
                     throwable.printStackTrace();
                 }

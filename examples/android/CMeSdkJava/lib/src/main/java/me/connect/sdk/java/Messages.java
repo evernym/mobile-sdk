@@ -4,7 +4,6 @@ package me.connect.sdk.java;
 import androidx.annotation.NonNull;
 
 import com.evernym.sdk.vcx.VcxException;
-import com.evernym.sdk.vcx.connection.ConnectionApi;
 import com.evernym.sdk.vcx.utils.UtilsApi;
 
 import org.json.JSONArray;
@@ -35,41 +34,77 @@ public class Messages {
      * @return List of {@link Message}
      */
     public static @NonNull
-    CompletableFuture<List<Message>> getPendingMessages(@NonNull MessageType messageType) {
+    CompletableFuture<List<Message>> getPendingMessages(
+            @NonNull MessageType messageType,
+            String uids,
+            String pwdids
+    ) {
         Logger.getInstance().i("Retrieving pending messages");
         CompletableFuture<List<Message>> result = new CompletableFuture<>();
         try {
-            UtilsApi.vcxGetMessages(MessageStatusType.PENDING, null, null).whenComplete((messagesString, err) -> {
-                if (err != null) {
-                    Logger.getInstance().e("Failed to retrieve messages: ", err);
-                    result.completeExceptionally(err);
-                    return;
-                }
-                try {
-                    List<Message> messages = new ArrayList<>();
-                    JSONArray messagesJson = new JSONArray(messagesString);
-                    for (int i = 0; i < messagesJson.length(); i++) {
-                        JSONArray msgsJson = messagesJson.getJSONObject(i).optJSONArray("msgs");
-                        String pairwiseDID = messagesJson.getJSONObject(i).getString("pairwiseDID");
-                        if (msgsJson != null) {
-                            for (int j = 0; j < msgsJson.length(); j++) {
-                                JSONObject message = msgsJson.getJSONObject(j);
-                                JSONObject payload = new JSONObject(message.getString("decryptedPayload"));
-                                String type = payload.getJSONObject("@type").getString("name");
-                                if (messageType.matches(type)) {
-                                    String messageUid = message.getString("uid");
-                                    String msg = payload.getString("@msg");
-                                    String status = message.getString("statusCode");
-                                    messages.add(new Message(pairwiseDID, messageUid, msg, type,status));
+            if (uids == null && pwdids == null) {
+                UtilsApi.vcxGetMessages(MessageStatusType.PENDING, null, null).whenComplete((messagesString, err) -> {
+                    if (err != null) {
+                        Logger.getInstance().e("Failed to retrieve messages: ", err);
+                        result.completeExceptionally(err);
+                        return;
+                    }
+                    try {
+                        List<Message> messages = new ArrayList<>();
+                        JSONArray messagesJson = new JSONArray(messagesString);
+                        for (int i = 0; i < messagesJson.length(); i++) {
+                            JSONArray msgsJson = messagesJson.getJSONObject(i).optJSONArray("msgs");
+                            String pairwiseDID = messagesJson.getJSONObject(i).getString("pairwiseDID");
+                            if (msgsJson != null) {
+                                for (int j = 0; j < msgsJson.length(); j++) {
+                                    JSONObject message = msgsJson.getJSONObject(j);
+                                    JSONObject payload = new JSONObject(message.getString("decryptedPayload"));
+                                    String type = payload.getJSONObject("@type").getString("name");
+                                    if (messageType.matches(type)) {
+                                        String messageUid = message.getString("uid");
+                                        String msg = payload.getString("@msg");
+                                        String status = message.getString("statusCode");
+                                        messages.add(new Message(pairwiseDID, messageUid, msg, type,status));
+                                    }
                                 }
                             }
                         }
+                        result.complete(messages);
+                    } catch (JSONException ex) {
+                        result.completeExceptionally(ex);
                     }
-                    result.complete(messages);
-                } catch (JSONException ex) {
-                    result.completeExceptionally(ex);
-                }
-            });
+                });
+
+            } else {
+                UtilsApi.vcxGetMessages(MessageStatusType.PENDING, uids, pwdids).whenComplete((messagesString, err) -> {
+                    if (err != null) {
+                        Logger.getInstance().e("Failed to get message: ", err);
+                        return;
+                    }
+                    try {
+                        List<Message> messages = new ArrayList<>();
+                        JSONArray messagesJson = new JSONArray(messagesString);
+                        for (int i = 0; i < messagesJson.length(); i++) {
+                            JSONArray msgsJson = messagesJson.getJSONObject(i).optJSONArray("msgs");
+                            String pairwiseDID = messagesJson.getJSONObject(i).getString("pairwiseDID");
+                            if (msgsJson != null) {
+                                for (int j = 0; j < msgsJson.length(); j++) {
+                                    JSONObject message = msgsJson.getJSONObject(j);
+                                    JSONObject payload = new JSONObject(message.getString("decryptedPayload"));
+                                    String type = payload.getJSONObject("@type").getString("name");
+                                    String messageUid = message.getString("uid");
+                                    String status = message.getString("statusCode");
+                                    String msg = payload.getString("@msg");
+                                    messages.add(new Message(pairwiseDID, messageUid, msg, type, status));
+                                }
+                            }
+                        }
+                        result.complete(messages);
+                    } catch (JSONException ex) {
+                        result.completeExceptionally(ex);
+                    }
+                });
+            }
         } catch (VcxException ex) {
             ex.printStackTrace();
         }
