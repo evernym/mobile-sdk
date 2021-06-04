@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                     String message;
                     if (err == null) {
                         message = "SDK initialized successfully.";
-                        sendToken();
+//                        sendToken();
                     } else {
                         message = "SDK was not initialized!";
                         Log.e(TAG, "Sdk not initialized: ", err);

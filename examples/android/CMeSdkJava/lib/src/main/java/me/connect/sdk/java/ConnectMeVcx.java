@@ -84,23 +84,21 @@ public class ConnectMeVcx {
         Logger.getInstance().i("Initializing SDK");
         CompletableFuture<Void> result = new CompletableFuture<>();
 
-        CompletionStage<Void> first;
-        first = createOneTimeInfo(context, constants, genesisPool);
-
-        first.whenComplete((res, ex) -> {
-            if (ex != null) {
-                result.completeExceptionally(ex);
-                return;
-            }
-            initialize(context).whenComplete((returnCode, err) -> {
-                if (err != null) {
-                    Logger.getInstance().e("Init failed", err);
-                    result.completeExceptionally(err);
-                } else {
-                    Logger.getInstance().i("Init completed");
-                    result.complete(null);
+        createOneTimeInfo(context, constants, genesisPool)
+            .whenComplete((res, ex) -> {
+                if (ex != null) {
+                    result.completeExceptionally(ex);
+                    return;
                 }
-            });
+                initialize(context).whenComplete((returnCode, err) -> {
+                    if (err != null) {
+                        Logger.getInstance().e("Init failed", err);
+                        result.completeExceptionally(err);
+                    } else {
+                        Logger.getInstance().i("Init completed");
+                        result.complete(null);
+                    }
+                });
         });
         return result;
     }
@@ -316,28 +314,13 @@ public class ConnectMeVcx {
                 .build();
 
         CompletableFuture<Void> result = new CompletableFuture<>();
-        Exception error = validate(config, context);
-        if (error != null) {
-            result.completeExceptionally(error);
-            return result;
-        }
+
         configureLoggerAndFiles(context);
 
         // We have top create thew ca cert for the openssl to work properly on android
         Utils.writeCACert(context);
         try {
-            String token = null;
-            if (!provisionTokenRetrieved(activity, constants)) {
-                try {
-                    token = retrieveToken(activity, constants);
-                } catch (Exception ex) {
-                    Log.e(TAG, "Failed to retrieve token, init cannot continue: ", ex);
-                    return result;
-                }
-            } else {
-                token = getSavedToken(activity, constants);
-            }
-
+            String token = retrieveToken(activity, constants);
             String agencyConfig = config.convertToVcxConfigAndMakeWalletDir();
 
             CompletionStage<String> provisioningStep;
@@ -359,8 +342,7 @@ public class ConnectMeVcx {
                 } else {
                     Logger.getInstance().i("createOneTimeInfo called: " + oneTimeInfo);
                     try {
-                        String vcxConfig  = config.addedFiledToVcxConfig(oneTimeInfo);
-                        SecurePreferencesHelper.setLongStringValue(context, SECURE_PREF_VCXCONFIG, vcxConfig);
+                        SecurePreferencesHelper.setLongStringValue(context, SECURE_PREF_VCXCONFIG, oneTimeInfo);
                         result.complete(null);
                     } catch (Exception e) {
                         result.completeExceptionally(e);
@@ -381,19 +363,14 @@ public class ConnectMeVcx {
         // we won't have to pay too much cost for calling this function inside init
         Utils.writeCACert(context);
         try {
-            int retCode = VcxApi.initSovToken();
-            if (retCode != 0) {
-                result.completeExceptionally(new Exception("Could not init: " + retCode));
-            } else {
-                String config = SecurePreferencesHelper.getLongStringValue(context, SECURE_PREF_VCXCONFIG, null);
-                VcxApi.vcxInitWithConfig(config).whenComplete((integer, err) -> {
-                    if (err != null) {
-                        result.completeExceptionally(err);
-                    } else {
-                        result.complete(null);
-                    }
-                });
-            }
+            String config = SecurePreferencesHelper.getLongStringValue(context, SECURE_PREF_VCXCONFIG, null);
+            VcxApi.vcxInitWithConfig(config).whenComplete((integer, err) -> {
+                if (err != null) {
+                    result.completeExceptionally(err);
+                } else {
+                    result.complete(null);
+                }
+            });
         } catch (AlreadyInitializedException e) {
             // even if we get already initialized exception
             // then also we will resolve promise, because we don't care if vcx is already
@@ -889,16 +866,5 @@ public class ConnectMeVcx {
             return agencyConfig.toString();
         }
 
-        /**
-         * Add pool name and protocol version to config from current config {@link Config}.
-         *
-         * @return {@link AgencyConfig} with advanced fields
-         */
-        public String addedFiledToVcxConfig(String config) throws JSONException {
-            JSONObject vcxConfig = new JSONObject(config);
-            vcxConfig.put("pool_name", this.poolName);
-            vcxConfig.put("protocol_version", this.protocolVersion);
-            return vcxConfig.toString();
-        }
     }
 }
