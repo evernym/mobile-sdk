@@ -84,7 +84,7 @@ class ProofRequestsViewModel(application: Application) : AndroidViewModel(applic
 
     private fun checkProofRequests(data: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val res = Messages.getPendingMessages(MessageType.PROOF_REQUEST).wrap().await()
+            val res = Messages.getPendingMessages(MessageType.PROOF_REQUEST, null, null).wrap().await()
 
             res.forEach { message ->
                 val holder = ProofDataHolder.extractRequestedFieldsFromProofMessage(message)!!

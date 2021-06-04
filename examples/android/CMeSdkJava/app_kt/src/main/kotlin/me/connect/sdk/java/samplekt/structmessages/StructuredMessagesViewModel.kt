@@ -32,7 +32,7 @@ class StructuredMessagesViewModel(application: Application) : AndroidViewModel(a
 
     private fun checkStructMessages(liveData: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val res = Messages.getPendingMessages(MessageType.QUESTION).wrap().await()
+            val res = Messages.getPendingMessages(MessageType.QUESTION, null, null).wrap().await()
             res.forEach { msg ->
                 val holder = StructuredMessages.extract(msg)
                 val pwDid: String = msg.pwDid

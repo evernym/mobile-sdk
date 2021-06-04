@@ -57,7 +57,7 @@ class CredentialOffersViewModel(application: Application) : AndroidViewModel(app
 
     private fun checkCredentialOffers(liveData: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val res = Messages.getPendingMessages(MessageType.CREDENTIAL_OFFER).wrap().await()
+            val res = Messages.getPendingMessages(MessageType.CREDENTIAL_OFFER, null, null).wrap().await()
             res.forEach { message ->
                 val holder = CredDataHolder.extractDataFromCredentialsOfferMessage(message)
                 val pwDid: String = message.pwDid
