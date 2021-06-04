@@ -194,7 +194,7 @@ Assume you received Credential message.
 
 As a the first step of working with MSDK (assume you app is already did provisioning) you have to call a function to initialize it with prepared config (Java `VcxApi.vcxInitWithConfig(config)` and Objective-C `[[[ConnectMeVcx alloc] init] initWithConfig:config`).
 Internally this function does three thing:
-1. Sets setting passed within config
+1. Sets settings passed within config
 2. Open secured Wallet
 3. Connects to a Pool Ledger
 
@@ -207,7 +207,7 @@ You can optionally skip the Ledger Connectivity (which takes several seconds) on
 
 1. Remove `genesis_path` field from the config JSON passing into `initWithConfig` function and call initialization function.
 
-2. Later, call function (for instance as a background task) to perform a connection to the Pool Ledger.
+2. Later, call function (for instance as a background task) to perform a connection to the Pool Ledger. You can run it in a separate thread.
     ```
     config = {
         "genesis_path": string,
