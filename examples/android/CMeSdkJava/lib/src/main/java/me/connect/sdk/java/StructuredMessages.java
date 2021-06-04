@@ -41,10 +41,14 @@ public class StructuredMessages {
      * @return {@link CompletableFuture} containing message ID
      */
     public static @NonNull
-    CompletableFuture<Void> answer(@NonNull String serializedConnection, @NonNull String messageId, @NonNull String type,
-                                   @NonNull String structuredMessage, @NonNull String answer) {
+    CompletableFuture<Void> answer(
+            @NonNull String serializedConnection,
+            @NonNull String messageId, @NonNull String type,
+            @NonNull String structuredMessage,
+            @NonNull String answer
+    ) {
         if ("question".equals(type)) {
-            return answerAries(serializedConnection, messageId, structuredMessage, answer);
+            return answerAries(serializedConnection, structuredMessage, answer);
         } else {
             return answerProprietary(serializedConnection, messageId, structuredMessage, answer);
         }
@@ -52,8 +56,12 @@ public class StructuredMessages {
 
 
     private static @NonNull
-    CompletableFuture<Void> answerProprietary(@NonNull String serializedConnection, @NonNull String messageId,
-                                              @NonNull String structuredMessage, @NonNull String answer) {
+    CompletableFuture<Void> answerProprietary(
+            @NonNull String serializedConnection,
+            @NonNull String messageId,
+            @NonNull String structuredMessage,
+            @NonNull String answer
+    ) {
         Logger.getInstance().i("Respond to structured message");
         CompletableFuture<Void> result = new CompletableFuture<>();
         try {
@@ -95,8 +103,6 @@ public class StructuredMessages {
                                     Logger.getInstance().e("Failed to send message: ", t);
                                     result.completeExceptionally(t);
                                 } else {
-
-
                                     try {
                                         ConnectionApi.connectionGetPwDid(conHandle).whenComplete((pwDid, th) -> {
                                             if (th != null) {
@@ -142,8 +148,11 @@ public class StructuredMessages {
     }
 
     private static @NonNull
-    CompletableFuture<Void> answerAries(@NonNull String serializedConnection, @NonNull String messageId,
-                                        @NonNull String structuredMessage, @NonNull String answer) {
+    CompletableFuture<Void> answerAries(
+            @NonNull String serializedConnection,
+            @NonNull String structuredMessage,
+            @NonNull String answer
+    ) {
         Logger.getInstance().i("Respond to structured message");
         CompletableFuture<Void> result = new CompletableFuture<>();
         try {
@@ -168,20 +177,6 @@ public class StructuredMessages {
                                     Logger.getInstance().e("Failed to get pwDid: ", th);
                                     result.completeExceptionally(th);
                                     return;
-                                }
-                                try {
-                                    String jsonMsg = Messages.prepareUpdateMessage(pwDid, messageId);
-                                    UtilsApi.vcxUpdateMessages(MessageStatusType.REVIEWED, jsonMsg).whenComplete((v1, error) -> {
-                                        if (error != null) {
-                                            Logger.getInstance().e("Failed to update messages", error);
-                                            result.completeExceptionally(error);
-                                        } else {
-                                            result.complete(null);
-                                        }
-
-                                    });
-                                } catch (Exception ex) {
-                                    result.completeExceptionally(ex);
                                 }
                             });
                         } catch (Exception ex) {

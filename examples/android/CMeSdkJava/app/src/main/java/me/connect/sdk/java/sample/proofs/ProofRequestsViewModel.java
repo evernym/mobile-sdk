@@ -59,7 +59,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                 // We automatically map first of each provided credentials to final structure
                 // This process should be interactive in real app
                 String data = Proofs.mapCredentials(creds);
-                Proofs.send(con.serialized, proof.serialized, data, "{}", proof.messageId).handle((s, e) -> {
+                Proofs.send(con.serialized, proof.serialized, data, "{}").handle((s, e) -> {
                     if (s != null) {
                         String serializedProof = Proofs.awaitStatusChange(s, MessageState.ACCEPTED);
                         proof.accepted = true;
@@ -84,7 +84,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             ProofRequest proof = db.proofRequestDao().getById(proofId);
             Connection con = db.connectionDao().getByPwDid(proof.pwDid);
-            Proofs.reject(con.serialized, proof.serialized, proof.messageId).handle((s, err) -> {
+            Proofs.reject(con.serialized, proof.serialized).handle((s, err) -> {
                 if (s != null) {
                     String serializedProof = Proofs.awaitStatusChange(s, MessageState.REJECTED);
                     proof.serialized = serializedProof;
@@ -106,6 +106,9 @@ public class ProofRequestsViewModel extends AndroidViewModel {
     private void checkProofRequests(SingleLiveData<Boolean> data) {
         Executors.newSingleThreadExecutor().execute(() -> {
             Messages.getPendingMessages(MessageType.PROOF_REQUEST).handle((res, throwable) -> {
+                if (throwable != null) {
+                    throwable.printStackTrace();
+                }
                 if (res != null) {
                     for (Message message : res) {
                         ProofDataHolder holder = ProofDataHolder.extractRequestedFieldsFromProofMessage(message);
@@ -123,6 +126,8 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                                     proof.threadId = holder.threadId;
                                     proof.messageId = message.getUid();
                                     db.proofRequestDao().insertAll(proof);
+
+                                    Messages.updateMessageStatus(pwDid, message.getUid());
                                 }
                                 return null;
                             });

@@ -43,7 +43,7 @@ class CredentialOffersViewModel(application: Application) : AndroidViewModel(app
         try {
             val offer = db.credentialOffersDao().getById(offerId)
             val connection = db.connectionDao().getByPwDid(offer.pwDid)
-            val s = Credentials.acceptOffer(connection.serialized, offer.serialized, offer.messageId).wrap().await()
+            val s = Credentials.acceptOffer(connection.serialized, offer.serialized).wrap().await()
             val s2: String = Credentials.awaitStatusChange(s, MessageState.ACCEPTED)
             offer.serialized = s2
             offer.accepted = true
@@ -72,6 +72,8 @@ class CredentialOffersViewModel(application: Application) : AndroidViewModel(app
                             messageId = message.uid
                     )
                     db.credentialOffersDao().insertAll(offer)
+
+                    Messages.updateMessageStatus(pwDid, message.uid)
                 }
             }
         } catch (e: Exception) {

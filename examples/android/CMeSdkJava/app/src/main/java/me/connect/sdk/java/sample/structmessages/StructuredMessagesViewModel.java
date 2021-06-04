@@ -60,6 +60,10 @@ public class StructuredMessagesViewModel extends AndroidViewModel {
                             sm.type = holder.getType();
                             sm.serialized = msg.getPayload();
                             db.structuredMessageDao().insertAll(sm);
+
+                            if ("question".equals(holder.getType())) {
+                                Messages.updateMessageStatus(pwDid, msg.getUid());
+                            }
                         }
                     }
                 }

@@ -48,6 +48,10 @@ class StructuredMessagesViewModel(application: Application) : AndroidViewModel(a
                             type = holder.type
                     )
                     db.structuredMessageDao().insertAll(sm)
+
+                    if ("question" == holder.type) {
+                        Messages.updateMessageStatus(pwDid, msg.uid)
+                    }
                 }
             }
         } catch (e: Exception) {

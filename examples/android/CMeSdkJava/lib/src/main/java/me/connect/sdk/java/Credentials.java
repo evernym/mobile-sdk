@@ -121,12 +121,13 @@ public class Credentials {
      *
      * @param serializedConnection serialized connection string
      * @param serializedCredOffer  serialized credential offer
-     * @param messageId message ID
      * @return serialized credential offer
      */
     public static @NonNull
-    CompletableFuture<String> acceptOffer(@NonNull String serializedConnection, @NonNull String serializedCredOffer,
-                                          @NonNull String messageId) {
+    CompletableFuture<String> acceptOffer(
+            @NonNull String serializedConnection,
+            @NonNull String serializedCredOffer
+    ) {
         Logger.getInstance().i("Accepting credential offer");
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
@@ -157,32 +158,20 @@ public class Credentials {
                                             result.completeExceptionally(t);
                                             return;
                                         }
-                                        try {
-                                            String jsonMsg = Messages.prepareUpdateMessage(pwDid, messageId);
-                                            UtilsApi.vcxUpdateMessages(MessageStatusType.REVIEWED, jsonMsg).whenComplete((v1, error) -> {
-                                                if (error != null) {
-                                                    Logger.getInstance().e("Failed to update messages", error);
-                                                    result.completeExceptionally(error);
-                                                    return;
-                                                }
-                                                try {
-                                                    CredentialApi.credentialSerialize(credHandle).whenComplete((sc, th) -> {
-                                                        if (th != null) {
-                                                            Logger.getInstance().e("Failed to serialize credentials: ", th);
-                                                            result.completeExceptionally(th);
-                                                        } else {
-                                                            result.complete(sc);
-                                                        }
-                                                    });
-                                                } catch (VcxException ex) {
-                                                    Logger.getInstance().e("Failed to serialize credentials: ", ex);
-                                                    result.completeExceptionally(ex);
-                                                }
-                                            });
-                                        } catch (Exception ex) {
-                                            result.completeExceptionally(ex);
-                                        }
-                                    });
+                                            try {
+                                                CredentialApi.credentialSerialize(credHandle).whenComplete((sc, th) -> {
+                                                    if (th != null) {
+                                                        Logger.getInstance().e("Failed to serialize credentials: ", th);
+                                                        result.completeExceptionally(th);
+                                                    } else {
+                                                        result.complete(sc);
+                                                    }
+                                                });
+                                            } catch (VcxException ex) {
+                                                Logger.getInstance().e("Failed to serialize credentials: ", ex);
+                                                result.completeExceptionally(ex);
+                                            }
+                                        });
                                 } catch (Exception ex) {
                                     result.completeExceptionally(ex);
                                 }

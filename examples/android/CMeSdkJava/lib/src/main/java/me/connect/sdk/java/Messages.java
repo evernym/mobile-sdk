@@ -4,7 +4,6 @@ package me.connect.sdk.java;
 import androidx.annotation.NonNull;
 
 import com.evernym.sdk.vcx.VcxException;
-import com.evernym.sdk.vcx.connection.ConnectionApi;
 import com.evernym.sdk.vcx.utils.UtilsApi;
 
 import org.json.JSONArray;
@@ -121,7 +120,25 @@ public class Messages {
         return result;
     }
 
-    static String prepareUpdateMessage(String pairwiseDid, String messsageId) {
-        return String.format("[{\"pairwiseDID\" : \"%s\", \"uids\": [\"%s\"]}]", pairwiseDid, messsageId);
+    public static void updateMessageStatus(String pwDid, String messageId) {
+        CompletableFuture<String> result = new CompletableFuture<>();
+        try {
+            String jsonMsg = prepareUpdateMessage(pwDid, messageId);
+            UtilsApi.vcxUpdateMessages(MessageStatusType.REVIEWED, jsonMsg).whenComplete((v1, error) -> {
+                if (error != null) {
+                    Logger.getInstance().e("Failed to update messages", error);
+                    result.completeExceptionally(error);
+                    return;
+                } else {
+                    result.complete(null);
+                }
+            });
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
+        }
+    }
+
+    static String prepareUpdateMessage(String pairwiseDid, String messageId) {
+        return String.format("[{\"pairwiseDID\" : \"%s\", \"uids\": [\"%s\"]}]", pairwiseDid, messageId);
     }
 }

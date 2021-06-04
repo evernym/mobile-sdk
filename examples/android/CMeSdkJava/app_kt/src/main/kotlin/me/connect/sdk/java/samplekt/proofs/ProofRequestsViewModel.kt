@@ -41,7 +41,7 @@ class ProofRequestsViewModel(application: Application) : AndroidViewModel(applic
             // We automatically map first of each provided credentials to final structure
             // This process should be interactive in real app
             val data = Proofs.mapCredentials(creds)
-            val s = Proofs.send(con.serialized, proof.serialized, data, "{}", proof.messageId).wrap().await()
+            val s = Proofs.send(con.serialized, proof.serialized, data, "{}").wrap().await()
             val serializedProof = Proofs.awaitStatusChange(s, MessageState.ACCEPTED)
             proof.accepted = true
             proof.serialized = serializedProof
@@ -64,7 +64,7 @@ class ProofRequestsViewModel(application: Application) : AndroidViewModel(applic
         try {
             val proof = db.proofRequestDao().getById(proofId)
             val con = db.connectionDao().getByPwDid(proof.pwDid)
-            val s = Proofs.reject(con.serialized, proof.serialized, proof.messageId).wrap().await()
+            val s = Proofs.reject(con.serialized, proof.serialized).wrap().await()
             val serializedProof = Proofs.awaitStatusChange(s, MessageState.REJECTED)
             proof.serialized = serializedProof
             proof.accepted = false
@@ -85,6 +85,7 @@ class ProofRequestsViewModel(application: Application) : AndroidViewModel(applic
     private fun checkProofRequests(data: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val res = Messages.getPendingMessages(MessageType.PROOF_REQUEST).wrap().await()
+
             res.forEach { message ->
                 val holder = ProofDataHolder.extractRequestedFieldsFromProofMessage(message)!!
                 val pwDid: String = message.pwDid
@@ -99,6 +100,8 @@ class ProofRequestsViewModel(application: Application) : AndroidViewModel(applic
                             messageId = message.uid
                     )
                     db.proofRequestDao().insertAll(proof)
+
+                    Messages.updateMessageStatus(pwDid, message.uid)
                 }
             }
         } catch (e: Exception) {
