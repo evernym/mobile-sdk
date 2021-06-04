@@ -36,12 +36,12 @@ class ProofRequestsViewModel(application: Application) : AndroidViewModel(applic
     private fun acceptProofReq(proofId: Int, liveData: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val proof = db.proofRequestDao().getById(proofId)
-            val con = db.connectionDao().getById(proof.connectionId)
+            val con = db.connectionDao().getByPwDid(proof.pwDid)
             val creds = Proofs.retrieveAvailableCredentials(proof.serialized).wrap().await()
             // We automatically map first of each provided credentials to final structure
             // This process should be interactive in real app
             val data = Proofs.mapCredentials(creds)
-            val s = Proofs.send(con.serialized, proof.serialized, data, "{}", proof.messageId).wrap().await()
+            val s = Proofs.send(con.serialized, proof.serialized, data, "{}").wrap().await()
             val serializedProof = Proofs.awaitStatusChange(s, MessageState.ACCEPTED)
             proof.accepted = true
             proof.serialized = serializedProof
@@ -63,8 +63,8 @@ class ProofRequestsViewModel(application: Application) : AndroidViewModel(applic
     private fun rejectProofReq(proofId: Int, liveData: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val proof = db.proofRequestDao().getById(proofId)
-            val con = db.connectionDao().getById(proof.connectionId)
-            val s = Proofs.reject(con.serialized, proof.serialized, proof.messageId).wrap().await()
+            val con = db.connectionDao().getByPwDid(proof.pwDid)
+            val s = Proofs.reject(con.serialized, proof.serialized).wrap().await()
             val serializedProof = Proofs.awaitStatusChange(s, MessageState.REJECTED)
             proof.serialized = serializedProof
             proof.accepted = false
@@ -84,23 +84,24 @@ class ProofRequestsViewModel(application: Application) : AndroidViewModel(applic
 
     private fun checkProofRequests(data: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val connections = db.connectionDao().getAllAsync()
-            connections.forEach { c ->
-                val res = Messages.getPendingMessages(c.serialized, MessageType.PROOF_REQUEST).wrap().await()
-                res.forEach { message ->
-                    val holder = ProofDataHolder.extractRequestedFieldsFromProofMessage(message)!!
-                    if (!db.proofRequestDao().checkExists(holder.threadId)) {
-                        val pr = Proofs.createWithRequest(UUID.randomUUID().toString(), holder.proofReq).wrap().await()
-                        val proof = ProofRequest(
-                                serialized = pr,
-                                name = holder.name,
-                                connectionId = c.id,
-                                attributes = holder.attributes,
-                                threadId = holder.threadId,
-                                messageId = message.uid
-                        )
-                        db.proofRequestDao().insertAll(proof)
-                    }
+            val res = Messages.getPendingMessages(MessageType.PROOF_REQUEST, null, null).wrap().await()
+
+            res.forEach { message ->
+                val holder = ProofDataHolder.extractRequestedFieldsFromProofMessage(message)!!
+                val pwDid: String = message.pwDid
+                if (!db.proofRequestDao().checkExists(holder.threadId)) {
+                    val pr = Proofs.createWithRequest(UUID.randomUUID().toString(), holder.proofReq).wrap().await()
+                    val proof = ProofRequest(
+                            serialized = pr,
+                            name = holder.name,
+                            pwDid = pwDid,
+                            attributes = holder.attributes,
+                            threadId = holder.threadId,
+                            messageId = message.uid
+                    )
+                    db.proofRequestDao().insertAll(proof)
+
+                    Messages.updateMessageStatus(pwDid, message.uid)
                 }
             }
         } catch (e: Exception) {

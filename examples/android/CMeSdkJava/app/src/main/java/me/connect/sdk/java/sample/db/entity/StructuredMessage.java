@@ -13,8 +13,8 @@ public class StructuredMessage {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
-    @ColumnInfo(name = "connection_id")
-    public int connectionId;
+    @ColumnInfo(name = "pwdid")
+    public String pwDid;
 
     @ColumnInfo(name = "serialized")
     public String serialized;

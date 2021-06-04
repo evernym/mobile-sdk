@@ -23,8 +23,8 @@ public interface StructuredMessageDao {
     @Insert
     void insertAll(StructuredMessage... messages);
 
-    @Query("SELECT EXISTS(SELECT * FROM structuredmessage WHERE (entry_id = :entryId AND connection_id = :connectionId))")
-    boolean checkMessageExists(String entryId, int connectionId);
+    @Query("SELECT EXISTS(SELECT * FROM structuredmessage WHERE pwDid = :pwDid)")
+    boolean checkMessageExists(String pwDid);
 
     @Update
     void update(StructuredMessage message);

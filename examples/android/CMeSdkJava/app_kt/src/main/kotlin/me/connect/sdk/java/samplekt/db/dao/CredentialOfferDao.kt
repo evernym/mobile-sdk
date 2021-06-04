@@ -16,8 +16,8 @@ interface CredentialOfferDao {
     @Insert
     suspend fun insertAll(vararg connections: CredentialOffer)
 
-    @Query("SELECT EXISTS(SELECT * FROM credentialoffer WHERE (claim_id = :claimId AND connection_id = :connectionId))")
-    suspend fun checkOfferExists(claimId: String, connectionId: Int): Boolean
+    @Query("SELECT EXISTS(SELECT * FROM credentialoffer WHERE pwDid = :pwDid)")
+    fun checkOfferExists(pwDid: String?): Boolean
 
     @Update
     suspend fun update(connection: CredentialOffer)

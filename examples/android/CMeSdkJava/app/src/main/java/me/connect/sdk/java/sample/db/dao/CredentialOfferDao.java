@@ -23,8 +23,8 @@ public interface CredentialOfferDao {
     @Insert
     void insertAll(CredentialOffer... connections);
 
-    @Query("SELECT EXISTS(SELECT * FROM credentialoffer WHERE (claim_id = :claimId AND connection_id = :connectionId))")
-    boolean checkOfferExists(String claimId, int connectionId);
+    @Query("SELECT EXISTS(SELECT * FROM credentialoffer WHERE pwDid = :pwDid)")
+    boolean checkOfferExists(String pwDid);
 
     @Update
     void update(CredentialOffer connection);

@@ -12,8 +12,8 @@ data class StructuredMessage(
         @PrimaryKey(autoGenerate = true)
         val id: Int = 0,
 
-        @ColumnInfo(name = "connection_id")
-        var connectionId: Int,
+        @ColumnInfo(name = "pwdid")
+        var pwDid: String,
 
         @ColumnInfo(name = "serialized")
         var serialized: String,

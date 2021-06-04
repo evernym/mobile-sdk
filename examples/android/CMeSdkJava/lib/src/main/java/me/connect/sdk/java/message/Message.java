@@ -5,12 +5,14 @@ public class Message {
     private String payload;
     private String type;
     private String status;
+    private String pairwiseDID;
 
-    public Message(String uid, String payload, String type, String status) {
+    public Message(String pairwiseDID, String uid, String payload, String type, String status) {
         this.uid = uid;
         this.payload = payload;
         this.type = type;
         this.status = status;
+        this.pairwiseDID = pairwiseDID;
     }
 
     public String getUid() {
@@ -27,5 +29,9 @@ public class Message {
 
     public String getStatus() {
         return status;
+    }
+
+    public String getPwDid() {
+        return pairwiseDID;
     }
 }

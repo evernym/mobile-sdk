@@ -32,23 +32,25 @@ class StructuredMessagesViewModel(application: Application) : AndroidViewModel(a
 
     private fun checkStructMessages(liveData: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val connections = db.connectionDao().getAllAsync()
-            connections.forEach { c ->
-                val res = Messages.getPendingMessages(c.serialized, MessageType.QUESTION).wrap().await()
-                res.forEach { msg ->
-                    val holder = StructuredMessages.extract(msg)
-                    if (!db.structuredMessageDao().checkMessageExists(holder.id, c.id)) {
-                        val sm = StructuredMessage(
-                                connectionId = c.id,
-                                messageId = msg.uid,
-                                entryId = holder.id,
-                                questionText = holder.questionText,
-                                questionDetail = holder.questionDetail,
-                                answers = holder.responses,
-                                serialized = msg.payload,
-                                type = holder.type
-                        )
-                        db.structuredMessageDao().insertAll(sm)
+            val res = Messages.getPendingMessages(MessageType.QUESTION, null, null).wrap().await()
+            res.forEach { msg ->
+                val holder = StructuredMessages.extract(msg)
+                val pwDid: String = msg.pwDid
+                if (!db.structuredMessageDao().checkMessageExists(pwDid)) {
+                    val sm = StructuredMessage(
+                            pwDid = pwDid,
+                            messageId = msg.uid,
+                            entryId = holder.id,
+                            questionText = holder.questionText,
+                            questionDetail = holder.questionDetail,
+                            answers = holder.responses,
+                            serialized = msg.payload,
+                            type = holder.type
+                    )
+                    db.structuredMessageDao().insertAll(sm)
+
+                    if ("question" == holder.type) {
+                        Messages.updateMessageStatus(pwDid, msg.uid)
                     }
                 }
             }
@@ -69,7 +71,7 @@ class StructuredMessagesViewModel(application: Application) : AndroidViewModel(a
     private fun answerStructMessage(messageId: Int, answer: String, liveData: SingleLiveData<Boolean>) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val sm = db.structuredMessageDao().getById(messageId)
-            val con = db.connectionDao().getById(sm.connectionId)
+            val con = db.connectionDao().getByPwDid(sm.pwDid)
             StructuredMessages.answer(con.serialized, sm.messageId, sm.type, sm.serialized, answer).wrap().await()
             sm.selectedAnswer = answer;
             db.structuredMessageDao().update(sm)

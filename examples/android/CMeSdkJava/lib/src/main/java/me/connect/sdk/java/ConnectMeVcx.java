@@ -1,13 +1,18 @@
 package me.connect.sdk.java;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Base64;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RawRes;
 
+import com.evernym.sdk.vcx.StringUtils;
 import com.evernym.sdk.vcx.VcxException;
 import com.evernym.sdk.vcx.utils.UtilsApi;
 import com.evernym.sdk.vcx.vcx.AlreadyInitializedException;
@@ -23,6 +28,14 @@ import java.io.FileOutputStream;
 
 import java.io.InputStream;
 import java.security.SecureRandom;
+import java.util.UUID;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 import java9.util.concurrent.CompletableFuture;
 import java9.util.concurrent.CompletionStage;
@@ -59,34 +72,24 @@ public class ConnectMeVcx {
     /**
      * Initialize library
      *
-     * @param config library config
+     * @param context Main Activity context
      * @return {@link CompletableFuture}
      */
     public static @NonNull
-    CompletableFuture<Void> init(Config config) {
-        Logger.getInstance().setLogLevel(config.logLevel);
+    CompletableFuture<Void> init(Context context) {
+        Logger.getInstance().setLogLevel(LogLevel.DEBUG);
         Logger.getInstance().i("Initializing SDK");
         CompletableFuture<Void> result = new CompletableFuture<>();
-        Exception error = validate(config);
-        if (error != null) {
-            result.completeExceptionally(error);
-            return result;
-        }
-        configureLoggerAndFiles(config);
 
         CompletionStage<Void> first;
-        if (!configAlreadyExist(config.context)) {
-            first = createOneTimeInfo(config);
-        } else {
-            first = CompletableFuture.completedStage(null);
-        }
-
+        first = CompletableFuture.completedStage(null);
+        configureLoggerAndFiles(context);
         first.whenComplete((res, ex) -> {
             if (ex != null) {
                 result.completeExceptionally(ex);
                 return;
             }
-            initialize(config.context).whenComplete((returnCode, err) -> {
+            initialize(context).whenComplete((returnCode, err) -> {
                 if (err != null) {
                     Logger.getInstance().e("Init failed", err);
                     result.completeExceptionally(err);
@@ -99,63 +102,54 @@ public class ConnectMeVcx {
         return result;
     }
 
-    private static Exception validate(Config config) {
-        if (config.context == null) {
-            return new IllegalStateException("Context must not be null");
-        } else if (config.genesisPoolResId == null && config.genesisPool == null) {
-            return new IllegalStateException("Genesis pool must not be null");
-        } else if (config.agency == null) {
-            return new IllegalStateException("Agency must not be null");
-        } else if (config.walletName == null) {
-            return new IllegalStateException("Wallet name must not be null");
+    public static void sendToken(
+            Activity activity,
+            String PREFS_NAME,
+            String FCM_TOKEN,
+            String FCM_TOKEN_SENT) {
+        SharedPreferences prefs = activity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        boolean tokenSent = prefs.getBoolean(FCM_TOKEN_SENT, false);
+        if (tokenSent) {
+            Log.d(TAG, "FCM token already sent");
+            return;
         }
-        return null;
+        String token = prefs.getString(FCM_TOKEN, null);
+        if (token != null) {
+            ConnectMeVcx.updateAgentInfo(UUID.randomUUID().toString(), token).whenComplete((res, err) -> {
+                if (err == null) {
+                    Log.d(TAG, "FCM token updated successfully");
+                    prefs.edit()
+                            .putBoolean(FCM_TOKEN_SENT, true)
+                            .apply();
+                } else {
+                    Log.e(TAG, "FCM token was not updated: ", err);
+                }
+            });
+        }
     }
 
-    private static void configureLoggerAndFiles(Config config) {
+    private static void configureLoggerAndFiles(Context context) {
         Logger.getInstance().i("Configuring logger and file storage");
         for (String name : VCX_LOGGER_NAMES) {
             LoggerFactory.getLogger(name);
-            LoggerConfiguration.configuration().setLogLevel(name, config.logLevel);
+            LoggerConfiguration.configuration().setLogLevel(name, LogLevel.DEBUG);
         }
-        Utils.makeRootDir(config.context);
-        setVcxLogger(config.logMaxSize, config.context);
+        Utils.makeRootDir(context);
+        setVcxLogger(LOG_MAX_SIZE_DEFAULT, context);
         try {
-            Os.setenv("EXTERNAL_STORAGE", Utils.getRootDir(config.context), true);
+            Os.setenv("EXTERNAL_STORAGE", Utils.getRootDir(context), true);
         } catch (ErrnoException e) {
             Logger.getInstance().e("Failed to set environment variable storage", e);
         }
     }
 
-    private static String prepareAgencyConfig(Config config) throws Exception {
-        String walletName = Utils.makeWalletName(config.walletName);
-        File walletDir = new File(Utils.getRootDir(config.context), "indy_client/wallet");
-        walletDir.mkdirs();
-        String walletPath = walletDir.getAbsolutePath();
-        String walletKey = createWalletKey(WALLET_KEY_LENGTH);
-        return AgencyConfig.setConfigParameters(config.agency, walletName, walletKey, walletPath, "3.0");
-    }
-
-    private static String populateConfig(String poolName, String oneTimeInfo, String genesisFilePath,
-                                         String logoUrl, String name) throws JSONException {
-        JSONObject json = new JSONObject(oneTimeInfo);
-        json.put("genesis_path", genesisFilePath);
-        json.put("institution_logo_url", logoUrl);
-        json.put("institution_name", name);
-        json.put("pool_name", poolName);
-        json.put("protocol_version", "2");
-        return json.toString();
-    }
-
-    private static File writeGenesisFile(Config config) {
-        File genesisFile = new File(Utils.getRootDir(config.context), "pool_transactions_genesis");
+    public static File writeGenesisFile(Context context, Integer genesisPoolResId) {
+        File genesisFile = new File(Utils.getRootDir(context), "pool_transactions_genesis");
         if (!genesisFile.exists()) {
             try (FileOutputStream stream = new FileOutputStream(genesisFile)) {
                 Logger.getInstance().d("writing poolTxnGenesis to file: " + genesisFile.getAbsolutePath());
-                if (config.genesisPool != null) {
-                    stream.write(config.genesisPool.getBytes());
-                } else if (config.genesisPoolResId != null) {
-                    try (InputStream genesisStream = config.context.getResources().openRawResource(config.genesisPoolResId)) {
+                if (genesisPoolResId != null) {
+                    try (InputStream genesisStream = context.getResources().openRawResource(genesisPoolResId)) {
                         byte[] buffer = new byte[8 * 1024];
                         int bytesRead;
                         while ((bytesRead = genesisStream.read(buffer)) != -1) {
@@ -170,7 +164,22 @@ public class ConnectMeVcx {
         return genesisFile;
     }
 
-    private static boolean configAlreadyExist(Context context) {
+    public static File writeGenesisFile(Context context, String genesisPool) {
+        File genesisFile = new File(Utils.getRootDir(context), "pool_transactions_genesis");
+        if (!genesisFile.exists()) {
+            try (FileOutputStream stream = new FileOutputStream(genesisFile)) {
+                Logger.getInstance().d("writing poolTxnGenesis to file: " + genesisFile.getAbsolutePath());
+                if (genesisPool != null) {
+                    stream.write(genesisPool.getBytes());
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return genesisFile;
+    }
+
+    public static boolean configAlreadyExist(Context context) {
         return SecurePreferencesHelper.containsLongStringValue(context, SECURE_PREF_VCXCONFIG);
     }
 
@@ -190,42 +199,118 @@ public class ConnectMeVcx {
         return Base64.encodeToString(bytes, Base64.NO_WRAP);
     }
 
-    private static CompletableFuture<Void> createOneTimeInfo(Config config) {
-        CompletableFuture<Void> result = new CompletableFuture<>();
-        // We have top create thew ca cert for the openssl to work properly on android
-        Utils.writeCACert(config.context);
-        try {
-            String agencyConfig = prepareAgencyConfig(config);
-            CompletionStage<String> provisioningStep;
-            if (config.provisionToken != null) {
-                String oneTimeInfo = UtilsApi.vcxAgentProvisionWithToken(agencyConfig, config.provisionToken);
-                // Fixme workaround to handle exception not thrown on previous step
-                //       Assume that `null` value is an error
-                if (oneTimeInfo == null) {
-                    throw new Exception("oneTimeInfo is null");
-                }
-                provisioningStep = CompletableFuture.completedStage(oneTimeInfo);
-            } else {
-                throw new Exception("ProvisionToken is not received ");
-            }
-            provisioningStep.whenComplete((oneTimeInfo, err) -> {
-                if (err != null) {
-                    Logger.getInstance().e("createOneTimeInfo failed: ", err);
-                    result.completeExceptionally(err);
-                } else {
-                    Logger.getInstance().i("createOneTimeInfo called: " + oneTimeInfo);
-                    try {
-                        File genesisFile = writeGenesisFile(config);
-                        String poolName = Utils.makePoolName(config.walletName);
-                        String vcxConfig = populateConfig(poolName, oneTimeInfo, genesisFile.getAbsolutePath(),
-                                "https://robothash.com/logo.png", "real institution name");
-                        SecurePreferencesHelper.setLongStringValue(config.context, SECURE_PREF_VCXCONFIG, vcxConfig);
-                        result.complete(null);
-                    } catch (Exception e) {
-                        result.completeExceptionally(e);
-                    }
-                }
+    private static String retrieveToken(Activity activity, Constants constants) throws Exception {
+        Log.d(TAG, "Retrieving token");
+
+        if (StringUtils.isNullOrWhiteSpace(constants.SERVER_URL) || constants.SERVER_URL.equals(constants.PLACEHOLDER_SERVER_URL)) {
+            activity.runOnUiThread(() -> {
+                Toast.makeText(activity, "Error: sponsor server URL is not set.", Toast.LENGTH_LONG).show();
             });
+            throw new Exception("Sponsor's server URL seems to be not set, please set your server URL in constants file to provision the app.");
+        }
+
+        SharedPreferences prefs = activity.getSharedPreferences(constants.PREFS_NAME, Context.MODE_PRIVATE);
+        String sponseeId = prefs.getString(constants.SPONSEE_ID, null);
+        if (sponseeId == null) {
+            sponseeId = UUID.randomUUID().toString();
+            prefs.edit()
+                    .putString(constants.SPONSEE_ID, sponseeId)
+                    .apply();
+        }
+        JSONObject json = new JSONObject();
+        json.put("sponseeId", sponseeId);
+
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(logging).build();
+        RequestBody body = RequestBody.create(json.toString(), MediaType.get("application/json"));
+        Request request = new Request.Builder()
+                .url(constants.SERVER_URL)
+                .post(body)
+                .build();
+        Response response = client.newCall(request).execute();
+        if (!response.isSuccessful()) {
+            throw new Exception("Response failed with code " + response.code());
+        }
+        String token = response.body().string();
+        if (token == null) {
+            throw new Exception("Token is not received ");
+        }
+        Log.d(TAG, "Retrieved token: " + token);
+        prefs.edit()
+                .putString(constants.PROVISION_TOKEN, token)
+                .putBoolean(constants.PROVISION_TOKEN_RETRIEVED, true)
+                .apply();
+
+        return token;
+    }
+
+    private static void makeDir(File dir) {
+        dir.mkdirs();
+    }
+
+    public static CompletableFuture<Void> createOneTimeInfo(
+            Context context,
+            Constants constants,
+            @RawRes int genesisPool
+    ) throws JSONException {
+        Logger.getInstance().setLogLevel(LogLevel.DEBUG);
+
+        Activity activity = (Activity) context;
+        String walletName = Utils.makeWalletName(constants.WALLET_NAME);
+        String walletKey = createWalletKey(WALLET_KEY_LENGTH);
+
+        File walletDir = new File(Utils.getRootDir(context), "indy_client/wallet");
+        makeDir(walletDir);
+        Log.d(TAG, "Wallet dir was made");
+
+        File genesisFile = writeGenesisFile(context, genesisPool);
+
+        String agencyConfig = ConnectMeVcx.Config.builder()
+                .withAgency(AgencyConfig.DEFAULT)
+                .withGenesisPool(genesisPool)
+                .withWalletName(walletName)
+                .withLogoUrl("https://robothash.com/logo.png")
+                .withInstitutionName("real institution name")
+                .withGenesisPath(genesisFile.getAbsolutePath())
+                .withWalletKey(walletKey)
+                .buildVcxConfig();
+
+        CompletableFuture<Void> result = new CompletableFuture<>();
+        configureLoggerAndFiles(context);
+
+        Utils.writeCACert(context);
+        try {
+            String token = retrieveToken(activity, constants);
+            UtilsApi.vcxAgentProvisionWithTokenAsync(agencyConfig, token)
+                .whenComplete((oneTimeInfo, err) -> {
+                    try {
+                        if (err != null) {
+                            Logger.getInstance().e("createOneTimeInfo failed: ", err);
+                            result.completeExceptionally(err);
+                        } else if (oneTimeInfo == null) {
+                            throw new Exception("oneTimeInfo is null");
+                        } else {
+                            Logger.getInstance().i("createOneTimeInfo called: " + oneTimeInfo);
+                            try {
+                                SecurePreferencesHelper.setLongStringValue(context, SECURE_PREF_VCXCONFIG, oneTimeInfo);
+                                initialize(context).whenComplete((returnCode, error) -> {
+                                    if (error != null) {
+                                        Logger.getInstance().e("Init failed", error);
+                                        result.completeExceptionally(error);
+                                    } else {
+                                        Logger.getInstance().i("Init completed");
+                                        result.complete(null);
+                                    }
+                                });
+                            } catch (Exception e) {
+                                result.completeExceptionally(e);
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
         } catch (Exception e) {
             result.completeExceptionally(e);
         }
@@ -240,19 +325,14 @@ public class ConnectMeVcx {
         // we won't have to pay too much cost for calling this function inside init
         Utils.writeCACert(context);
         try {
-            int retCode = VcxApi.initSovToken();
-            if (retCode != 0) {
-                result.completeExceptionally(new Exception("Could not init: " + retCode));
-            } else {
-                String config = SecurePreferencesHelper.getLongStringValue(context, SECURE_PREF_VCXCONFIG, null);
-                VcxApi.vcxInitWithConfig(config).whenComplete((integer, err) -> {
-                    if (err != null) {
-                        result.completeExceptionally(err);
-                    } else {
-                        result.complete(null);
-                    }
-                });
-            }
+            String config = SecurePreferencesHelper.getLongStringValue(context, SECURE_PREF_VCXCONFIG, null);
+            VcxApi.vcxInitWithConfig(config).whenComplete((integer, err) -> {
+                if (err != null) {
+                    result.completeExceptionally(err);
+                } else {
+                    result.complete(null);
+                }
+            });
         } catch (AlreadyInitializedException e) {
             // even if we get already initialized exception
             // then also we will resolve promise, because we don't care if vcx is already
@@ -264,7 +344,6 @@ public class ConnectMeVcx {
         }
         return result;
     }
-
 
     private static void setVcxLogger(int maxFileSizeBytes, Context context) {
         File logFile = new File(Utils.getRootDir(context), "me.connect.rotating.log");
@@ -332,31 +411,152 @@ public class ConnectMeVcx {
 
     }
 
+    public static final class ConstantsBuilder {
+        private String WALLET_NAME;
+        private String PREFS_NAME;
+        private String SPONSEE_ID;
+        private String PROVISION_TOKEN;
+        private String FCM_TOKEN;
+        private String FCM_TOKEN_SENT;
+        private String PROVISION_TOKEN_RETRIEVED;
+        private String PLACEHOLDER_SERVER_URL;
+        private String SERVER_URL;
+
+        private ConstantsBuilder() {
+        }
+
+        public @NonNull
+        ConstantsBuilder withWalletName(@NonNull String WALLET_NAME) {
+            this.WALLET_NAME = WALLET_NAME;
+            return this;
+        }
+
+        public @NonNull
+        ConstantsBuilder withPrefsName(@NonNull String PREFS_NAME) {
+            this.PREFS_NAME = PREFS_NAME;
+            return this;
+        }
+
+        public @NonNull
+        ConstantsBuilder withSponseeId(@NonNull String SPONSEE_ID) {
+            this.SPONSEE_ID = SPONSEE_ID;
+            return this;
+        }
+
+        public @NonNull
+        ConstantsBuilder withProvisionToken(@NonNull String PROVISION_TOKEN) {
+            this.PROVISION_TOKEN = PROVISION_TOKEN;
+            return this;
+        }
+
+        public @NonNull
+        ConstantsBuilder withFcmToken(@NonNull String FCM_TOKEN) {
+            this.FCM_TOKEN = FCM_TOKEN;
+            return this;
+        }
+
+        public @NonNull
+        ConstantsBuilder withFcmTokenSent(@NonNull String FCM_TOKEN_SENT) {
+            this.FCM_TOKEN_SENT = FCM_TOKEN_SENT;
+            return this;
+        }
+
+        public @NonNull
+        ConstantsBuilder withProvisionTokenRetrieved(@NonNull String PROVISION_TOKEN_RETRIEVED) {
+            this.PROVISION_TOKEN_RETRIEVED = PROVISION_TOKEN_RETRIEVED;
+            return this;
+        }
+
+        public @NonNull
+        ConstantsBuilder withPlaceholderServerUrl(@NonNull String PLACEHOLDER_SERVER_URL) {
+            this.PLACEHOLDER_SERVER_URL = PLACEHOLDER_SERVER_URL;
+            return this;
+        }
+
+        public @NonNull
+        ConstantsBuilder withServerUrl(@NonNull String SERVER_URL) {
+            this.SERVER_URL = SERVER_URL;
+            return this;
+        }
+
+        /**
+         * Build {@link Config} instance.
+         *
+         * @return {@link Config} instance
+         */
+        public @NonNull
+        Constants build() {
+            return new Constants(
+                    WALLET_NAME,
+                    PREFS_NAME,
+                    SPONSEE_ID,
+                    PROVISION_TOKEN,
+                    FCM_TOKEN,
+                    FCM_TOKEN_SENT,
+                    PROVISION_TOKEN_RETRIEVED,
+                    PLACEHOLDER_SERVER_URL,
+                    SERVER_URL
+            );
+        }
+    }
+
+    /**
+     * Config used during {@link ConnectMeVcx} initialization.
+     */
+    public static class Constants {
+        private String WALLET_NAME;
+        private String PREFS_NAME;
+        private String SPONSEE_ID;
+        private String PROVISION_TOKEN;
+        private String FCM_TOKEN;
+        private String FCM_TOKEN_SENT;
+        private String PROVISION_TOKEN_RETRIEVED;
+        private String PLACEHOLDER_SERVER_URL;
+        private String SERVER_URL;
+
+        public Constants(String WALLET_NAME,
+                         String PREFS_NAME,
+                         String SPONSEE_ID,
+                         String PROVISION_TOKEN,
+                         String FCM_TOKEN,
+                         String FCM_TOKEN_SENT,
+                         String PROVISION_TOKEN_RETRIEVED,
+                         String PLACEHOLDER_SERVER_URL,
+                         String SERVER_URL
+        ) {
+            this.WALLET_NAME = WALLET_NAME;
+            this.PREFS_NAME = PREFS_NAME;
+            this.SPONSEE_ID = SPONSEE_ID;
+            this.PROVISION_TOKEN = PROVISION_TOKEN;
+            this.FCM_TOKEN = FCM_TOKEN;
+            this.FCM_TOKEN_SENT = FCM_TOKEN_SENT;
+            this.PROVISION_TOKEN_RETRIEVED = PROVISION_TOKEN_RETRIEVED;
+            this.PLACEHOLDER_SERVER_URL = PLACEHOLDER_SERVER_URL;
+            this.SERVER_URL = SERVER_URL;
+        }
+
+        /**
+         * Creates builder for {@link Config}.
+         *
+         * @return {@link ConstantsBuilder} instance
+         */
+        public static ConstantsBuilder builder() {
+            return new ConstantsBuilder();
+        }
+
+    }
+
     public static final class ConfigBuilder {
-        private Context context;
         private String genesisPool;
         private Integer genesisPoolResId;
         private String agency;
         private String walletName;
-        private Integer logMaxSize;
-        private LogLevel logLevel;
-        private String provisionToken;
-
+        private String logoUrl;
+        private String institutionName;
+        private String genesisPath;
+        private String walletKey;
 
         private ConfigBuilder() {
-        }
-
-        /**
-         * Set {@link Context} that will be used by SDK.
-         * Context is required to access internal file storage and shared preferences.
-         *
-         * @param context {@link Context} of current application
-         * @return {@link ConfigBuilder} instance
-         */
-        public @NonNull
-        ConfigBuilder withContext(@NonNull Context context) {
-            this.context = context;
-            return this;
         }
 
         /**
@@ -409,42 +609,55 @@ public class ConnectMeVcx {
         }
 
         /**
-         * Set log max size in bytes. Default value is {@link #LOG_MAX_SIZE_DEFAULT}.
+         * Set logo url
          *
-         * @param logMaxSize max log file size in bytes
-         * @return {@link ConfigBuilder} instance
-         */
-        public @NonNull
-        ConfigBuilder withLogMaxSize(int logMaxSize) {
-            this.logMaxSize = logMaxSize;
-            return this;
-        }
-
-
-        /**
-         * Set log level. Default value is {@link LogLevel#INFO}
-         * Please note that log level is set globally for slf4j logs.
-         *
-         * @param logLevel
+         * @param logoUrl logoUrl
          * @return
          */
         public @NonNull
-        ConfigBuilder withLogLevel(LogLevel logLevel) {
-            this.logLevel = logLevel;
+        ConfigBuilder withLogoUrl(String logoUrl) {
+            this.logoUrl = logoUrl;
             return this;
         }
 
         /**
-         * Set provision token
+         * Set institution name
          *
-         * @param provisionToken provisionToken
+         * @param institutionName institutionName
          * @return
          */
         public @NonNull
-        ConfigBuilder withProvisionToken(String provisionToken) {
-            this.provisionToken = provisionToken;
+        ConfigBuilder withInstitutionName(String institutionName) {
+            this.institutionName = institutionName;
             return this;
         }
+
+        /**
+         * Set genesis path
+         *
+         * @param genesisPath genesisPath
+         *
+         * @return
+         */
+        public @NonNull
+        ConfigBuilder withGenesisPath(String genesisPath) {
+            this.genesisPath = genesisPath;
+            return this;
+        }
+
+        /**
+         * Set wallet key
+         *
+         * @param walletKey walletKey
+         *
+         * @return
+         */
+        public @NonNull
+        ConfigBuilder withWalletKey(String walletKey) {
+            this.walletKey = walletKey;
+            return this;
+        }
+
 
         /**
          * Build {@link Config} instance.
@@ -453,8 +666,33 @@ public class ConnectMeVcx {
          */
         public @NonNull
         Config build() {
-            return new Config(context, genesisPool, genesisPoolResId, agency, walletName, logMaxSize, logLevel,
-                    provisionToken);
+            return new Config(
+                    agency,
+                    genesisPool,
+                    genesisPoolResId,
+                    walletName,
+                    logoUrl,
+                    institutionName,
+                    genesisPath,
+                    walletKey
+            );
+        }
+
+        /**
+         * Creates agency config from current config {@link Config} and make wallet dir.
+         *
+         * @return {@link AgencyConfig} with advanced fields
+         */
+        public @NonNull
+        String buildVcxConfig() throws JSONException {
+            JSONObject agencyConfig = new JSONObject(this.agency);
+            agencyConfig.put("wallet_name", this.walletName);
+            agencyConfig.put("wallet_key", this.walletKey);
+            agencyConfig.put("protocol_type", "3.0");
+            agencyConfig.put("path", this.genesisPath);
+            agencyConfig.put("logo", this.logoUrl);
+            agencyConfig.put("name", this.institutionName);
+            return agencyConfig.toString();
         }
     }
 
@@ -462,29 +700,33 @@ public class ConnectMeVcx {
      * Config used during {@link ConnectMeVcx} initialization.
      */
     public static class Config {
-        private Context context;
+        private String agency;
         private String genesisPool;
         private Integer genesisPoolResId;
-        private String agency;
         private String walletName;
-        private Integer logMaxSize = LOG_MAX_SIZE_DEFAULT;
-        private LogLevel logLevel = LogLevel.INFO;
-        private String provisionToken;
+        private String logoUrl;
+        private String institutionName;
+        private String genesisPath;
+        private String walletKey;
 
-        public Config(Context context, String genesisPool, Integer genesisPoolResId, String agency, String walletName,
-                      Integer logMaxSize, LogLevel logLevel, String provisionToken) {
-            this.context = context;
+        public Config(
+            String agency,
+            String genesisPool,
+            Integer genesisPoolResId,
+            String walletName,
+            String logoUrl,
+            String institutionName,
+            String genesisPath,
+            String walletKey
+        ) {
+            this.agency = agency;
             this.genesisPool = genesisPool;
             this.genesisPoolResId = genesisPoolResId;
-            this.agency = agency;
             this.walletName = walletName;
-            if (logMaxSize != null) {
-                this.logMaxSize = logMaxSize;
-            }
-            if (logLevel != null) {
-                this.logLevel = logLevel;
-            }
-            this.provisionToken = provisionToken;
+            this.logoUrl = logoUrl;
+            this.institutionName = institutionName;
+            this.genesisPath = genesisPath;
+            this.walletKey = walletKey;
         }
 
         /**

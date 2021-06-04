@@ -16,8 +16,8 @@ interface StructuredMessageDao {
     @Insert
     suspend fun insertAll(vararg messages: StructuredMessage)
 
-    @Query("SELECT EXISTS(SELECT * FROM structuredmessage WHERE (entry_id = :entryId AND connection_id = :connectionId))")
-    suspend fun checkMessageExists(entryId: String, connectionId: Int): Boolean
+    @Query("SELECT EXISTS(SELECT * FROM structuredmessage WHERE pwDid = :pwDid)")
+    fun checkMessageExists(pwDid: String): Boolean
 
     @Update
     suspend fun update(message: StructuredMessage)
