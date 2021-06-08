@@ -213,6 +213,7 @@ public class Connections {
                                         Logger.getInstance().e("Failed to reuse connection: ", e);
                                         result.completeExceptionally(e);
                                     } else {
+                                        System.out.println(res + "connectionSendReuse");
                                         result.complete(true);
                                     }
                                 });
@@ -232,6 +233,8 @@ public class Connections {
             result.completeExceptionally(ex);
         }
     }
+
+
 
     /**
      * Creates new connection from invitation.

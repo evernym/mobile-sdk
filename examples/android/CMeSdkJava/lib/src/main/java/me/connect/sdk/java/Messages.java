@@ -60,6 +60,7 @@ public class Messages {
                                     JSONObject message = msgsJson.getJSONObject(j);
                                     JSONObject payload = new JSONObject(message.getString("decryptedPayload"));
                                     String type = payload.getJSONObject("@type").getString("name");
+                                    System.out.println("getPendingMessages" + type);
                                     if (messageType.matches(type)) {
                                         String messageUid = message.getString("uid");
                                         String msg = payload.getString("@msg");
@@ -105,6 +106,43 @@ public class Messages {
                     }
                 });
             }
+        } catch (VcxException ex) {
+            ex.printStackTrace();
+        }
+        return result;
+    }
+
+    public static @NonNull
+    CompletableFuture<Boolean> waitHandshakeReuse() {
+        Logger.getInstance().i("Retrieving pending messages");
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
+        try {
+            UtilsApi.vcxGetMessages(MessageStatusType.PENDING, null, null).whenComplete((messagesString, err) -> {
+                if (err != null) {
+                    Logger.getInstance().e("Failed to retrieve messages: ", err);
+                    result.completeExceptionally(err);
+                    return;
+                }
+                try {
+                    JSONArray messagesJson = new JSONArray(messagesString);
+                    for (int i = 0; i < messagesJson.length(); i++) {
+                        JSONArray msgsJson = messagesJson.getJSONObject(i).optJSONArray("msgs");
+                        if (msgsJson != null) {
+                            for (int j = 0; j < msgsJson.length(); j++) {
+                                JSONObject message = msgsJson.getJSONObject(j);
+                                JSONObject payload = new JSONObject(message.getString("decryptedPayload"));
+                                String type = payload.getJSONObject("@type").getString("name");
+                                if (type.equals("handshake-reuse-accepted")) {
+                                    result.complete(true);
+                                }
+                            }
+                        }
+                    }
+
+                } catch (JSONException ex) {
+                    result.completeExceptionally(ex);
+                }
+            });
         } catch (VcxException ex) {
             ex.printStackTrace();
         }

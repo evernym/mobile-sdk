@@ -16,14 +16,17 @@ import org.json.JSONObject;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import java9.util.concurrent.CompletableFuture;
 import me.connect.sdk.java.Connections;
 import me.connect.sdk.java.Credentials;
+import me.connect.sdk.java.Messages;
 import me.connect.sdk.java.connection.QRConnection;
 import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
-import me.connect.sdk.java.sample.db.dao.ConnectionDao;
 import me.connect.sdk.java.sample.db.entity.Connection;
 import me.connect.sdk.java.sample.db.entity.CredentialOffer;
 
@@ -81,14 +84,36 @@ public class ConnectionsViewModel extends AndroidViewModel {
                             try {
                                 String type = offerAttach.getString("@type");
                                 if (exists) {
-                                    String existingConnection = Connections.findExistingConnection(parsedInvite, serializedConns);
-                                    JSONObject connection = new JSONObject(existingConnection);
-                                    if (type.contains("credential")) {
-                                        createWithCredentialOffer(connection, liveData, offerAttach);
-                                    }
+                                    CompletableFuture<Void> result = new CompletableFuture<>();
+                                    Messages.waitHandshakeReuse().whenComplete((handshake, e) -> {
+                                        if (e != null) {
+                                            e.printStackTrace();
+                                        } else {
+                                            if (handshake) {
+                                                try {
+                                                    String existingConnection = Connections.findExistingConnection(parsedInvite, serializedConns);
+                                                    JSONObject connection = convertToJSONObject(existingConnection);
+                                                    if (type.contains("credential")) {
+                                                        System.out.println("existingConnectionExistingConnection" + connection);
+                                                        createWithCredentialOffer(connection, liveData, offerAttach);
+                                                    }
+                                                } catch (Exception exception) {
+                                                    exception.printStackTrace();
+                                                }
+                                                result.complete(null);
+                                            }
+                                            try {
+                                                TimeUnit.SECONDS.sleep(1);
+                                            } catch (InterruptedException interruptedException) {
+                                                interruptedException.printStackTrace();
+                                            }
+                                        }
+                                    });
+
+
+                                    liveData.postValue(REDIRECT);
                                 } else {
-                                    System.out.println(type.contains("credential") + "type.matches");
-                                    if (type.contains("credential")) {
+                                    if (type.matches("credential")) {
                                         connectionCreateWithCredentialOffer(parsedInvite, data, liveData, offerAttach);
                                     }
                                 }
@@ -113,27 +138,32 @@ public class ConnectionsViewModel extends AndroidViewModel {
         SingleLiveData<ConnectionCreateResult> liveData,
         JSONObject offerAttach
     ) {
-        Credentials.createWithOffer(UUID.randomUUID().toString(), requestsAttach).handle((co, er) -> {
-            if (er != null) {
-                er.printStackTrace();
-            } else {
-                CredentialOffer offer = new CredentialOffer();
-                try {
-                    offer.claimId = offerAttach.getString("@id");
-                    offer.name = offerAttach.getString("comment");
-                    offer.pwDid = existingConnection.getString("pwDid");
-                    JSONObject preview = offerAttach.getJSONObject("credential_preview");
-                    offer.attributes = preview.getString("attributes");
-                    offer.serialized = co;
-                    offer.messageId = null;
-                    db.credentialOffersDao().insertAll(offer);
-                    liveData.postValue(REQUEST_ATTACH);
-                } catch (JSONException e) {
-                    e.printStackTrace();
+        try {
+            JSONObject data = existingConnection.getJSONObject("data");
+            Credentials.createWithOffer(UUID.randomUUID().toString(), requestsAttach).handle((co, er) -> {
+                if (er != null) {
+                    er.printStackTrace();
+                } else {
+                    CredentialOffer offer = new CredentialOffer();
+                    try {
+                        offer.claimId = offerAttach.getString("@id");
+                        offer.name = offerAttach.getString("comment");
+                        offer.pwDid = data.getString("pw_did");
+                        JSONObject preview = offerAttach.getJSONObject("credential_preview");
+                        offer.attributes = preview.getString("attributes");
+                        offer.serialized = co;
+                        offer.messageId = null;
+                        db.credentialOffersDao().insertAll(offer);
+                        liveData.postValue(REQUEST_ATTACH);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-            return null;
-        });
+                return null;
+            });
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void connectionCreateWithCredentialOffer(
