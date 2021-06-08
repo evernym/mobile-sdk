@@ -6,14 +6,23 @@ import com.evernym.sdk.vcx.VcxException;
 import com.evernym.sdk.vcx.connection.ConnectionApi;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.List;
 
 import java9.util.concurrent.CompletableFuture;
 import me.connect.sdk.java.connection.Connection;
 import me.connect.sdk.java.message.AriesMessageType;
 import me.connect.sdk.java.message.MessageState;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
  * Class containing methods to work with connections
@@ -21,7 +30,6 @@ import me.connect.sdk.java.message.MessageState;
 public class Connections {
 
     public static final String TAG = "ConnectMeVcx";
-
 
     public static @NonNull
     CompletableFuture<Boolean> verifyConnectionExists(@NonNull String invitationDetails,
@@ -42,7 +50,6 @@ public class Connections {
         return result;
     }
 
-
     private static boolean isAriesInvitation(String invite) throws Exception {
         JSONObject json = new JSONObject(invite);
         boolean hasId = json.has("@id");
@@ -55,7 +62,7 @@ public class Connections {
         return hasId && typeMatches;
     }
 
-    private static String findExistingConnection(String newInvite, List<String> serializedConnections) throws Exception {
+    public static String findExistingConnection(String newInvite, List<String> serializedConnections) throws Exception {
         String existingConnection = null;
         for (String sc : serializedConnections) {
             int handle = ConnectionApi.connectionDeserialize(sc).get();
@@ -335,5 +342,32 @@ public class Connections {
             e.printStackTrace();
         }
         return serializedConnection;
+    }
+
+    public static String readDataFromUrl(String url) {
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient client = new OkHttpClient.Builder().build();
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            return response.body().string();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean isOutOfBand(String invite) throws Exception {
+
+        JSONObject json = new JSONObject(invite);
+        if (json.has("@type")) {
+            String invitationType = json.getString("@type");
+            return invitationType.contains(AriesMessageType.OUTOFBAND_INVITATION);
+        } else {
+            throw new Exception("Invalid invite format");
+        }
     }
 }

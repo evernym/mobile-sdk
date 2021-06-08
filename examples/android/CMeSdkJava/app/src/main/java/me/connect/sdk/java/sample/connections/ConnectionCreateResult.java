@@ -3,5 +3,6 @@ package me.connect.sdk.java.sample.connections;
 public enum ConnectionCreateResult {
     SUCCESS,
     REDIRECT,
-    FAILURE
+    FAILURE,
+    REQUEST_ATTACH
 }

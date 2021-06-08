@@ -15,6 +15,7 @@ public interface AriesMessageType {
     String ACK = "notification/1.0/ack";
     // issue-credential
     String OFFER_CREDENTIAL = "issue-credential/1.0/offer-credential";
+    String PREVIEW_CREDENTIAL = "issue-credential/1.0/credential-preview";
     String PROPOSE_CREDENTIAL = "issue-credential/1.1/propose-credential";
     String REQUEST_CREDENTIAL = "issue-credential/1.0/request-credential";
     String ISSUE_CREDENTIAL = "issue-credential/1.0/issue-credential";
