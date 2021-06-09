@@ -4,5 +4,6 @@ public enum ConnectionCreateResult {
     SUCCESS,
     REDIRECT,
     FAILURE,
-    REQUEST_ATTACH
+    REQUEST_ATTACH,
+    PROOF_ATTACH
 }

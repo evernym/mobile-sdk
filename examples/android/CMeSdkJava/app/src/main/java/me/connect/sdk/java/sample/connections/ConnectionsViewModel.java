@@ -13,11 +13,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import java9.util.concurrent.CompletableFuture;
 import me.connect.sdk.java.Connections;
@@ -29,15 +28,19 @@ import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Connection;
 import me.connect.sdk.java.sample.db.entity.CredentialOffer;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 import static me.connect.sdk.java.sample.connections.ConnectionCreateResult.FAILURE;
 import static me.connect.sdk.java.sample.connections.ConnectionCreateResult.REDIRECT;
 import static me.connect.sdk.java.sample.connections.ConnectionCreateResult.SUCCESS;
 import static me.connect.sdk.java.sample.connections.ConnectionCreateResult.REQUEST_ATTACH;
 
+
 public class ConnectionsViewModel extends AndroidViewModel {
     private final Database db;
-    private Boolean isOoB = null;
     private String requestsAttach = null;
     private LiveData<List<Connection>> connections;
 
@@ -59,74 +62,62 @@ public class ConnectionsViewModel extends AndroidViewModel {
         return data;
     }
 
+    private boolean isConnectionOrProprietaryType(Connections.InvitationType type) {
+        return type == Connections.InvitationType.Proprietary
+                || type == Connections.InvitationType.Connection;
+    }
+
+    private boolean isOutOfBandType(Connections.InvitationType type) {
+        return type == Connections.InvitationType.OutOfBand;
+    }
+
     private void createConnection(String invite, SingleLiveData<ConnectionCreateResult> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             String parsedInvite = parseInvite(invite);
-
-            try {
-                isOoB = Connections.isOutOfBand(parsedInvite);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            requestsAttach = extractRequestAttach(parsedInvite);
-            JSONObject offerAttach = convertToJSONObject(requestsAttach);
-
-            ConnDataHolder data = extractDataFromInvite(parsedInvite);
+            Connections.InvitationType invitationType = Connections.getInvitationType(parsedInvite);
+            ConnDataHolder data = extractMetaFromInvite(parsedInvite);
             List<String> serializedConns = db.connectionDao().getAllSerializedConnections();
-            Connections.verifyConnectionExists(parsedInvite, serializedConns)
-                .handle((exists, err) -> {
-                    if (err != null) {
-                        err.printStackTrace();
-                        liveData.postValue(FAILURE);
-                    } else {
-                        if (isOoB && offerAttach != null) {
-                            try {
-                                String type = offerAttach.getString("@type");
-                                if (exists) {
-                                    CompletableFuture<Void> result = new CompletableFuture<>();
-                                    Messages.waitHandshakeReuse().whenComplete((handshake, e) -> {
-                                        if (e != null) {
-                                            e.printStackTrace();
-                                        } else {
-                                            if (handshake) {
-                                                try {
-                                                    String existingConnection = Connections.findExistingConnection(parsedInvite, serializedConns);
-                                                    JSONObject connection = convertToJSONObject(existingConnection);
-                                                    if (type.contains("credential")) {
-                                                        System.out.println("existingConnectionExistingConnection" + connection);
-                                                        createWithCredentialOffer(connection, liveData, offerAttach);
-                                                    }
-                                                } catch (Exception exception) {
-                                                    exception.printStackTrace();
-                                                }
-                                                result.complete(null);
-                                            }
-                                        }
-                                    });
-                                    liveData.postValue(REDIRECT);
-                                } else {
-                                    if (type.contains("credential")) {
-                                        connectionCreateWithCredentialOffer(parsedInvite, data, liveData, offerAttach);
-                                    }
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        } else {
-                            if (exists) {
-                                liveData.postValue(REDIRECT);
-                            } else {
-                                connectionCreate(parsedInvite, data, liveData);
-                            }
+            String existingConnection = Connections.verifyConnectionExists(parsedInvite, serializedConns);
+            if (isConnectionOrProprietaryType(invitationType)) {
+                if (existingConnection != null) {
+                    Connections.connectionRedirectByType(parsedInvite, existingConnection);
+                    liveData.postValue(REDIRECT);
+                    return;
+                }
+                connectionCreate(parsedInvite, data, liveData);
+            } else if (isOutOfBandType(invitationType)) {
+                try {
+                    requestsAttach = extractRequestAttach(parsedInvite);
+                    JSONObject offerAttach = convertToJSONObject(requestsAttach);
+
+                    if (offerAttach == null) {
+                        if (existingConnection != null) {
+                            Connections.connectionRedirectByType(parsedInvite, existingConnection);
+                            liveData.postValue(REDIRECT);
+                            return;
                         }
+                        connectionCreate(parsedInvite, data, liveData);
                     }
-                    return null;
-                });
+                    String attachType = offerAttach.getString("@type");
+
+                    if (existingConnection != null) {
+                        Connections.connectionRedirectByType(parsedInvite, existingConnection);
+                        reuseConnection(parsedInvite, serializedConns, liveData, offerAttach, attachType);
+                        liveData.postValue(REDIRECT);
+                        return;
+                    }
+                    //TODO Change on better check
+                    if (attachType.contains("credential")) {
+                        connectionCreateAndAcceptCredentialOffer(parsedInvite, data, liveData, offerAttach);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
         });
     }
 
-    private void createWithCredentialOffer(
+    private void acceptCredentialOffer(
         JSONObject existingConnection,
         SingleLiveData<ConnectionCreateResult> liveData,
         JSONObject offerAttach
@@ -159,11 +150,78 @@ public class ConnectionsViewModel extends AndroidViewModel {
         }
     }
 
-    private void connectionCreateWithCredentialOffer(
+    private void connectionCreateAndAcceptCredentialOffer(
             String parsedInvite,
             ConnDataHolder data,
             SingleLiveData<ConnectionCreateResult> liveData,
             JSONObject offerAttach
+    ) {
+        Credentials.createWithOffer(UUID.randomUUID().toString(), requestsAttach).handle((co, er) -> {
+            if (er != null) {
+                er.printStackTrace();
+            } else {
+                CredentialOffer offer = new CredentialOffer();
+                try {
+                    offer.claimId = offerAttach.getString("@id");
+                    offer.name = offerAttach.getString("comment");
+                    offer.pwDid = null;
+
+                    JSONObject preview = offerAttach.getJSONObject("credential_preview");
+                    offer.attributes = preview.getString("attributes");
+
+                    offer.serialized = co;
+                    offer.messageId = null;
+
+                    offer.attachConnection = parsedInvite;
+                    offer.attachConnectionName = data.name;
+                    offer.attachConnectionLogo = data.logo;
+
+                    db.credentialOffersDao().insertAll(offer);
+
+                    liveData.postValue(REQUEST_ATTACH);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        });
+
+    }
+
+    private void reuseConnection(
+            String parsedInvite,
+            List<String> serializedConns,
+            SingleLiveData<ConnectionCreateResult> liveData,
+            JSONObject offerAttach,
+            String attachType
+    ) {
+        CompletableFuture<Void> result = new CompletableFuture<>();
+        Messages.waitHandshakeReuse().whenComplete((handshake, e) -> {
+            if (e != null) {
+                e.printStackTrace();
+            } else {
+                if (handshake) {
+                    try {
+                        String existingConnection = Connections.findExistingConnection(parsedInvite, serializedConns);
+                        JSONObject connection = convertToJSONObject(existingConnection);
+                        if (attachType.contains("credential")) {
+                            System.out.println("existingConnectionExistingConnection" + connection);
+                            acceptCredentialOffer(connection, liveData, offerAttach);
+                        }
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                    result.complete(null);
+                }
+            }
+        });
+    }
+
+    private void connectionCreateWithProof(
+        String parsedInvite,
+        ConnDataHolder data,
+        SingleLiveData<ConnectionCreateResult> liveData,
+        JSONObject proofAttach
     ) {
         Connections.create(parsedInvite, new QRConnection())
             .handle((res, throwable) -> {
@@ -176,32 +234,27 @@ public class ConnectionsViewModel extends AndroidViewModel {
                     c.pwDid = pwDid;
                     c.serialized = serializedCon;
                     db.connectionDao().insertAll(c);
+
                     liveData.postValue(throwable == null ? SUCCESS : FAILURE);
-
-                    Credentials.createWithOffer(UUID.randomUUID().toString(), requestsAttach).handle((co, er) -> {
-                        if (er != null) {
-                            er.printStackTrace();
-                        } else {
-                            CredentialOffer offer = new CredentialOffer();
-                            try {
-                                offer.claimId = offerAttach.getString("@id");
-                                offer.name = offerAttach.getString("comment");
-                                offer.pwDid = pwDid;
-
-                                JSONObject preview = offerAttach.getJSONObject("credential_preview");
-                                offer.attributes = preview.getString("attributes");
-
-                                offer.serialized = co;
-                                offer.messageId = null;
-                                db.credentialOffersDao().insertAll(offer);
-
-                                liveData.postValue(REQUEST_ATTACH);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        return null;
-                    });
+//                    if (!db.proofRequestDao().checkExists(holder.threadId)) {
+//                        Proofs.createWithRequest(UUID.randomUUID().toString(), holder.proofReq).handle((pr, err) -> {
+//                            if (err != null) {
+//                                err.printStackTrace();
+//                            } else {
+//                                ProofRequest proof = new ProofRequest();
+//                                proof.serialized = pr;
+//                                proof.name = holder.name;
+//                                proof.pwDid = pwDid;
+//                                proof.attributes = holder.attributes;
+//                                proof.threadId = holder.threadId;
+//                                proof.messageId = message.getUid();
+//                                db.proofRequestDao().insertAll(proof);
+//
+//                                liveData.postValue(PROOF_ATTACH);
+//                            }
+//                            return null;
+//                        });
+//                    }
                 }
                 if (throwable != null) {
                     throwable.printStackTrace();
@@ -243,7 +296,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
             if (param != null) {
                 return new String(Base64.decode(param, Base64.NO_WRAP));
             } else {
-                return Connections.readDataFromUrl(invite);
+                return readDataFromUrl(invite);
             }
         } else {
             return invite;
@@ -276,7 +329,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
         return null;
     }
 
-    private ConnDataHolder extractDataFromInvite(String invite) {
+    private ConnDataHolder extractMetaFromInvite(String invite) {
         try {
             JSONObject json = convertToJSONObject(invite);
             if (json != null && json.has("label")) {
@@ -318,6 +371,22 @@ public class ConnectionsViewModel extends AndroidViewModel {
             }
             return new JSONObject(init);
         } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String readDataFromUrl(String url) {
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient client = new OkHttpClient.Builder().build();
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            return response.body().string();
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;

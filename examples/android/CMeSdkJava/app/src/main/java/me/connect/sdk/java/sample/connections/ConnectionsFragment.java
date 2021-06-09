@@ -94,24 +94,22 @@ public class ConnectionsFragment extends Fragment {
         binding.buttonAddConnection.setEnabled(false);
         binding.buttonQr.setEnabled(false);
         model.newConnection(invite).observeOnce(getViewLifecycleOwner(), status -> {
-            String msg = null;
             switch (status) {
                 case SUCCESS:
-                    msg = "Connection created";
+                    Toast.makeText(getActivity(), "Connection created", Toast.LENGTH_SHORT).show();
                     break;
                 case REDIRECT:
-                    msg = "Connection redirected";
+                    Toast.makeText(getActivity(), "Connection redirected", Toast.LENGTH_SHORT).show();
+                    break;
+                case FAILURE:
+                    Toast.makeText(getActivity(), "Connection failed", Toast.LENGTH_SHORT).show();
                     break;
                 case REQUEST_ATTACH:
                     selectActiveTab(1);
-                    msg = null;
                     break;
-                case FAILURE:
-                    msg = "Connection failed";
+                case PROOF_ATTACH:
+                    selectActiveTab(2);
                     break;
-            }
-            if (msg != null) {
-                Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
             }
             if (status != ConnectionCreateResult.FAILURE) {
                 binding.editTextConnection.setText(null);
