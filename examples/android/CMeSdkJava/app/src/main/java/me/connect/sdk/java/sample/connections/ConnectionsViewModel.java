@@ -102,18 +102,11 @@ public class ConnectionsViewModel extends AndroidViewModel {
                                                 }
                                                 result.complete(null);
                                             }
-                                            try {
-                                                TimeUnit.SECONDS.sleep(1);
-                                            } catch (InterruptedException interruptedException) {
-                                                interruptedException.printStackTrace();
-                                            }
                                         }
                                     });
-
-
                                     liveData.postValue(REDIRECT);
                                 } else {
-                                    if (type.matches("credential")) {
+                                    if (type.contains("credential")) {
                                         connectionCreateWithCredentialOffer(parsedInvite, data, liveData, offerAttach);
                                     }
                                 }
@@ -263,6 +256,9 @@ public class ConnectionsViewModel extends AndroidViewModel {
             if (json != null && json.has("request~attach")) {
                 String requestAttachCode = json.getString("request~attach");
                 JSONArray requestsAttachItems = new JSONArray(requestAttachCode);
+                if (requestsAttachItems.length() == 0) {
+                    return null;
+                }
                 JSONObject requestsAttachItem = requestsAttachItems.getJSONObject(0);
                 JSONObject requestsAttachItemData = requestsAttachItem.getJSONObject("data");
                 String requestsAttachItemBase = requestsAttachItemData.getString("base64");
@@ -317,6 +313,9 @@ public class ConnectionsViewModel extends AndroidViewModel {
 
     private static JSONObject convertToJSONObject(String init) {
         try {
+            if (init == null) {
+                return null;
+            }
             return new JSONObject(init);
         } catch (JSONException e) {
             e.printStackTrace();
