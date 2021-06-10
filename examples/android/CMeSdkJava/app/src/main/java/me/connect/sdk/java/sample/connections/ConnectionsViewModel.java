@@ -248,7 +248,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
                     proof.serialized = pr;
                     proof.name = proofAttach.getString("comment");
                     proof.pwDid = null;
-                    proof.attributes = null;
+                    proof.attributes = extractAttachmentFromProofAttach(proofAttach);
                     JSONObject thread = proofAttach.getJSONObject("~thread");
                     proof.threadId = thread.getString("thid");
 
@@ -284,7 +284,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
                         proof.serialized = pr;
                         proof.name = proofAttach.getString("comment");
                         proof.pwDid = data.getString("pw_did");
-                        proof.attributes = null;
+                        proof.attributes = extractAttachmentFromProofAttach(proofAttach);
                         JSONObject thread = proofAttach.getJSONObject("~thread");
                         proof.threadId = thread.getString("thid");
 
@@ -359,6 +359,30 @@ public class ConnectionsViewModel extends AndroidViewModel {
                 if (result != null) {
                     result.put("@id", requestsAttachItem.getString("@id"));
                     return result.toString();
+                }
+                return null;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String extractAttachmentFromProofAttach(JSONObject proofAttach) {
+        try {
+            if (proofAttach != null && proofAttach.has("request_presentations~attach")) {
+                String requestAttachCode = proofAttach.getString("request_presentations~attach");
+                JSONArray requestsAttachItems = new JSONArray(requestAttachCode);
+                if (requestsAttachItems.length() == 0) {
+                    return null;
+                }
+                JSONObject requestsAttachItem = requestsAttachItems.getJSONObject(0);
+                JSONObject requestsAttachItemData = requestsAttachItem.getJSONObject("data");
+                String requestsAttachItemBase = requestsAttachItemData.getString("base64");
+                String requestAttachDecode = new String(Base64.decode(requestsAttachItemBase, Base64.NO_WRAP));
+                JSONObject result = convertToJSONObject(requestAttachDecode);
+                if (result != null) {
+                    return result.getJSONObject("requested_attributes").toString();
                 }
                 return null;
             }

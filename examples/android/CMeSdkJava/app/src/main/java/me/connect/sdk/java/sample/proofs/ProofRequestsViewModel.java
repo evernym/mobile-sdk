@@ -139,6 +139,12 @@ public class ProofRequestsViewModel extends AndroidViewModel {
     private void rejectProofReq(int proofId, SingleLiveData<ProofCreateResult> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             ProofRequest proof = db.proofRequestDao().getById(proofId);
+            if (proof.pwDid == null) {
+                proof.accepted = false;
+                db.proofRequestDao().update(proof);
+                liveData.postValue(SUCCESS);
+                return;
+            }
             Connection con = db.connectionDao().getByPwDid(proof.pwDid);
             Proofs.reject(con.serialized, proof.serialized).handle((s, err) -> {
                 if (s != null) {
@@ -147,7 +153,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                     proof.accepted = false;
                     db.proofRequestDao().update(proof);
                 }
-                liveData.postValue(err == null ? SUCCESS: FAILURE);
+                liveData.postValue(err == null ? SUCCESS : FAILURE);
                 return null;
             });
         });
