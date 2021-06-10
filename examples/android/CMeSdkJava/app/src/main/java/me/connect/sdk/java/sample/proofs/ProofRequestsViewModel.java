@@ -18,7 +18,6 @@ import me.connect.sdk.java.message.Message;
 import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.message.MessageType;
 import me.connect.sdk.java.sample.SingleLiveData;
-import me.connect.sdk.java.sample.credentials.CredentialCreateResult;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Connection;
 import me.connect.sdk.java.sample.db.entity.ProofRequest;
@@ -69,8 +68,6 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                     db.connectionDao().insertAll(c);
                     liveData.postValue(throwable == null ? SUCCESS_CONNECTION : FAILURE_CONNECTION);
 
-                    proof.pwDid = pwDid;
-
                     Proofs.retrieveAvailableCredentials(proof.serialized).handle((creds, err) -> {
                         if (err != null) {
                             liveData.postValue(FAILURE);
@@ -83,6 +80,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                             if (s != null) {
                                 String serializedProof = Proofs.awaitStatusChange(s, MessageState.ACCEPTED);
                                 proof.accepted = true;
+                                proof.pwDid = pwDid;
                                 proof.serialized = serializedProof;
                                 db.proofRequestDao().update(proof);
                             }

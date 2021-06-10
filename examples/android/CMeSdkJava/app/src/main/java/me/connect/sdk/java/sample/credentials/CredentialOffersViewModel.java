@@ -6,10 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
-import org.json.JSONObject;
-
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 
@@ -78,11 +75,10 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                     db.connectionDao().insertAll(c);
                     data.postValue(throwable == null ? SUCCESS_CONNECTION : FAILURE_CONNECTION);
 
-                    offer.pwDid = pwDid;
-
                     Credentials.acceptOffer(serializedCon, offer.serialized).handle((s, thr) -> {
                             if (s != null) {
                                 offer.serialized = Credentials.awaitStatusChange(s, MessageState.ACCEPTED);
+                                offer.pwDid = pwDid;
                                 offer.accepted = true;
                                 db.credentialOffersDao().update(offer);
                             }

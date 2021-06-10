@@ -29,7 +29,7 @@ public class Proofs {
 
     /**
      * Get proof requests
-     * Deprecated. Use {@link Messages#getPendingMessages(String, MessageType)} instead.
+     * Deprecated. Use {@link Messages}.getPendingMessages(String, MessageType) instead.
      *
      * @param connection serialized connection
      * @return {@link CompletableFuture} containing list of proof requests as JSON strings.
@@ -170,6 +170,7 @@ public class Proofs {
                             Logger.getInstance().e("Failed to retrieve proof credentials: ", e);
                             result.completeExceptionally(e);
                         } else {
+                            System.out.println(retrievedCreds + "proofRetrieveCredentials");
                             result.complete(retrievedCreds);
                         }
                     });
