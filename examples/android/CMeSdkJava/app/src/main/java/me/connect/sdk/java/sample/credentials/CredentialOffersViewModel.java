@@ -60,37 +60,6 @@ public class CredentialOffersViewModel extends AndroidViewModel {
         return data;
     }
 
-    private void createConnection(
-            CredentialOffer offer,
-            SingleLiveData<CredentialCreateResult> data
-    ) {
-        String pw;
-        Connections.create(offer.attachConnection, new QRConnection())
-            .handle((res, throwable) -> {
-                if (res != null) {
-                    System.out.println("createConnection" + res);
-
-                    String serializedCon = Connections.awaitStatusChange(res, MessageState.ACCEPTED);
-                    System.out.println("createConnection" + serializedCon);
-
-                    String pwDid = Connections.getPwDid(serializedCon);
-                    Connection c = new Connection();
-                    c.name = offer.attachConnectionName;
-                    c.icon = offer.attachConnectionLogo;
-                    c.pwDid = pwDid;
-                    c.serialized = serializedCon;
-                    db.connectionDao().insertAll(c);
-                    data.postValue(throwable == null ? SUCCESS_CONNECTION : FAILURE_CONNECTION);
-
-                    return pwDid;
-                }
-                if (throwable != null) {
-                    throwable.printStackTrace();
-                }
-                return null;
-            });
-    }
-
     private void acceptCredentialOfferAndCreateConnection(
             CredentialOffer offer,
             SingleLiveData<CredentialCreateResult> data
@@ -134,6 +103,7 @@ public class CredentialOffersViewModel extends AndroidViewModel {
             CredentialOffer offer = db.credentialOffersDao().getById(offerId);
             if (offer.attachConnection != null) {
                 acceptCredentialOfferAndCreateConnection(offer, data);
+                return;
             }
             Connection connection = db.connectionDao().getByPwDid(offer.pwDid);
             Credentials.acceptOffer(connection.serialized, offer.serialized).handle((s, throwable) -> {

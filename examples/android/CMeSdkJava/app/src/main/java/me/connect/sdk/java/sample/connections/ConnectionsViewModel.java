@@ -22,12 +22,14 @@ import java9.util.concurrent.CompletableFuture;
 import me.connect.sdk.java.Connections;
 import me.connect.sdk.java.Credentials;
 import me.connect.sdk.java.Messages;
+import me.connect.sdk.java.Proofs;
 import me.connect.sdk.java.connection.QRConnection;
 import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Connection;
 import me.connect.sdk.java.sample.db.entity.CredentialOffer;
+import me.connect.sdk.java.sample.db.entity.ProofRequest;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -37,6 +39,7 @@ import static me.connect.sdk.java.sample.connections.ConnectionCreateResult.FAIL
 import static me.connect.sdk.java.sample.connections.ConnectionCreateResult.REDIRECT;
 import static me.connect.sdk.java.sample.connections.ConnectionCreateResult.SUCCESS;
 import static me.connect.sdk.java.sample.connections.ConnectionCreateResult.REQUEST_ATTACH;
+import static me.connect.sdk.java.sample.connections.ConnectionCreateResult.PROOF_ATTACH;
 
 
 public class ConnectionsViewModel extends AndroidViewModel {
@@ -69,6 +72,14 @@ public class ConnectionsViewModel extends AndroidViewModel {
 
     private boolean isOutOfBandType(Connections.InvitationType type) {
         return type == Connections.InvitationType.OutOfBand;
+    }
+
+    private boolean isCredentialInviteType(String type) {
+        return type.contains("issue-credential");
+    }
+
+    private boolean isProofInviteType(String type) {
+        return type.contains("present-proof");
     }
 
     private void createConnection(String invite, SingleLiveData<ConnectionCreateResult> liveData) {
@@ -106,9 +117,12 @@ public class ConnectionsViewModel extends AndroidViewModel {
                         liveData.postValue(REDIRECT);
                         return;
                     }
-                    //TODO Change on better check
-                    if (attachType.contains("credential")) {
+                    if (isCredentialInviteType(attachType)) {
                         connectionCreateAndAcceptCredentialOffer(parsedInvite, data, liveData, offerAttach);
+                        return;
+                    }
+                    if (isProofInviteType(attachType)) {
+                        connectionCreateWithProof(parsedInvite, data, liveData, offerAttach);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -204,9 +218,11 @@ public class ConnectionsViewModel extends AndroidViewModel {
                     try {
                         String existingConnection = Connections.findExistingConnection(parsedInvite, serializedConns);
                         JSONObject connection = convertToJSONObject(existingConnection);
-                        if (attachType.contains("credential")) {
-                            System.out.println("existingConnectionExistingConnection" + connection);
+                        if (isCredentialInviteType(attachType)) {
                             acceptCredentialOffer(connection, liveData, offerAttach);
+                        }
+                        if (isProofInviteType(attachType)) {
+                            sendProof(connection, liveData, offerAttach);
                         }
                     } catch (Exception exception) {
                         exception.printStackTrace();
@@ -223,46 +239,69 @@ public class ConnectionsViewModel extends AndroidViewModel {
         SingleLiveData<ConnectionCreateResult> liveData,
         JSONObject proofAttach
     ) {
-        Connections.create(parsedInvite, new QRConnection())
-            .handle((res, throwable) -> {
-                if (res != null) {
-                    String serializedCon = Connections.awaitStatusChange(res, MessageState.ACCEPTED);
-                    String pwDid = Connections.getPwDid(serializedCon);
-                    Connection c = new Connection();
-                    c.name = data.name;
-                    c.icon = data.logo;
-                    c.pwDid = pwDid;
-                    c.serialized = serializedCon;
-                    db.connectionDao().insertAll(c);
+        Proofs.createWithRequest(UUID.randomUUID().toString(), requestsAttach).handle((pr, err) -> {
+            if (err != null) {
+                err.printStackTrace();
+            } else {
+                    ProofRequest proof = new ProofRequest();
+                    try {
+                    proof.serialized = pr;
+                    proof.name = proofAttach.getString("comment");
+                    proof.pwDid = null;
+                    proof.attributes = null;
+                    JSONObject thread = proofAttach.getJSONObject("~thread");
+                    proof.threadId = thread.getString("thid");
 
-                    liveData.postValue(throwable == null ? SUCCESS : FAILURE);
-//                    if (!db.proofRequestDao().checkExists(holder.threadId)) {
-//                        Proofs.createWithRequest(UUID.randomUUID().toString(), holder.proofReq).handle((pr, err) -> {
-//                            if (err != null) {
-//                                err.printStackTrace();
-//                            } else {
-//                                ProofRequest proof = new ProofRequest();
-//                                proof.serialized = pr;
-//                                proof.name = holder.name;
-//                                proof.pwDid = pwDid;
-//                                proof.attributes = holder.attributes;
-//                                proof.threadId = holder.threadId;
-//                                proof.messageId = message.getUid();
-//                                db.proofRequestDao().insertAll(proof);
-//
-//                                liveData.postValue(PROOF_ATTACH);
-//                            }
-//                            return null;
-//                        });
-//                    }
+                    proof.attachConnection = parsedInvite;
+                    proof.attachConnectionName = data.name;
+                    proof.attachConnectionLogo = data.logo;
+
+                    proof.messageId = null;
+                    db.proofRequestDao().insertAll(proof);
+
+                    liveData.postValue(PROOF_ATTACH);
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-                if (throwable != null) {
-                    throwable.printStackTrace();
-                }
-                return res;
-            });
+            }
+            return null;
+        });
     }
 
+    private void sendProof(
+            JSONObject existingConnection,
+            SingleLiveData<ConnectionCreateResult> liveData,
+            JSONObject proofAttach
+    ) {
+        try {
+            JSONObject data = existingConnection.getJSONObject("data");
+            Proofs.createWithRequest(UUID.randomUUID().toString(), requestsAttach).handle((pr, err) -> {
+                if (err != null) {
+                    err.printStackTrace();
+                } else {
+                    ProofRequest proof = new ProofRequest();
+                    try {
+                        proof.serialized = pr;
+                        proof.name = proofAttach.getString("comment");
+                        proof.pwDid = data.getString("pw_did");
+                        proof.attributes = null;
+                        JSONObject thread = proofAttach.getJSONObject("~thread");
+                        proof.threadId = thread.getString("thid");
+
+                        proof.messageId = null;
+                        db.proofRequestDao().insertAll(proof);
+
+                        liveData.postValue(PROOF_ATTACH);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                return null;
+            });
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 
     private void connectionCreate(
             String parsedInvite,
