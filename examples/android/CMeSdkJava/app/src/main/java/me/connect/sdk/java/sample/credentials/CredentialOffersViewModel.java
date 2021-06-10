@@ -78,11 +78,10 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                     db.connectionDao().insertAll(c);
                     data.postValue(throwable == null ? SUCCESS_CONNECTION : FAILURE_CONNECTION);
 
-                    offer.pwDid = pwDid;
-
                     Credentials.acceptOffer(serializedCon, offer.serialized).handle((s, thr) -> {
                             if (s != null) {
                                 offer.serialized = Credentials.awaitStatusChange(s, MessageState.ACCEPTED);
+                                offer.pwDid = pwDid;
                                 offer.accepted = true;
                                 db.credentialOffersDao().update(offer);
                             }

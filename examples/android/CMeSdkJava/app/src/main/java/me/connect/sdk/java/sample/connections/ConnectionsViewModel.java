@@ -65,9 +65,12 @@ public class ConnectionsViewModel extends AndroidViewModel {
         return data;
     }
 
-    private boolean isConnectionOrProprietaryType(Connections.InvitationType type) {
-        return type == Connections.InvitationType.Proprietary
-                || type == Connections.InvitationType.Connection;
+    private boolean isProprietaryType(Connections.InvitationType type) {
+        return type == Connections.InvitationType.Proprietary;
+    }
+
+    private boolean isAriesConnection(Connections.InvitationType type) {
+        return type == Connections.InvitationType.Connection;
     }
 
     private boolean isOutOfBandType(Connections.InvitationType type) {
@@ -86,43 +89,59 @@ public class ConnectionsViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             String parsedInvite = parseInvite(invite);
             Connections.InvitationType invitationType = Connections.getInvitationType(parsedInvite);
-            ConnDataHolder data = extractMetaFromInvite(parsedInvite);
+            ConnDataHolder data = extractUserMetaFromInvite(parsedInvite);
             List<String> serializedConns = db.connectionDao().getAllSerializedConnections();
             String existingConnection = Connections.verifyConnectionExists(parsedInvite, serializedConns);
-            if (isConnectionOrProprietaryType(invitationType)) {
+
+            if (isProprietaryType(invitationType)) {
                 if (existingConnection != null) {
-                    Connections.connectionRedirectByType(parsedInvite, existingConnection);
+                    Connections.connectionRedirectProprietary(invite, existingConnection);
+                    liveData.postValue(REDIRECT);
+                } else {
+                    connectionCreate(parsedInvite, data, liveData);
+                }
+                return;
+            }
+
+            if (isAriesConnection(invitationType)) {
+                if (existingConnection != null) {
+                    Connections.connectionRedirectAries(invite, existingConnection);
                     liveData.postValue(REDIRECT);
                     return;
+                } else {
+                    connectionCreate(parsedInvite, data, liveData);
                 }
-                connectionCreate(parsedInvite, data, liveData);
-            } else if (isOutOfBandType(invitationType)) {
+                return;
+            }
+
+            if (isOutOfBandType(invitationType)) {
                 try {
                     requestsAttach = extractRequestAttach(parsedInvite);
                     JSONObject offerAttach = convertToJSONObject(requestsAttach);
 
                     if (offerAttach == null) {
                         if (existingConnection != null) {
-                            Connections.connectionRedirectByType(parsedInvite, existingConnection);
+                            Connections.connectionRedirectAriesOutOfBand(parsedInvite, existingConnection);
                             liveData.postValue(REDIRECT);
-                            return;
+                        } else {
+                            connectionCreate(parsedInvite, data, liveData);
                         }
-                        connectionCreate(parsedInvite, data, liveData);
+                        return;
                     }
                     String attachType = offerAttach.getString("@type");
 
                     if (existingConnection != null) {
-                        Connections.connectionRedirectByType(parsedInvite, existingConnection);
-                        reuseConnection(parsedInvite, serializedConns, liveData, offerAttach, attachType);
+                        Connections.connectionRedirectAriesOutOfBand(parsedInvite, existingConnection);
+                        processAttachement(parsedInvite, serializedConns, liveData, offerAttach, attachType);
                         liveData.postValue(REDIRECT);
                         return;
                     }
                     if (isCredentialInviteType(attachType)) {
-                        connectionCreateAndAcceptCredentialOffer(parsedInvite, data, liveData, offerAttach);
+                        createCredentialStateObject(parsedInvite, data, liveData, offerAttach);
                         return;
                     }
                     if (isProofInviteType(attachType)) {
-                        connectionCreateWithProof(parsedInvite, data, liveData, offerAttach);
+                        createProofStateObject(parsedInvite, data, liveData, offerAttach);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -131,7 +150,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
         });
     }
 
-    private void acceptCredentialOffer(
+    private void createCredentialStateObjectForExistingConnection(
         JSONObject existingConnection,
         SingleLiveData<ConnectionCreateResult> liveData,
         JSONObject offerAttach
@@ -164,7 +183,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
         }
     }
 
-    private void connectionCreateAndAcceptCredentialOffer(
+    private void createCredentialStateObject(
             String parsedInvite,
             ConnDataHolder data,
             SingleLiveData<ConnectionCreateResult> liveData,
@@ -202,7 +221,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
 
     }
 
-    private void reuseConnection(
+    private void processAttachement(
             String parsedInvite,
             List<String> serializedConns,
             SingleLiveData<ConnectionCreateResult> liveData,
@@ -219,10 +238,10 @@ public class ConnectionsViewModel extends AndroidViewModel {
                         String existingConnection = Connections.findExistingConnection(parsedInvite, serializedConns);
                         JSONObject connection = convertToJSONObject(existingConnection);
                         if (isCredentialInviteType(attachType)) {
-                            acceptCredentialOffer(connection, liveData, offerAttach);
+                            createCredentialStateObjectForExistingConnection(connection, liveData, offerAttach);
                         }
                         if (isProofInviteType(attachType)) {
-                            sendProof(connection, liveData, offerAttach);
+                            createProofStateObjectForExistingConnection(connection, liveData, offerAttach);
                         }
                     } catch (Exception exception) {
                         exception.printStackTrace();
@@ -233,7 +252,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
         });
     }
 
-    private void connectionCreateWithProof(
+    private void createProofStateObject(
         String parsedInvite,
         ConnDataHolder data,
         SingleLiveData<ConnectionCreateResult> liveData,
@@ -268,7 +287,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
         });
     }
 
-    private void sendProof(
+    private void createProofStateObjectForExistingConnection(
             JSONObject existingConnection,
             SingleLiveData<ConnectionCreateResult> liveData,
             JSONObject proofAttach
@@ -331,12 +350,15 @@ public class ConnectionsViewModel extends AndroidViewModel {
     private String parseInvite(String invite) {
         if (URLUtil.isValidUrl(invite)) {
             Uri uri = Uri.parse(invite);
-            String param = uri.getQueryParameter("c_i");
-            if (param != null) {
-                return new String(Base64.decode(param, Base64.NO_WRAP));
-            } else {
-                return readDataFromUrl(invite);
+            String ariesConnection = uri.getQueryParameter("c_i");
+            String ariesOutOfBand = uri.getQueryParameter("oob");
+            if (ariesConnection != null) {
+                return new String(Base64.decode(ariesConnection, Base64.NO_WRAP));
             }
+            if (ariesOutOfBand != null) {
+                return new String(Base64.decode(ariesOutOfBand, Base64.NO_WRAP));
+            }
+            return readDataFromUrl(invite);
         } else {
             return invite;
         }
@@ -392,7 +414,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
         return null;
     }
 
-    private ConnDataHolder extractMetaFromInvite(String invite) {
+    private ConnDataHolder extractUserMetaFromInvite(String invite) {
         try {
             JSONObject json = convertToJSONObject(invite);
             if (json != null && json.has("label")) {

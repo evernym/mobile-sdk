@@ -69,8 +69,6 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                     db.connectionDao().insertAll(c);
                     liveData.postValue(throwable == null ? SUCCESS_CONNECTION : FAILURE_CONNECTION);
 
-                    proof.pwDid = pwDid;
-
                     Proofs.retrieveAvailableCredentials(proof.serialized).handle((creds, err) -> {
                         if (err != null) {
                             liveData.postValue(FAILURE);
@@ -83,6 +81,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                             if (s != null) {
                                 String serializedProof = Proofs.awaitStatusChange(s, MessageState.ACCEPTED);
                                 proof.accepted = true;
+                                proof.pwDid = pwDid;
                                 proof.serialized = serializedProof;
                                 db.proofRequestDao().update(proof);
                             }
