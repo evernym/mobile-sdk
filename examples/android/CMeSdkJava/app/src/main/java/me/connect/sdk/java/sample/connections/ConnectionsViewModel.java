@@ -49,6 +49,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
     private void createConnection(String invite, SingleLiveData<ConnectionCreateResult> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             String parsedInvite = Utils.parseInvite(invite);
+            System.out.println(parsedInvite + "extractedAttachRequest");
             Connections.InvitationType invitationType = Connections.getInvitationType(parsedInvite);
             Utils.ConnDataHolder userMeta = Utils.extractUserMetaFromInvite(parsedInvite);
             List<String> serializedConns = db.connectionDao().getAllSerializedConnections();
@@ -104,92 +105,51 @@ public class ConnectionsViewModel extends AndroidViewModel {
             SingleLiveData<ConnectionCreateResult> liveData
     ) {
         try {
+            OutOfBandInvite outOfBandInvite = OutOfBandInvite.builder()
+                .withParsedInvite(parsedInvite)
+                .withExtractedAttachRequest(extractedAttachRequest)
+                .withAttach(attachRequestObject)
+                .withExistingConnection(existingConnection)
+                .withUserMeta(userMeta)
+                .withLiveData(liveData)
+                .build();
+
             String attachType = attachRequestObject.getString("@type");
             if (Utils.isCredentialInviteType(attachType)) {
-                processCredentialAttachment(
-                    parsedInvite,
-                    extractedAttachRequest,
-                    attachRequestObject,
-                    existingConnection,
-                    userMeta,
-                    liveData
-                );
+                processCredentialAttachment(outOfBandInvite);
                 return;
             }
             if (Utils.isProofInviteType(attachType)) {
-                processProofAttachment(
-                    parsedInvite,
-                    extractedAttachRequest,
-                    attachRequestObject,
-                    existingConnection,
-                    userMeta,
-                    liveData
-                );
+                processProofAttachment(outOfBandInvite);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private void processCredentialAttachment(
-            String parsedInvite,
-            String extractedAttachRequest,
-            JSONObject offerAttach,
-            String existingConnection,
-            Utils.ConnDataHolder userMeta,
-            SingleLiveData<ConnectionCreateResult> liveData
-    ) {
-        if (existingConnection != null) {
-            Connections.connectionRedirectAriesOutOfBand(parsedInvite, existingConnection);
-            OutOfBandHelper.createCredentialStateObjectForExistingConnection(
-                    db,
-                    extractedAttachRequest,
-                    offerAttach,
-                    existingConnection,
-                    liveData
+    private void processCredentialAttachment(OutOfBandInvite outOfBandInvite) {
+        if (outOfBandInvite.existingConnection != null) {
+            Connections.connectionRedirectAriesOutOfBand(
+                    outOfBandInvite.parsedInvite,
+                    outOfBandInvite.existingConnection
             );
-            liveData.postValue(REDIRECT);
+            OutOfBandHelper.createCredentialStateObjectForExistingConnection(db, outOfBandInvite);
+            outOfBandInvite.liveData.postValue(REDIRECT);
             return;
         }
-        OutOfBandHelper.createCredentialStateObject(
-                db,
-                parsedInvite,
-                extractedAttachRequest,
-                offerAttach,
-                userMeta,
-                liveData
-        );
+        OutOfBandHelper.createCredentialStateObject(db, outOfBandInvite);
     }
 
-    private void processProofAttachment(
-            String parsedInvite,
-            String extractedAttachRequest,
-            JSONObject proofAttach,
-            String existingConnection,
-            Utils.ConnDataHolder userMeta,
-            SingleLiveData<ConnectionCreateResult> liveData
-    ) {
-        if (existingConnection != null) {
-            OutOfBandHelper.createProofStateObjectForExistingConnection(
-                    db,
-                    extractedAttachRequest,
-                    proofAttach,
-                    existingConnection,
-                    liveData
-            );
-            liveData.postValue(REDIRECT);
+    private void processProofAttachment(OutOfBandInvite outOfBandInvite) {
+        if (outOfBandInvite.existingConnection != null) {
+            OutOfBandHelper.createProofStateObjectForExistingConnection(db, outOfBandInvite);
+            outOfBandInvite.liveData.postValue(REDIRECT);
             return;
         }
-        OutOfBandHelper.createProofStateObject(
-                db,
-                parsedInvite,
-                extractedAttachRequest,
-                proofAttach,
-                userMeta,
-                liveData);
+        OutOfBandHelper.createProofStateObject(db, outOfBandInvite);
     }
 
-    private void connectionCreate(
+    public void connectionCreate(
             String parsedInvite,
             Utils.ConnDataHolder data,
             SingleLiveData<ConnectionCreateResult> liveData
@@ -212,5 +172,95 @@ public class ConnectionsViewModel extends AndroidViewModel {
                 liveData.postValue(throwable == null ? SUCCESS : FAILURE);
                 return res;
             });
+    }
+
+    public static class OutOfBandInviteBuilder {
+        private String parsedInvite;
+        private String extractedAttachRequest;
+        private JSONObject attach;
+        private String existingConnection;
+        private Utils.ConnDataHolder userMeta;
+        private SingleLiveData<ConnectionCreateResult> liveData;
+
+        private OutOfBandInviteBuilder() {
+        }
+
+        public @NonNull
+        OutOfBandInviteBuilder withParsedInvite(@NonNull String parsedInvite) {
+            this.parsedInvite = parsedInvite;
+            return this;
+        }
+
+        public @NonNull
+        OutOfBandInviteBuilder withExtractedAttachRequest(@NonNull String extractedAttachRequest) {
+            this.extractedAttachRequest = extractedAttachRequest;
+            return this;
+        }
+
+        public @NonNull
+        OutOfBandInviteBuilder withAttach(@NonNull JSONObject attach) {
+            this.attach = attach;
+            return this;
+        }
+
+        public @NonNull
+        OutOfBandInviteBuilder withUserMeta(Utils.ConnDataHolder userMeta) {
+            this.userMeta = userMeta;
+            return this;
+        }
+
+        public @NonNull
+        OutOfBandInviteBuilder withLiveData(@NonNull SingleLiveData<ConnectionCreateResult> liveData) {
+            this.liveData = liveData;
+            return this;
+        }
+
+        public @NonNull
+        OutOfBandInviteBuilder withExistingConnection(String existingConnection) {
+            this.existingConnection = existingConnection;
+            return this;
+        }
+
+        public @NonNull
+        OutOfBandInvite build() {
+            return new OutOfBandInvite(
+                    parsedInvite,
+                    extractedAttachRequest,
+                    attach,
+                    userMeta,
+                    existingConnection,
+                    liveData
+            );
+        }
+    }
+
+    public static class OutOfBandInvite {
+        public String parsedInvite;
+        public String extractedAttachRequest;
+        public JSONObject attach;
+        public Utils.ConnDataHolder userMeta;
+        public String existingConnection;
+        public SingleLiveData<ConnectionCreateResult> liveData;
+
+        public OutOfBandInvite(
+                String parsedInvite,
+                String extractedAttachRequest,
+                JSONObject attach,
+                Utils.ConnDataHolder userMeta,
+                String existingConnection,
+                SingleLiveData<ConnectionCreateResult> liveData
+        ) {
+            this.parsedInvite = parsedInvite;
+            this.extractedAttachRequest = extractedAttachRequest;
+            this.attach = attach;
+            this.existingConnection = existingConnection;
+            this.userMeta = userMeta;
+            this.liveData = liveData;
+        }
+
+        public static OutOfBandInviteBuilder builder() {
+            return new OutOfBandInviteBuilder();
+        }
+
     }
 }

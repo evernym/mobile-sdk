@@ -27,6 +27,7 @@ import static me.connect.sdk.java.sample.proofs.ProofCreateResult.FAILURE;
 import static me.connect.sdk.java.sample.proofs.ProofCreateResult.FAILURE_CONNECTION;
 import static me.connect.sdk.java.sample.proofs.ProofCreateResult.SUCCESS;
 import static me.connect.sdk.java.sample.proofs.ProofCreateResult.SUCCESS_CONNECTION;
+import static me.connect.sdk.java.sample.proofs.ProofCreateResult.MISSED;
 
 public class ProofRequestsViewModel extends AndroidViewModel {
     private final Database db;
@@ -68,9 +69,12 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                     db.connectionDao().insertAll(c);
                     liveData.postValue(throwable == null ? SUCCESS_CONNECTION : FAILURE_CONNECTION);
 
+                    proof.pwDid = pwDid;
+                    db.proofRequestDao().update(proof);
+
                     Proofs.retrieveAvailableCredentials(proof.serialized).handle((creds, err) -> {
                         if (err != null) {
-                            liveData.postValue(FAILURE);
+                            liveData.postValue(MISSED);
                             return null;
                         }
                         // We automatically map first of each provided credentials to final structure
@@ -80,7 +84,6 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                             if (s != null) {
                                 String serializedProof = Proofs.awaitStatusChange(s, MessageState.ACCEPTED);
                                 proof.accepted = true;
-                                proof.pwDid = pwDid;
                                 proof.serialized = serializedProof;
                                 db.proofRequestDao().update(proof);
                             }
@@ -100,7 +103,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
     private void acceptProofReq(int proofId, SingleLiveData<ProofCreateResult> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             ProofRequest proof = db.proofRequestDao().getById(proofId);
-            if (proof.attachConnection != null) {
+            if (proof.attachConnection != null && proof.pwDid == null) {
                 acceptProofReqAndCreateConnection(proof, liveData);
                 return;
             }
@@ -173,6 +176,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                     for (Message message : res) {
                         ProofDataHolder holder = ProofDataHolder.extractRequestedFieldsFromProofMessage(message);
                         String pwDid = message.getPwDid();
+                        Connection con = db.connectionDao().getByPwDid(pwDid);
                         if (!db.proofRequestDao().checkExists(holder.threadId)) {
                             Proofs.createWithRequest(UUID.randomUUID().toString(), holder.proofReq).handle((pr, err) -> {
                                 if (err != null) {
@@ -184,6 +188,7 @@ public class ProofRequestsViewModel extends AndroidViewModel {
                                     proof.pwDid = pwDid;
                                     proof.attributes = holder.attributes;
                                     proof.threadId = holder.threadId;
+                                    proof.attachConnectionLogo = con.icon;
                                     proof.messageId = message.getUid();
                                     db.proofRequestDao().insertAll(proof);
 

@@ -83,6 +83,8 @@ public class ProofRequestsFragment extends Fragment {
                 case FAILURE_CONNECTION:
                     Toast.makeText(getActivity(), "Connection failed", Toast.LENGTH_SHORT).show();
                     break;
+                case MISSED:
+                    Toast.makeText(getActivity(), "Missed credential", Toast.LENGTH_SHORT).show();
             }
         });
     }

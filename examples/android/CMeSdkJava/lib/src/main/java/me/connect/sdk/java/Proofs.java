@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import java9.util.concurrent.CompletableFuture;
 import me.connect.sdk.java.message.MessageState;
@@ -170,8 +171,11 @@ public class Proofs {
                             Logger.getInstance().e("Failed to retrieve proof credentials: ", e);
                             result.completeExceptionally(e);
                         } else {
-                            System.out.println(retrievedCreds + "proofRetrieveCredentials");
-                            result.complete(retrievedCreds);
+                            if (checkProofCorrectly(retrievedCreds)) {
+                                result.complete(retrievedCreds);
+                            } else {
+                                result.completeExceptionally(new Exception("Missed credential"));
+                            }
                         }
                     });
                 } catch (VcxException ex) {
@@ -182,6 +186,25 @@ public class Proofs {
             result.completeExceptionally(ex);
         }
         return result;
+    }
+
+    private static boolean checkProofCorrectly(String retrievedCreds) {
+        try {
+            JSONObject retrievedCredsObject = new JSONObject(retrievedCreds).getJSONObject("attrs");
+            Iterator<String> keys = retrievedCredsObject.keys();
+            boolean result = true;
+            while(keys.hasNext()) {
+                String key = keys.next();
+                if (retrievedCredsObject.getJSONArray(key).length() == 0) {
+                    result = false;
+                    break;
+                }
+            }
+            return result;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**

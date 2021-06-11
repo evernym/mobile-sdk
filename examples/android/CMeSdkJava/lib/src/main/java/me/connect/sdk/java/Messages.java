@@ -52,6 +52,7 @@ public class Messages {
                     try {
                         List<Message> messages = new ArrayList<>();
                         JSONArray messagesJson = new JSONArray(messagesString);
+                        System.out.println(messagesString);
                         for (int i = 0; i < messagesJson.length(); i++) {
                             JSONArray msgsJson = messagesJson.getJSONObject(i).optJSONArray("msgs");
                             String pairwiseDID = messagesJson.getJSONObject(i).getString("pairwiseDID");
@@ -60,7 +61,6 @@ public class Messages {
                                     JSONObject message = msgsJson.getJSONObject(j);
                                     JSONObject payload = new JSONObject(message.getString("decryptedPayload"));
                                     String type = payload.getJSONObject("@type").getString("name");
-                                    System.out.println("getPendingMessages" + type);
                                     if (messageType.matches(type)) {
                                         String messageUid = message.getString("uid");
                                         String msg = payload.getString("@msg");

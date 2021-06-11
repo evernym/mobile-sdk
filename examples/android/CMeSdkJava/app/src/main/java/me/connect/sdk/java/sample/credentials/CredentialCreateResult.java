@@ -4,5 +4,5 @@ public enum CredentialCreateResult {
     SUCCESS,
     SUCCESS_CONNECTION,
     FAILURE,
-    FAILURE_CONNECTION,
+    FAILURE_CONNECTION
 }

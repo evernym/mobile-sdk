@@ -6,6 +6,9 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -125,29 +128,29 @@ public class CredentialOffersViewModel extends AndroidViewModel {
                     for (Message message : res) {
                         CredDataHolder holder = CredDataHolder.extractDataFromCredentialsOfferMessage(message);
                         String pwDid = message.getPwDid();
-                        if (!db.credentialOffersDao().checkOfferExists(pwDid)) {
-                            try {
-                                Credentials.createWithOffer(UUID.randomUUID().toString(), holder.offer).handle((co, err) -> {
-                                    if (err != null) {
-                                        err.printStackTrace();
-                                    } else {
-                                        CredentialOffer offer = new CredentialOffer();
-                                        offer.claimId = holder.id;
-                                        offer.name = holder.name;
-                                        offer.pwDid = pwDid;
-                                        offer.attributes = holder.attributes;
-                                        offer.serialized = co;
-                                        offer.messageId = message.getUid();
-                                        db.credentialOffersDao().insertAll(offer);
+                        Connection connection = db.connectionDao().getByPwDid(pwDid);
+                        try {
+                            Credentials.createWithOffer(UUID.randomUUID().toString(), holder.offer).handle((co, err) -> {
+                                if (err != null) {
+                                    err.printStackTrace();
+                                } else {
+                                    CredentialOffer offer = new CredentialOffer();
+                                    offer.claimId = holder.id;
+                                    offer.name = holder.name;
+                                    offer.pwDid = pwDid;
+                                    offer.attributes = holder.attributes;
+                                    offer.serialized = co;
+                                    offer.attachConnectionLogo = connection.icon;
+                                    offer.messageId = message.getUid();
+                                    db.credentialOffersDao().insertAll(offer);
 
-                                        Messages.updateMessageStatus(pwDid, message.getUid());
+                                    Messages.updateMessageStatus(pwDid, message.getUid());
 
-                                    }
-                                    return null;
-                                });
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
+                                }
+                                return null;
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
                 }
