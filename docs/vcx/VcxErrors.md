@@ -46,14 +46,13 @@ In [Error Details](#error-details) section you can find information about how to
 
 - InvalidOption:
     * code: **1007**
-    * description: The parameter passed into C-API is null or invalid
-    * causes:
-        * Cannot restore string from a pointer
-        * Cannot get callback from a pointer
-        * Passed a combination of incompatible parameters
-    * tip: 
-        * Check that passing parameters are not nulls if you use C-API 
-        * Some functions declare self exclusive parameters
+    * description: The value passed for a mandatory parameter is null
+    * tip: Ensure that you do not pass `null` values for required parameters
+
+- IncompatibleParameter:
+    * code: **1111**
+    * description: Passed a combination of incompatible parameters. Some functions declare self exclusive parameters
+    * tip: Check function documentation to ensure that you do not pass self exclusive parameters
 
 - InvalidMessagePack:
     * code: **1019**
@@ -547,7 +546,10 @@ You need either create them again or deserialize from a string.
     
 - InvalidProofCredentialData:
     * code: **1027**
-    * description: Selected credentials passed for Proof generation has invalid format
+    * description: Selected credentials passed for Proof generation has invalid format.
+    * causes:
+        * Cannot parse selected credentials
+        * There are no credentials passed for a requested attribute.
     * format:
         ```
             {

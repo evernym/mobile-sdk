@@ -13,10 +13,9 @@ The options below are used to create a user associated Agent on the Agency.
 * `agency_endpoint` - a public endpoint of agency to connect.
 * `agency_did` - DID assigned to the agency.
 * `agency_verkey` - Verkey associated with agency DID.
-* `agent_seed` - (optional) Seed to use to create DID/Verkey will be for the provisioned agent.
-    If no value specified, a random pair will be generated. 
 * `enterprise_seed` - (optional) Seed to use to create DID/Verkey associated with user.
-    If no value specified, a random pair will be generated. 
+    You may need to pass this seed when you want to use a specific DID/Verkey pair that is registered in the Ledger Network.
+    If no value specified, a random pair will be generated.
 * `did_method` - (optional) Method name to use to create fully qualified DIDs (`did:<did_method>:<generated did value>`).
     If no value specified, `unqualified` DID form will be used. 
 
@@ -127,11 +126,6 @@ The most of options listed below coincide with options listed for Agent Provisio
 There are also some options that can extend the JSON received during Agent Provisioning.
 
 ##### Common library related options
-* `payment_method` - the name of payment method which was registered by a plugin.
-    In the current state Mobile-Sdk depends on payment library even if payment related functionality is not used.
-    That is why payment plugin must be registered independently before library initialization and 
-    corresponding `payment_method` must be passed into config.
-
 * `protocol_type` - (optional) message protocol to use for communication with Agent and other Users.
 
     Note: This value must be taken from the JSON received during Agent Provisioning.
