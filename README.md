@@ -40,7 +40,7 @@ Before starting, please read the [Base Concepts document](docs/0.Base Concepts.m
 
 #### Additional Sources:
 * [Configuration](docs/Configuration.md) &#8212; The list of all VCX library configuration options. 
-* [Errors](docs/vcx/VcxErrors.md) &#8212; The list of all possible VCX errors and their definitions. 
+* [Errors](docs/vcx/VcxErrors.md) &#8212; The list of all possible errors and their definitions. 
 * [New Messages Processing](docs/8.Messages.md)
 * [Credentials With Attachments](docs/9.CredentialsWithAttachments.md)
 * [Push Notifications](docs/PushNotifications.md)

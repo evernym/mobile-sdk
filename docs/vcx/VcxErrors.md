@@ -9,24 +9,14 @@ In [Error Details](#error-details) section you can find information about how to
 
 ##### Common
 - Success: 
-    * code: 0
+    * code: **0**
     * description: a function completed with success
-    
-- UnknownError:
-    * code: **1001**  
-    * description: Unknown error happened 
-        
 - InvalidState: 
     * code: **1081**
     * description: Object is in a state in which can't perform the requested action
     * causes:
         * Cannot get a requested attribute of state object (the state of object suppose to have the requested field but it is missing).
         Possibly, the object has been restored from a malformed string.
-        
-- InvalidDelegate:
-    * code: **1012**
-    * description: Invalid DELEGATE        
-        
 - InvalidConfiguration: 
     * code: **1004**
     * description: Invalid configuration JSON passed into provisioning or library initialization functions
@@ -38,40 +28,33 @@ In [Error Details](#error-details) section you can find information about how to
             * Cannot read library settings
             * Cannot read the value for some key from the library settings
     * tip: Check the format of config JSON. The list of available options you can find in the [document](./Configuration.md).
-
 - InvalidJson:
     * code: **1016**
     * description: Cannot parse an object from JSON string (JSON has invalid format, field missing, field has an invalid type)
     * tip: Ensure JSON parameters you pass to function match to defined format
-
-- InvalidOption:
+- InvalidValue:
     * code: **1007**
     * description: The value passed for a mandatory parameter is null
     * tip: Ensure that you do not pass `null` values for required parameters
-
 - IncompatibleParameter:
     * code: **1111**
     * description: Passed a combination of incompatible parameters. Some functions declare self exclusive parameters
     * tip: Check function documentation to ensure that you do not pass self exclusive parameters
-
 - InvalidMessagePack:
     * code: **1019**
     * description: Cannot encode/decode message using MessagePack
     * note: MessagePack encoding is used from communication with Agency when library initialized with `protocol_type:1.0`
-    
 - ObjectCacheError:
     * code: **1070**
     * description: Could not get access to Object Cache containing state objects
     * note: unexpected internal error
-    
 - NotReady:
     * code: **1005**
     * description: A state object is in a state in which can not perform requested action
     * causes:
         * You try to perform an action with a state object which has not come into the appropriate state yet  
         * You try to get state object attribute which is not received yet
-        * You try to use uncompleted Connection to send messages
-
+        * You try to use uncompleted Connection to send messages. Ensure that Connection is completed and its state is `4` before using it for sending messages.
 - IOError:
     * code: **1074**
     * description: Cannot perform input output operation 
@@ -82,16 +65,13 @@ In [Error Details](#error-details) section you can find information about how to
     * tips:
         * Ensure the specifying file exists / available
         * Ensure that there are enough permissions to perform input/output operations on a file system
-    
 - SerializationError:
     * code: **1050**
     * description: Could not represent object as a JSON string
-    
 - NotBase58:
     * code: **1014**
     * description: Could not encode/decode base58 string
     * tip: Check validity of passed parameters which are base58 strings
-    
 - InvalidProvisioningToken:
     * code: **1107**
     * description: Token object passed into `vcx_provision_agent_with_token` is invalid
@@ -109,14 +89,12 @@ In [Error Details](#error-details) section you can find information about how to
             sponsorVerKey: String,
         }
         ```
-    
 - AlreadyInitialized:
     * code: **1044**
     * description: The library already has been initialized whit one of `vcx_init*` functions
     * tips: 
         * You need to call `vcx_shutdown` function first to be able initialize library again
         * The combination of `vcx_shutdown` + `vcx_init*` can be used to switch used environment
-    
 - ActionNotSupported:
     * code: **1103**
     * description: Requested action is not supported for state object 
@@ -125,70 +103,28 @@ In [Error Details](#error-details) section you can find information about how to
         * `aries - 3.0`.
     * tip: Most probably you try to perform an action with a state object which is not implemented for the object.
     You either need to set a different `protocol_type` during library initialization or created an object with an invitation/offer/request relates to one of protocols.
-
 - EncodeError: 
     * code: **1022**
     * description: Could not encode string to a big integer
     * causes:
         * Could not generate nonce using for Proof Request preparation
         * Count not encode provided Credential attribute values
-        
 - IndyWalletNotFound:
     * code: **212**
     * description: Error from Indy: Wallet Item not found
-    
-- InvalidHttpResponse:
-    * code: **1033**
-    * description: Invalid HTTP response.
-    
 - InvalidLibIndyError:
     * code: **1035**
     * description: Unknown libindy error
-    
-- InvalidPoolName:
-    * code: **1059**
-    * description: Pool Name in config was invalid     
-        
-- InvalidWalletKeys:
-    * code: **1062**
-    * description: Invalid wallet keys...have you provisioned correctly?
-    
 - CommonError:
     * code: **1063**
     * description: Common Error     
-     
-- UnknownLedgerTransactionType:
-    * code: **1065**
-    * description: Unknown ledger transaction type
-    
-- InvalidPaymentDetails:
-    * code: **1068**
-    * description: Invalid Payment Details     
-          
-- MissingWalletName:
+- InvalidWalletImportConfig:
     * code: **1076**
-    * description: Missing wallet name in config          
-    
-- MissingExportedWalletPath:
-    * code: **1077**
-    * description: Missing exported wallet path in config      
-          
+    * description: Invalid config JSON passed into wallet import function 
 - MissingExportedBackupKey:
     * code: **1078**
     * description: Missing exported backup key in config 
-          
-- UnableToCreateThread:
-    * code: **1085**
-    * description: Unable to create thread
     
-- LibindyRejection:
-    * code: **1089**
-    * description: Unknown libindy rejection
-    
-- InvalidA2AMessage:
-    * code: **1098**
-    * description: Invalid A2A Message version                     
-          
 ##### Handles
    
 VCX keeps all state objects within in-memory Object Cache (which actually is thread safe HashMap). 
@@ -208,7 +144,6 @@ You need either create them again or deserialize from a string.
     * suggestion: 
         * Ensure you pass correct handle correspondent to state object
     * note: If you unloaded the library all objects disappear. You need either create them again or deserialize from string.
-     
 - InvalidConnectionHandle:
     * code: **1003**
     * description: Cannot find Connection object in the Object Cache
@@ -218,7 +153,6 @@ You need either create them again or deserialize from a string.
     * suggestion: 
         * Ensure you pass correct handle correspondent to Connection object
     * note: If you unloaded the library all objects disappear. You need either create them again or deserialize from string.
-     
 - InvalidCredentialHandle:
     * code: **1053**
     * description: Cannot find Credential object in the Object Cache
@@ -227,7 +161,6 @@ You need either create them again or deserialize from a string.
     * suggestion: 
         * Ensure you pass correct handle correspondent to Credential object
     * note: If you unloaded the library all objects disappear. You need either create them again or deserialize from string.
-         
 - InvalidIssuerCredentialHandle:
     * code: **1015**
     * description: Cannot find Issuer Credential object in the Object Cache
@@ -236,7 +169,6 @@ You need either create them again or deserialize from a string.
     * suggestion: 
         * Ensure you pass correct handle correspondent to Issuer Credential object
     * note: If you unloaded the library all objects disappear. You need either create them again or deserialize from string.
-    
 - InvalidDisclosedProofHandle:
     * code: **1049**
     * description: Cannot find Disclosed Proof object in the Object Cache
@@ -245,7 +177,6 @@ You need either create them again or deserialize from a string.
     * suggestion: 
         * Ensure you pass correct handle correspondent to Disclosed Proof object
     * note: If you unloaded the library all objects disappear. You need either create them again or deserialize from string.
-        
 - InvalidProofHandle:
     * code: **1017**
     * description: Cannot find Proof object in the Object Cache
@@ -254,7 +185,6 @@ You need either create them again or deserialize from a string.
     * suggestion: 
         * Ensure you pass correct handle correspondent to Proof object
     * note: If you unloaded the library all objects disappear. You need either create them again or deserialize from string.
-            
 - InvalidCredDefHandle:
     * code: **1037**
     * description: Cannot find Credential Definition object in the Object Cache
@@ -263,7 +193,6 @@ You need either create them again or deserialize from a string.
     * suggestion: 
         * Ensure you pass correct handle correspondent to Credential Definition object
     * note: If you unloaded the library all objects disappear. You need either create them again or deserialize from string.
-                
 - InvalidSchemaHandle:
     * code: **1042**
     * description: Cannot find Schema object in the Object Cache
@@ -280,35 +209,27 @@ You need either create them again or deserialize from a string.
     * description: The `payment_method` is not found in library setting.
     * causes: The `payment_method` field has not been passed during library initialization and now you try to perform a payment related action.
     * warn: In some cases null-pointer can be received in runtime when you has not initialized a payment library and try to perform a payment related action. 
-    
 - InvalidDid: 
     * code: **1008**
     * description: DID validation failed. DID must be a base58 string
-    
 - InvalidVerkey: 
     * code: **1009**
     * description: Verkey validation failed. Verkey must be a base58 string
-    
 - InvalidNonce: 
     * code: **1011**
     * description: Proof Request Nonce validation failed. Nonce must be at most 80-bit integer
-    
 - InvalidUrl: 
     * code: **1013**
     * description: URL-like validation failed
-    
 - InvalidDIDDoc: 
     * code: **1108**
     * description: Received DIDDoc has invalid format
-    
 - InvalidAttachmentEncoding: 
     * code: **1100**
     * description: Message attachment cannot be decoded or has unsupported format
-    
 - InvalidSelfAttestedValue:
     * code: **1046**
     * description: Self Attested Value invalid 
-    
 - InvalidProofPredicate:
     * code: **1047**
     * description: Predicate in proof is invalid     
@@ -318,18 +239,7 @@ You need either create them again or deserialize from a string.
 - CreateConnection:
     * code: **1061**
     * description: Could not store Connection state object into the Object Cache
-
-- ConnectionError:
-    * code: **1002**  
-    * description: Error with Connection
-    * causes: Invitation connection object is probably invalid  
-    * tip: Check if invitation is valid json object. For protocol v2, url parameter should be base64 decoded first
-    
-- ConnectionMissingEndpoint:
-    * code: **1006**
-    * description: No Endpoint set for Connection Object          
-    
-- InvalidInviteDetail:
+- InvalidConnectionInvite:
     * code: **1045**
     * description: Could not parse Connection Invitation from JSON string
     * format: the format depends on the protocol inviter use
@@ -370,7 +280,6 @@ You need either create them again or deserialize from a string.
                  "routingKeys": [string]
               }
             ```
-
 - InvalidRedirectDetail:
     * code: **1104**
     * description: Could not parse Connection Redirection Details / Out-of-Band Invitation from JSON string
@@ -420,44 +329,41 @@ You need either create them again or deserialize from a string.
               ]
             }
             ```
-    
 - DeleteConnection:
     * code: **1060**
     * description: Could Delete Connection object
     * causes: 
         * Connection is in unappropriated state
-        * Could not delete relate Agent on Agency
+        * Could not delete related Pairwise Agent on Agency
     * tip: Check status of connection is appropriate to be deleted from the Agency
-
 - NoAgentInformation:
     * code: **1106**
     * description: Connection state object does not contain information about provisioned Agent 
+- ConnectionAlreadyExists:
+    * code: **1062**
+    * description: Connection invitation has been already accepted. It can be thrown only when `protocol_type:1.0` is used.
 
 ##### Credential Definition
     
 - CredentialDefinitionRequestFailed:
     * code: **1029**
     * description: Call to indy credential def request failed
-        
-- CreateCredDef:
+- CreateCredentialDefinition:
     * code: **1034**
     * description: Call to create Credential Definition failed
     * causes:
         * Could not store CredentialDefinition state object into Object Cache
         * Cannot generate RevocationRegistry for Credential Definition supporting revocation.
-
-- CredDefAlreadyCreated:
+- CredentialDefinitionAlreadyCreated:
     * code: **1039**
     * description: Cannot create Credential Definitions as a Credential Definition referring to the same `id` is already exists in wallet
     * tip: Use `tag` field to create a new Credential Definition referring to the same schema and DID
-    
 - CredentialDefinitionNotFound:
     * code: **1036**
     * description: Cannot get Credential Definition from the Ledger
     * causes:
         * Credential Definition for requested id does not exist on the Ledger
         * Library is connected to different Ledger    
-        
 - CreateRevRegDef:
     * code: **1095**
     * description: Cannot create Revocation Registry for Credential Definition supporting revocation
@@ -475,11 +381,9 @@ You need either create them again or deserialize from a string.
                 max_creds: Option<u32>,
             }
         ```
-    
 - InvalidRevocationEntry:
     * code: **1092**
     * description: Unable to Update Revocation Delta on the Ledger
-    
 - InvalidRevocationTimestamp:
     * code: **1093**
     * description: Revocation timestamp not found on Revocable Credential or cannot request Revocation Registry from the Ledger for requested timestamp
@@ -492,24 +396,17 @@ You need either create them again or deserialize from a string.
     * cause:
         * Cannot deserialize Credential Request from provided JSON string
         * Credential Request does not contain `msg_ref_id` field pointing to the message on the Agency
-
 - InvalidCredentialOffer:
     * code: **1043**
     * description: Invalid Credential Offer message
     * causes:
         * Cannot parse Credential Offer message from JSON string
         * Credential Offer does not contain `msg_ref_id` field pointing to the message on the Agency
-
 - InvalidCredential:
     * code: **1054**
     * description: Invalid Credential message
     * causes:
         * Cannot parse Credential message from JSON string
-
-- CredentialRequestFailed:
-    * code: **1055**
-    * description: Could not create credential request 
-    
 - InvalidAttributesStructure:
     * code: **1021**
     * description: Invalid format of passed attributes
@@ -534,7 +431,8 @@ You need either create them again or deserialize from a string.
                 NOTE: should either be "name" or "names", not both and not none of them.
                 Use "names" to specify several attributes that have to match a single credential.
 
-##### Proof       
+##### Proof    
+
 - InvalidProof:
     * code: **1023**
     * description: Invalid Proof message
@@ -543,10 +441,9 @@ You need either create them again or deserialize from a string.
         * Proof verification failed
             * Proof math verification failed
             * Encoded values from Proof do not match to expected            
-    
 - InvalidProofCredentialData:
     * code: **1027**
-    * description: Selected credentials passed for Proof generation has invalid format.
+    * description: Selected credentials passed for Proof generation has invalid format or empty.
     * causes:
         * Cannot parse selected credentials
         * There are no credentials passed for a requested attribute.
@@ -569,16 +466,11 @@ You need either create them again or deserialize from a string.
                 },
             }
         ```
-- ProofIsNotCompliant:
-    * code: **1032**
-    * description: Proof is not compliant to proof request
-    
 - CreateProof:
     * code: **1056**
     * description: Cannot generate Proof
     * causes:
         * Cannot store Proof state object into the Object Cache
-    
 - InvalidProofRequest:
     * code: **1086**
     * description: Proof Request has invalid format
@@ -616,15 +508,6 @@ You need either create them again or deserialize from a string.
               },
          }
         ```
-    
-- InvalidSchema:
-    * code: **1031**
-    * description: Cannot get Schema from the Ledger
-    * causes:
-        * Schema for requested id does not exist on the Ledger
-        * Library is connected to different Ledger    
-        * Cannot parse Schema from JSON string 
-    
 - InvalidPredicatesStructure:
     * code: **1028**
     * description: Predicates provided to create a Proof Request are not correct
@@ -634,16 +517,22 @@ You need either create them again or deserialize from a string.
 - CreateSchema:
     * code: **1041**
     * description: Cannot store Schema state object into the Object Cache
-    
 - InvalidSchemaSeqNo:
     * code: **1040**
-    * description: Cannot find Schema on the Ledger for requested id
-    
+  * description: Cannot get Schema from the Ledger
+  * causes:
+      * Schema for requested id does not exist on the Ledger
+      * Library is connected to different Ledger
 - DuplicationSchema:
     * code: **1088**
     * description: Cannot not create Schema as Ledger already contains schema for given DID, Version, and Name combination
     * tip: Use different version to create a Schema with the same name
-    
+- SchemaNotFound:
+    * code: **1031**
+    * description: Cannot get Schema from the Ledger
+    * causes:
+        * Schema for requested id does not exist on the Ledger
+        * Library is connected to different Ledger
 - UnknownSchemaRejection:
     * code: **1094**
     * description: Schema transaction has been rejected on the Ledger
@@ -659,13 +548,11 @@ You need either create them again or deserialize from a string.
     * tip: 
         * Ensure the path to Pool genesis transactions file is correct
         * Ensure Pool genesis transactions has correct format
-    
 - CreatePoolConfig:
     * code: **1026**
     * description: Could not create Indy Pool Ledger config file
     * causes: 
         * Not enough permissions to create the config on the file system
-    
 - PoolLedgerConnect:
     * code: **1025**
     * description: Could not connect to Poole Ledger
@@ -673,11 +560,9 @@ You need either create them again or deserialize from a string.
         * Pool Ledger config file does not exist
         * Pool Ledger Genesis transactions are invalid
         * Pool Ledger Genesis transactions do not match to Network
-    
 - InvalidLedgerResponse:
     * code: **1082**
     * description: Could parse transaction response received from the Ledger
-    
 - NoPoolOpen:
     * code: **1030**
     * description: There is no opened Pool Ledger. 
@@ -690,7 +575,6 @@ You need either create them again or deserialize from a string.
     * description: Could not create Indy Wallet
     * causes:
         * Not enough permissions to create the Wallet on the file system
-  
 - WalletAccessFailed:
     * code: **1075**
     * description: Attempt to open Wallet failed with invalid credentials
@@ -698,43 +582,34 @@ You need either create them again or deserialize from a string.
         * Try to init library with `wallet_key` different of used for provisioning
         * Try to init library with `wallet_key_derivation` different of used for provisioning
     * tip: Ensure you pass the same combination of `wallet_key` and `wallet_key_derivation` as was used for provisioning/wallet creation.
-    
 - InvalidWalletHandle:
     * code: **1057**
     * description: Try to access Wallet with invalid handle
     * cause: VCX try to perform an operation with Wallet but Libindy does not have an opened wallet for used handle
-    
 - DuplicationWallet:
     * code: **1051**, **213**
     * description: Duplicate wallet, try to create Wallet with a duplicate name
     * tip: Try to use different `wallet_name` in provisioning config
-    
 - WalletRecordNotFound:
     * code: **1073**
     * description: Could not find a record with the requested id in a Wallet
-    
 - DuplicationWalletRecord:
     * code: **1072**
     * description: Wallet record for given id already exists
-    
 - WalletNotFound:
     * code: **1079**
     * description: Could not open/delete Wallet for the given name as it is not found
-    
 - WalletAlreadyOpen:
     * code: **1052**
     * description: Could not open Wallet as it is already opened
     * tip: call `vcx_shutdown` to reset library (close wallet / pool)
-    
 - MissingWalletKey:
     * code: **1069**
     * description: The config passed into provision / initialization functions does not contains `wallet_key` field.
-    
 - DuplicationMasterSecret:
     * code: **1084**
     * description: Attempted to add a Master Secret with a name that already existed in wallet
     * causes: Try to provision second time
-    
 - DuplicationDid:
     * code: **1083**
     * description: Attempted to add a DID to wallet when that DID already exists in wallet
@@ -745,14 +620,12 @@ You need either create them again or deserialize from a string.
 - CreateWalletBackup:
     * code: **1096**
     * description: Could not prepare Wallet Backup because expected field not found in the state Object
-
 - RetrieveExportedWallet:
     * code: **1097**
     * description: Failed to retrieve exported wallet
     * causes:
         * Could not find exported wallet file
         * Expected field not found in the state Object
-
 - RetrieveDeadDrop:
     * code: **1099**
     * description: Failed to retrieve Dead Drop payload
@@ -765,7 +638,6 @@ You need either create them again or deserialize from a string.
     * causes:
         * Could not send message as remote endpoint is unreachable
         * Remote server responded with error status
-
 - InvalidAgencyResponse:
     * code: **1020**
     * description: Error Retrieving messages from Agency
@@ -774,7 +646,6 @@ You need either create them again or deserialize from a string.
         * Agency has not returned any messages
         * Message of expected type not found in response
         * Agency returned message with empty payload
-    
 - MessageIsOutOfThread: 
     * code: **1109**
     * description: Received message is out of thread
@@ -784,11 +655,9 @@ You need either create them again or deserialize from a string.
 - NoPaymentInformation:
     * code: **1071**
     * description: There is no payment information/transaction associated with requested object (Credential Definition, Schema, Credential). Creating an object did not require payments
-    
 - InsufficientTokenAmount:
     * code: **1064**
     * description: Insufficient amount of tokens to perform payment operation
-    
 - InvalidPaymentAddress: 
     * code: **1066**
     * description: Payment transaction does not contain or contains invalid payment address
@@ -799,17 +668,14 @@ You need either create them again or deserialize from a string.
     * code: **1080**
     * description: The format of object parameter passed into Libindy has invalid structure (json, config, key, credential and etc...).
     * note: This is an unexpected internal error which means that the format of some Libindy messages has been changed.
-    
 - TimeoutLibindy:
     * code: **1038**
     * description: Waiting for callback passed into Libindy timed out (function has not been completed).
     * note: This is an unexpected internal error.
-    
 - InvalidLibindyParam:
     * code: **1067**
     * description: The parameter passed to libindy was invalid. Likely, null pointer has been passed for some reason
     * note This is an unexpected internal error.
-
 - LibndyError(code):
     * code: code
     * description: Error raised from `Libindy` library and haven't handled by `Vcx`
