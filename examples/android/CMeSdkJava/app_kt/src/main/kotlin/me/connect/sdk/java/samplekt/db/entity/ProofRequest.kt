@@ -15,7 +15,7 @@ data class ProofRequest(
         var threadId: String,
 
         @ColumnInfo(name = "pwdid")
-        var pwDid: String,
+        var pwDid: String? = null,
 
         @ColumnInfo(name = "serialized")
         var serialized: String,
@@ -30,5 +30,14 @@ data class ProofRequest(
         var accepted: Boolean? = null,
 
         @ColumnInfo(name = "message_id")
-        var messageId: String
+        var messageId: String? = null,
+
+        @ColumnInfo(name = "attachConnection")
+        var attachConnection: String? = null,
+
+        @ColumnInfo(name = "attachConnectionName")
+        var attachConnectionName: String? = null,
+
+        @ColumnInfo(name = "attachConnectionLogo")
+        var attachConnectionLogo: String? = null
 )

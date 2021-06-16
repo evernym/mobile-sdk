@@ -7,8 +7,9 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import me.connect.sdk.java.samplekt.db.entity.CredentialOffer
+import com.bumptech.glide.Glide
 import me.connect.sdk.java.samplekt.R
+import me.connect.sdk.java.samplekt.db.entity.CredentialOffer
 
 
 class CredentialOffersAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<CredentialOffersAdapter.CredentialsViewHolder>() {
@@ -31,6 +32,7 @@ class CredentialOffersAdapter(private val itemClickListener: ItemClickListener) 
             else -> R.drawable.no
         }
         holder.image.setImageResource(res)
+        Glide.with(holder.logo.context).load(credentialOffer.attachConnectionLogo).into(holder.logo)
         holder.accept.visibility = if (credentialOffer.accepted == null) View.VISIBLE else View.GONE
         holder.accept.setOnClickListener {
             holder.accept.isEnabled = false
@@ -49,6 +51,7 @@ class CredentialOffersAdapter(private val itemClickListener: ItemClickListener) 
     class CredentialsViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         var text: TextView = v.findViewById(R.id.text)
         var image: ImageView = v.findViewById(R.id.image)
+        var logo: ImageView = v.findViewById(R.id.logo)
         var offers: TextView = v.findViewById(R.id.offers)
         var accept: Button = v.findViewById(R.id.buttonaccept)
     }

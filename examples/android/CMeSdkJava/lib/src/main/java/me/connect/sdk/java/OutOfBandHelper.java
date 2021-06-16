@@ -16,26 +16,6 @@ import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 public class OutOfBandHelper {
-    public static boolean isProprietaryType(Connections.InvitationType type) {
-        return type == Connections.InvitationType.Proprietary;
-    }
-
-    public static boolean isAriesConnection(Connections.InvitationType type) {
-        return type == Connections.InvitationType.Connection;
-    }
-
-    public static boolean isOutOfBandType(Connections.InvitationType type) {
-        return type == Connections.InvitationType.OutOfBand;
-    }
-
-    public static boolean isCredentialInviteType(String type) {
-        return type.contains("issue-credential");
-    }
-
-    public static boolean isProofInviteType(String type) {
-        return type.contains("present-proof");
-    }
-
     public static String readDataFromUrl(String url) {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -95,7 +75,7 @@ public class OutOfBandHelper {
         }
 
         public @NonNull
-        OutOfBandInviteBuilder withExtractedAttachRequest(@NonNull String extractedAttachRequest) {
+        OutOfBandInviteBuilder withExtractedAttachRequest(String extractedAttachRequest) {
             this.extractedAttachRequest = extractedAttachRequest;
             return this;
         }

@@ -8,6 +8,25 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ConnectionsUtils {
+    public static boolean isProprietaryType(Connections.InvitationType type) {
+        return type == Connections.InvitationType.Proprietary;
+    }
+
+    public static boolean isAriesConnection(Connections.InvitationType type) {
+        return type == Connections.InvitationType.Connection;
+    }
+
+    public static boolean isOutOfBandType(Connections.InvitationType type) {
+        return type == Connections.InvitationType.OutOfBand;
+    }
+
+    public static boolean isCredentialInviteType(String type) {
+        return type.contains("issue-credential");
+    }
+
+    public static boolean isProofInviteType(String type) {
+        return type.contains("present-proof");
+    }
 
     public static String parseInvite(String invite) {
         if (URLUtil.isValidUrl(invite)) {

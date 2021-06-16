@@ -64,7 +64,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
             ConnectionsUtils.ConnDataHolder userMeta = ConnectionsUtils.extractUserMetaFromInvite(parsedInvite);
             List<String> serializedConns = db.connectionDao().getAllSerializedConnections();
             String existingConnection = Connections.verifyConnectionExists(parsedInvite, serializedConns);
-            if (OutOfBandHelper.isProprietaryType(invitationType)) {
+            if (ConnectionsUtils.isProprietaryType(invitationType)) {
                 if (existingConnection != null) {
                     Connections.connectionRedirectProprietary(invite, existingConnection);
                     liveData.postValue(REDIRECT);
@@ -73,7 +73,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
                 }
                 return;
             }
-            if (OutOfBandHelper.isAriesConnection(invitationType)) {
+            if (ConnectionsUtils.isAriesConnection(invitationType)) {
                 if (existingConnection != null) {
                     liveData.postValue(REDIRECT);
                     return;
@@ -82,7 +82,7 @@ public class ConnectionsViewModel extends AndroidViewModel {
                 }
                 return;
             }
-            if (OutOfBandHelper.isOutOfBandType(invitationType)) {
+            if (ConnectionsUtils.isOutOfBandType(invitationType)) {
                 String extractedAttachRequest = OutOfBandHelper.extractRequestAttach(parsedInvite);
                 JSONObject attachRequestObject = Utils.convertToJSONObject(extractedAttachRequest);
                 if (attachRequestObject == null) {
@@ -124,11 +124,11 @@ public class ConnectionsViewModel extends AndroidViewModel {
                 .build();
 
             String attachType = attachRequestObject.getString("@type");
-            if (OutOfBandHelper.isCredentialInviteType(attachType)) {
+            if (ConnectionsUtils.isCredentialInviteType(attachType)) {
                 processCredentialAttachment(outOfBandInvite, liveData);
                 return;
             }
-            if (OutOfBandHelper.isProofInviteType(attachType)) {
+            if (ConnectionsUtils.isProofInviteType(attachType)) {
                 processProofAttachment(outOfBandInvite, liveData);
             }
         } catch (JSONException e) {
