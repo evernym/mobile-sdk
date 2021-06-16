@@ -18,11 +18,14 @@ import java.util.zip.ZipOutputStream;
 
 import android.content.ContextWrapper;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by abdussami on 23/05/18.
  */
 
-class Utils {
+public class Utils {
     private static final int BUFFER_SIZE = 4096;
     private static String TAG = "BRIDGEUTILS";
     static final String ROOT_DIR = "connectMeVcx";
@@ -161,5 +164,17 @@ class Utils {
                 zipOutput.write(data, 0, bytesRead);
             }
         }
+    }
+
+    public static JSONObject convertToJSONObject(String init) {
+        try {
+            if (init == null) {
+                return null;
+            }
+            return new JSONObject(init);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return new JSONObject();
     }
 }
