@@ -10,6 +10,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +52,7 @@ public class ProofRequestsAdapter extends RecyclerView.Adapter<ProofRequestsAdap
             res = R.drawable.no;
         }
         holder.image.setImageResource(res);
+        Glide.with(holder.logo.getContext()).load(proofRequest.attachConnectionLogo).into(holder.logo);
         holder.accept.setVisibility(acceptVisible ? View.VISIBLE : View.GONE);
         holder.reject.setVisibility(rejectVisible ? View.VISIBLE : View.GONE);
         holder.accept.setEnabled(true);
@@ -84,6 +87,7 @@ public class ProofRequestsAdapter extends RecyclerView.Adapter<ProofRequestsAdap
         public Button accept;
         public Button reject;
         public ImageView image;
+        public ImageView logo;
 
 
         public ProofViewHolder(View v) {
@@ -93,6 +97,7 @@ public class ProofRequestsAdapter extends RecyclerView.Adapter<ProofRequestsAdap
             accept = v.findViewById(R.id.buttonAccept);
             reject = v.findViewById(R.id.buttonReject);
             image = v.findViewById(R.id.image);
+            logo = v.findViewById(R.id.logo);
         }
     }
 

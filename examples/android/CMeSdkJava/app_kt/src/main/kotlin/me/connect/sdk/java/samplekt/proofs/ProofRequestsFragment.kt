@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import me.connect.sdk.java.samplekt.proofs.ProofCreateResult.*
 import me.connect.sdk.java.samplekt.databinding.ProofsFragmentBinding
 
 
@@ -40,8 +41,16 @@ class ProofRequestsFragment : Fragment() {
     }
 
     private fun accept(proofId: Int) {
-        model.acceptProofRequest(proofId).observeOnce(viewLifecycleOwner,
-                Observer { Toast.makeText(activity, "Proof request accepted", Toast.LENGTH_SHORT).show() })
+        model.acceptProofRequest(proofId).observeOnce(viewLifecycleOwner, Observer { status ->
+            when (status) {
+                SUCCESS -> Toast.makeText(activity, "Proof request accepted", Toast.LENGTH_SHORT).show()
+                FAILURE -> Toast.makeText(activity, "Proof request accept failure", Toast.LENGTH_SHORT).show()
+                SUCCESS_CONNECTION -> Toast.makeText(activity, "Connection created", Toast.LENGTH_SHORT).show()
+                FAILURE_CONNECTION -> Toast.makeText(activity, "Connection failed", Toast.LENGTH_SHORT).show()
+                MISSED -> Toast.makeText(activity, "Credentials missed", Toast.LENGTH_SHORT).show()
+                else -> return@Observer
+            }
+        })
     }
 
     private fun reject(proofId: Int) {

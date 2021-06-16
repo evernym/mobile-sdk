@@ -7,8 +7,9 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import me.connect.sdk.java.samplekt.db.entity.ProofRequest
+import com.bumptech.glide.Glide
 import me.connect.sdk.java.samplekt.R
+import me.connect.sdk.java.samplekt.db.entity.ProofRequest
 
 
 class ProofRequestsAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<ProofRequestsAdapter.ProofViewHolder>() {
@@ -34,6 +35,7 @@ class ProofRequestsAdapter(private val itemClickListener: ItemClickListener) : R
 
         }
         holder.image.setImageResource(res)
+        Glide.with(holder.logo.context).load(proofRequest.attachConnectionLogo).into(holder.logo)
         holder.accept.visibility = if (acceptVisible) View.VISIBLE else View.GONE
         holder.reject.visibility = if (rejectVisible) View.VISIBLE else View.GONE
         holder.accept.isEnabled = true
@@ -66,7 +68,7 @@ class ProofRequestsAdapter(private val itemClickListener: ItemClickListener) : R
         var accept: Button = v.findViewById(R.id.buttonAccept)
         var reject: Button = v.findViewById(R.id.buttonReject)
         var image: ImageView = v.findViewById(R.id.image)
-
+        var logo: ImageView = v.findViewById(R.id.logo)
     }
 
     interface ItemClickListener {

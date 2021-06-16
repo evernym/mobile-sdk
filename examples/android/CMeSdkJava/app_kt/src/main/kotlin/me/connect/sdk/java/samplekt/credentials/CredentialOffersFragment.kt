@@ -11,7 +11,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import me.connect.sdk.java.samplekt.credentials.CredentialOffersAdapter.ItemClickListener
 import me.connect.sdk.java.samplekt.databinding.CredentialsFragmentBinding
-
+import me.connect.sdk.java.samplekt.credentials.CredentialCreateResult.*
 
 class CredentialOffersFragment : Fragment() {
     private lateinit var binding: CredentialsFragmentBinding
@@ -40,7 +40,32 @@ class CredentialOffersFragment : Fragment() {
     }
 
     private fun accept(offerId: Int) {
-        model.acceptOffer(offerId).observeOnce(viewLifecycleOwner, Observer { Toast.makeText(activity, "Accept offer processed", Toast.LENGTH_SHORT).show() })
+        model.acceptOffer(offerId).observeOnce(
+            viewLifecycleOwner,
+            Observer<CredentialCreateResult> { ok: CredentialCreateResult? ->
+                when (ok) {
+                    SUCCESS -> Toast.makeText(
+                        activity,
+                        "Accept offer processed",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    FAILURE -> Toast.makeText(
+                        activity,
+                        "Accept offer failure",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    SUCCESS_CONNECTION -> Toast.makeText(
+                        activity,
+                        "Connection created",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    FAILURE_CONNECTION -> Toast.makeText(
+                        activity,
+                        "Connection failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
     }
 
     companion object {

@@ -10,6 +10,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +21,7 @@ import me.connect.sdk.java.sample.db.entity.CredentialOffer;
 public class CredentialOffersAdapter extends RecyclerView.Adapter<CredentialOffersAdapter.CredentialsViewHolder> {
 
     private List<CredentialOffer> data;
-    private ItemClickListener itemClickListener;
+    private final ItemClickListener itemClickListener;
 
     public CredentialOffersAdapter(ItemClickListener itemClickListener) {
         this.itemClickListener = itemClickListener;
@@ -43,11 +45,12 @@ public class CredentialOffersAdapter extends RecyclerView.Adapter<CredentialOffe
         holder.accept.setEnabled(true);
         if (credentialOffer.accepted == null)
             res = R.drawable.question;
-        else if (credentialOffer.accepted)
+        else if (credentialOffer.accepted) {
             res = R.drawable.yes;
-        else
+        } else
             res = R.drawable.no;
         holder.image.setImageResource(res);
+        Glide.with(holder.logo.getContext()).load(credentialOffer.attachConnectionLogo).into(holder.logo);
         holder.accept.setVisibility(credentialOffer.accepted == null ? View.VISIBLE : View.GONE);
         holder.accept.setOnClickListener(view -> {
             holder.accept.setEnabled(false);
@@ -67,6 +70,7 @@ public class CredentialOffersAdapter extends RecyclerView.Adapter<CredentialOffe
 
     static class CredentialsViewHolder extends RecyclerView.ViewHolder {
         public TextView text;
+        public ImageView logo;
         public ImageView image;
         public TextView offers;
         public Button accept;
@@ -74,6 +78,7 @@ public class CredentialOffersAdapter extends RecyclerView.Adapter<CredentialOffe
         public CredentialsViewHolder(View v) {
             super(v);
             text = v.findViewById(R.id.text);
+            logo = v.findViewById(R.id.logo);
             image = v.findViewById(R.id.image);
             offers = v.findViewById(R.id.offers);
             accept = v.findViewById(R.id.buttonaccept);

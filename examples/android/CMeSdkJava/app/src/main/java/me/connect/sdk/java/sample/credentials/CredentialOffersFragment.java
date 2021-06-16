@@ -8,14 +8,17 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import me.connect.sdk.java.sample.databinding.CredentialsFragmentBinding;
+
+import static me.connect.sdk.java.sample.credentials.CredentialCreateResult.FAILURE;
+import static me.connect.sdk.java.sample.credentials.CredentialCreateResult.SUCCESS;
+import static me.connect.sdk.java.sample.credentials.CredentialCreateResult.FAILURE_CONNECTION;
+import static me.connect.sdk.java.sample.credentials.CredentialCreateResult.SUCCESS_CONNECTION;
 
 public class CredentialOffersFragment extends Fragment {
 
@@ -59,7 +62,20 @@ public class CredentialOffersFragment extends Fragment {
 
     private void accept(int offerId) {
         model.acceptOffer(offerId).observeOnce(getViewLifecycleOwner(), ok -> {
-            Toast.makeText(getActivity(), "Accept offer processed", Toast.LENGTH_SHORT).show();
+            switch (ok) {
+                case SUCCESS:
+                    Toast.makeText(getActivity(), "Accept offer processed", Toast.LENGTH_SHORT).show();
+                    break;
+                case FAILURE:
+                    Toast.makeText(getActivity(), "Accept offer failure", Toast.LENGTH_SHORT).show();
+                    break;
+                case SUCCESS_CONNECTION:
+                    Toast.makeText(getActivity(), "Connection created", Toast.LENGTH_SHORT).show();
+                    break;
+                case FAILURE_CONNECTION:
+                    Toast.makeText(getActivity(), "Connection failed", Toast.LENGTH_SHORT).show();
+                    break;
+            }
         });
     }
 }

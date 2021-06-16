@@ -16,6 +16,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import me.connect.sdk.java.sample.R;
 import me.connect.sdk.java.sample.databinding.ProofsFragmentBinding;
 
+import static me.connect.sdk.java.sample.proofs.ProofCreateResult.FAILURE;
+import static me.connect.sdk.java.sample.proofs.ProofCreateResult.FAILURE_CONNECTION;
+import static me.connect.sdk.java.sample.proofs.ProofCreateResult.SUCCESS;
+import static me.connect.sdk.java.sample.proofs.ProofCreateResult.SUCCESS_CONNECTION;
+
 public class ProofRequestsFragment extends Fragment {
 
     private ProofsFragmentBinding binding;
@@ -65,13 +70,35 @@ public class ProofRequestsFragment extends Fragment {
 
     private void accept(int proofId) {
         model.acceptProofRequest(proofId).observeOnce(getViewLifecycleOwner(), ok -> {
-            Toast.makeText(getActivity(), "Proof request accepted", Toast.LENGTH_SHORT).show();
+            switch (ok) {
+                case SUCCESS:
+                    Toast.makeText(getActivity(), "Proof request accepted", Toast.LENGTH_SHORT).show();
+                    break;
+                case FAILURE:
+                    Toast.makeText(getActivity(), "Proof request accept failure", Toast.LENGTH_SHORT).show();
+                    break;
+                case SUCCESS_CONNECTION:
+                    Toast.makeText(getActivity(), "Connection created", Toast.LENGTH_SHORT).show();
+                    break;
+                case FAILURE_CONNECTION:
+                    Toast.makeText(getActivity(), "Connection failed", Toast.LENGTH_SHORT).show();
+                    break;
+                case MISSED:
+                    Toast.makeText(getActivity(), "Missed credential", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
     private void reject(int proofId) {
         model.rejectProofRequest(proofId).observeOnce(getViewLifecycleOwner(), ok -> {
-            Toast.makeText(getActivity(), "Proof request rejected", Toast.LENGTH_SHORT).show();
+            switch (ok) {
+                case SUCCESS:
+                    Toast.makeText(getActivity(), "Proof request rejected", Toast.LENGTH_SHORT).show();
+                    break;
+                case FAILURE:
+                    Toast.makeText(getActivity(), "Proof request reject failure", Toast.LENGTH_SHORT).show();
+                    break;
+            }
         });
     }
 }

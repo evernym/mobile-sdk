@@ -14,15 +14,21 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.tabs.TabLayout;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+
+import me.connect.sdk.java.sample.R;
 import me.connect.sdk.java.sample.databinding.ConnectionsFragmentBinding;
 
 public class ConnectionsFragment extends Fragment {
 
     private ConnectionsFragmentBinding binding;
     private ConnectionsViewModel model;
+    private TabLayout tabLayout;
 
     public static ConnectionsFragment newInstance() {
         return new ConnectionsFragment();
@@ -33,6 +39,10 @@ public class ConnectionsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = ConnectionsFragmentBinding.inflate(inflater, container, false);
+
+        View view = Objects.requireNonNull(getActivity()).findViewById(R.id.pager);
+        tabLayout = view.findViewById(R.id.tab_layout);
+
         return binding.getRoot();
     }
 
@@ -62,6 +72,10 @@ public class ConnectionsFragment extends Fragment {
         });
     }
 
+    public void selectActiveTab (Integer index) {
+        tabLayout.selectTab(tabLayout.getTabAt(index));
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
@@ -80,18 +94,23 @@ public class ConnectionsFragment extends Fragment {
         binding.buttonAddConnection.setEnabled(false);
         binding.buttonQr.setEnabled(false);
         model.newConnection(invite).observeOnce(getViewLifecycleOwner(), status -> {
-            String msg;
             switch (status) {
                 case SUCCESS:
-                    msg = "Connection created";
+                    Toast.makeText(getActivity(), "Connection created", Toast.LENGTH_SHORT).show();
                     break;
                 case REDIRECT:
-                    msg = "Connection redirected";
+                    Toast.makeText(getActivity(), "Connection redirected", Toast.LENGTH_SHORT).show();
                     break;
-                default:
-                    msg = "Connection failed";
+                case FAILURE:
+                    Toast.makeText(getActivity(), "Connection failed", Toast.LENGTH_SHORT).show();
+                    break;
+                case REQUEST_ATTACH:
+                    selectActiveTab(1);
+                    break;
+                case PROOF_ATTACH:
+                    selectActiveTab(2);
+                    break;
             }
-            Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
             if (status != ConnectionCreateResult.FAILURE) {
                 binding.editTextConnection.setText(null);
             }

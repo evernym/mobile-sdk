@@ -7,7 +7,6 @@ import com.evernym.sdk.vcx.connection.ConnectionApi;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.List;
 
 import java9.util.concurrent.CompletableFuture;
@@ -22,40 +21,54 @@ public class Connections {
 
     public static final String TAG = "ConnectMeVcx";
 
+    public enum InvitationType {
+        Proprietary,
+        Connection,
+        OutOfBand
+    }
 
-    public static @NonNull
-    CompletableFuture<Boolean> verifyConnectionExists(@NonNull String invitationDetails,
-                                                      @NonNull List<String> serializedConnections) {
-        Logger.getInstance().i("Starting invite verification");
-        CompletableFuture<Boolean> result = new CompletableFuture<>();
+    public static String verifyConnectionExists(
+            @NonNull String invitationDetails,
+            @NonNull List<String> serializedConnections
+    ) {
         try {
-            String existingConnection = findExistingConnection(invitationDetails, serializedConnections);
-            if (isAriesInvitation(invitationDetails)) {
-                connectionRedirectAries(result, invitationDetails, existingConnection);
+            Logger.getInstance().i("Starting invite verification");
+            return findExistingConnection(invitationDetails, serializedConnections);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static InvitationType getInvitationType(String invite) {
+        try {
+            JSONObject json = new JSONObject(invite);
+            boolean hasId = json.has("@id");
+            if (json.has("@type") && hasId) {
+                String invitationType = json.getString("@type");
+                if (invitationType.contains(AriesMessageType.OUTOFBAND_INVITATION)) {
+                    return InvitationType.OutOfBand;
+                }
+                if (invitationType.contains(AriesMessageType.CONNECTION_INVITATION)) {
+                    return InvitationType.Connection;
+                } else {
+                    return InvitationType.Proprietary;
+                }
             } else {
-                connectionRedirectProprietary(result, invitationDetails, existingConnection);
+                throw new Exception("Invalid invite format");
             }
-
-        } catch (Exception ex) {
-            result.completeExceptionally(ex);
+        } catch (Exception e ) {
+            e.printStackTrace();
         }
-        return result;
+        return null;
     }
 
-
-    private static boolean isAriesInvitation(String invite) throws Exception {
-        JSONObject json = new JSONObject(invite);
-        boolean hasId = json.has("@id");
-        boolean typeMatches = false;
-        if (json.has("@type")) {
-            String type = json.getString("@type");
-            typeMatches = type.contains(AriesMessageType.CONNECTION_INVITATION)
-                    || type.contains(AriesMessageType.OUTOFBAND_INVITATION);
-        }
-        return hasId && typeMatches;
+    private static boolean isAriesInvitation(String invite) {
+        InvitationType type = getInvitationType(invite);
+        return type == InvitationType.Connection || type == InvitationType.OutOfBand;
     }
 
-    private static String findExistingConnection(String newInvite, List<String> serializedConnections) throws Exception {
+    public static String findExistingConnection(String newInvite, List<String> serializedConnections) throws Exception {
         String existingConnection = null;
         for (String sc : serializedConnections) {
             int handle = ConnectionApi.connectionDeserialize(sc).get();
@@ -119,8 +132,8 @@ public class Connections {
     /**
      * Redirect proprietary connection if needed
      */
-    private static void connectionRedirectProprietary(CompletableFuture<Boolean> result, String invitationDetails,
-                                                      String serializedConnection) {
+    public static void connectionRedirectProprietary(String invitationDetails, String serializedConnection) {
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
         if (serializedConnection == null) {
             result.complete(false);
             return;
@@ -134,31 +147,20 @@ public class Connections {
                     result.completeExceptionally(err);
                 }
                 try {
-                    ConnectionApi.connectionGetTheirPwDid(handle).whenComplete((pwDid, e) -> {
-                        if (e != null) {
-                            Logger.getInstance().e("Failed to obtain pwDid for connection: ", e);
-                            result.completeExceptionally(e);
+                    ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((oldHandle, error) -> {
+                        if (error != null) {
+                            Logger.getInstance().e("Failed to deserialize stored connection: ", error);
+                            result.completeExceptionally(error);
                         }
                         try {
-                            ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((oldHandle, error) -> {
-                                if (error != null) {
-                                    Logger.getInstance().e("Failed to deserialize stored connection: ", error);
-                                    result.completeExceptionally(error);
-                                }
-                                try {
-                                    ConnectionApi.vcxConnectionRedirect(handle, oldHandle).whenComplete((res, t) -> {
-                                        if (t != null) {
-                                            Logger.getInstance().e("Failed to redirect connection: ", t);
-                                            result.completeExceptionally(t);
-                                        } else {
-                                            result.complete(true);
-                                        }
-                                    });
-                                } catch (Exception ex) {
-                                    result.completeExceptionally(ex);
+                            ConnectionApi.vcxConnectionRedirect(handle, oldHandle).whenComplete((res, t) -> {
+                                if (t != null) {
+                                    Logger.getInstance().e("Failed to redirect connection: ", t);
+                                    result.completeExceptionally(t);
+                                } else {
+                                    result.complete(true);
                                 }
                             });
-
                         } catch (Exception ex) {
                             result.completeExceptionally(ex);
                         }
@@ -172,54 +174,58 @@ public class Connections {
         }
     }
 
-
     /**
      * Redirect aries and out-of-band connections if needed
      */
-    private static void connectionRedirectAries(CompletableFuture<Boolean> result, String invitationDetails,
-                                                String serializedConnection) {
+    public static void connectionRedirectAriesOutOfBand(String invitationDetails, String serializedConnection) {
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
         try {
-            JSONObject iniviteJson = new JSONObject(invitationDetails);
-            String type = iniviteJson.getString("@type");
-            if (type.contains(AriesMessageType.CONNECTION_INVITATION)) {
-                // For Aries invite only existence should be checked
-                result.complete(serializedConnection != null);
-            } else if (type.contains(AriesMessageType.OUTOFBAND_INVITATION)) {
-                // Current implementation assume that 'request~attach' array is not presented
-                JSONArray handshakeProtocols = iniviteJson.optJSONArray("handshake_protocols");
-                if (handshakeProtocols == null) {
-                    result.completeExceptionally(new Exception("Invite does not have 'handshake_protocols' entry."));
-                } else if (serializedConnection == null) {
-                    // Connection does not exist, could create new connection
-                    result.complete(false);
-                } else {
-                    // Connection already exists and should be reused
+            JSONObject inviteJson = new JSONObject(invitationDetails);
+            // Current implementation assume that 'request~attach' array is not presented
+            JSONArray handshakeProtocols = inviteJson.optJSONArray("handshake_protocols");
+
+            if (serializedConnection == null) {
+                // Connection does not exist, could create new connection
+                result.complete(false);
+                return;
+            }
+            if (handshakeProtocols == null) {
+                result.completeExceptionally(new Exception("Invite does not have 'handshake_protocols' entry."));
+                return;
+            }
+
+            // Connection already exists and should be reused and wait handshake reuse
+            try {
+                ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((handle, err) -> {
+                    if (err != null) {
+                        Logger.getInstance().e("Failed to deserialize stored connection: ", err);
+                        result.completeExceptionally(err);
+                    }
                     try {
-                        ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((handle, err) -> {
-                            if (err != null) {
-                                Logger.getInstance().e("Failed to deserialize stored connection: ", err);
-                                result.completeExceptionally(err);
-                            }
-                            try {
-                                ConnectionApi.connectionSendReuse(handle, invitationDetails).whenComplete((res, e) -> {
-                                    if (e != null) {
-                                        Logger.getInstance().e("Failed to reuse connection: ", e);
-                                        result.completeExceptionally(e);
+                        ConnectionApi.connectionSendReuse(handle, invitationDetails).whenComplete((res, e) -> {
+                            if (e != null) {
+                                Logger.getInstance().e("Failed to reuse connection: ", e);
+                                result.completeExceptionally(e);
+                            } else {
+                                Messages.waitHandshakeReuse().whenComplete((handshake, error) -> {
+                                    if (error != null) {
+                                        error.printStackTrace();
                                     } else {
-                                        result.complete(true);
+                                        if (handshake) {
+                                            result.complete(true);
+                                        } else {
+                                            result.completeExceptionally(new Exception("Don't get handshake reuse"));
+                                        }
                                     }
                                 });
-                            } catch (VcxException ex) {
-                                result.completeExceptionally(ex);
                             }
                         });
-                    } catch (Exception ex) {
+                    } catch (VcxException ex) {
                         result.completeExceptionally(ex);
                     }
-                }
-            } else {
-                // unsupported invitation type
-                result.completeExceptionally(new Exception("Unsupported invite aries invite type: " + type));
+                });
+            } catch (Exception ex) {
+                result.completeExceptionally(ex);
             }
         } catch (Exception ex) {
             result.completeExceptionally(ex);

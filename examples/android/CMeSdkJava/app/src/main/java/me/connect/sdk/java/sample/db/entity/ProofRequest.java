@@ -29,4 +29,13 @@ public class ProofRequest {
 
     @ColumnInfo(name = "message_id")
     public String messageId;
+
+    @ColumnInfo(name = "attachConnection")
+    public String attachConnection;
+
+    @ColumnInfo(name = "attachConnectionName")
+    public String attachConnectionName;
+
+    @ColumnInfo(name = "attachConnectionLogo")
+    public String attachConnectionLogo;
 }

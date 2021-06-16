@@ -119,6 +119,33 @@ public class Credentials {
     }
 
     /**
+     * Create credential offer
+     *
+     * @param sourceId             custom string for this cred offer
+     * @param message              credential offer string
+     * @return serialized credential offer
+     */
+    public static @NonNull
+    CompletableFuture<String> credentialSerialize(@NonNull int credHandle) {
+        Logger.getInstance().i("Accepting credential offer");
+        CompletableFuture<String> result = new CompletableFuture<>();
+        try {
+            CredentialApi.credentialSerialize(credHandle).whenComplete((sc, e) -> {
+                if (e != null) {
+                    Logger.getInstance().e("Failed to serialize credentials: ", e);
+                    result.completeExceptionally(e);
+                } else {
+                    result.complete(sc);
+                }
+
+            });
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
+        }
+        return result;
+    }
+
+    /**
      * Accept credential offer
      *
      * @param serializedConnection serialized connection string
