@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.license      =  { :type => 'MIT', :file => 'LICENSE' }
   s.authors      = { "Evernym Inc." => "info@evernym.com" }
   s.platforms    = { :ios => "10.0" }
-  s.source       = { :http => 'https://gitlab.com/evernym/mobile/mobile-sdk/-/package_files/12149692/download', :type => 'zip' }
+  s.source       = { :http => 'https://gitlab.com/evernym/mobile/mobile-sdk/-/package_files/12200878/download', :type => 'zip' }
   s.swift_version = '4.0'
 
   s.source_files = "ios/**/*.{h,c,m,swift}"

@@ -32,7 +32,7 @@ through to the libvcx shared library.
   s.homepage         = 'https://www.evernym.com/'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'evernym-ios-dev' => 'iosdev@evernym.com' }
-  s.source           = { :http => 'https://gitlab.com/evernym/mobile/mobile-sdk/-/package_files/12149689/download', :type => 'zip' }
+  s.source           = { :http => 'https://gitlab.com/evernym/mobile/mobile-sdk/-/package_files/12200893/download', :type => 'zip' }
 
   s.ios.deployment_target = '8.0'
 
