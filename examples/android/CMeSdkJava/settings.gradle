@@ -1,3 +1,4 @@
 include ':app'
 include ':app_kt'
+include ':app_kt_old'
 include ':lib'

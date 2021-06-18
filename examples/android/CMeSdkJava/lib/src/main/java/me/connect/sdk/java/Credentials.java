@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import com.evernym.sdk.vcx.VcxException;
 import com.evernym.sdk.vcx.connection.ConnectionApi;
 import com.evernym.sdk.vcx.credential.CredentialApi;
+import com.evernym.sdk.vcx.proof.DisclosedProofApi;
 import com.evernym.sdk.vcx.utils.UtilsApi;
 
 import org.json.JSONArray;
@@ -218,6 +219,111 @@ public class Credentials {
             result.completeExceptionally(ex);
         }
         return result;
+    }
+
+    /**
+     * Reject credential offer
+     *
+     * @param serializedConnection serialized connection string
+     * @param serializedCredOffer  serialized credential offer
+     * @return serialized credential offer
+     */
+    public static
+    @NonNull
+    CompletableFuture<String> rejectOffer (
+            @NonNull String serializedConnection,
+            @NonNull String serializedCredOffer
+    ) {
+        Logger.getInstance().i("Sending proof request response");
+        CompletableFuture<String> result = new CompletableFuture<>();
+        try {
+            ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((conHandle, err) -> {
+                if (err != null) {
+                    Logger.getInstance().e("Failed to deserialize connection: ", err);
+                    result.completeExceptionally(err);
+                    return;
+                }
+                try {
+                    CredentialApi.credentialDeserialize(serializedCredOffer).whenComplete((credHandle, er) -> {
+                        if (er != null) {
+                            Logger.getInstance().e("Failed to deserialize credential offer: ", er);
+                            result.completeExceptionally(er);
+                            return;
+                        }
+                        try {
+                            CredentialApi.credentialReject(credHandle, conHandle, "").whenComplete((v, e) -> {
+                                if (e != null) {
+                                    Logger.getInstance().e("Failed to reject proof: ", e);
+                                    result.completeExceptionally(e);
+                                    return;
+                                }
+                                try {
+                                    ConnectionApi.connectionGetPwDid(conHandle).whenComplete((pwDid, t) -> {
+                                        if (t != null) {
+                                            Logger.getInstance().e("Failed to get pwDid: ", t);
+                                            result.completeExceptionally(t);
+                                            return;
+                                        }
+                                        try {
+                                            CredentialApi.credentialSerialize(credHandle).whenComplete((sc, th) -> {
+                                                if (th != null) {
+                                                    Logger.getInstance().e("Failed to serialize credentials: ", th);
+                                                    result.completeExceptionally(th);
+                                                } else {
+                                                    result.complete(sc);
+                                                }
+                                            });
+                                        } catch (VcxException ex) {
+                                            result.completeExceptionally(ex);
+                                        }
+                                    });
+                                } catch (Exception ex) {
+                                    result.completeExceptionally(ex);
+                                }
+                            });
+                        } catch (VcxException ex) {
+                            result.completeExceptionally(ex);
+                        }
+                    });
+                } catch (Exception ex) {
+                    result.completeExceptionally(ex);
+                }
+            });
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
+        }
+        return result;
+    }
+
+    /**
+     * Loops indefinitely until proof request status is not changed
+     *
+     * @param serializedCredOffer string containing serialized credential offer
+     * @param messageState    desired message state
+     * @return string containing serialized proof request
+     */
+    public static String awaitStatusChangeForOffer(String serializedCredOffer, MessageState messageState) {
+        Logger.getInstance().i("Awaiting proof state change");
+        int count = 1;
+        try {
+            Integer handle = CredentialApi.credentialDeserialize(serializedCredOffer).get();
+            while (true) {
+                Logger.getInstance().i("Awaiting proof state change: attempt #" + count);
+                Integer state0 = CredentialApi.credentialUpdateState(handle).get();
+                Logger.getInstance().i("Awaiting proof state change: update state=" + state0);
+                Integer state = CredentialApi.credentialGetState(handle).get();
+                Logger.getInstance().i("Awaiting proof state change: got state=" + state);
+                if (messageState.matches(state)) {
+                    return CredentialApi.credentialSerialize(handle).get();
+                }
+                count++;
+                Thread.sleep(1000);
+            }
+        } catch (Exception e) {
+            Logger.getInstance().e("Failed to await proof state", e);
+            e.printStackTrace();
+        }
+        return serializedCredOffer;
     }
 
     /**

@@ -7,10 +7,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
 import me.connect.sdk.java.sample.backups.BackupsFragment;
-import me.connect.sdk.java.sample.connections.ConnectionsFragment;
-import me.connect.sdk.java.sample.credentials.CredentialOffersFragment;
-import me.connect.sdk.java.sample.proofs.ProofRequestsFragment;
-import me.connect.sdk.java.sample.structmessages.StructuredMessagesFragment;
+import me.connect.sdk.java.sample.history.HistoryFragment;
+import me.connect.sdk.java.sample.homepage.HomePageFragment;
 
 public class MainPagerAdapter extends FragmentPagerAdapter {
     public MainPagerAdapter(@NonNull FragmentManager fm) {
@@ -22,14 +20,10 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                return ConnectionsFragment.newInstance();
+                return HomePageFragment.newInstance();
             case 1:
-                return CredentialOffersFragment.newInstance();
+                return HistoryFragment.newInstance();
             case 2:
-                return ProofRequestsFragment.newInstance();
-            case 3:
-                return StructuredMessagesFragment.newInstance();
-            case 4:
                 return BackupsFragment.newInstance();
             default:
                 return null;
@@ -42,14 +36,10 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
         // todo should use resource strings
         switch (position) {
             case 0:
-                return "Connections";
+                return "Home";
             case 1:
-                return "Credentials Offers";
+                return "History";
             case 2:
-                return "Proof requests";
-            case 3:
-                return "Structured messages";
-            case 4:
                 return "Wallet backups";
             default:
                 return null;
@@ -59,6 +49,6 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 5;
+        return 3;
     }
 }

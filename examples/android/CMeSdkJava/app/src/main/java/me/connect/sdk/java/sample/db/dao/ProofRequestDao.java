@@ -22,6 +22,9 @@ public interface ProofRequestDao {
     @Query("SELECT EXISTS(SELECT * FROM proofrequest WHERE thread_id = :threadId)")
     boolean checkExists(String threadId);
 
+    @Query("SELECT * FROM proofrequest WHERE thread_id = :threadId")
+    ProofRequest getByThreadId(String threadId);
+
     @Insert
     void insertAll(ProofRequest... proofRequests);
 

@@ -7,7 +7,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ProofRequests {
-
     public static JSONObject decodeProofRequestAttach(JSONObject proofAttach) {
         try {
             String requestAttachCode = proofAttach.getString("request_presentations~attach");

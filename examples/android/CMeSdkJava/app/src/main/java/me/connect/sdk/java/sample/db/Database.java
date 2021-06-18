@@ -6,19 +6,29 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
+import me.connect.sdk.java.sample.db.dao.ActionDao;
 import me.connect.sdk.java.sample.db.dao.BackupDao;
 import me.connect.sdk.java.sample.db.dao.ConnectionDao;
 import me.connect.sdk.java.sample.db.dao.CredentialOfferDao;
 import me.connect.sdk.java.sample.db.dao.ProofRequestDao;
 import me.connect.sdk.java.sample.db.dao.StructuredMessageDao;
+import me.connect.sdk.java.sample.db.entity.Action;
 import me.connect.sdk.java.sample.db.entity.Backup;
 import me.connect.sdk.java.sample.db.entity.Connection;
 import me.connect.sdk.java.sample.db.entity.CredentialOffer;
 import me.connect.sdk.java.sample.db.entity.ProofRequest;
 import me.connect.sdk.java.sample.db.entity.StructuredMessage;
 
-@androidx.room.Database(entities = {Backup.class, Connection.class, CredentialOffer.class, ProofRequest.class, StructuredMessage.class},
+@androidx.room.Database(entities = {
+        Backup.class,
+        Connection.class,
+        CredentialOffer.class,
+        ProofRequest.class,
+        StructuredMessage.class,
+        Action.class
+},
         version = 1)
+
 @TypeConverters({ResponseConverter.class})
 public abstract class Database extends RoomDatabase {
     private static final String DB_NAME = "db";
@@ -31,6 +41,8 @@ public abstract class Database extends RoomDatabase {
     public abstract CredentialOfferDao credentialOffersDao();
 
     public abstract ProofRequestDao proofRequestDao();
+
+    public abstract ActionDao actionDao();
 
     public abstract StructuredMessageDao structuredMessageDao();
 
