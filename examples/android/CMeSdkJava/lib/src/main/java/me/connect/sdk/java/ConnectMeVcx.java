@@ -29,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.security.SecureRandom;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -326,10 +327,18 @@ public class ConnectMeVcx {
         Utils.writeCACert(context);
         try {
             String config = SecurePreferencesHelper.getLongStringValue(context, SECURE_PREF_VCXCONFIG, null);
+
+            JSONObject con = new JSONObject(config);
+            JSONObject poolConfig = new JSONObject();
+            poolConfig.put("genesis_path", con.getString("genesis_path"));
+            poolConfig.put("pool_name", con.getString("genesis_path"));
+            con.remove("genesis_path");
+
             VcxApi.vcxInitWithConfig(config).whenComplete((integer, err) -> {
                 if (err != null) {
                     result.completeExceptionally(err);
                 } else {
+                    initPool(poolConfig.toString());
                     result.complete(null);
                 }
             });
@@ -338,11 +347,21 @@ public class ConnectMeVcx {
             // then also we will resolve promise, because we don't care if vcx is already
             // initialized
             result.complete(null);
-        } catch (VcxException e) {
+        } catch (VcxException | JSONException e) {
             e.printStackTrace();
             result.completeExceptionally(e);
         }
         return result;
+    }
+
+    private static void initPool(String config) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                VcxApi.vcxInitPool(config);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private static void setVcxLogger(int maxFileSizeBytes, Context context) {
@@ -567,7 +586,6 @@ public class ConnectMeVcx {
          */
         public @NonNull
         ConfigBuilder withGenesisPool(@NonNull String genesisPool) {
-
             this.genesisPool = genesisPool;
             return this;
         }
