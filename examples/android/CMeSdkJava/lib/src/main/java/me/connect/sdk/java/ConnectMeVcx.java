@@ -327,18 +327,13 @@ public class ConnectMeVcx {
         Utils.writeCACert(context);
         try {
             String config = SecurePreferencesHelper.getLongStringValue(context, SECURE_PREF_VCXCONFIG, null);
-
             JSONObject con = new JSONObject(config);
-            JSONObject poolConfig = new JSONObject();
-            poolConfig.put("genesis_path", con.getString("genesis_path"));
-            poolConfig.put("pool_name", con.getString("genesis_path"));
             con.remove("genesis_path");
-
-            VcxApi.vcxInitWithConfig(config).whenComplete((integer, err) -> {
+            VcxApi.vcxInitWithConfig(con.toString()).whenComplete((integer, err) -> {
                 if (err != null) {
                     result.completeExceptionally(err);
                 } else {
-                    initPool(poolConfig.toString());
+                    initPool(config);
                     result.complete(null);
                 }
             });
@@ -357,7 +352,11 @@ public class ConnectMeVcx {
     private static void initPool(String config) {
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
-                VcxApi.vcxInitPool(config);
+                JSONObject vcxConfig = new JSONObject(config);
+                JSONObject poolConfig = new JSONObject();
+                poolConfig.put("genesis_path", vcxConfig.getString("genesis_path"));
+                poolConfig.put("pool_name", "android-sample-pool");
+                VcxApi.vcxInitPool(poolConfig.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
