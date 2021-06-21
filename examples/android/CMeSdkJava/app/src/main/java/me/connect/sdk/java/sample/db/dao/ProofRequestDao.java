@@ -20,7 +20,7 @@ public interface ProofRequestDao {
     ProofRequest getById(int id);
 
     @Query("SELECT EXISTS(SELECT * FROM proofrequest WHERE thread_id = :threadId)")
-    boolean checkExists(String threadId);
+    boolean checkProofExists(String threadId);
 
     @Query("SELECT * FROM proofrequest WHERE thread_id = :threadId")
     ProofRequest getByThreadId(String threadId);

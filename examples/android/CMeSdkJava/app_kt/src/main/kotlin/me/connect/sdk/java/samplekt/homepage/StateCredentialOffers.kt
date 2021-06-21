@@ -28,22 +28,26 @@ object StateCredentialOffers {
         try {
             val connection: JSONObject = Utils.convertToJSONObject(outOfBandInvite.existingConnection)!!
             val connectionData = connection.getJSONObject("data")
-            val co = Credentials.createWithOffer(
-                UUID.randomUUID().toString(),
-                outOfBandInvite.extractedAttachRequest
-            ).wrap().await()
-            val preview: JSONObject =
-                outOfBandInvite.attach.getJSONObject("credential_preview")
-            val offer = CredentialOffer(
-                claimId = outOfBandInvite.attach.getString("@id"),
-                name = outOfBandInvite.attach.getString("comment"),
-                pwDid = connectionData.getString("pw_did"),
-                attributes = preview.getJSONArray("attributes").getString(0),
-                serialized = co,
-                attachConnectionLogo = JSONObject(outOfBandInvite.parsedInvite).getString("profileUrl")
-            )
-            db.credentialOffersDao().insertAll(offer)
-            acceptCredentialOffer(offer, db, liveData, action);
+            val claimId: String = outOfBandInvite.attach.getString("@id");
+            val pwDid: String =  connectionData.getString("pw_did")
+            if (!db.credentialOffersDao().checkOfferExists(claimId, pwDid)) {
+                val co = Credentials.createWithOffer(
+                    UUID.randomUUID().toString(),
+                    outOfBandInvite.extractedAttachRequest
+                ).wrap().await()
+                val preview: JSONObject =
+                    outOfBandInvite.attach.getJSONObject("credential_preview")
+                val offer = CredentialOffer(
+                    claimId = claimId,
+                    name = outOfBandInvite.attach.getString("comment"),
+                    pwDid = pwDid,
+                    attributes = preview.getJSONArray("attributes").getString(0),
+                    serialized = co,
+                    attachConnectionLogo = JSONObject(outOfBandInvite.parsedInvite).getString("profileUrl")
+                )
+                db.credentialOffersDao().insertAll(offer)
+                acceptCredentialOffer(offer, db, liveData, action);
+            }
         } catch (e: JSONException) {
             e.printStackTrace()
         }
@@ -118,7 +122,7 @@ object StateCredentialOffers {
         val res = Connections.create(offer.attachConnection!!, QRConnection()).wrap().await()
         if (res != null) {
             val serializedCon =
-                Connections.awaitStatusChange(res, MessageState.ACCEPTED)
+                Connections.awaitStatusChange(res)
             val pwDid = Connections.getPwDid(serializedCon)
             val c = Connection(
                 name = offer.attachConnectionName!!,

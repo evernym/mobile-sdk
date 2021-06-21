@@ -11,7 +11,6 @@ import me.connect.sdk.java.OutOfBandHelper;
 import me.connect.sdk.java.Proofs;
 import me.connect.sdk.java.Utils;
 import me.connect.sdk.java.connection.QRConnection;
-import me.connect.sdk.java.message.MessageState;
 import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Action;
@@ -32,36 +31,38 @@ public class StateProofRequests {
     ) {
         try {
             JSONObject connection = Utils.convertToJSONObject(outOfBandInvite.existingConnection);
+
             assert connection != null;
             JSONObject connectionData = connection.getJSONObject("data");
-            Proofs.createWithRequest(UUID.randomUUID().toString(), outOfBandInvite.extractedAttachRequest).handle((pr, err) -> {
-                if (err != null) {
-                    err.printStackTrace();
-                } else {
-                    ProofRequest proof = new ProofRequest();
-                    try {
-                        JSONObject decodedProofAttach = me.connect.sdk.java.ProofRequests.decodeProofRequestAttach(outOfBandInvite.attach);
 
-                        proof.serialized = pr;
-                        proof.name = me.connect.sdk.java.ProofRequests.extractRequestedNameFromProofRequest(decodedProofAttach);
-                        proof.pwDid = connectionData.getString("pw_did");
-                        proof.attributes = me.connect.sdk.java.ProofRequests.extractRequestedAttributesFromProofRequest(decodedProofAttach);
-                        JSONObject thread = outOfBandInvite.attach.getJSONObject("~thread");
-                        proof.threadId = thread.getString("thid");
+            JSONObject thread = outOfBandInvite.attach.getJSONObject("~thread");
+            String threadId = thread.getString("thid");
+            if(!db.proofRequestDao().checkProofExists(threadId)) {
+                Proofs.createWithRequest(UUID.randomUUID().toString(), outOfBandInvite.extractedAttachRequest).handle((pr, err) -> {
+                    if (err != null) {
+                        err.printStackTrace();
+                    } else {
+                        ProofRequest proof = new ProofRequest();
+                        try {
+                            JSONObject decodedProofAttach = me.connect.sdk.java.ProofRequests.decodeProofRequestAttach(outOfBandInvite.attach);
 
-                        proof.attachConnectionLogo = new JSONObject(outOfBandInvite.parsedInvite)
-                                .getString("profileUrl");
+                            proof.serialized = pr;
+                            proof.name = me.connect.sdk.java.ProofRequests.extractRequestedNameFromProofRequest(decodedProofAttach);
+                            proof.pwDid = connectionData.getString("pw_did");
+                            proof.attributes = me.connect.sdk.java.ProofRequests.extractRequestedAttributesFromProofRequest(decodedProofAttach);
+                            proof.threadId = threadId;
+                            proof.attachConnectionLogo = new JSONObject(outOfBandInvite.parsedInvite).getString("profileUrl");
+                            proof.messageId = null;
+                            db.proofRequestDao().insertAll(proof);
 
-                        proof.messageId = null;
-                        db.proofRequestDao().insertAll(proof);
-
-                        acceptProofReq(proof, db, liveData, action);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                            acceptProofReq(proof, db, liveData, action);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
-                return null;
-            });
+                    return null;
+                });
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }

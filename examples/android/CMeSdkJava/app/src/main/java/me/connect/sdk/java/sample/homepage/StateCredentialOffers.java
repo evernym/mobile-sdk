@@ -38,33 +38,38 @@ public class StateCredentialOffers {
             JSONObject connection = Utils.convertToJSONObject(outOfBandInvite.existingConnection);
             assert connection != null;
             JSONObject connectionData = connection.getJSONObject("data");
-            me.connect.sdk.java.Credentials.createWithOffer(UUID.randomUUID().toString(), outOfBandInvite.extractedAttachRequest).handle((co, er) -> {
-                if (er != null) {
-                    er.printStackTrace();
-                } else {
-                    CredentialOffer offer = new CredentialOffer();
-                    try {
 
-                        offer.claimId = outOfBandInvite.attach.getString("@id");
-                        offer.name = outOfBandInvite.attach.getString("comment");
-                        offer.pwDid = connectionData.getString("pw_did");
-                        JSONObject preview = outOfBandInvite.attach.getJSONObject("credential_preview");
-                        offer.attributes = preview.getJSONArray("attributes").getString(0);
-                        offer.serialized = co;
+            String claimId = outOfBandInvite.attach.getString("@id");
+            String pwDid =  connectionData.getString("pw_did");
+            if (!db.credentialOffersDao().checkOfferExists(claimId, pwDid)) {
+                me.connect.sdk.java.Credentials.createWithOffer(UUID.randomUUID().toString(), outOfBandInvite.extractedAttachRequest).handle((co, er) -> {
+                    if (er != null) {
+                        er.printStackTrace();
+                    } else {
+                        CredentialOffer offer = new CredentialOffer();
+                        try {
 
-                        offer.attachConnectionLogo = new JSONObject(outOfBandInvite.parsedInvite)
-                                .getString("profileUrl");
+                            offer.claimId = claimId;
+                            offer.name = outOfBandInvite.attach.getString("comment");
+                            offer.pwDid = pwDid;
+                            JSONObject preview = outOfBandInvite.attach.getJSONObject("credential_preview");
+                            offer.attributes = preview.getJSONArray("attributes").getString(0);
+                            offer.serialized = co;
 
-                        offer.messageId = null;
-                        db.credentialOffersDao().insertAll(offer);
+                            offer.attachConnectionLogo = new JSONObject(outOfBandInvite.parsedInvite)
+                                    .getString("profileUrl");
 
-                        acceptCredentialOffer(offer, db, liveData, action);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                            offer.messageId = null;
+                            db.credentialOffersDao().insertAll(offer);
+
+                            acceptCredentialOffer(offer, db, liveData, action);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
-                return null;
-            });
+                    return null;
+                });
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -76,7 +81,6 @@ public class StateCredentialOffers {
             SingleLiveData<Results> liveData,
             Action action
     ) {
-
         me.connect.sdk.java.Credentials.createWithOffer(UUID.randomUUID().toString(), outOfBandInvite.extractedAttachRequest).handle((co, er) -> {
             if (er != null) {
                 er.printStackTrace();

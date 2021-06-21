@@ -1,12 +1,8 @@
 package me.connect.sdk.java.samplekt.homepage
 
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
-import kotlinx.coroutines.launch
 import me.connect.sdk.java.*
 import me.connect.sdk.java.connection.QRConnection
-import me.connect.sdk.java.message.MessageState
 import me.connect.sdk.java.samplekt.SingleLiveData
 import me.connect.sdk.java.samplekt.db.Database
 import me.connect.sdk.java.samplekt.db.entity.Action
@@ -29,27 +25,28 @@ object StateProofRequests {
         try {
             val connection = Utils.convertToJSONObject(outOfBandInvite.existingConnection)!!
             val connectionData = connection.getJSONObject("data")
-            val pr = Proofs.createWithRequest(
-                UUID.randomUUID().toString(),
-                outOfBandInvite.extractedAttachRequest
-            ).wrap().await()
+            val pr = Proofs.createWithRequest(UUID.randomUUID().toString(), outOfBandInvite.extractedAttachRequest).wrap().await()
             val decodedProofAttach = ProofRequests.decodeProofRequestAttach(outOfBandInvite.attach)
             val thread = outOfBandInvite.attach.getJSONObject("~thread")
-            val name = ProofRequests.extractRequestedNameFromProofRequest(decodedProofAttach)
-            val attr = ProofRequests.extractRequestedAttributesFromProofRequest(decodedProofAttach)
-            if (name != null && attr != null) {
-                val proof = ProofRequest(
-                    serialized = pr,
-                    name = name,
-                    pwDid = connectionData.getString("pw_did"),
-                    attributes = attr,
-                    threadId = thread.getString("thid"),
-                    attachConnectionLogo = JSONObject(outOfBandInvite.parsedInvite)
-                        .getString("profileUrl")
-                )
-                db.proofRequestDao().insertAll(proof)
+            val threadId = thread.getString("thid");
+            if(!db.proofRequestDao().checkProofExists(threadId)) {
+                val name = ProofRequests.extractRequestedNameFromProofRequest(decodedProofAttach)
+                val attr =
+                    ProofRequests.extractRequestedAttributesFromProofRequest(decodedProofAttach)
+                if (name != null && attr != null) {
+                    val proof = ProofRequest(
+                        serialized = pr,
+                        name = name,
+                        pwDid = connectionData.getString("pw_did"),
+                        attributes = attr,
+                        threadId = threadId,
+                        attachConnectionLogo = JSONObject(outOfBandInvite.parsedInvite)
+                            .getString("profileUrl")
+                    )
+                    db.proofRequestDao().insertAll(proof)
 
-                acceptProofReq(proof, db, liveData, action);
+                    acceptProofReq(proof, db, liveData, action);
+                }
             }
         } catch (e: JSONException) {
             e.printStackTrace()
