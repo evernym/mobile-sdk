@@ -119,31 +119,34 @@ public class Credentials {
         return result;
     }
 
-    /**
-     * Create credential offer
-     *
-     * @param sourceId             custom string for this cred offer
-     * @param message              credential offer string
-     * @return serialized credential offer
-     */
     public static @NonNull
-    CompletableFuture<String> credentialSerialize(@NonNull int credHandle) {
-        Logger.getInstance().i("Accepting credential offer");
-        CompletableFuture<String> result = new CompletableFuture<>();
+    void fetchPublicEntities(
+            @NonNull String serializedCredentialStateObject,
+            @NonNull String message
+    ) {
         try {
-            CredentialApi.credentialSerialize(credHandle).whenComplete((sc, e) -> {
-                if (e != null) {
-                    Logger.getInstance().e("Failed to serialize credentials: ", e);
-                    result.completeExceptionally(e);
-                } else {
-                    result.complete(sc);
+            CredentialApi.credentialDeserialize(serializedCredentialStateObject).whenComplete((credHandle, er) -> {
+                if (er != null) {
+                    Logger.getInstance().e("Failed to deserialize credential offer: ", er);
                 }
-
+                try {
+                    CredentialApi.credentialUpdateStateWithMessage(credHandle, message).whenComplete((crHan, err) -> {
+                        if (err != null) {
+                            err.printStackTrace();
+                        }
+                        try {
+                            UtilsApi.vcxFetchPublicEntities();
+                        } catch (VcxException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                } catch (VcxException e) {
+                    e.printStackTrace();
+                }
             });
-        } catch (Exception ex) {
-            result.completeExceptionally(ex);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return result;
     }
 
     /**
@@ -293,37 +296,6 @@ public class Credentials {
             result.completeExceptionally(ex);
         }
         return result;
-    }
-
-    /**
-     * Loops indefinitely until proof request status is not changed
-     *
-     * @param serializedCredOffer string containing serialized credential offer
-     * @param messageState    desired message state
-     * @return string containing serialized proof request
-     */
-    public static String awaitStatusChangeForOffer(String serializedCredOffer, MessageState messageState) {
-        Logger.getInstance().i("Awaiting proof state change");
-        int count = 1;
-        try {
-            Integer handle = CredentialApi.credentialDeserialize(serializedCredOffer).get();
-            while (true) {
-                Logger.getInstance().i("Awaiting proof state change: attempt #" + count);
-                Integer state0 = CredentialApi.credentialUpdateState(handle).get();
-                Logger.getInstance().i("Awaiting proof state change: update state=" + state0);
-                Integer state = CredentialApi.credentialGetState(handle).get();
-                Logger.getInstance().i("Awaiting proof state change: got state=" + state);
-                if (messageState.matches(state)) {
-                    return CredentialApi.credentialSerialize(handle).get();
-                }
-                count++;
-                Thread.sleep(1000);
-            }
-        } catch (Exception e) {
-            Logger.getInstance().e("Failed to await proof state", e);
-            e.printStackTrace();
-        }
-        return serializedCredOffer;
     }
 
     /**

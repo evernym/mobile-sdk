@@ -143,6 +143,8 @@ public class HomePageViewModel extends AndroidViewModel {
                 if (err != null) {
                     err.printStackTrace();
                 } else {
+                    Credentials.fetchPublicEntities(co, holder.offer);
+
                     CredentialOffer offer = new CredentialOffer();
                     offer.claimId = holder.id;
                     offer.name = holder.name;

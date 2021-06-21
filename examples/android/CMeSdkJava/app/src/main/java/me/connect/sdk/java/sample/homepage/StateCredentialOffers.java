@@ -203,7 +203,7 @@ public class StateCredentialOffers {
             Connection con = db.connectionDao().getByPwDid(offer.pwDid);
             Credentials.rejectOffer(con.serialized, offer.serialized).handle((s, err) -> {
                 if (s != null) {
-                    String serializedProof = Credentials.awaitStatusChangeForOffer(s, MessageState.REJECTED);
+                    String serializedProof = Credentials.awaitStatusChange(s, MessageState.REJECTED);
                     offer.serialized = serializedProof;
                     offer.accepted = false;
                     db.credentialOffersDao().update(offer);
