@@ -1,12 +1,10 @@
 package me.connect.sdk.java.samplekt.db.dao
 
 import androidx.lifecycle.LiveData
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import me.connect.sdk.java.samplekt.db.entity.Action
 
+@Dao
 interface ActionDao {
     @Query("SELECT * FROM `action`")
     fun getAllAsync(): List<Action>
@@ -21,11 +19,11 @@ interface ActionDao {
     fun getActionsByStatus(status: String?): LiveData<List<Action>>
 
     @Insert
-    fun insertAll(vararg actions: Action)
+    suspend fun insertAll(vararg actions: Action)
 
     @Update
-    fun update(action: Action)
+    suspend fun update(action: Action)
 
     @Delete
-    fun delete(action: Action)
+    suspend fun delete(action: Action)
 }

@@ -32,7 +32,7 @@ class HomePageAdapter(private val itemClickListener: ItemClickListener) : Recycl
         holder.buttonAccept.visibility = View.INVISIBLE
         holder.buttonReject.visibility = View.INVISIBLE
 
-        if (action.entryId == null && action.messageAnswers == null) {
+        if (action.entryId == null || action.messageAnswers == null) {
             holder.buttonAccept.visibility = View.VISIBLE
             holder.buttonReject.visibility = View.VISIBLE
             holder.buttonAccept.isEnabled = true

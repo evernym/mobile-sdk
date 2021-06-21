@@ -22,7 +22,6 @@ import me.connect.sdk.java.samplekt.wrap
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
-import java.util.concurrent.Executors
 
 class HomePageViewModel(application: Application) : AndroidViewModel(application) {
     private val db: Database = Database.getInstance(application)
@@ -64,13 +63,15 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
 
     private fun answerStructMessage(actionId: Int, answer: String, liveData: SingleLiveData<Results>) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val sm = db.structuredMessageDao().getById(actionId)
-            val con = db.connectionDao().getByPwDid(sm.pwDid)
-            StructuredMessages.answer(con.serialized, sm.messageId, sm.type, sm.serialized, answer).wrap().await()
+            val action = db.actionDao().getActionsById(actionId)
+            val con = db.connectionDao().getByPwDid(action.pwDid!!)
+            val sm = db.structuredMessageDao().getByEntryIdAndPwDid(action.entryId, action.pwDid)
+
+            StructuredMessages.answer(con.serialized, sm!!.messageId, sm.type, sm.serialized, answer).wrap().await()
             sm.selectedAnswer = answer;
             db.structuredMessageDao().update(sm)
             liveData.postValue(QUESTION_SUCCESS)
-
+            HistoryActions.addToHistory(actionId, "Ask to question", db, liveData);
         } catch (e: Exception) {
             e.printStackTrace()
             liveData.postValue(QUESTION_FAILURE);
@@ -276,12 +277,13 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
                         invite = invite,
                         name = attachRequestObject.getString("comment"),
                         description = inviteObject.getString("goal"),
-                        details = preview.getJSONArray("attributes").getString(0),
+                        details = preview.getJSONArray("attributes").getString(0)!!,
                         icon = inviteObject.getString("profileUrl"),
                         status = PENDING.toString()
                     )
-
                     db.actionDao().insertAll(action)
+                    liveData.postValue(ACTION_SUCCESS)
+                    return@launch
                 }
                 if (ConnectionsUtils.isProofInviteType(attachType)) {
                     val decodedProofAttach = ProofRequests.decodeProofRequestAttach(attachRequestObject)
@@ -295,6 +297,8 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
                     )
 
                     db.actionDao().insertAll(action)
+                    liveData.postValue(ACTION_SUCCESS)
+                    return@launch
                 }
             } else {
                 val action = Action(
@@ -306,15 +310,15 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
                 )
 
                 db.actionDao().insertAll(action)
+                liveData.postValue(ACTION_SUCCESS)
             }
-            liveData.postValue(ACTION_SUCCESS)
         } catch (e: JSONException) {
             e.printStackTrace()
             liveData.postValue(ACTION_FAILURE)
         }
     }
 
-    private fun createActionWithOffer(
+    private suspend fun createActionWithOffer(
         type: String,
         name: String,
         icon: String,
@@ -341,7 +345,7 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    private fun createActionWithProof(
+    private suspend fun createActionWithProof(
         type: String,
         name: String,
         icon: String,
@@ -366,7 +370,7 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    private fun createActionWithQuestion(
+    private suspend fun createActionWithQuestion(
         type: String,
         name: String,
         icon: String,
@@ -397,33 +401,31 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
     }
 
     object HistoryActions {
-        fun addHistoryAction(
+        suspend fun addHistoryAction(
             db: Database,
             name: String,
             description: String,
             icon: String,
             liveData: SingleLiveData<Results>
         ) {
-            Executors.newSingleThreadExecutor().execute {
-                try {
-                    val action = Action(
-                        invite = null,
-                        name = name,
-                        description = description,
-                        icon = icon,
-                        status = HISTORIZED.toString()
-                    )
+            try {
+                val action = Action(
+                    invite = null,
+                    name = name,
+                    description = description,
+                    icon = icon,
+                    status = HISTORIZED.toString()
+                )
 
-                    db.actionDao().insertAll(action)
-                    liveData.postValue(ACTION_SUCCESS)
-                } catch (e: java.lang.Exception) {
-                    e.printStackTrace()
-                    liveData.postValue(ACTION_FAILURE)
-                }
+                db.actionDao().insertAll(action)
+                liveData.postValue(ACTION_SUCCESS)
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+                liveData.postValue(ACTION_FAILURE)
             }
         }
 
-        fun addToHistory(
+        suspend fun addToHistory(
             actionId: Int,
             description: String,
             db: Database,

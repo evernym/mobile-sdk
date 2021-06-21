@@ -90,6 +90,7 @@ class HomePageFragment: Fragment() {
                     PROOF_SUCCESS -> Toast.makeText(activity, "Proof request accepted", Toast.LENGTH_SHORT).show()
                     PROOF_MISSED -> Toast.makeText(activity, "Credentials missed", Toast.LENGTH_SHORT).show()
                     PROOF_FAILURE -> Toast.makeText(activity, "Proof request accept failure", Toast.LENGTH_SHORT).show()
+                    else -> return@Observer
                 }
             })
     }
@@ -107,6 +108,7 @@ class HomePageFragment: Fragment() {
                     PROOF_FAILURE -> Toast.makeText(activity, "Proof request reject failure", Toast.LENGTH_SHORT).show()
                     REJECT -> Toast.makeText(activity, "Rejected", Toast.LENGTH_SHORT).show()
                     FAILURE -> Toast.makeText(activity, "FAILURE", Toast.LENGTH_SHORT).show()
+                    else -> return@Observer
                 }
             })
     }
@@ -120,6 +122,7 @@ class HomePageFragment: Fragment() {
                 when (status) {
                     ACTION_SUCCESS -> Toast.makeText(activity, "QR code is handled", Toast.LENGTH_SHORT).show()
                     ACTION_FAILURE -> Toast.makeText(activity, "QR code is handle failure", Toast.LENGTH_SHORT).show()
+                    else -> return@Observer
                 }
                 binding.checkMessages.isEnabled = true
                 binding.buttonQr.isEnabled = true
