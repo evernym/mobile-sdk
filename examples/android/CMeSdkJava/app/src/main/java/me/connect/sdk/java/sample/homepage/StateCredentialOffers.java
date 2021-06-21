@@ -120,7 +120,7 @@ public class StateCredentialOffers {
         Connection connection = db.connectionDao().getByPwDid(offer.pwDid);
         me.connect.sdk.java.Credentials.acceptOffer(connection.serialized, offer.serialized).handle((s, throwable) -> {
                 if (s != null) {
-                    offer.serialized = me.connect.sdk.java.Credentials.awaitStatusChange(s, MessageState.ACCEPTED);
+                    offer.serialized = me.connect.sdk.java.Credentials.awaitCredentialReceived(s);
                     offer.accepted = true;
                     db.credentialOffersDao().update(offer);
                 }
@@ -146,7 +146,7 @@ public class StateCredentialOffers {
         Connections.create(offer.attachConnection, new QRConnection())
                 .handle((res, throwable) -> {
                     if (res != null) {
-                        String serializedCon = Connections.awaitStatusChange(res, MessageState.ACCEPTED);
+                        String serializedCon = Connections.awaitStatusChange(res);
 
                         String pwDid = Connections.getPwDid(serializedCon);
                         Connection c = new Connection();
@@ -167,7 +167,7 @@ public class StateCredentialOffers {
 
                         me.connect.sdk.java.Credentials.acceptOffer(serializedCon, offer.serialized).handle((s, thr) -> {
                                 if (s != null) {
-                                    offer.serialized = me.connect.sdk.java.Credentials.awaitStatusChange(s, MessageState.ACCEPTED);
+                                    offer.serialized = me.connect.sdk.java.Credentials.awaitCredentialReceived(s);
                                     offer.pwDid = pwDid;
                                     offer.accepted = true;
                                     db.credentialOffersDao().update(offer);
@@ -203,8 +203,7 @@ public class StateCredentialOffers {
             Connection con = db.connectionDao().getByPwDid(offer.pwDid);
             Credentials.rejectOffer(con.serialized, offer.serialized).handle((s, err) -> {
                 if (s != null) {
-                    String serializedProof = Credentials.awaitStatusChange(s, MessageState.REJECTED);
-                    offer.serialized = serializedProof;
+                    offer.serialized = s;
                     offer.accepted = false;
                     db.credentialOffersDao().update(offer);
                 }

@@ -77,7 +77,7 @@ public class ConnectMeVcx {
      * @return {@link CompletableFuture}
      */
     public static @NonNull
-    CompletableFuture<Void> init(Context context) {
+    CompletableFuture<Void> init(Context context, @RawRes int genesisPool) {
         Logger.getInstance().setLogLevel(LogLevel.DEBUG);
         Logger.getInstance().i("Initializing SDK");
         CompletableFuture<Void> result = new CompletableFuture<>();
@@ -90,7 +90,7 @@ public class ConnectMeVcx {
                 result.completeExceptionally(ex);
                 return;
             }
-            initialize(context).whenComplete((returnCode, err) -> {
+            initialize(context, genesisPool).whenComplete((returnCode, err) -> {
                 if (err != null) {
                     Logger.getInstance().e("Init failed", err);
                     result.completeExceptionally(err);
@@ -265,15 +265,12 @@ public class ConnectMeVcx {
         makeDir(walletDir);
         Log.d(TAG, "Wallet dir was made");
 
-        File genesisFile = writeGenesisFile(context, genesisPool);
-
         String agencyConfig = ConnectMeVcx.Config.builder()
                 .withAgency(AgencyConfig.DEFAULT)
                 .withGenesisPool(genesisPool)
                 .withWalletName(walletName)
                 .withLogoUrl("https://robothash.com/logo.png")
                 .withInstitutionName("real institution name")
-                .withGenesisPath(genesisFile.getAbsolutePath())
                 .withWalletKey(walletKey)
                 .buildVcxConfig();
 
@@ -295,7 +292,7 @@ public class ConnectMeVcx {
                             Logger.getInstance().i("createOneTimeInfo called: " + oneTimeInfo);
                             try {
                                 SecurePreferencesHelper.setLongStringValue(context, SECURE_PREF_VCXCONFIG, oneTimeInfo);
-                                initialize(context).whenComplete((returnCode, error) -> {
+                                initialize(context, genesisPool).whenComplete((returnCode, error) -> {
                                     if (error != null) {
                                         Logger.getInstance().e("Init failed", error);
                                         result.completeExceptionally(error);
@@ -318,7 +315,7 @@ public class ConnectMeVcx {
         return result;
     }
 
-    private static CompletableFuture<Void> initialize(Context context) {
+    private static CompletableFuture<Void> initialize(Context context, @RawRes int genesisPool) {
         CompletableFuture<Void> result = new CompletableFuture<>();
         // When we restore data, then we are not calling createOneTimeInfo
         // and hence ca-crt is not written within app directory
@@ -333,7 +330,7 @@ public class ConnectMeVcx {
                 if (err != null) {
                     result.completeExceptionally(err);
                 } else {
-                    initPool(config);
+                    initPool(context, genesisPool);
                     result.complete(null);
                 }
             });
@@ -349,12 +346,12 @@ public class ConnectMeVcx {
         return result;
     }
 
-    private static void initPool(String config) {
+    private static void initPool(Context context, @RawRes int genesisPool) {
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
-                JSONObject vcxConfig = new JSONObject(config);
                 JSONObject poolConfig = new JSONObject();
-                poolConfig.put("genesis_path", vcxConfig.getString("genesis_path"));
+                File genesisFile = writeGenesisFile(context, genesisPool);
+                poolConfig.put("genesis_path", genesisFile.getAbsoluteFile());
                 poolConfig.put("pool_name", "android-sample-pool");
                 VcxApi.vcxInitPool(poolConfig.toString());
             } catch (Exception e) {
@@ -571,7 +568,6 @@ public class ConnectMeVcx {
         private String walletName;
         private String logoUrl;
         private String institutionName;
-        private String genesisPath;
         private String walletKey;
 
         private ConfigBuilder() {
@@ -650,19 +646,6 @@ public class ConnectMeVcx {
         }
 
         /**
-         * Set genesis path
-         *
-         * @param genesisPath genesisPath
-         *
-         * @return
-         */
-        public @NonNull
-        ConfigBuilder withGenesisPath(String genesisPath) {
-            this.genesisPath = genesisPath;
-            return this;
-        }
-
-        /**
          * Set wallet key
          *
          * @param walletKey walletKey
@@ -690,7 +673,6 @@ public class ConnectMeVcx {
                     walletName,
                     logoUrl,
                     institutionName,
-                    genesisPath,
                     walletKey
             );
         }
@@ -706,7 +688,6 @@ public class ConnectMeVcx {
             agencyConfig.put("wallet_name", this.walletName);
             agencyConfig.put("wallet_key", this.walletKey);
             agencyConfig.put("protocol_type", "3.0");
-            agencyConfig.put("path", this.genesisPath);
             agencyConfig.put("logo", this.logoUrl);
             agencyConfig.put("name", this.institutionName);
             return agencyConfig.toString();
@@ -723,7 +704,6 @@ public class ConnectMeVcx {
         private String walletName;
         private String logoUrl;
         private String institutionName;
-        private String genesisPath;
         private String walletKey;
 
         public Config(
@@ -733,7 +713,6 @@ public class ConnectMeVcx {
             String walletName,
             String logoUrl,
             String institutionName,
-            String genesisPath,
             String walletKey
         ) {
             this.agency = agency;
@@ -742,7 +721,6 @@ public class ConnectMeVcx {
             this.walletName = walletName;
             this.logoUrl = logoUrl;
             this.institutionName = institutionName;
-            this.genesisPath = genesisPath;
             this.walletKey = walletKey;
         }
 

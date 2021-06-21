@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun usuallyTimeRun() {
-        ConnectMeVcx.init(this).handleAsync<Any?> { res: Void?, err: Throwable? ->
+        ConnectMeVcx.init(this, R.raw.genesis).handleAsync<Any?> { res: Void?, err: Throwable? ->
             val message: String
             if (err == null) {
                 message = "SDK initialized successfully."

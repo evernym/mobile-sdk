@@ -88,7 +88,7 @@ object StateCredentialOffers {
             val connection: Connection = db.connectionDao().getByPwDid(offer.pwDid!!)
             val s = Credentials.acceptOffer(connection.serialized, offer.serialized).wrap().await()
             if (s != null) {
-                offer.serialized = Credentials.awaitStatusChange(s, MessageState.ACCEPTED)
+                offer.serialized = Credentials.awaitCredentialReceived(s)
                 offer.accepted = true
                 db.credentialOffersDao().update(offer)
 
@@ -140,10 +140,7 @@ object StateCredentialOffers {
             val s = Credentials.acceptOffer(serializedCon, offer.serialized).wrap().await()
             if (s != null) {
                 offer.serialized =
-                    Credentials.awaitStatusChange(
-                        s,
-                        MessageState.ACCEPTED
-                    )
+                    Credentials.awaitCredentialReceived(s)
                 offer.pwDid = pwDid
                 offer.accepted = true
                 db.credentialOffersDao().update(offer)
@@ -180,10 +177,7 @@ object StateCredentialOffers {
             val s = Credentials.rejectOffer(con.serialized, offer.serialized).wrap().await()
             if (s != null) {
                 val serializedProof =
-                    Credentials.awaitStatusChangeForOffer(
-                        s,
-                        MessageState.REJECTED
-                    )
+                    Credentials.awaitCredentialReceived(s)
                 offer.serialized = serializedProof
                 offer.accepted = false
                 db.credentialOffersDao().update(offer)

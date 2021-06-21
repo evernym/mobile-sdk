@@ -145,8 +145,7 @@ object StateConnections {
     ) {
         try {
             val co = Connections.create(parsedInvite, QRConnection()).wrap().await()
-            val serializedCon =
-                Connections.awaitStatusChange(co, MessageState.ACCEPTED)
+            val serializedCon = Connections.awaitStatusChange(co)
             val pwDid = Connections.getPwDid(serializedCon)
             val c = Connection(
                 name = data.name,

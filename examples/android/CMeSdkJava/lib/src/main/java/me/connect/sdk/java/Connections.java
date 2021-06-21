@@ -321,7 +321,7 @@ public class Connections {
      * @return string containing serialized connection
      */
     public static @NonNull
-    String awaitStatusChange(@NonNull String serializedConnection, MessageState messageState) {
+    String awaitStatusChange(@NonNull String serializedConnection) {
         Logger.getInstance().i("Awaiting connection state change");
         int count = 1;
         try {
@@ -330,7 +330,7 @@ public class Connections {
                 Logger.getInstance().i("Awaiting connection state change: attempt #" + count);
                 Integer state = ConnectionApi.vcxConnectionUpdateState(handle).get();
                 Logger.getInstance().i("Awaiting connection state change: got state=" + state);
-                if (messageState.matches(state)) {
+                if (MessageState.ACCEPTED.matches(state)) {
                     return ConnectionApi.connectionSerialize(handle).get();
                 }
                 count++;

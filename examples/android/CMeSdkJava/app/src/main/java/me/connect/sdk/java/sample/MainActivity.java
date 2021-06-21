@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private ConnectMeVcx.Constants buildConstants() {
-        ConnectMeVcx.Constants constants = ConnectMeVcx.Constants.builder()
+        return ConnectMeVcx.Constants.builder()
             .withWalletName(Constants.WALLET_NAME)
             .withPrefsName(Constants.PREFS_NAME)
             .withSponseeId(Constants.SPONSEE_ID)
@@ -77,11 +77,10 @@ public class MainActivity extends AppCompatActivity {
             .withPlaceholderServerUrl(Constants.PLACEHOLDER_SERVER_URL)
             .withServerUrl(Constants.SERVER_URL)
             .build();
-        return constants;
     }
 
     private void usuallyTimeRun() {
-        ConnectMeVcx.init(this).handleAsync((res, err) -> {
+        ConnectMeVcx.init(this, R.raw.genesis).handleAsync((res, err) -> {
             String message;
             if (err == null) {
                 message = "SDK initialized successfully.";

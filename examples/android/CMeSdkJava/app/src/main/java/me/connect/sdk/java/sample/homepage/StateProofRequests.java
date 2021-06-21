@@ -126,9 +126,8 @@ public class StateProofRequests {
                 String data = Proofs.mapCredentials(creds);
                 Proofs.send(con.serialized, proof.serialized, data, "{}").handle((s, e) -> {
                     if (s != null) {
-                        String serializedProof = Proofs.awaitStatusChange(s, MessageState.ACCEPTED);
                         proof.accepted = true;
-                        proof.serialized = serializedProof;
+                        proof.serialized = s;
                         db.proofRequestDao().update(proof);
                     }
                     HomePageViewModel.addToHistory(
@@ -154,7 +153,7 @@ public class StateProofRequests {
         Connections.create(proof.attachConnection, new QRConnection())
                 .handle((res, throwable) -> {
                     if (res != null) {
-                        String serializedCon = Connections.awaitStatusChange(res, MessageState.ACCEPTED);
+                        String serializedCon = Connections.awaitStatusChange(res);
 
                         String pwDid = Connections.getPwDid(serializedCon);
                         Connection c = new Connection();
@@ -186,9 +185,8 @@ public class StateProofRequests {
                             String data = Proofs.mapCredentials(creds);
                             Proofs.send(serializedCon, proof.serialized, data, "{}").handle((s, e) -> {
                                 if (s != null) {
-                                    String serializedProof = Proofs.awaitStatusChange(s, MessageState.ACCEPTED);
                                     proof.accepted = true;
-                                    proof.serialized = serializedProof;
+                                    proof.serialized = s;
                                     db.proofRequestDao().update(proof);
                                 }
 
@@ -223,8 +221,7 @@ public class StateProofRequests {
             Connection con = db.connectionDao().getByPwDid(proof.pwDid);
             Proofs.reject(con.serialized, proof.serialized).handle((s, err) -> {
                 if (s != null) {
-                    String serializedProof = Proofs.awaitStatusChange(s, MessageState.REJECTED);
-                    proof.serialized = serializedProof;
+                    proof.serialized = s;
                     proof.accepted = false;
                     db.proofRequestDao().update(proof);
                 }

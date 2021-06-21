@@ -104,9 +104,8 @@ object StateProofRequests {
             val data = Proofs.mapCredentials(creds)
             val s =  Proofs.send(con.serialized, proof.serialized, data, "{}").wrap().await()
             if (s != null) {
-                val serializedProof = Proofs.awaitStatusChange(s, MessageState.ACCEPTED)
                 proof.accepted = true
-                proof.serialized = serializedProof
+                proof.serialized = s
                 db.proofRequestDao().update(proof)
 
                 HomePageViewModel.HistoryActions.addToHistory(
@@ -134,13 +133,12 @@ object StateProofRequests {
     ) {
         val res = Connections.create(proof.attachConnection!!, QRConnection()).wrap().await()
         if (res != null) {
-            val serializedCon = Connections.awaitStatusChange(res, MessageState.ACCEPTED)
-            val pwDid = Connections.getPwDid(serializedCon)
+            val pwDid = Connections.getPwDid(res)
             val c = Connection(
                 name = proof.attachConnectionName!!,
                 icon = proof.attachConnectionLogo,
                 pwDid = pwDid,
-                serialized = serializedCon
+                serialized = res
             )
             proof.pwDid = pwDid
             db.connectionDao().insertAll(c)
@@ -162,11 +160,10 @@ object StateProofRequests {
                 liveData.postValue(PROOF_MISSED)
             }
             val data = Proofs.mapCredentials(creds)
-            val s = Proofs.send(serializedCon, proof.serialized, data, "{}").wrap().await()
+            val s = Proofs.send(res, proof.serialized, data, "{}").wrap().await()
             if (s != null) {
-                val serializedProof = Proofs.awaitStatusChange(s, MessageState.ACCEPTED)
                 proof.accepted = true
-                proof.serialized = serializedProof
+                proof.serialized = s
                 db.proofRequestDao().update(proof)
 
                 HomePageViewModel.HistoryActions.addToHistory(
@@ -195,8 +192,7 @@ object StateProofRequests {
             }
             val con = db.connectionDao().getByPwDid(proof.pwDid!!)
             val s = Proofs.reject(con.serialized, proof.serialized).wrap().await()
-            val serializedProof = Proofs.awaitStatusChange(s, MessageState.REJECTED)
-            proof.serialized = serializedProof
+            proof.serialized = s
             proof.accepted = false
             db.proofRequestDao().update(proof)
 
