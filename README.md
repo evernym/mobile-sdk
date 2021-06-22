@@ -23,7 +23,7 @@ Connecting and exchanging encrypted data between an Agency (server side) and an 
 
 Going through this tutorial we will create a simple application which will allow us to accept and present verifiable encrypted credentials.
 
-Before starting, please read the [Base Concepts document](docs/0.Base Concepts.md) containing explanations for terms that will be frequently used in this guide.
+Before starting, please read the [Base Concepts document](docs/0.BaseConcepts.md) containing explanations for terms that will be frequently used in this guide.
 
 1. [Create a new App](docs/1.ProjectSetup.md)
 1. [Initialize Wallet and Agent](docs/2.Initialization.md) on a specific Agency (web server)
@@ -37,7 +37,7 @@ Before starting, please read the [Base Concepts document](docs/0.Base Concepts.m
 
 #### Additional Sources:
 * [Configuration](docs/Configuration.md) &#8212; The list of all VCX library configuration options. 
-* [Errors](docs/vcx/VcxErrors.md) &#8212; The list of all possible errors and their definitions. 
+* [Errors](docs/Errors.md) &#8212; The list of all possible errors and their definitions. 
 * [New Messages Processing](docs/8.Messages.md)
 * [Credentials With Attachments](docs/9.CredentialsWithAttachments.md)
 * [Push Notifications](docs/PushNotifications.md)
@@ -45,10 +45,11 @@ Before starting, please read the [Base Concepts document](docs/0.Base Concepts.m
 * [Advanced Techniques](docs/Advanced.md)
 
 ### Helpful links
+- [Verity-SDK Samples](https://github.com/evernym/verity-sdk#sample-code) - samples can be used for testing of different application use cases.
+- [React-Native-White-Label-App](https://gitlab.com/evernym/mobile/react-native-white-label-app) - React-Native package built using MSDK which allows the quick building of customized digital wallets
 - Connect.Me Public Beta &#8212; Most of the features of the Evernym Mobile SDK are showcased in [Connect.Me](https://connect.me/). You can use upcoming releases of Connect.Me by clicking the appropriate link from your device.
   - IOS: [https://testflight.apple.com/join/bmbX21Kq](https://testflight.apple.com/join/bmbX21Kq)
   - Android: [https://play.google.com/apps/testing/me.connect](https://play.google.com/apps/testing/me.connect)
-- <a href="https://github.com/sovrin-foundation/connector-app" target="_blank">Sovrin Connector App</a> &#8212; Helpful resource to see how an older version of mobile SDK works.
 
 ## Acknowledgements
 This effort is part of a project that has received funding from the European Union’s Horizon 2020 research and innovation program under grant agreement No 871932 delivered through our participation in the eSSIF-Lab, which aims to advance the broad adoption of self-sovereign identity for the benefit of all.
