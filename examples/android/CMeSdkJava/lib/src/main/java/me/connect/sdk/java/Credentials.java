@@ -5,7 +5,6 @@ import androidx.annotation.NonNull;
 import com.evernym.sdk.vcx.VcxException;
 import com.evernym.sdk.vcx.connection.ConnectionApi;
 import com.evernym.sdk.vcx.credential.CredentialApi;
-import com.evernym.sdk.vcx.proof.DisclosedProofApi;
 import com.evernym.sdk.vcx.utils.UtilsApi;
 
 import org.json.JSONArray;
@@ -14,10 +13,11 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import java9.util.concurrent.CompletableFuture;
+import me.connect.sdk.java.message.Message;
 import me.connect.sdk.java.message.MessageState;
-import me.connect.sdk.java.message.MessageStatusType;
 import me.connect.sdk.java.message.MessageType;
 
 /**
@@ -155,27 +155,16 @@ public class Credentials {
                                     return;
                                 }
                                 try {
-                                    ConnectionApi.connectionGetPwDid(conHandle).whenComplete((pwDid, t) -> {
-                                        if (t != null) {
-                                            Logger.getInstance().e("Failed to get pwDid: ", t);
-                                            result.completeExceptionally(t);
-                                            return;
+                                    CredentialApi.credentialSerialize(credHandle).whenComplete((sc, th) -> {
+                                        if (th != null) {
+                                            Logger.getInstance().e("Failed to serialize credentials: ", th);
+                                            result.completeExceptionally(th);
+                                        } else {
+                                            result.complete(sc);
                                         }
-                                            try {
-                                                CredentialApi.credentialSerialize(credHandle).whenComplete((sc, th) -> {
-                                                    if (th != null) {
-                                                        Logger.getInstance().e("Failed to serialize credentials: ", th);
-                                                        result.completeExceptionally(th);
-                                                    } else {
-                                                        result.complete(sc);
-                                                    }
-                                                });
-                                            } catch (VcxException ex) {
-                                                Logger.getInstance().e("Failed to serialize credentials: ", ex);
-                                                result.completeExceptionally(ex);
-                                            }
-                                        });
-                                } catch (Exception ex) {
+                                    });
+                                } catch (VcxException ex) {
+                                    Logger.getInstance().e("Failed to serialize credentials: ", ex);
                                     result.completeExceptionally(ex);
                                 }
                             });
@@ -231,26 +220,15 @@ public class Credentials {
                                     return;
                                 }
                                 try {
-                                    ConnectionApi.connectionGetPwDid(conHandle).whenComplete((pwDid, t) -> {
-                                        if (t != null) {
-                                            Logger.getInstance().e("Failed to get pwDid: ", t);
-                                            result.completeExceptionally(t);
-                                            return;
-                                        }
-                                        try {
-                                            CredentialApi.credentialSerialize(credHandle).whenComplete((sc, th) -> {
-                                                if (th != null) {
-                                                    Logger.getInstance().e("Failed to serialize credentials: ", th);
-                                                    result.completeExceptionally(th);
-                                                } else {
-                                                    result.complete(sc);
-                                                }
-                                            });
-                                        } catch (VcxException ex) {
-                                            result.completeExceptionally(ex);
+                                    CredentialApi.credentialSerialize(credHandle).whenComplete((sc, th) -> {
+                                        if (th != null) {
+                                            Logger.getInstance().e("Failed to serialize credentials: ", th);
+                                            result.completeExceptionally(th);
+                                        } else {
+                                            result.complete(sc);
                                         }
                                     });
-                                } catch (Exception ex) {
+                                } catch (VcxException ex) {
                                     result.completeExceptionally(ex);
                                 }
                             });
@@ -291,6 +269,38 @@ public class Credentials {
                 }
                 count++;
                 Thread.sleep(1000);
+            }
+        } catch (Exception e) {
+            Logger.getInstance().e("Failed to await cred state", e);
+            e.printStackTrace();
+        }
+        return serializedCredential;
+    }
+
+    /**
+     * Loops indefinitely until credential request status is not changed
+     *
+     * @param serializedCredential string containing serialized credential request
+     * @param claimId string claimId of credential request
+     * @return string containing serialized credential
+     */
+    public static String awaitCredentialReceived(String serializedCredential, String claimId) {
+        Logger.getInstance().i("Awaiting cred state change");
+        int status = -1;
+        try {
+            Integer handle = CredentialApi.credentialDeserialize(serializedCredential).get();
+            while (true) {
+                try {
+                    Message message = Messages.downloadMessageByTypeAndThreadId(MessageType.CREDENTIAL, claimId).get();
+                    status = CredentialApi.credentialUpdateStateWithMessage(handle, message.getPayload()).get();
+                    if (MessageState.ACCEPTED.matches(status)) {
+                        UtilsApi.vcxFetchPublicEntities();
+                        return CredentialApi.credentialSerialize(handle).get();
+                    }
+                    Thread.sleep(1000);
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         } catch (Exception e) {
             Logger.getInstance().e("Failed to await cred state", e);

@@ -4,15 +4,20 @@ import androidx.annotation.NonNull;
 
 import com.evernym.sdk.vcx.VcxException;
 import com.evernym.sdk.vcx.connection.ConnectionApi;
+import com.evernym.sdk.vcx.credential.CredentialApi;
+import com.evernym.sdk.vcx.utils.UtilsApi;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import java9.util.concurrent.CompletableFuture;
 import me.connect.sdk.java.connection.Connection;
 import me.connect.sdk.java.message.AriesMessageType;
+import me.connect.sdk.java.message.Message;
 import me.connect.sdk.java.message.MessageState;
+import me.connect.sdk.java.message.MessageType;
 
 /**
  * Class containing methods to work with connections
@@ -321,7 +326,7 @@ public class Connections {
      * @return string containing serialized connection
      */
     public static @NonNull
-    String awaitStatusChange(@NonNull String serializedConnection) {
+    String awaitConnectionReceived(@NonNull String serializedConnection) {
         Logger.getInstance().i("Awaiting connection state change");
         int count = 1;
         try {
@@ -338,6 +343,38 @@ public class Connections {
             }
         } catch (Exception e) {
             Logger.getInstance().e("Failed to await connection state", e);
+            e.printStackTrace();
+        }
+        return serializedConnection;
+    }
+
+    /**
+     * Loops indefinitely until connection status is not changed
+     *
+     * @param serializedConnection string containing serialized connection
+     * @param pwDid string pwDid of connection
+     * @return string containing serialized connection
+     */
+    public static String awaitConnectionReceived(String serializedConnection, String pwDid) {
+        Logger.getInstance().i("Awaiting connection state change");
+        int status = -1;
+        try {
+            System.out.println("serializedConnection" + serializedConnection);
+            Integer handle = ConnectionApi.connectionDeserialize(serializedConnection).get();
+            while (true) {
+                try {
+                    Message message = Messages.downloadMessageByTypeAndThreadId(MessageType.CONNECTION_RESPONSE, pwDid).get();
+                    status = ConnectionApi.vcxConnectionUpdateStateWithMessage(handle, message.getPayload()).get();
+                    if (MessageState.ACCEPTED.matches(status)) {
+                        return ConnectionApi.connectionSerialize(handle).get();
+                    }
+                    Thread.sleep(1000);
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            Logger.getInstance().e("Failed to await cred state", e);
             e.printStackTrace();
         }
         return serializedConnection;

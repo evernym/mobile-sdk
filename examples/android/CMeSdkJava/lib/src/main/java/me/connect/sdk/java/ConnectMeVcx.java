@@ -265,12 +265,15 @@ public class ConnectMeVcx {
         makeDir(walletDir);
         Log.d(TAG, "Wallet dir was made");
 
+//        File genesisFile = writeGenesisFile(context, genesisPool);
+
         String agencyConfig = ConnectMeVcx.Config.builder()
                 .withAgency(AgencyConfig.DEFAULT)
                 .withGenesisPool(genesisPool)
                 .withWalletName(walletName)
                 .withLogoUrl("https://robothash.com/logo.png")
                 .withInstitutionName("real institution name")
+//                .withGenesisPath(genesisFile.getAbsolutePath())
                 .withWalletKey(walletKey)
                 .buildVcxConfig();
 
@@ -315,6 +318,17 @@ public class ConnectMeVcx {
         return result;
     }
 
+    private static String vcxConfigWithoutGenesisPath(String config) {
+        try {
+            JSONObject vcxConfig = new JSONObject(config);
+            vcxConfig.remove("genesis_path");
+            return vcxConfig.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return config;
+    }
+
     private static CompletableFuture<Void> initialize(Context context, @RawRes int genesisPool) {
         CompletableFuture<Void> result = new CompletableFuture<>();
         // When we restore data, then we are not calling createOneTimeInfo
@@ -324,9 +338,8 @@ public class ConnectMeVcx {
         Utils.writeCACert(context);
         try {
             String config = SecurePreferencesHelper.getLongStringValue(context, SECURE_PREF_VCXCONFIG, null);
-            JSONObject con = new JSONObject(config);
-            con.remove("genesis_path");
-            VcxApi.vcxInitWithConfig(con.toString()).whenComplete((integer, err) -> {
+            String vcxConfig = vcxConfigWithoutGenesisPath(config);
+            VcxApi.vcxInitWithConfig(vcxConfig).whenComplete((integer, err) -> {
                 if (err != null) {
                     result.completeExceptionally(err);
                 } else {
@@ -339,7 +352,7 @@ public class ConnectMeVcx {
             // then also we will resolve promise, because we don't care if vcx is already
             // initialized
             result.complete(null);
-        } catch (VcxException | JSONException e) {
+        } catch (VcxException e) {
             e.printStackTrace();
             result.completeExceptionally(e);
         }
@@ -568,6 +581,7 @@ public class ConnectMeVcx {
         private String walletName;
         private String logoUrl;
         private String institutionName;
+        private String genesisPath;
         private String walletKey;
 
         private ConfigBuilder() {
@@ -646,6 +660,19 @@ public class ConnectMeVcx {
         }
 
         /**
+         * Set genesis path
+         *
+         * @param genesisPath genesisPath
+         *
+         * @return
+         */
+        public @NonNull
+        ConfigBuilder withGenesisPath(String genesisPath) {
+            this.genesisPath = genesisPath;
+            return this;
+        }
+
+        /**
          * Set wallet key
          *
          * @param walletKey walletKey
@@ -673,6 +700,7 @@ public class ConnectMeVcx {
                     walletName,
                     logoUrl,
                     institutionName,
+//                    genesisPath,
                     walletKey
             );
         }
@@ -688,6 +716,7 @@ public class ConnectMeVcx {
             agencyConfig.put("wallet_name", this.walletName);
             agencyConfig.put("wallet_key", this.walletKey);
             agencyConfig.put("protocol_type", "3.0");
+            agencyConfig.put("path", this.genesisPath);
             agencyConfig.put("logo", this.logoUrl);
             agencyConfig.put("name", this.institutionName);
             return agencyConfig.toString();
@@ -704,6 +733,7 @@ public class ConnectMeVcx {
         private String walletName;
         private String logoUrl;
         private String institutionName;
+//        private String genesisPath;
         private String walletKey;
 
         public Config(
@@ -713,6 +743,7 @@ public class ConnectMeVcx {
             String walletName,
             String logoUrl,
             String institutionName,
+//            String genesisPath,
             String walletKey
         ) {
             this.agency = agency;
@@ -721,6 +752,7 @@ public class ConnectMeVcx {
             this.walletName = walletName;
             this.logoUrl = logoUrl;
             this.institutionName = institutionName;
+//            this.genesisPath = genesisPath;
             this.walletKey = walletKey;
         }
 

@@ -159,8 +159,11 @@ public class StateConnections {
         Connections.create(parsedInvite, new QRConnection())
                 .handle((res, throwable) -> {
                     if (res != null) {
-                        String serializedCon = Connections.awaitStatusChange(res);
-                        String pwDid = Connections.getPwDid(serializedCon);
+                        String pwDid = Connections.getPwDid(res);
+
+                        String serializedCon = Connections.awaitConnectionReceived(res, pwDid);
+
+                        pwDid = Connections.getPwDid(serializedCon);
                         Connection c = new Connection();
                         c.name = data.name;
                         c.icon = data.logo;

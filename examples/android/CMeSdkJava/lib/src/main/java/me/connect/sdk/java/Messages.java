@@ -131,7 +131,8 @@ public class Messages {
                 try {
                     List<Message> messages = new ArrayList<>();
                     JSONArray messagesJson = new JSONArray(messagesString);
-                    System.out.println(messagesString);
+                    System.out.println(messagesJson + "getAllPendingMessages");
+
                     for (int i = 0; i < messagesJson.length(); i++) {
                         JSONArray msgsJson = messagesJson.getJSONObject(i).optJSONArray("msgs");
                         String pairwiseDID = messagesJson.getJSONObject(i).getString("pairwiseDID");
@@ -218,4 +219,44 @@ public class Messages {
         return String.format("[{\"pairwiseDID\" : \"%s\", \"uids\": [\"%s\"]}]", pairwiseDid, messsageId);
     }
 
+    public static CompletableFuture<Message> downloadMessageByTypeAndThreadId(
+            MessageType messageType,
+            String id
+    ) {
+        CompletableFuture<Message> result = new CompletableFuture<>();
+        Messages.getAllPendingMessages().handle((messages, throwable) -> {
+            if (throwable != null) {
+                throwable.printStackTrace();
+                result.completeExceptionally(throwable);
+            }
+            for (Message message : messages) {
+                String msg = message.getPayload();
+                try {
+                    JSONObject msgPayload = new JSONObject(msg);
+                    String type = msgPayload.getString("@type");
+                    if (messageType.equals(MessageType.CREDENTIAL) && messageType.matches(type)) {
+                        String claimId = msgPayload.getString("@id");
+                        if (claimId.equals(id)) {
+                            result.complete(message);
+                        }
+                    }
+                    if (messageType.equals(MessageType.CONNECTION_RESPONSE) && messageType.matchesValue(type)) {
+                        String pwDid = message.getPwDid();
+
+                        if (pwDid.equals(id)) {
+                            result.complete(message);
+                        }
+                    }
+                    if (messageType.equals(MessageType.ACK) && messageType.matches(message.getType())) {
+                        result.complete(message);
+                    }
+                    return null;
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        });
+        return result;
+    }
 }

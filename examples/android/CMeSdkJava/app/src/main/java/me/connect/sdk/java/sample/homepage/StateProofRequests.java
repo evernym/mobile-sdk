@@ -37,32 +37,30 @@ public class StateProofRequests {
 
             JSONObject thread = outOfBandInvite.attach.getJSONObject("~thread");
             String threadId = thread.getString("thid");
-            if(!db.proofRequestDao().checkProofExists(threadId)) {
-                Proofs.createWithRequest(UUID.randomUUID().toString(), outOfBandInvite.extractedAttachRequest).handle((pr, err) -> {
-                    if (err != null) {
-                        err.printStackTrace();
-                    } else {
-                        ProofRequest proof = new ProofRequest();
-                        try {
-                            JSONObject decodedProofAttach = me.connect.sdk.java.ProofRequests.decodeProofRequestAttach(outOfBandInvite.attach);
+            Proofs.createWithRequest(UUID.randomUUID().toString(), outOfBandInvite.extractedAttachRequest).handle((pr, err) -> {
+                if (err != null) {
+                    err.printStackTrace();
+                } else {
+                    ProofRequest proof = new ProofRequest();
+                    try {
+                        JSONObject decodedProofAttach = me.connect.sdk.java.ProofRequests.decodeProofRequestAttach(outOfBandInvite.attach);
 
-                            proof.serialized = pr;
-                            proof.name = me.connect.sdk.java.ProofRequests.extractRequestedNameFromProofRequest(decodedProofAttach);
-                            proof.pwDid = connectionData.getString("pw_did");
-                            proof.attributes = me.connect.sdk.java.ProofRequests.extractRequestedAttributesFromProofRequest(decodedProofAttach);
-                            proof.threadId = threadId;
-                            proof.attachConnectionLogo = new JSONObject(outOfBandInvite.parsedInvite).getString("profileUrl");
-                            proof.messageId = null;
-                            db.proofRequestDao().insertAll(proof);
+                        proof.serialized = pr;
+                        proof.name = me.connect.sdk.java.ProofRequests.extractRequestedNameFromProofRequest(decodedProofAttach);
+                        proof.pwDid = connectionData.getString("pw_did");
+                        proof.attributes = me.connect.sdk.java.ProofRequests.extractRequestedAttributesFromProofRequest(decodedProofAttach);
+                        proof.threadId = threadId;
+                        proof.attachConnectionLogo = new JSONObject(outOfBandInvite.parsedInvite).getString("profileUrl");
+                        proof.messageId = null;
+                        db.proofRequestDao().insertAll(proof);
 
-                            acceptProofReq(proof, db, liveData, action);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                        acceptProofReq(proof, db, liveData, action);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                    return null;
-                });
-            }
+                }
+                return null;
+            });
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -154,9 +152,10 @@ public class StateProofRequests {
         Connections.create(proof.attachConnection, new QRConnection())
                 .handle((res, throwable) -> {
                     if (res != null) {
-                        String serializedCon = Connections.awaitStatusChange(res);
+                        String pwDid = Connections.getPwDid(res);
+                        String serializedCon = Connections.awaitConnectionReceived(res, pwDid);
 
-                        String pwDid = Connections.getPwDid(serializedCon);
+                        pwDid = Connections.getPwDid(serializedCon);
                         Connection c = new Connection();
                         c.name = proof.attachConnectionName;
                         c.icon = proof.attachConnectionLogo;

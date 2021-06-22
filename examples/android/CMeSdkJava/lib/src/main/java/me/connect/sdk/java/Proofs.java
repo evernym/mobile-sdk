@@ -255,23 +255,12 @@ public class Proofs {
                                             return;
                                         }
                                         try {
-                                            ConnectionApi.connectionGetPwDid(conHandle).whenComplete((pwDid, t) -> {
-                                                if (t != null) {
-                                                    Logger.getInstance().e("Failed to get pwDid: ", t);
-                                                    result.completeExceptionally(t);
-                                                    return;
-                                                }
-                                                try {
-                                                    DisclosedProofApi.proofSerialize(pHandle).whenComplete((sp, th) -> {
-                                                        if (th != null) {
-                                                            Logger.getInstance().e("Failed to serialize proof: ", th);
-                                                            result.completeExceptionally(th);
-                                                        } else {
-                                                            result.complete(sp);
-                                                        }
-                                                    });
-                                                } catch (VcxException ex) {
-                                                    result.completeExceptionally(ex);
+                                            DisclosedProofApi.proofSerialize(pHandle).whenComplete((sp, th) -> {
+                                                if (th != null) {
+                                                    Logger.getInstance().e("Failed to serialize proof: ", th);
+                                                    result.completeExceptionally(th);
+                                                } else {
+                                                    result.complete(sp);
                                                 }
                                             });
                                         } catch (Exception ex) {
@@ -333,26 +322,15 @@ public class Proofs {
                                     return;
                                 }
                                 try {
-                                    ConnectionApi.connectionGetPwDid(conHandle).whenComplete((pwDid, t) -> {
-                                        if (t != null) {
-                                            Logger.getInstance().e("Failed to get pwDid: ", t);
-                                            result.completeExceptionally(t);
-                                            return;
-                                        }
-                                        try {
-                                            DisclosedProofApi.proofSerialize(pHandle).whenComplete((sp, th) -> {
-                                                if (th != null) {
-                                                    Logger.getInstance().e("Failed to serialize proof: ", th);
-                                                    result.completeExceptionally(th);
-                                                } else {
-                                                    result.complete(sp);
-                                                }
-                                            });
-                                        } catch (VcxException ex) {
-                                            result.completeExceptionally(ex);
+                                    DisclosedProofApi.proofSerialize(pHandle).whenComplete((sp, th) -> {
+                                        if (th != null) {
+                                            Logger.getInstance().e("Failed to serialize proof: ", th);
+                                            result.completeExceptionally(th);
+                                        } else {
+                                            result.complete(sp);
                                         }
                                     });
-                                } catch (Exception ex) {
+                                } catch (VcxException ex) {
                                     result.completeExceptionally(ex);
                                 }
                             });
