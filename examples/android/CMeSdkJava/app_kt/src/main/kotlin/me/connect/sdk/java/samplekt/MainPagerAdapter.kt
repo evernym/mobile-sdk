@@ -3,7 +3,6 @@ package me.connect.sdk.java.samplekt
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import me.connect.sdk.java.samplekt.backups.BackupsFragment
 import me.connect.sdk.java.samplekt.history.HistoryFragment
 import me.connect.sdk.java.samplekt.homepage.HomePageFragment
 
@@ -12,7 +11,6 @@ class MainPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     override fun getItem(position: Int): Fragment = when (position) {
         0 -> HomePageFragment.newInstance()
         1 -> HistoryFragment.newInstance()
-        2 -> BackupsFragment.newInstance()
         else -> HomePageFragment.newInstance()
     }
 
@@ -20,9 +18,8 @@ class MainPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     override fun getPageTitle(position: Int): CharSequence? = when (position) {
         0 -> "Home"
         1 -> "History"
-        2 -> "Wallet backups"
         else -> null
     }
 
-    override fun getCount(): Int = 5
+    override fun getCount(): Int = 2
 }
