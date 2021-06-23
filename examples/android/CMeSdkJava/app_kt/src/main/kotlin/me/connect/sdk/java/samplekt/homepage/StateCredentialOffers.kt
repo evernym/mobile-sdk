@@ -6,7 +6,6 @@ import me.connect.sdk.java.Credentials
 import me.connect.sdk.java.OutOfBandHelper
 import me.connect.sdk.java.Utils
 import me.connect.sdk.java.connection.QRConnection
-import me.connect.sdk.java.message.MessageState
 import me.connect.sdk.java.samplekt.SingleLiveData
 import me.connect.sdk.java.samplekt.db.Database
 import me.connect.sdk.java.samplekt.db.entity.Action
@@ -35,13 +34,11 @@ object StateCredentialOffers {
                     UUID.randomUUID().toString(),
                     outOfBandInvite.extractedAttachRequest
                 ).wrap().await()
-                val preview: JSONObject =
-                    outOfBandInvite.attach.getJSONObject("credential_preview")
+                val thread = outOfBandInvite.attach.getJSONObject("~thread")
                 val offer = CredentialOffer(
+                    threadId = thread.getString("thid"),
                     claimId = claimId,
-                    name = outOfBandInvite.attach.getString("comment"),
                     pwDid = pwDid,
-                    attributes = preview.getJSONArray("attributes").getString(0),
                     serialized = co,
                     attachConnectionLogo = JSONObject(outOfBandInvite.parsedInvite).getString("profileUrl")
                 )
@@ -63,12 +60,10 @@ object StateCredentialOffers {
             UUID.randomUUID().toString(),
             outOfBandInvite.extractedAttachRequest
         ).wrap().await()
-        val preview: JSONObject =
-            outOfBandInvite.attach.getJSONObject("credential_preview")
+        val thread = outOfBandInvite.attach.getJSONObject("~thread")
         val offer = CredentialOffer(
+            threadId = thread.getString("thid"),
             claimId = outOfBandInvite.attach.getString("@id"),
-            name = outOfBandInvite.attach.getString("comment"),
-            attributes = preview.getJSONArray("attributes").getString(0),
             serialized = co,
             attachConnection = outOfBandInvite.parsedInvite,
             attachConnectionName = outOfBandInvite.userMeta?.name,
@@ -92,8 +87,7 @@ object StateCredentialOffers {
             val connection: Connection = db.connectionDao().getByPwDid(offer.pwDid!!)
             val s = Credentials.acceptOffer(connection.serialized, offer.serialized).wrap().await()
             if (s != null) {
-                offer.serialized = Credentials.awaitCredentialReceived(s)
-                offer.accepted = true
+                offer.serialized = Credentials.awaitCredentialReceived(s, offer.threadId, offer.pwDid)
                 db.credentialOffersDao().update(offer)
 
                 HomePageViewModel.HistoryActions.addToHistory(
@@ -105,6 +99,12 @@ object StateCredentialOffers {
 
                 data.postValue(OFFER_SUCCESS);
             } else {
+                HomePageViewModel.HistoryActions.addToHistory(
+                    action.id,
+                    "Credential accept failure",
+                    db,
+                    data
+                );
                 data.postValue(OFFER_FAILURE)
             }
         } catch (e: Exception) {
@@ -121,9 +121,8 @@ object StateCredentialOffers {
     ) {
         val res = Connections.create(offer.attachConnection!!, QRConnection()).wrap().await()
         if (res != null) {
-            val serializedCon =
-                Connections.awaitStatusChange(res)
-            val pwDid = Connections.getPwDid(serializedCon)
+            val pwDid = Connections.getPwDid(res)
+            val serializedCon = Connections.awaitConnectionReceived(res, pwDid)
             val c = Connection(
                 name = offer.attachConnectionName!!,
                 icon = offer.attachConnectionLogo,
@@ -143,10 +142,8 @@ object StateCredentialOffers {
 
             val s = Credentials.acceptOffer(serializedCon, offer.serialized).wrap().await()
             if (s != null) {
-                offer.serialized =
-                    Credentials.awaitCredentialReceived(s)
+                offer.serialized = Credentials.awaitCredentialReceived(s, offer.threadId, pwDid)
                 offer.pwDid = pwDid
-                offer.accepted = true
                 db.credentialOffersDao().update(offer)
 
                 HomePageViewModel.HistoryActions.addToHistory(
@@ -158,6 +155,12 @@ object StateCredentialOffers {
 
                 data.postValue(OFFER_SUCCESS);
             } else {
+                HomePageViewModel.HistoryActions.addToHistory(
+                    action.id,
+                    "Credential accept failure",
+                    db,
+                    data
+                );
                 data.postValue(OFFER_FAILURE)
             }
         } else {
@@ -172,18 +175,13 @@ object StateCredentialOffers {
     ) {
         try {
             if (offer.pwDid == null) {
-                offer.accepted = false
-                db.credentialOffersDao().update(offer)
                 liveData.postValue(PROOF_SUCCESS)
                 return
             }
             val con = db.connectionDao().getByPwDid(offer.pwDid!!)
             val s = Credentials.rejectOffer(con.serialized, offer.serialized).wrap().await()
             if (s != null) {
-                val serializedProof =
-                    Credentials.awaitCredentialReceived(s)
-                offer.serialized = serializedProof
-                offer.accepted = false
+                offer.serialized = s
                 db.credentialOffersDao().update(offer)
             }
             liveData.postValue(PROOF_SUCCESS)

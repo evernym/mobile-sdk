@@ -255,6 +255,9 @@ public class Messages {
                     if (messageType.equals(MessageType.ACK) && messageType.matches(type)) {
                         result.complete(message);
                     }
+                    if (messageType.equals(MessageType.HANDSHAKE) && messageType.matches(type)) {
+                        result.complete(message);
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

@@ -43,8 +43,6 @@ public class StateProofRequests {
                 } else {
                     ProofRequest proof = new ProofRequest();
                     try {
-                        JSONObject decodedProofAttach = me.connect.sdk.java.ProofRequests.decodeProofRequestAttach(outOfBandInvite.attach);
-
                         proof.serialized = pr;
                         proof.pwDid = connectionData.getString("pw_did");
                         proof.threadId = threadId;
@@ -144,7 +142,6 @@ public class StateProofRequests {
                         String pwDid = Connections.getPwDid(res);
                         String serializedCon = Connections.awaitConnectionReceived(res, pwDid);
 
-                        pwDid = Connections.getPwDid(serializedCon);
                         Connection c = new Connection();
                         c.name = proof.attachConnectionName;
                         c.icon = proof.attachConnectionLogo;

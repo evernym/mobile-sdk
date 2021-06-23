@@ -6,7 +6,6 @@ import me.connect.sdk.java.ConnectionsUtils
 import me.connect.sdk.java.OutOfBandHelper
 import me.connect.sdk.java.Utils
 import me.connect.sdk.java.connection.QRConnection
-import me.connect.sdk.java.message.MessageState
 import me.connect.sdk.java.samplekt.SingleLiveData
 import me.connect.sdk.java.samplekt.db.Database
 import me.connect.sdk.java.samplekt.db.entity.Action
@@ -145,8 +144,8 @@ object StateConnections {
     ) {
         try {
             val co = Connections.create(parsedInvite, QRConnection()).wrap().await()
-            val serializedCon = Connections.awaitStatusChange(co)
-            val pwDid = Connections.getPwDid(serializedCon)
+            val pwDid = Connections.getPwDid(co)
+            val serializedCon = Connections.awaitConnectionReceived(co, pwDid)
             val c = Connection(
                 name = data.name,
                 icon = data.logo,

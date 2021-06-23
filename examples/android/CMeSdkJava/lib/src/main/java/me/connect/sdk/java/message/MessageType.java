@@ -10,6 +10,7 @@ public enum MessageType {
     CREDENTIAL,
     CONNECTION_RESPONSE,
     ACK,
+    HANDSHAKE,
 
     CREDENTIAL_OFFER,
     PROOF_REQUEST,
@@ -22,7 +23,7 @@ public enum MessageType {
     private static final String CREDENTIAL_VALUES = "issue-credential/1.0/issue-credential";
     private static final String CONNECTION_RESPONSE_VALUES = "connections/1.0/response";
     private static final String ACK_VALUES = "ack";
-
+    private static final String HANDSHAKE_VALUES = "handshake-reuse-accepted";
 
     public boolean matches(String type) {
         List<String> listToCheck;
@@ -54,6 +55,9 @@ public enum MessageType {
                 break;
             case ACK:
                 valueCheck = ACK_VALUES;
+                break;
+            case HANDSHAKE:
+                valueCheck = HANDSHAKE_VALUES;
                 break;
             default:
                 Logger.getInstance().w("Message type " + this + "matching was not implemented");

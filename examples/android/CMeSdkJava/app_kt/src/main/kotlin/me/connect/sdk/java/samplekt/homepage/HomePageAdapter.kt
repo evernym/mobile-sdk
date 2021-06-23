@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import me.connect.sdk.java.samplekt.R
 import me.connect.sdk.java.samplekt.db.entity.Action
+import org.json.JSONObject
 
 class HomePageAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<HomePageAdapter.HomePageViewHolder>() {
     private var data = mutableListOf<Action>()
@@ -31,8 +32,11 @@ class HomePageAdapter(private val itemClickListener: ItemClickListener) : Recycl
 
         holder.buttonAccept.visibility = View.INVISIBLE
         holder.buttonReject.visibility = View.INVISIBLE
+        holder.selectedAnswer.visibility = View.INVISIBLE
+        holder.buttonHolder.visibility = View.INVISIBLE
 
         if (action.entryId == null || action.messageAnswers == null) {
+            holder.buttonHolder.removeAllViews();
             holder.buttonAccept.visibility = View.VISIBLE
             holder.buttonReject.visibility = View.VISIBLE
             holder.buttonAccept.isEnabled = true
@@ -63,7 +67,7 @@ class HomePageAdapter(private val itemClickListener: ItemClickListener) : Recycl
                             val view = holder.buttonHolder.getChildAt(i)
                             view.isEnabled = false
                         }
-                        itemClickListener.onAnswerClick(action.id, response.text)
+                        itemClickListener.onAnswerClick(action.id, response.response)
                     }
                 }
             }
@@ -94,6 +98,6 @@ class HomePageAdapter(private val itemClickListener: ItemClickListener) : Recycl
 
         fun onRejectClick(entryId: Int)
 
-        fun onAnswerClick(entryId: Int, answer: String)
+        fun onAnswerClick(entryId: Int, answer: JSONObject)
     }
 }

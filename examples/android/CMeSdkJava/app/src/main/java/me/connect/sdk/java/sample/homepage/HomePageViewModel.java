@@ -159,6 +159,7 @@ public class HomePageViewModel extends AndroidViewModel {
                             MessageType.CREDENTIAL_OFFER.toString(),
                             holder.name,
                             connection.icon,
+                            holder.attributes,
                             holder.id,
                             pwDid,
                             liveData
@@ -348,6 +349,7 @@ public class HomePageViewModel extends AndroidViewModel {
             String type,
             String name,
             String icon,
+            String details,
             String offerId,
             String pwDid,
             SingleLiveData<Results> liveData
@@ -358,6 +360,7 @@ public class HomePageViewModel extends AndroidViewModel {
             action.name = name;
             action.description = "To issue the credential";
             action.icon = icon;
+            action.details = details;
             action.claimId = offerId;
             action.pwDid = pwDid;
             action.status = PENDING.toString();

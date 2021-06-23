@@ -5,12 +5,19 @@ import org.json.JSONArray
 import org.json.JSONException
 
 
-class CredDataHolder(var id: String, var name: String, var attributes: String, var offer: String) {
+class CredDataHolder(
+    var id: String,
+    var name: String,
+    var attributes: String,
+    var offer: String,
+    var threadId: String
+    ) {
     companion object {
         fun extractDataFromCredentialsOfferMessage(msg: Message): CredDataHolder? {
             return try {
                 val data = JSONArray(msg.payload).getJSONObject(0)
                 val id = data.getString("claim_id")
+                val threadId = data.getString("thread_id")
                 val name = data.getString("claim_name")
                 val attributesJson = data.getJSONObject("credential_attrs")
                 val attributes = StringBuilder()
@@ -20,7 +27,7 @@ class CredDataHolder(var id: String, var name: String, var attributes: String, v
                     val value = attributesJson.getString(key)
                     attributes.append(String.format("%s: %s\n", key, value))
                 }
-                CredDataHolder(id, name, attributes.toString(), msg.payload)
+                CredDataHolder(id, name, attributes.toString(), msg.payload, threadId)
             } catch (e: JSONException) {
                 e.printStackTrace()
                 null

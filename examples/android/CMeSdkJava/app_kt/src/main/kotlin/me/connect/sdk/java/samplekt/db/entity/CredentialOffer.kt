@@ -14,24 +14,14 @@ data class CredentialOffer(
         @ColumnInfo(name = "pwdid")
         var pwDid: String? = null,
 
+        @ColumnInfo(name = "threadId")
+        var threadId: String,
+
         @ColumnInfo(name = "serialized")
         var serialized: String,
 
         @ColumnInfo(name = "claim_id")
         var claimId: String,
-
-        @ColumnInfo(name = "name")
-        var name: String,
-
-        // todo temporary
-        @ColumnInfo(name = "attributes")
-        var attributes: String,
-
-        @ColumnInfo(name = "accepted")
-        var accepted: Boolean? = null,
-
-        @ColumnInfo(name = "message_id")
-        var messageId: String? = null,
 
         @ColumnInfo(name = "attachConnection")
         var attachConnection: String? = null,

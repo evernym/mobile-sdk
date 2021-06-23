@@ -15,6 +15,7 @@ import com.google.zxing.integration.android.IntentIntegrator
 import me.connect.sdk.java.samplekt.databinding.HomePageFragmentBinding
 import me.connect.sdk.java.samplekt.db.entity.Action
 import me.connect.sdk.java.samplekt.homepage.Results.*
+import org.json.JSONObject
 
 class HomePageFragment: Fragment() {
     private lateinit var binding: HomePageFragmentBinding
@@ -40,7 +41,7 @@ class HomePageFragment: Fragment() {
 
             override fun onRejectClick(entryId: Int) = reject(entryId)
 
-            override fun onAnswerClick(entryId: Int, answer: String) = answer(entryId, answer)
+            override fun onAnswerClick(entryId: Int, answer: JSONObject) = answer(entryId, answer)
         }
         val adapter = HomePageAdapter(listener)
         binding.actionsList.adapter = adapter
@@ -140,7 +141,7 @@ class HomePageFragment: Fragment() {
             })
     }
 
-    private fun answer(entryId: Int, answer: String) {
+    private fun answer(entryId: Int, answer: JSONObject) {
         model.answerMessage(entryId, answer).observeOnce(
             viewLifecycleOwner,
             Observer {

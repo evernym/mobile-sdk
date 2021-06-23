@@ -36,12 +36,9 @@ object StateProofRequests {
                 if (name != null && attr != null) {
                     val proof = ProofRequest(
                         serialized = pr,
-                        name = name,
                         pwDid = connectionData.getString("pw_did"),
-                        attributes = attr,
                         threadId = threadId,
-                        attachConnectionLogo = JSONObject(outOfBandInvite.parsedInvite)
-                            .getString("profileUrl")
+                        attachConnectionLogo = JSONObject(outOfBandInvite.parsedInvite).getString("profileUrl")
                     )
                     db.proofRequestDao().insertAll(proof)
 
@@ -67,8 +64,6 @@ object StateProofRequests {
         if (name != null && attr != null) {
             val proof = ProofRequest(
                 serialized = pr,
-                name = name,
-                attributes = attr,
                 threadId = thread.getString("thid"),
                 attachConnection = outOfBandInvite.parsedInvite,
                 attachConnectionName = outOfBandInvite.userMeta?.name,
@@ -101,7 +96,6 @@ object StateProofRequests {
             val data = Proofs.mapCredentials(creds)
             val s =  Proofs.send(con.serialized, proof.serialized, data, "{}").wrap().await()
             if (s != null) {
-                proof.accepted = true
                 proof.serialized = s
                 db.proofRequestDao().update(proof)
 
@@ -131,15 +125,18 @@ object StateProofRequests {
         val res = Connections.create(proof.attachConnection!!, QRConnection()).wrap().await()
         if (res != null) {
             val pwDid = Connections.getPwDid(res)
+            val serializedCon = Connections.awaitConnectionReceived(res, pwDid)
+
             val c = Connection(
                 name = proof.attachConnectionName!!,
                 icon = proof.attachConnectionLogo,
                 pwDid = pwDid,
-                serialized = res
+                serialized = serializedCon
             )
-            proof.pwDid = pwDid
             db.connectionDao().insertAll(c)
             liveData.postValue(CONNECTION_SUCCESS)
+
+            proof.pwDid = pwDid
             db.proofRequestDao().update(proof)
 
             HomePageViewModel.HistoryActions.addHistoryAction(
@@ -157,12 +154,10 @@ object StateProofRequests {
                 liveData.postValue(PROOF_MISSED)
             }
             val data = Proofs.mapCredentials(creds)
-            val s = Proofs.send(res, proof.serialized, data, "{}").wrap().await()
+            val s = Proofs.send(serializedCon, proof.serialized, data, "{}").wrap().await()
             if (s != null) {
-                proof.accepted = true
-                proof.serialized = s
-                db.proofRequestDao().update(proof)
-
+                proof.serialized = s;
+                db.proofRequestDao().update(proof);
                 HomePageViewModel.HistoryActions.addToHistory(
                     action.id,
                     "Proofs send",
@@ -182,7 +177,6 @@ object StateProofRequests {
     suspend fun rejectProofReq(proof: ProofRequest, db: Database, liveData: SingleLiveData<Results>) {
         try {
             if (proof.pwDid == null) {
-                proof.accepted = false;
                 db.proofRequestDao().update(proof);
                 liveData.postValue(PROOF_SUCCESS);
                 return;
@@ -190,7 +184,6 @@ object StateProofRequests {
             val con = db.connectionDao().getByPwDid(proof.pwDid!!)
             val s = Proofs.reject(con.serialized, proof.serialized).wrap().await()
             proof.serialized = s
-            proof.accepted = false
             db.proofRequestDao().update(proof)
 
             liveData.postValue(PROOF_SUCCESS)

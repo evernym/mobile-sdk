@@ -55,26 +55,26 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
         return data
     }
 
-    fun answerMessage(actionId: Int, answer: String): SingleLiveData<Results> {
+    fun answerMessage(actionId: Int, answer: JSONObject): SingleLiveData<Results> {
         val data = SingleLiveData<Results>()
         answerStructMessage(actionId, answer, data)
         return data
     }
 
-    private fun answerStructMessage(actionId: Int, answer: String, liveData: SingleLiveData<Results>) = viewModelScope.launch(Dispatchers.IO) {
+    private fun answerStructMessage(actionId: Int, answer: JSONObject, liveData: SingleLiveData<Results>) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val action = db.actionDao().getActionsById(actionId)
             val con = db.connectionDao().getByPwDid(action.pwDid!!)
             val sm = db.structuredMessageDao().getByEntryIdAndPwDid(action.entryId, action.pwDid)
 
-            StructuredMessages.answer(con.serialized, sm!!.messageId, sm.type, sm.serialized, answer).wrap().await()
-            sm.selectedAnswer = answer;
+            StructuredMessages.answer(con.serialized, sm!!.serialized, answer).wrap().await()
+            sm.selectedAnswer = answer.getString("text")
             db.structuredMessageDao().update(sm)
             liveData.postValue(QUESTION_SUCCESS)
-            HistoryActions.addToHistory(actionId, "Ask to question", db, liveData);
+            HistoryActions.addToHistory(actionId, "Ask to question", db, liveData)
         } catch (e: Exception) {
             e.printStackTrace()
-            liveData.postValue(QUESTION_FAILURE);
+            liveData.postValue(QUESTION_FAILURE)
         }
     }
 
@@ -102,12 +102,10 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
             val co = Credentials.createWithOffer(UUID.randomUUID().toString(), holder!!.offer).wrap().await()
             val offer = CredentialOffer(
                 claimId = holder.id,
-                name = holder.name,
                 pwDid = pwDid,
-                attributes = holder.attributes,
                 serialized = co,
-                messageId = message.uid,
-                attachConnectionLogo = connection.icon
+                attachConnectionLogo = connection.icon,
+                threadId = holder.threadId
             )
             db.credentialOffersDao().insertAll(offer)
 
@@ -117,10 +115,11 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
                 MessageType.CREDENTIAL_OFFER.toString(),
                 holder.name,
                 connection.icon!!,
+                holder.attributes,
                 holder.id,
                 pwDid,
                 liveData
-            );
+            )
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -134,12 +133,9 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
             val pr = Proofs.createWithRequest(UUID.randomUUID().toString(), holder.proofReq).wrap().await()
             val proof = ProofRequest(
                 serialized = pr,
-                name = holder.name,
                 pwDid = pwDid,
-                attributes = holder.attributes,
                 threadId = holder.threadId,
-                attachConnectionLogo = connection.icon,
-                messageId = message.uid
+                attachConnectionLogo = connection.icon
             )
             db.proofRequestDao().insertAll(proof)
 
@@ -151,7 +147,7 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
                 connection.icon!!,
                 holder.threadId,
                 liveData
-            );
+            )
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -163,14 +159,10 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
     ) {
         val holder = StructuredMessages.extract(message)
         val pwDid = message.pwDid
-        val connection = db.connectionDao().getByPwDid(pwDid)
         try {
             val sm = StructuredMessage(
                 pwDid = pwDid,
-                messageId = message.uid,
                 entryId = holder.id,
-                questionText = holder.questionText,
-                questionDetail = holder.questionDetail,
                 type = holder.type,
                 serialized = message.payload,
                 answers = holder.responses
@@ -182,8 +174,8 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
             }
             createActionWithQuestion(
                 MessageType.CREDENTIAL_OFFER.toString(),
-                connection.name,
-                connection.icon!!,
+                holder.questionText,
+                holder.questionDetail,
                 pwDid,
                 holder.id,
                 holder.responses,
@@ -322,6 +314,7 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
         type: String,
         name: String,
         icon: String,
+        details: String,
         offerId: String,
         pwDid: String,
         liveData: SingleLiveData<Results>
@@ -332,6 +325,7 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
                 name = name,
                 description = "To issue the credential",
                 icon = icon,
+                details = details,
                 claimId = offerId,
                 pwDid = pwDid,
                 status = PENDING.toString()
@@ -373,7 +367,7 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
     private suspend fun createActionWithQuestion(
         type: String,
         name: String,
-        icon: String,
+        details: String,
         pwDid: String,
         entryId: String,
         messageAnswers: List<StructuredMessageHolder.Response>,
@@ -385,7 +379,7 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
                 type = type,
                 name = name,
                 description = "Answer the questions",
-                icon = icon,
+                details = details,
                 pwDid = pwDid,
                 entryId = entryId,
                 messageAnswers = messageAnswers,
