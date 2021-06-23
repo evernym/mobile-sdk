@@ -160,12 +160,9 @@ public class StateConnections {
                 .handle((res, throwable) -> {
                     if (res != null) {
                         String pwDid = Connections.getPwDid(res);
-
                         String serializedCon = Connections.awaitConnectionReceived(res, pwDid);
 
-                        pwDid = Connections.getPwDid(serializedCon);
                         Connection c = new Connection();
-                        c.name = data.name;
                         c.icon = data.logo;
                         c.pwDid = pwDid;
                         c.serialized = serializedCon;

@@ -86,23 +86,27 @@ public class HomePageViewModel extends AndroidViewModel {
         return data;
     }
 
-    public SingleLiveData<Results> answerMessage(int actionId, String answer) {
+    public SingleLiveData<Results> answerMessage(int actionId, JSONObject answer) {
         SingleLiveData<Results> data = new SingleLiveData<>();
         answerStructMessage(actionId, answer, data);
         return data;
     }
 
-    private void answerStructMessage(int actionId, String answer, SingleLiveData<Results> liveData) {
+    private void answerStructMessage(int actionId, JSONObject answer, SingleLiveData<Results> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             Action action = db.actionDao().getActionsById(actionId);
             StructuredMessage sm = db.structuredMessageDao().getByEntryIdAndPwDid(action.entryId, action.pwDid);
 
             Connection connection = db.connectionDao().getByPwDid(sm.pwDid);
-            StructuredMessages.answer(connection.serialized, sm.messageId, sm.type, sm.serialized, answer).handle((res, err) -> {
+            StructuredMessages.answer(connection.serialized, sm.serialized, answer).handle((res, err) -> {
                 if (err == null) {
-                    sm.selectedAnswer = answer;
-                    db.structuredMessageDao().update(sm);
-                    liveData.postValue(QUESTION_FAILURE);
+                    try {
+                        sm.selectedAnswer = answer.getString("text");
+                        db.structuredMessageDao().update(sm);
+                        liveData.postValue(QUESTION_FAILURE);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
                 liveData.postValue(QUESTION_SUCCESS);
                 return null;
@@ -144,13 +148,10 @@ public class HomePageViewModel extends AndroidViewModel {
                     err.printStackTrace();
                 } else {
                     CredentialOffer offer = new CredentialOffer();
+                    offer.threadId = holder.threadId;
                     offer.claimId = holder.id;
-                    offer.name = holder.name;
                     offer.pwDid = pwDid;
-                    offer.attributes = holder.attributes;
                     offer.serialized = co;
-                    offer.attachConnectionLogo = connection.icon;
-                    offer.messageId = message.getUid();
                     db.credentialOffersDao().insertAll(offer);
 
                     Messages.updateMessageStatus(pwDid, message.getUid());
@@ -181,12 +182,8 @@ public class HomePageViewModel extends AndroidViewModel {
                 } else {
                     ProofRequest proof = new ProofRequest();
                     proof.serialized = pr;
-                    proof.name = holder.name;
                     proof.pwDid = pwDid;
-                    proof.attributes = holder.attributes;
                     proof.threadId = holder.threadId;
-                    proof.attachConnectionLogo = connection.icon;
-                    proof.messageId = message.getUid();
                     db.proofRequestDao().insertAll(proof);
 
                     Messages.updateMessageStatus(pwDid, message.getUid());
@@ -207,15 +204,12 @@ public class HomePageViewModel extends AndroidViewModel {
 
     private void questionsProcess(Message message, SingleLiveData<Results> liveData) {
         StructuredMessageHolder holder = StructuredMessages.extract(message);
+
         String pwDid = message.getPwDid();
-        Connection connection = db.connectionDao().getByPwDid(pwDid);
         try {
             StructuredMessage sm = new StructuredMessage();
             sm.pwDid = pwDid;
-            sm.messageId = message.getUid();
             sm.entryId = holder.getId();
-            sm.questionText = holder.getQuestionText();
-            sm.questionDetail = holder.getQuestionDetail();
             sm.type = holder.getType();
             sm.serialized = message.getPayload();
             sm.answers = holder.getResponses();
@@ -226,8 +220,8 @@ public class HomePageViewModel extends AndroidViewModel {
             }
             createActionWithQuestion(
                     MessageType.CREDENTIAL_OFFER.toString(),
-                    connection.name,
-                    connection.icon,
+                    holder.getQuestionText(),
+                    holder.getQuestionDetail(),
                     pwDid,
                     holder.getId(),
                     holder.getResponses(),
@@ -403,7 +397,7 @@ public class HomePageViewModel extends AndroidViewModel {
     private void createActionWithQuestion(
             String type,
             String name,
-            String icon,
+            String details,
             String pwDid,
             String entryId,
             List<StructuredMessageHolder.Response> messageAnswers,
@@ -415,7 +409,7 @@ public class HomePageViewModel extends AndroidViewModel {
             action.type = type;
             action.name = name;
             action.description = "Answer the questions";
-            action.icon = icon;
+            action.details = details;
             action.pwDid = pwDid;
             action.entryId = entryId;
             action.messageAnswers = messageAnswers;

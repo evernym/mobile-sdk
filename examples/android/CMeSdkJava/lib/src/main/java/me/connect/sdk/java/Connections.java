@@ -359,15 +359,17 @@ public class Connections {
         Logger.getInstance().i("Awaiting connection state change");
         int status = -1;
         try {
-            System.out.println("serializedConnection" + serializedConnection);
             Integer handle = ConnectionApi.connectionDeserialize(serializedConnection).get();
             while (true) {
                 try {
                     Message message = Messages.downloadMessageByTypeAndThreadId(MessageType.CONNECTION_RESPONSE, pwDid).get();
-                    status = ConnectionApi.vcxConnectionUpdateStateWithMessage(handle, message.getPayload()).get();
-                    if (MessageState.ACCEPTED.matches(status)) {
-                        return ConnectionApi.connectionSerialize(handle).get();
-                    }
+//                    if (message != null && message.getPayload() != null) {
+                        status = ConnectionApi.vcxConnectionUpdateStateWithMessage(handle, message.getPayload()).get();
+                        Messages.updateMessageStatus(pwDid, message.getUid());
+                        if (MessageState.ACCEPTED.matches(status)) {
+                            return ConnectionApi.connectionSerialize(handle).get();
+                        }
+//                    }
                     Thread.sleep(1000);
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();

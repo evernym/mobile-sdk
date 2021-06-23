@@ -230,15 +230,19 @@ public class Messages {
                 result.completeExceptionally(throwable);
             }
             for (Message message : messages) {
-                String msg = message.getPayload();
                 try {
+                    String msg = message.getPayload();
                     JSONObject msgPayload = new JSONObject(msg);
                     String type = msgPayload.getString("@type");
-                    if (messageType.equals(MessageType.CREDENTIAL) && messageType.matches(type)) {
-                        String claimId = msgPayload.getString("@id");
-                        if (claimId.equals(id)) {
+
+                    if (messageType.equals(MessageType.CREDENTIAL) && messageType.matchesValue(type)) {
+                        JSONObject thread = msgPayload.getJSONObject("~thread");
+                        String thid = thread.getString("thid");
+
+                        if (thid.equals(id)) {
                             result.complete(message);
                         }
+                        result.complete(null);
                     }
                     if (messageType.equals(MessageType.CONNECTION_RESPONSE) && messageType.matchesValue(type)) {
                         String pwDid = message.getPwDid();
@@ -246,15 +250,16 @@ public class Messages {
                         if (pwDid.equals(id)) {
                             result.complete(message);
                         }
+                        result.complete(null);
                     }
-                    if (messageType.equals(MessageType.ACK) && messageType.matches(message.getType())) {
+                    if (messageType.equals(MessageType.ACK) && messageType.matches(type)) {
                         result.complete(message);
                     }
-                    return null;
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
+            result.complete(null);
             return null;
         });
         return result;

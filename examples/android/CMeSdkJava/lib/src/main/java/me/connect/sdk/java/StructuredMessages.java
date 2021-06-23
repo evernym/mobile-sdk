@@ -34,8 +34,6 @@ public class StructuredMessages {
      * answer structured message
      *
      * @param serializedConnection JSON string containing serialized connection
-     * @param messageId            message ID
-     * @param type                 message type
      * @param structuredMessage    structured message
      * @param answer               value of the answer
      * @return {@link CompletableFuture} containing message ID
@@ -43,115 +41,8 @@ public class StructuredMessages {
     public static @NonNull
     CompletableFuture<Void> answer(
             @NonNull String serializedConnection,
-            @NonNull String messageId, @NonNull String type,
             @NonNull String structuredMessage,
-            @NonNull String answer
-    ) {
-        if ("question".equals(type)) {
-            return answerAries(serializedConnection, structuredMessage, answer);
-        } else {
-            return answerProprietary(serializedConnection, messageId, structuredMessage, answer);
-        }
-    }
-
-
-    private static @NonNull
-    CompletableFuture<Void> answerProprietary(
-            @NonNull String serializedConnection,
-            @NonNull String messageId,
-            @NonNull String structuredMessage,
-            @NonNull String answer
-    ) {
-        Logger.getInstance().i("Respond to structured message");
-        CompletableFuture<Void> result = new CompletableFuture<>();
-        try {
-            JSONObject structMessageJson = new JSONObject(structuredMessage);
-            JSONArray responses = structMessageJson.getJSONArray("valid_responses");
-            String nonce = null;
-            String msgId = structMessageJson.getString("@id");
-            for (int i = 0; i < responses.length(); i++) {
-                JSONObject response = responses.getJSONObject(i);
-                String text = response.getString("text");
-                if (text.equals(answer)) {
-                    nonce = response.getString("nonce");
-                    break;
-                }
-            }
-            if (nonce == null) {
-                result.completeExceptionally(new Exception("nonce was not found for selected answer"));
-                return result;
-            }
-            final String answerNonce = nonce;
-            ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((conHandle, err) -> {
-                if (err != null) {
-                    Logger.getInstance().e("Failed to deserialize connection: ", err);
-                    result.completeExceptionally(err);
-                    return;
-                }
-                byte[] encodedAnswer = Base64.encode(answerNonce.getBytes(), Base64.NO_WRAP);
-                try {
-                    ConnectionApi.connectionSignData(conHandle, encodedAnswer, encodedAnswer.length).whenComplete((signature, e) -> {
-                        if (e != null) {
-                            Logger.getInstance().e("Failed to sign data: ", e);
-                            result.completeExceptionally(e);
-                            return;
-                        }
-                        try {
-                            MessageHolder msg = MessageUtils.prepareAnswer(encodedAnswer, signature, messageId, msgId);
-                            ConnectionApi.connectionSendMessage(conHandle, msg.getMessage(), msg.getMessageOptions()).whenComplete((r, t) -> {
-                                if (t != null) {
-                                    Logger.getInstance().e("Failed to send message: ", t);
-                                    result.completeExceptionally(t);
-                                } else {
-                                    try {
-                                        ConnectionApi.connectionGetPwDid(conHandle).whenComplete((pwDid, th) -> {
-                                            if (th != null) {
-                                                Logger.getInstance().e("Failed to get pwDid: ", th);
-                                                result.completeExceptionally(th);
-                                                return;
-                                            }
-                                            try {
-                                                String jsonMsg = Messages.prepareUpdateMessage(pwDid, messageId);
-                                                UtilsApi.vcxUpdateMessages(MessageStatusType.REVIEWED, jsonMsg).whenComplete((v1, error) -> {
-                                                    if (error != null) {
-                                                        Logger.getInstance().e("Failed to update messages", error);
-                                                        result.completeExceptionally(error);
-                                                    } else {
-                                                        result.complete(null);
-                                                    }
-
-                                                });
-                                            } catch (Exception ex) {
-                                                result.completeExceptionally(ex);
-                                            }
-                                        });
-                                    } catch (Exception ex) {
-                                        result.completeExceptionally(ex);
-                                    }
-
-
-                                }
-                            });
-                        } catch (Exception ex) {
-                            result.completeExceptionally(ex);
-                        }
-                    });
-
-                } catch (Exception ex) {
-                    result.completeExceptionally(ex);
-                }
-            });
-        } catch (Exception ex) {
-            result.completeExceptionally(ex);
-        }
-        return result;
-    }
-
-    private static @NonNull
-    CompletableFuture<Void> answerAries(
-            @NonNull String serializedConnection,
-            @NonNull String structuredMessage,
-            @NonNull String answer
+            @NonNull JSONObject answer
     ) {
         Logger.getInstance().i("Respond to structured message");
         CompletableFuture<Void> result = new CompletableFuture<>();
@@ -163,26 +54,14 @@ public class StructuredMessages {
                     return;
                 }
                 try {
-                    JSONObject answerJson = new JSONObject();
-                    answerJson.put("text", answer);
-                    ConnectionApi.connectionSendAnswer(conHandle, structuredMessage, answerJson.toString()).whenComplete((res, er) -> {
+                    System.out.println(answer + "CompletableFuture1");
+                    ConnectionApi.connectionSendAnswer(conHandle, structuredMessage, answer.toString()).whenComplete((res, er) -> {
                         if (er != null) {
                             Logger.getInstance().e("Failed to send answer: ", er);
                             result.completeExceptionally(er);
-                            return;
                         }
-                        try {
-                            ConnectionApi.connectionGetPwDid(conHandle).whenComplete((pwDid, th) -> {
-                                if (th != null) {
-                                    Logger.getInstance().e("Failed to get pwDid: ", th);
-                                    result.completeExceptionally(th);
-                                    return;
-                                }
-                            });
-                        } catch (Exception ex) {
-                            result.completeExceptionally(ex);
-                        }
-
+                        System.out.println(answer + "CompletableFuture2");
+                        result.complete(null);
                     });
                 } catch (Exception ex) {
                     result.completeExceptionally(ex);
@@ -193,6 +72,99 @@ public class StructuredMessages {
         }
         return result;
     }
+
+
+//    private static @NonNull
+//    CompletableFuture<Void> answerProprietary(
+//            @NonNull String serializedConnection,
+//            @NonNull String messageId,
+//            @NonNull String structuredMessage,
+//            @NonNull String answer
+//    ) {
+//        Logger.getInstance().i("Respond to structured message");
+//        CompletableFuture<Void> result = new CompletableFuture<>();
+//        try {
+//            JSONObject structMessageJson = new JSONObject(structuredMessage);
+//            JSONArray responses = structMessageJson.getJSONArray("valid_responses");
+//            String nonce = null;
+//            String msgId = structMessageJson.getString("@id");
+//            for (int i = 0; i < responses.length(); i++) {
+//                JSONObject response = responses.getJSONObject(i);
+//                String text = response.getString("text");
+//                if (text.equals(answer)) {
+//                    nonce = response.getString("nonce");
+//                    break;
+//                }
+//            }
+//            if (nonce == null) {
+//                result.completeExceptionally(new Exception("nonce was not found for selected answer"));
+//                return result;
+//            }
+//            final String answerNonce = nonce;
+//            ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((conHandle, err) -> {
+//                if (err != null) {
+//                    Logger.getInstance().e("Failed to deserialize connection: ", err);
+//                    result.completeExceptionally(err);
+//                    return;
+//                }
+//                byte[] encodedAnswer = Base64.encode(answerNonce.getBytes(), Base64.NO_WRAP);
+//                try {
+//                    ConnectionApi.connectionSignData(conHandle, encodedAnswer, encodedAnswer.length).whenComplete((signature, e) -> {
+//                        if (e != null) {
+//                            Logger.getInstance().e("Failed to sign data: ", e);
+//                            result.completeExceptionally(e);
+//                            return;
+//                        }
+//                        try {
+//                            MessageHolder msg = MessageUtils.prepareAnswer(encodedAnswer, signature, messageId, msgId);
+//                            ConnectionApi.connectionSendMessage(conHandle, msg.getMessage(), msg.getMessageOptions()).whenComplete((r, t) -> {
+//                                if (t != null) {
+//                                    Logger.getInstance().e("Failed to send message: ", t);
+//                                    result.completeExceptionally(t);
+//                                } else {
+//                                    try {
+//                                        ConnectionApi.connectionGetPwDid(conHandle).whenComplete((pwDid, th) -> {
+//                                            if (th != null) {
+//                                                Logger.getInstance().e("Failed to get pwDid: ", th);
+//                                                result.completeExceptionally(th);
+//                                                return;
+//                                            }
+//                                            try {
+//                                                String jsonMsg = Messages.prepareUpdateMessage(pwDid, messageId);
+//                                                UtilsApi.vcxUpdateMessages(MessageStatusType.REVIEWED, jsonMsg).whenComplete((v1, error) -> {
+//                                                    if (error != null) {
+//                                                        Logger.getInstance().e("Failed to update messages", error);
+//                                                        result.completeExceptionally(error);
+//                                                    } else {
+//                                                        result.complete(null);
+//                                                    }
+//
+//                                                });
+//                                            } catch (Exception ex) {
+//                                                result.completeExceptionally(ex);
+//                                            }
+//                                        });
+//                                    } catch (Exception ex) {
+//                                        result.completeExceptionally(ex);
+//                                    }
+//
+//
+//                                }
+//                            });
+//                        } catch (Exception ex) {
+//                            result.completeExceptionally(ex);
+//                        }
+//                    });
+//
+//                } catch (Exception ex) {
+//                    result.completeExceptionally(ex);
+//                }
+//            });
+//        } catch (Exception ex) {
+//            result.completeExceptionally(ex);
+//        }
+//        return result;
+//    }
 
     /**
      * Temporary method to parse structured question message JSON string and extract {@link StructuredMessageHolder} from it.

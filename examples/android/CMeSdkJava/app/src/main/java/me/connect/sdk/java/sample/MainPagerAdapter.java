@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
-import me.connect.sdk.java.sample.backups.BackupsFragment;
 import me.connect.sdk.java.sample.history.HistoryFragment;
 import me.connect.sdk.java.sample.homepage.HomePageFragment;
 
@@ -23,8 +22,6 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
                 return HomePageFragment.newInstance();
             case 1:
                 return HistoryFragment.newInstance();
-            case 2:
-                return BackupsFragment.newInstance();
             default:
                 return null;
         }
@@ -33,14 +30,11 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
     @Nullable
     @Override
     public CharSequence getPageTitle(int position) {
-        // todo should use resource strings
         switch (position) {
             case 0:
                 return "Home";
             case 1:
                 return "History";
-            case 2:
-                return "Wallet backups";
             default:
                 return null;
         }
@@ -49,6 +43,6 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 3;
+        return 2;
     }
 }

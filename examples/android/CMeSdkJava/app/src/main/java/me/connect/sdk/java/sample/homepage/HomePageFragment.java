@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.json.JSONObject;
+
 import me.connect.sdk.java.sample.databinding.HomePageFragmentBinding;
 import me.connect.sdk.java.sample.homepage.Results.*;
 
@@ -55,7 +57,7 @@ public class HomePageFragment extends Fragment {
             }
 
             @Override
-            public void onAnswerClick(int entryId, String answer) {
+            public void onAnswerClick(int entryId, JSONObject answer) {
                 answer(entryId, answer);
             }
         });
@@ -183,7 +185,7 @@ public class HomePageFragment extends Fragment {
         });
     }
 
-    private void answer(int entryId, String answer) {
+    private void answer(int entryId, JSONObject answer) {
         model.answerMessage(entryId, answer).observeOnce(getViewLifecycleOwner(), ok -> {
             Toast.makeText(getActivity(), "Struct message processed", Toast.LENGTH_SHORT).show();
         });

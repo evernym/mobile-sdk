@@ -281,21 +281,24 @@ public class Credentials {
      * Loops indefinitely until credential request status is not changed
      *
      * @param serializedCredential string containing serialized credential request
-     * @param claimId string claimId of credential request
+     * @param threadId string claimId of credential request
      * @return string containing serialized credential
      */
-    public static String awaitCredentialReceived(String serializedCredential, String claimId) {
+    public static String awaitCredentialReceived(String serializedCredential, String threadId, String pwDid) {
         Logger.getInstance().i("Awaiting cred state change");
         int status = -1;
         try {
             Integer handle = CredentialApi.credentialDeserialize(serializedCredential).get();
             while (true) {
                 try {
-                    Message message = Messages.downloadMessageByTypeAndThreadId(MessageType.CREDENTIAL, claimId).get();
-                    status = CredentialApi.credentialUpdateStateWithMessage(handle, message.getPayload()).get();
-                    if (MessageState.ACCEPTED.matches(status)) {
-                        UtilsApi.vcxFetchPublicEntities();
-                        return CredentialApi.credentialSerialize(handle).get();
+                    Message message = Messages.downloadMessageByTypeAndThreadId(MessageType.CREDENTIAL, threadId).get();
+                    if (message != null) {
+                        status = CredentialApi.credentialUpdateStateWithMessage(handle, message.getPayload()).get();
+                        Messages.updateMessageStatus(pwDid, message.getUid());
+                        if (MessageState.ACCEPTED.matches(status)) {
+                            UtilsApi.vcxFetchPublicEntities();
+                            return CredentialApi.credentialSerialize(handle).get();
+                        }
                     }
                     Thread.sleep(1000);
                 } catch (ExecutionException | InterruptedException e) {

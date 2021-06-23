@@ -1,5 +1,8 @@
 package me.connect.sdk.java.message;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.List;
 
 public class StructuredMessageHolder {
@@ -44,6 +47,18 @@ public class StructuredMessageHolder {
         public Response(String text, String nonce) {
             this.text = text;
             this.nonce = nonce;
+        }
+
+        public JSONObject getResponse() {
+            try {
+                JSONObject response = new JSONObject();
+                response.put("text", text);
+                response.put("nonce", nonce);
+                return response;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
         }
 
         public String getText() {

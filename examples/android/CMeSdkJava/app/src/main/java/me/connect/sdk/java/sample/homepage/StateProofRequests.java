@@ -46,12 +46,9 @@ public class StateProofRequests {
                         JSONObject decodedProofAttach = me.connect.sdk.java.ProofRequests.decodeProofRequestAttach(outOfBandInvite.attach);
 
                         proof.serialized = pr;
-                        proof.name = me.connect.sdk.java.ProofRequests.extractRequestedNameFromProofRequest(decodedProofAttach);
                         proof.pwDid = connectionData.getString("pw_did");
-                        proof.attributes = me.connect.sdk.java.ProofRequests.extractRequestedAttributesFromProofRequest(decodedProofAttach);
                         proof.threadId = threadId;
                         proof.attachConnectionLogo = new JSONObject(outOfBandInvite.parsedInvite).getString("profileUrl");
-                        proof.messageId = null;
                         db.proofRequestDao().insertAll(proof);
 
                         acceptProofReq(proof, db, liveData, action);
@@ -78,20 +75,13 @@ public class StateProofRequests {
             } else {
                 ProofRequest proof = new ProofRequest();
                 try {
-                    JSONObject decodedProofAttach = me.connect.sdk.java.ProofRequests.decodeProofRequestAttach(outOfBandInvite.attach);
-
                     proof.serialized = pr;
-                    proof.name = me.connect.sdk.java.ProofRequests.extractRequestedNameFromProofRequest(decodedProofAttach);
                     proof.pwDid = null;
-                    proof.attributes = me.connect.sdk.java.ProofRequests.extractRequestedAttributesFromProofRequest(decodedProofAttach);
                     JSONObject thread = outOfBandInvite.attach.getJSONObject("~thread");
                     proof.threadId = thread.getString("thid");
-
                     proof.attachConnection = outOfBandInvite.parsedInvite;
                     proof.attachConnectionName = outOfBandInvite.userMeta.name;
                     proof.attachConnectionLogo = outOfBandInvite.userMeta.logo;
-
-                    proof.messageId = null;
                     db.proofRequestDao().insertAll(proof);
 
                     acceptProofReq(proof, db, liveData, action);
@@ -125,7 +115,6 @@ public class StateProofRequests {
                 String data = Proofs.mapCredentials(creds);
                 Proofs.send(con.serialized, proof.serialized, data, "{}").handle((s, e) -> {
                     if (s != null) {
-                        proof.accepted = true;
                         proof.serialized = s;
                         db.proofRequestDao().update(proof);
                     }
@@ -185,7 +174,6 @@ public class StateProofRequests {
                             String data = Proofs.mapCredentials(creds);
                             Proofs.send(serializedCon, proof.serialized, data, "{}").handle((s, e) -> {
                                 if (s != null) {
-                                    proof.accepted = true;
                                     proof.serialized = s;
                                     db.proofRequestDao().update(proof);
                                 }
@@ -213,8 +201,6 @@ public class StateProofRequests {
     public static void rejectProofReq(ProofRequest proof, Database db, SingleLiveData<Results> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             if (proof.pwDid == null) {
-                proof.accepted = false;
-                db.proofRequestDao().update(proof);
                 liveData.postValue(PROOF_SUCCESS);
                 return;
             }
@@ -222,7 +208,6 @@ public class StateProofRequests {
             Proofs.reject(con.serialized, proof.serialized).handle((s, err) -> {
                 if (s != null) {
                     proof.serialized = s;
-                    proof.accepted = false;
                     db.proofRequestDao().update(proof);
                 }
                 liveData.postValue(err == null ? PROOF_SUCCESS : PROOF_FAILURE);

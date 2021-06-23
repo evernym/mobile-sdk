@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,8 +50,11 @@ public class HomePageAdapter extends RecyclerView.Adapter<HomePageAdapter.HomePa
 
         holder.buttonAccept.setVisibility(View.INVISIBLE);
         holder.buttonReject.setVisibility(View.INVISIBLE);
+        holder.selectedAnswer.setVisibility(View.INVISIBLE);
+        holder.buttonHolder.setVisibility(View.INVISIBLE);
 
         if (action.entryId == null && action.messageAnswers == null) {
+            holder.buttonHolder.removeAllViews();
             holder.buttonAccept.setVisibility(View.VISIBLE);
             holder.buttonReject.setVisibility(View.VISIBLE);
             holder.buttonAccept.setEnabled(true);
@@ -66,6 +71,7 @@ public class HomePageAdapter extends RecyclerView.Adapter<HomePageAdapter.HomePa
             });
         } else {
             holder.buttonHolder.removeAllViews();
+            holder.buttonHolder.setVisibility(View.VISIBLE);
             if (action.selectedAnswer != null) {
                 holder.selectedAnswer.setVisibility(View.VISIBLE);
                 holder.selectedAnswer.setText("Selected answer: " + action.selectedAnswer);
@@ -80,7 +86,7 @@ public class HomePageAdapter extends RecyclerView.Adapter<HomePageAdapter.HomePa
                             View view = holder.buttonHolder.getChildAt(i);
                             view.setEnabled(false);
                         }
-                        itemClickListener.onAnswerClick(action.id, response.getText());
+                        itemClickListener.onAnswerClick(action.id, response.getResponse());
                     });
                 }
             }
@@ -125,6 +131,6 @@ public class HomePageAdapter extends RecyclerView.Adapter<HomePageAdapter.HomePa
 
         void onRejectClick(int entryId);
 
-        void onAnswerClick(int entryId, String answer);
+        void onAnswerClick(int entryId, JSONObject answer);
     }
 }

@@ -3,6 +3,7 @@ package me.connect.sdk.java.sample.homepage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 
@@ -48,18 +49,13 @@ public class StateCredentialOffers {
                     } else {
                         CredentialOffer offer = new CredentialOffer();
                         try {
-
+                            JSONObject thread = outOfBandInvite.attach.getJSONObject("~thread");
+                            offer.threadId = thread.getString("thid");
                             offer.claimId = claimId;
-                            offer.name = outOfBandInvite.attach.getString("comment");
                             offer.pwDid = pwDid;
-                            JSONObject preview = outOfBandInvite.attach.getJSONObject("credential_preview");
-                            offer.attributes = preview.getJSONArray("attributes").getString(0);
                             offer.serialized = co;
-
                             offer.attachConnectionLogo = new JSONObject(outOfBandInvite.parsedInvite)
                                     .getString("profileUrl");
-
-                            offer.messageId = null;
                             db.credentialOffersDao().insertAll(offer);
 
                             acceptCredentialOffer(offer, db, liveData, action);
@@ -87,16 +83,11 @@ public class StateCredentialOffers {
             } else {
                 CredentialOffer offer = new CredentialOffer();
                 try {
+                    JSONObject thread = outOfBandInvite.attach.getJSONObject("~thread");
+                    offer.threadId = thread.getString("thid");
                     offer.claimId = outOfBandInvite.attach.getString("@id");
-                    offer.name = outOfBandInvite.attach.getString("comment");
                     offer.pwDid = null;
-
-                    JSONObject preview = outOfBandInvite.attach.getJSONObject("credential_preview");
-                    offer.attributes = preview.getJSONArray("attributes").getString(0);
-
                     offer.serialized = co;
-                    offer.messageId = null;
-
                     offer.attachConnection = outOfBandInvite.parsedInvite;
                     offer.attachConnectionName = outOfBandInvite.userMeta.name;
                     offer.attachConnectionLogo = outOfBandInvite.userMeta.logo;
@@ -124,17 +115,22 @@ public class StateCredentialOffers {
         Connection connection = db.connectionDao().getByPwDid(offer.pwDid);
         me.connect.sdk.java.Credentials.acceptOffer(connection.serialized, offer.serialized).handle((s, throwable) -> {
                 if (s != null) {
-                    offer.serialized = me.connect.sdk.java.Credentials.awaitCredentialReceived(s, offer.claimId);
-                    offer.accepted = true;
+                    offer.serialized = me.connect.sdk.java.Credentials.awaitCredentialReceived(s, offer.threadId, offer.pwDid);
                     db.credentialOffersDao().update(offer);
+                    HomePageViewModel.addToHistory(
+                        action.id,
+                        "Credential accept",
+                        db,
+                        data
+                    );
+                } else {
+                    HomePageViewModel.addToHistory(
+                            action.id,
+                            "Credential accept failure",
+                            db,
+                            data
+                    );
                 }
-                HomePageViewModel.addToHistory(
-                    action.id,
-                    "Credential accept",
-                    db,
-                    data
-                );
-
                 data.postValue(throwable == null ? OFFER_SUCCESS: OFFER_SUCCESS);
                 return null;
             }
@@ -151,13 +147,9 @@ public class StateCredentialOffers {
                 .handle((res, throwable) -> {
                     if (res != null) {
                         String pwDid = Connections.getPwDid(res);
-                        System.out.println(pwDid + "parsedInvite");
-
                         String serializedCon = Connections.awaitConnectionReceived(res, pwDid);
 
-                        pwDid = Connections.getPwDid(serializedCon);
                         Connection c = new Connection();
-                        c.name = offer.attachConnectionName;
                         c.icon = offer.attachConnectionLogo;
                         c.pwDid = pwDid;
                         c.serialized = serializedCon;
@@ -174,21 +166,25 @@ public class StateCredentialOffers {
                             offer.attachConnectionLogo,
                             data
                         );
-
                         me.connect.sdk.java.Credentials.acceptOffer(serializedCon, offer.serialized).handle((s, thr) -> {
                                 if (s != null) {
-                                    offer.serialized = me.connect.sdk.java.Credentials.awaitCredentialReceived(s, offer.claimId);
-                                    offer.accepted = true;
+                                    offer.serialized = me.connect.sdk.java.Credentials.awaitCredentialReceived(s, offer.threadId, pwDid);
                                     db.credentialOffersDao().update(offer);
+
+                                    HomePageViewModel.addToHistory(
+                                        action.id,
+                                        "Credential accept",
+                                        db,
+                                        data
+                                    );
+                                } else {
+                                    HomePageViewModel.addToHistory(
+                                        action.id,
+                                        "Credential accept failure",
+                                        db,
+                                        data
+                                    );
                                 }
-
-                                HomePageViewModel.addToHistory(
-                                    action.id,
-                                    "Credential accept",
-                                    db,
-                                    data
-                                );
-
                                 data.postValue(thr == null ? OFFER_SUCCESS: OFFER_FAILURE);
                                 return null;
                             }
@@ -204,8 +200,6 @@ public class StateCredentialOffers {
     public static void rejectCredentialOffer(CredentialOffer offer, Database db, SingleLiveData<Results> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             if (offer.pwDid == null) {
-                offer.accepted = false;
-                db.credentialOffersDao().update(offer);
                 liveData.postValue(PROOF_SUCCESS);
                 return;
             }
@@ -213,7 +207,6 @@ public class StateCredentialOffers {
             Credentials.rejectOffer(con.serialized, offer.serialized).handle((s, err) -> {
                 if (s != null) {
                     offer.serialized = s;
-                    offer.accepted = false;
                     db.credentialOffersDao().update(offer);
                 }
                 liveData.postValue(err == null ? PROOF_SUCCESS : PROOF_FAILURE);
