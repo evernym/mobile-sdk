@@ -13,7 +13,20 @@
 
 @interface CMCredential: NSObject
 
-+(void)acceptCredOfferWithMsgid: (NSDictionary*) messageObj forConnection: (NSDictionary*) connection withCompletionHandler: (ResponseBlock) completionBlock;
++(void) acceptCredOfferWithMsgid: (NSDictionary*) messageObj
+                  forConnection: (NSDictionary*) connection
+          withCompletionHandler: (ResponseBlock) completionBlock;
+
++(void) createWithOffer: (NSString*)offer
+  withCompletionHandler: (ResponseWithObject) completionBlock;
+
++(void) acceptCredentialOffer: (NSString*) serializedConnection
+         serializedCredential: (NSString*) serializedCredential
+        withCompletionHandler: (ResponseWithObject) completionBlock;
+
++(void) rejectCredentialOffer: (NSString*) serializedConnection
+         serializedCredential: (NSString*) serializedCredential
+        withCompletionHandler: (ResponseWithObject) completionBlock;
 
 @end
 

@@ -31,7 +31,7 @@
 }
 
 
-+(NSString*) extractRequestAttach: (NSDictionary*)invite {
++(NSDictionary*) extractRequestAttach: (NSDictionary*)invite {
     NSArray* requestAttach = [invite objectForKey: @"request~attach"];
     NSDictionary* requestAttachItem = requestAttach[0];
     NSDictionary* requestAttachData = [requestAttachItem objectForKey: @"data"];
@@ -40,7 +40,7 @@
     NSData* invitationData = [CMUtilities decode64String: requestAttachBase64];
     NSString* json = [[NSString alloc] initWithData: invitationData encoding: NSUTF8StringEncoding];
     NSLog(@" JSON %@", json);
-    return json;
+    return [CMUtilities jsonToDictionary: json];
 }
 
 +(NSDictionary*) parseInvitationLink: (NSString*) link {
@@ -133,7 +133,9 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
 
     NSDictionary *connectValues = [CMUtilities parsedInvite: invitation];
-//    NSString *requestAttach = [self extractRequestAttach: connectValues];
+    NSDictionary *requestAttach = [self extractRequestAttach: connectValues];
+    [LocalStorage store: @"request~attach"
+              andObject: requestAttach];
     
     if([[connectValues allKeys] count] < 1) {
         connectValues = [CMConnection parseInvitationLink: invitation];
@@ -209,7 +211,8 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
                         dispatch_semaphore_wait(acceptedWaitSemaphore, DISPATCH_TIME_FOREVER);
                         if (connectionState == 4) {
                             
-                            [sdkApi connectionSerialize: (int)connectionHandle completion: ^(NSError *error, NSString *connectionSerialized) {
+                            [sdkApi connectionSerialize: (int)connectionHandle
+                                             completion: ^(NSError *error, NSString *connectionSerialized) {
                                 if (error && error.code > 0) {
                                     return completionBlock(nil, error);
                                 }

@@ -105,7 +105,7 @@
 }
 
 +(void) createWithOffer: (NSString*)offer
-  withCompletionHandler: (ResponseWithString) completionBlock {
+  withCompletionHandler: (ResponseWithObject) completionBlock {
     NSError* error;
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
     
@@ -123,8 +123,7 @@
                 if (error && error.code > 0) {
                     return completionBlock(nil, error);
                 }
-                
-                return completionBlock(state, nil);
+                return completionBlock([CMUtilities jsonToDictionary:state], nil);
             }];
         }];
     } @catch (NSException *exception) {
@@ -196,7 +195,7 @@
                             dispatch_semaphore_wait(acceptedWaitSemaphore, DISPATCH_TIME_FOREVER);
                             if (credentialState == 4) {
                                 NSLog(@"credential accepted");
-                                return completionBlock(state, nil);
+                                return completionBlock([CMUtilities jsonToDictionary:state], nil);
                                 break;
                             }
                         }
@@ -242,7 +241,7 @@
                             return completionBlock(nil, error);
                         }
                         
-                        return completionBlock(state, nil);
+                        return completionBlock([CMUtilities jsonToDictionary:state], nil);
                     }];
                 }];
             }];

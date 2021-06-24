@@ -9,6 +9,8 @@
 #import "ViewController.h"
 #import "MobileSDK.h"
 #import "CMConnection.h"
+#import "CMCredential.h"
+#import "CMUtilities.h"
 #import "ConnectionDetailsViewController.h"
 #import "LocalStorage.h"
 #import "QRCodeReaderViewController.h"
@@ -61,7 +63,9 @@ UIGestureRecognizer *tapper;
 
 - (IBAction)addNewConn: (id)sender {
     if(addConnConfigTextView.text.length > 3 && ![addConnConfigTextView.text isEqual: @"enter code here"]) {
-        [CMConnection connect: addConnConfigTextView.text connectionType: QR phoneNumber: @"" withCompletionHandler: ^(NSDictionary *connectionData, NSError *error) {
+        [CMConnection connect: addConnConfigTextView.text
+               connectionType: QR phoneNumber: @""
+        withCompletionHandler: ^(NSDictionary *connectionData, NSError *error) {
             if (error != nil && error > 0) {
                 NSLog(@"Error %@", error.localizedDescription);
                 return;
@@ -69,6 +73,30 @@ UIGestureRecognizer *tapper;
             if(connectionData) {
                 self.addConnConfigTextView.text = @"";
                 [self performSegueWithIdentifier: @"openConnectionDetails" sender: connectionData];
+                NSString* serializedConnection = [connectionData objectForKey: @"serializedConnection"];
+                NSLog(@"ConnectionData %@", serializedConnection);
+
+                NSDictionary *offer = [LocalStorage getObjectForKey: @"request~attach" shouldCreate: false];
+                [CMCredential createWithOffer:[CMUtilities dictToJsonString:offer]
+                        withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+                    if (error && error.code > 0) {
+                        NSLog(@"Error createWithOffer %@", error);
+
+                        return;
+                    }
+                    NSLog(@"Created offer %@", responseObject);
+
+                    [CMCredential acceptCredentialOffer:serializedConnection
+                                   serializedCredential:[CMUtilities dictToJsonString:responseObject]
+                                  withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+                        if (error && error.code > 0) {
+                            NSLog(@"Error acceptCredentialOffer %@", error);
+
+                            return;
+                        }
+                        NSLog(@"Credential Offer Accepted %@", error);
+                    }];
+                }];
             }
         }];
     }
