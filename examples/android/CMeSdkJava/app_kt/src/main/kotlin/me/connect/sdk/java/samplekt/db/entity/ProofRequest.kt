@@ -20,18 +20,6 @@ data class ProofRequest(
         @ColumnInfo(name = "serialized")
         var serialized: String,
 
-        @ColumnInfo(name = "name")
-        var name: String,
-
-        @ColumnInfo(name = "attributes")
-        var attributes: String,
-
-        @ColumnInfo(name = "accepted")
-        var accepted: Boolean? = null,
-
-        @ColumnInfo(name = "message_id")
-        var messageId: String? = null,
-
         @ColumnInfo(name = "attachConnection")
         var attachConnection: String? = null,
 

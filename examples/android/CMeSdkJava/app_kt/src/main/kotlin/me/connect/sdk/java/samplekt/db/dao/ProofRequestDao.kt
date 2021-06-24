@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import me.connect.sdk.java.samplekt.db.entity.ProofRequest
 
-
 @Dao
 interface ProofRequestDao {
     @Query("SELECT * FROM proofrequest")
@@ -14,7 +13,10 @@ interface ProofRequestDao {
     suspend fun getById(id: Int): ProofRequest
 
     @Query("SELECT EXISTS(SELECT * FROM proofrequest WHERE thread_id = :threadId)")
-    suspend fun checkExists(threadId: String): Boolean
+    suspend fun checkProofExists(threadId: String): Boolean
+
+    @Query("SELECT * FROM proofrequest WHERE thread_id = :threadId")
+    fun getByThreadId(threadId: String?): ProofRequest?
 
     @Insert
     suspend fun insertAll(vararg proofRequests: ProofRequest)

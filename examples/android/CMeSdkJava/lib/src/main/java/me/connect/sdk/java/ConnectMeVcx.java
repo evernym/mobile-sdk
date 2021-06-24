@@ -29,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.security.SecureRandom;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -76,7 +77,7 @@ public class ConnectMeVcx {
      * @return {@link CompletableFuture}
      */
     public static @NonNull
-    CompletableFuture<Void> init(Context context) {
+    CompletableFuture<Void> init(Context context, @RawRes int genesisPool) {
         Logger.getInstance().setLogLevel(LogLevel.DEBUG);
         Logger.getInstance().i("Initializing SDK");
         CompletableFuture<Void> result = new CompletableFuture<>();
@@ -89,7 +90,7 @@ public class ConnectMeVcx {
                 result.completeExceptionally(ex);
                 return;
             }
-            initialize(context).whenComplete((returnCode, err) -> {
+            initialize(context, genesisPool).whenComplete((returnCode, err) -> {
                 if (err != null) {
                     Logger.getInstance().e("Init failed", err);
                     result.completeExceptionally(err);
@@ -264,7 +265,7 @@ public class ConnectMeVcx {
         makeDir(walletDir);
         Log.d(TAG, "Wallet dir was made");
 
-        File genesisFile = writeGenesisFile(context, genesisPool);
+//        File genesisFile = writeGenesisFile(context, genesisPool);
 
         String agencyConfig = ConnectMeVcx.Config.builder()
                 .withAgency(AgencyConfig.DEFAULT)
@@ -272,7 +273,7 @@ public class ConnectMeVcx {
                 .withWalletName(walletName)
                 .withLogoUrl("https://robothash.com/logo.png")
                 .withInstitutionName("real institution name")
-                .withGenesisPath(genesisFile.getAbsolutePath())
+//                .withGenesisPath(genesisFile.getAbsolutePath())
                 .withWalletKey(walletKey)
                 .buildVcxConfig();
 
@@ -294,7 +295,7 @@ public class ConnectMeVcx {
                             Logger.getInstance().i("createOneTimeInfo called: " + oneTimeInfo);
                             try {
                                 SecurePreferencesHelper.setLongStringValue(context, SECURE_PREF_VCXCONFIG, oneTimeInfo);
-                                initialize(context).whenComplete((returnCode, error) -> {
+                                initialize(context, genesisPool).whenComplete((returnCode, error) -> {
                                     if (error != null) {
                                         Logger.getInstance().e("Init failed", error);
                                         result.completeExceptionally(error);
@@ -317,7 +318,18 @@ public class ConnectMeVcx {
         return result;
     }
 
-    private static CompletableFuture<Void> initialize(Context context) {
+    private static String vcxConfigWithoutGenesisPath(String config) {
+        try {
+            JSONObject vcxConfig = new JSONObject(config);
+            vcxConfig.remove("genesis_path");
+            return vcxConfig.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return config;
+    }
+
+    private static CompletableFuture<Void> initialize(Context context, @RawRes int genesisPool) {
         CompletableFuture<Void> result = new CompletableFuture<>();
         // When we restore data, then we are not calling createOneTimeInfo
         // and hence ca-crt is not written within app directory
@@ -326,10 +338,12 @@ public class ConnectMeVcx {
         Utils.writeCACert(context);
         try {
             String config = SecurePreferencesHelper.getLongStringValue(context, SECURE_PREF_VCXCONFIG, null);
-            VcxApi.vcxInitWithConfig(config).whenComplete((integer, err) -> {
+            String vcxConfig = vcxConfigWithoutGenesisPath(config);
+            VcxApi.vcxInitWithConfig(vcxConfig).whenComplete((integer, err) -> {
                 if (err != null) {
                     result.completeExceptionally(err);
                 } else {
+                    initPool(context, genesisPool);
                     result.complete(null);
                 }
             });
@@ -343,6 +357,20 @@ public class ConnectMeVcx {
             result.completeExceptionally(e);
         }
         return result;
+    }
+
+    private static void initPool(Context context, @RawRes int genesisPool) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                JSONObject poolConfig = new JSONObject();
+                File genesisFile = writeGenesisFile(context, genesisPool);
+                poolConfig.put("genesis_path", genesisFile.getAbsoluteFile());
+                poolConfig.put("pool_name", "android-sample-pool");
+                VcxApi.vcxInitPool(poolConfig.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private static void setVcxLogger(int maxFileSizeBytes, Context context) {
@@ -567,7 +595,6 @@ public class ConnectMeVcx {
          */
         public @NonNull
         ConfigBuilder withGenesisPool(@NonNull String genesisPool) {
-
             this.genesisPool = genesisPool;
             return this;
         }
@@ -673,7 +700,7 @@ public class ConnectMeVcx {
                     walletName,
                     logoUrl,
                     institutionName,
-                    genesisPath,
+//                    genesisPath,
                     walletKey
             );
         }
@@ -706,7 +733,7 @@ public class ConnectMeVcx {
         private String walletName;
         private String logoUrl;
         private String institutionName;
-        private String genesisPath;
+//        private String genesisPath;
         private String walletKey;
 
         public Config(
@@ -716,7 +743,7 @@ public class ConnectMeVcx {
             String walletName,
             String logoUrl,
             String institutionName,
-            String genesisPath,
+//            String genesisPath,
             String walletKey
         ) {
             this.agency = agency;
@@ -725,7 +752,7 @@ public class ConnectMeVcx {
             this.walletName = walletName;
             this.logoUrl = logoUrl;
             this.institutionName = institutionName;
-            this.genesisPath = genesisPath;
+//            this.genesisPath = genesisPath;
             this.walletKey = walletKey;
         }
 

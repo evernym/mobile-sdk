@@ -32,14 +32,16 @@ public class ResponseConverter {
     public static String fromResponseList(List<Response> responses) {
         try {
             JSONArray json = new JSONArray();
-            for (Response r : responses) {
-                JSONObject entry = new JSONObject();
-                entry.put("text", r.getText());
-                entry.put("nonce", r.getNonce());
-                json.put(entry);
+            if (responses != null) {
+                for (Response r : responses) {
+                    JSONObject entry = new JSONObject();
+                    entry.put("text", r.getText());
+                    entry.put("nonce", r.getNonce());
+                    json.put(entry);
+                }
+                return json.toString();
             }
-            return json.toString();
-
+            return null;
         } catch (JSONException e) {
             return null;
         }

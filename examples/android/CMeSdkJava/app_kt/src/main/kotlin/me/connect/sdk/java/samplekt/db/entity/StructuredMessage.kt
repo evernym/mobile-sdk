@@ -21,15 +21,6 @@ data class StructuredMessage(
         @ColumnInfo(name = "entry_id")
         var entryId: String,
 
-        @ColumnInfo(name = "message_id")
-        var messageId: String,
-
-        @ColumnInfo(name = "question_text")
-        var questionText: String,
-
-        @ColumnInfo(name = "question_detail")
-        var questionDetail: String,
-
         @ColumnInfo(name = "answers")
         var answers: List<Response>,
 

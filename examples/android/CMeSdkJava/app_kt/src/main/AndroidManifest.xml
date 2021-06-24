@@ -6,7 +6,8 @@
     <!-- Fixme `android:usesCleartextTraffic` is used only for test purposes -->
     <application
         android:hardwareAccelerated="true"
-        android:allowBackup="true"
+        android:allowBackup="false"
+        tools:replace="android:allowBackup"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"

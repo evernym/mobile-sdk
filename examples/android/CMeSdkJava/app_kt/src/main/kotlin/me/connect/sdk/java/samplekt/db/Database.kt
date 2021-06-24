@@ -13,14 +13,17 @@ import me.connect.sdk.java.samplekt.db.entity.*
     Connection::class,
     CredentialOffer::class,
     ProofRequest::class,
-    StructuredMessage::class
+    StructuredMessage::class,
+    Action::class
 ], version = 1)
+
 @TypeConverters(ResponseConverter::class)
 abstract class Database : RoomDatabase() {
     abstract fun backupDao(): BackupDao
     abstract fun connectionDao(): ConnectionDao
     abstract fun credentialOffersDao(): CredentialOfferDao
     abstract fun proofRequestDao(): ProofRequestDao
+    abstract fun actionDao(): ActionDao
     abstract fun structuredMessageDao(): StructuredMessageDao
 
     companion object {

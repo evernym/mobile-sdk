@@ -18,18 +18,6 @@ public class ProofRequest {
     @ColumnInfo(name = "serialized")
     public String serialized;
 
-    @ColumnInfo(name = "name")
-    public String name;
-
-    @ColumnInfo(name = "attributes")
-    public String attributes;
-
-    @ColumnInfo(name = "accepted")
-    public Boolean accepted;
-
-    @ColumnInfo(name = "message_id")
-    public String messageId;
-
     @ColumnInfo(name = "attachConnection")
     public String attachConnection;
 

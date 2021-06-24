@@ -22,15 +22,6 @@ public class StructuredMessage {
     @ColumnInfo(name = "entry_id")
     public String entryId;
 
-    @ColumnInfo(name = "message_id")
-    public String messageId;
-
-    @ColumnInfo(name = "question_text")
-    public String questionText;
-
-    @ColumnInfo(name = "question_detail")
-    public String questionDetail;
-
     @ColumnInfo(name = "answers")
     public List<Response> answers;
 

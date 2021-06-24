@@ -14,24 +14,14 @@ public class CredentialOffer implements Serializable {
     @ColumnInfo(name = "pwdid")
     public String pwDid;
 
+    @ColumnInfo(name = "threadId")
+    public String threadId;
+
     @ColumnInfo(name = "serialized")
     public String serialized;
 
     @ColumnInfo(name = "claim_id")
     public String claimId;
-
-    @ColumnInfo(name = "name")
-    public String name;
-
-    // todo temporary
-    @ColumnInfo(name = "attributes")
-    public String attributes;
-
-    @ColumnInfo(name = "accepted")
-    public Boolean accepted;
-
-    @ColumnInfo(name = "message_id")
-    public String messageId;
 
     @ColumnInfo(name = "attachConnection")
     public String attachConnection;

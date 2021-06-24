@@ -13,18 +13,21 @@ public class CredDataHolder {
     public String name;
     public String attributes;
     public String offer;
+    public String threadId;
 
-    public CredDataHolder(String id, String name, String attributes, String offer) {
+    public CredDataHolder(String id, String name, String attributes, String offer, String threadId) {
         this.id = id;
         this.name = name;
         this.attributes = attributes;
         this.offer = offer;
+        this.threadId = threadId;
     }
 
     public static CredDataHolder extractDataFromCredentialsOfferMessage(Message msg) {
         try {
             JSONObject data = new JSONArray(msg.getPayload()).getJSONObject(0);
             String id = data.getString("claim_id");
+            String thread_id = data.getString("thread_id");
             String name = data.getString("claim_name");
             JSONObject attributesJson = data.getJSONObject("credential_attrs");
             StringBuilder attributes = new StringBuilder();
@@ -34,7 +37,7 @@ public class CredDataHolder {
                 String value = attributesJson.getString(key);
                 attributes.append(String.format("%s: %s\n", key, value));
             }
-            return new CredDataHolder(id, name, attributes.toString(), msg.getPayload());
+            return new CredDataHolder(id, name, attributes.toString(), msg.getPayload(), thread_id);
         } catch (JSONException e) {
             e.printStackTrace();
             return null;

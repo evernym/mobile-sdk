@@ -23,16 +23,21 @@ class ResponseConverter {
     }
 
     @TypeConverter
-    fun fromResponseList(responses: List<Response>): String = try {
-        val json = JSONArray()
-        responses.forEach { r ->
-            val entry = JSONObject()
-            entry.put("text", r.text)
-            entry.put("nonce", r.nonce)
-            json.put(entry)
+    fun fromResponseList(responses: List<Response>?): String {
+        try {
+            val json = JSONArray()
+            if (responses != null) {
+                responses.forEach { r ->
+                    val entry = JSONObject()
+                    entry.put("text", r.text)
+                    entry.put("nonce", r.nonce)
+                    json.put(entry)
+                }
+                return json.toString()
+            }
+            return "[]"
+        } catch (e: JSONException) {
+            return "[]"
         }
-        json.toString()
-    } catch (e: JSONException) {
-        "[]"
     }
 }
