@@ -10,6 +10,8 @@
 #import "CMConnection.h"
 #import "LocalStorage.h"
 #import "MobileSDK.h"
+#import "CMCredential.h"
+#import "CMMessage.h"
 
 @implementation CMConnection
 
@@ -28,14 +30,111 @@
     return connValues[@"data"][@"pw_did"];
 }
 
+
++(NSString*) extractRequestAttach: (NSDictionary*)invite {
+    NSArray* requestAttach = [invite objectForKey: @"request~attach"];
+    NSDictionary* requestAttachItem = requestAttach[0];
+    NSDictionary* requestAttachData = [requestAttachItem objectForKey: @"data"];
+    NSString* requestAttachBase64 = [requestAttachData objectForKey: @"base64"];
+
+    NSData* invitationData = [CMUtilities decode64String: requestAttachBase64];
+    NSString* json = [[NSString alloc] initWithData: invitationData encoding: NSUTF8StringEncoding];
+    NSLog(@" JSON %@", json);
+    return json;
+}
+
++(NSDictionary*) parseInvitationLink: (NSString*) link {
+    NSArray* linkComponents = [link componentsSeparatedByString: @"msg?c_i="];
+
+    if([linkComponents count] < 2) {
+        return nil;
+    }
+
+    NSData* invitationData = [CMUtilities decode64String: linkComponents[1]];
+    NSString*  json = [[NSString alloc] initWithData: invitationData encoding: NSUTF8StringEncoding];
+
+    return [CMUtilities jsonToDictionary: json];
+}
+
++(NSString*)connectionID: connectValues {
+    NSString* connectionID = [connectValues objectForKey: @"id"];
+
+    if(!connectionID) {
+        connectionID =  [connectValues objectForKey: @"@id"];
+    }
+
+    if(!connectionID) {
+        NSDictionary* connectionData = [CMUtilities jsonToDictionary: connectValues[@"serializedConnection"]];
+        connectionID = connectionData[@"data"][@"pw_did"];
+    }
+
+    if(!connectionID) {
+        NSLog(@"Connection ID is missing %@", connectValues);
+    }
+
+    return connectionID;
+}
+
++(NSString*) connectionName: (NSDictionary*)connection {
+    NSString* connectionName = connection[@"invitation"][@"s"][@"n"];
+    if(!connectionName) {
+        connectionName = connection[@"invitation"][@"label"];
+    }
+
+    return connectionName;
+}
+
++(void)connectionRedirectAriesOutOfBand: (NSString*)invitation
+                   serializedConnection: (NSString*)serializedConnection
+                  withCompletionHandler: (ResponseWithBoolean) completionBlock {
+    NSError* error;
+    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
+    
+    @try {
+        if (serializedConnection == nil) {
+            NSError *error = [[NSError alloc] initWithDomain: @"connectMe"
+                                                        code: 400
+                                                    userInfo: @{ @"message": @"Error: Serialized connection is null" }];
+            return completionBlock(false, error);
+        }
+        // TODO: add check for handshake protocols
+        [sdkApi connectionDeserialize:serializedConnection
+                           completion:^(NSError *error, NSInteger connectionHandle) {
+            if (error && error.code > 0) {
+                return completionBlock(false, error);
+            }
+            
+            [sdkApi connectionSendReuse:(int) connectionHandle
+                                 invite:invitation
+                         withCompletion:^(NSError *error) {
+                if (error && error.code > 0) {
+                    return completionBlock(false, error);
+                }
+                
+                [CMMessage waitHandshakeReuse:^(BOOL result, NSError *error) {
+                    if (error && error.code > 0) {
+                        return completionBlock(false, error);
+                    }
+                    if (result) {
+                        return completionBlock(true, nil);
+                    }
+                }];
+            }];
+        }];
+    } @catch (NSException *exception) {
+        return completionBlock(false, error);
+    }
+}
+
 +(void)connect: (NSString*)invitation
 connectionType: (int)connectionType
    phoneNumber: (NSString*) phone
 withCompletionHandler: (ResponseWithObject) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
 
-    NSDictionary *connectValues = [CMUtilities jsonToDictionary: invitation];
-
+    NSDictionary *connectValues = [CMUtilities parsedInvite: invitation];
+//    NSString *requestAttach = [self extractRequestAttach: connectValues];
+    
     if([[connectValues allKeys] count] < 1) {
         connectValues = [CMConnection parseInvitationLink: invitation];
         invitation = [CMUtilities toJsonString: connectValues];
@@ -50,10 +149,11 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
     }
 
     [LocalStorage store: @"tempConnection" andObject: connectValues];
-
-    [sdkApi connectionCreateWithInvite: [self connectionID: connectValues]
-                         inviteDetails: invitation
-                            completion: ^(NSError *error, NSInteger connectionHandle) {
+    NSLog(@"IDDD  %@", [self connectionID: connectValues]);
+    
+    [sdkApi connectionCreateWithOutofbandInvite: [self connectionID: connectValues]
+                                         invite: [CMUtilities dictToJsonString: connectValues]
+                                     completion: ^(NSError *error, NSInteger connectionHandle) {
         if (error && error.code > 0) {
             if(error && error.code != 1010) {
                 return completionBlock(nil, error);
@@ -67,7 +167,7 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
             }];
         }
 
-        [CMUtilities printSuccess: @[@"createConnectionWithInvite",  [NSNumber numberWithLong: connectionHandle]]];
+        [CMUtilities printSuccess: @[@"connectionCreateWithOutofbandInvite",  [NSNumber numberWithLong: connectionHandle]]];
         
         NSString *connectType = [NSString stringWithFormat:@"{\"connection_type\":\"%@\",\"phone\":%@\"\"}",
                                     [CMConnection connectionByType: connectionType], phone];
@@ -136,47 +236,6 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
                 });
         }];
     }];
-}
-
-+(NSDictionary*) parseInvitationLink: (NSString*) link {
-    NSArray* linkComponents = [link componentsSeparatedByString: @"msg?c_i="];
-
-    if([linkComponents count] < 2) {
-        return nil;
-    }
-
-    NSData* invitationData = [CMUtilities decode64String: linkComponents[1]];
-    NSString*  json = [[NSString alloc] initWithData: invitationData encoding: NSUTF8StringEncoding];
-
-    return [CMUtilities jsonToDictionary: json];
-}
-
-+(NSString*)connectionID: connectValues {
-    NSString* connectionID = [connectValues objectForKey: @"id"];
-
-    if(!connectionID) {
-        connectionID =  [connectValues objectForKey: @"@id"];
-    }
-
-    if(!connectionID) {
-        NSDictionary* connectionData = [CMUtilities jsonToDictionary: connectValues[@"serializedConnection"]];
-        connectionID = connectionData[@"data"][@"pw_did"];
-    }
-
-    if(!connectionID) {
-        NSLog(@"Connection ID is missing %@", connectValues);
-    }
-
-    return connectionID;
-}
-
-+(NSString*) connectionName: (NSDictionary*)connection {
-    NSString* connectionName = connection[@"invitation"][@"s"][@"n"];
-    if(!connectionName) {
-        connectionName = connection[@"invitation"][@"label"];
-    }
-
-    return connectionName;
 }
 
 +(void)removeConnection: (NSString*) connection withCompletionHandler: (ResponseBlock) completionBlock {

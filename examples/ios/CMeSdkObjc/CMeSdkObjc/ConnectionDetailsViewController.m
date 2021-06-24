@@ -84,7 +84,9 @@
 
     if([messageType isEqual: @"credOffer"]) {
         NSLog(@"credOffer");
-        [CMCredential acceptCredOffer: message forConnection: connection withCompletionHandler: ^(NSString *credentialDetails, NSError *error) {
+        [CMCredential acceptCredOfferWithMsgid: message
+                        forConnection: connection
+                withCompletionHandler: ^(NSString *credentialDetails, NSError *error) {
             NSLog(@"credential offer results %@ %@", credentialDetails, error.localizedDescription);
             if (error && error.code > 0) {
                 [CMUtilities printError: error];

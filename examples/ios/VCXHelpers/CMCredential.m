@@ -14,7 +14,9 @@
 
 @implementation CMCredential
 
-+ (void)acceptCredOffer: (NSDictionary*) messageObj forConnection: (NSDictionary*) connection withCompletionHandler: (ResponseBlock) completionBlock {
++(void)acceptCredOfferWithMsgid: (NSDictionary*) messageObj
+                  forConnection: (NSDictionary*) connection
+          withCompletionHandler: (ResponseBlock) completionBlock {
     NSError* error;
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
     
@@ -97,6 +99,154 @@
             }];
         }];
         
+    } @catch (NSException *exception) {
+        return completionBlock(nil, error);
+    }
+}
+
++(void) createWithOffer: (NSString*)offer
+  withCompletionHandler: (ResponseWithString) completionBlock {
+    NSError* error;
+    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
+    
+    @try {
+        NSString *uuid = [[NSUUID UUID] UUIDString];
+        [sdkApi credentialCreateWithOffer:uuid
+                                    offer:offer
+                               completion:^(NSError *error, NSInteger credentailHandle) {
+            if (error && error.code > 0) {
+                return completionBlock(nil, error);
+            }
+            
+            [sdkApi credentialSerialize:credentailHandle
+                             completion:^(NSError *error, NSString *state) {
+                if (error && error.code > 0) {
+                    return completionBlock(nil, error);
+                }
+                
+                return completionBlock(state, nil);
+            }];
+        }];
+    } @catch (NSException *exception) {
+        return completionBlock(nil, error);
+    }
+}
+
++(void) acceptCredentialOffer: (NSString*) serializedConnection
+         serializedCredential: (NSString*) serializedCredential
+        withCompletionHandler: (ResponseWithObject) completionBlock {
+    NSError* error;
+    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
+    
+    @try {
+    [sdkApi connectionDeserialize:serializedConnection
+                       completion:^(NSError *error, NSInteger connectionHandle) {
+        if (error && error.code > 0) {
+            return completionBlock(nil, error);
+        }
+        
+        [sdkApi credentialDeserialize:serializedCredential
+                           completion:^(NSError *error, NSInteger credentialHandle) {
+            if (error && error.code > 0) {
+                return completionBlock(nil, error);
+            }
+            [sdkApi credentialSendRequest:credentialHandle
+                         connectionHandle:(int)connectionHandle
+                            paymentHandle:0
+                               completion:^(NSError *error) {
+                if (error && error.code > 0) {
+                    return completionBlock(nil, error);
+                }
+                
+                [sdkApi credentialSerialize:credentialHandle
+                                 completion:^(NSError *error, NSString *state) {
+                    if (error && error.code > 0) {
+                        return completionBlock(nil, error);
+                    }
+                    
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                        while(true) {
+                            dispatch_semaphore_t acceptedWaitSemaphore = dispatch_semaphore_create(0);
+                            __block NSInteger credentialState = 0;
+                            
+                            [sdkApi credentialGetState:credentialHandle
+                                            completion:^(NSError *error, NSInteger state) {
+                                if (error && error.code > 0) {
+                                    dispatch_semaphore_signal(acceptedWaitSemaphore);
+                                    return completionBlock(nil, error);
+                                }
+                                
+                                if (state != 4) {
+                                    [sdkApi credentialUpdateState:credentialHandle
+                                                       completion:^(NSError *error, NSInteger state) {
+                                        if (error && error.code > 0) {
+                                            dispatch_semaphore_signal(acceptedWaitSemaphore);
+                                            return completionBlock(nil, error);
+                                        }
+                                        
+                                        credentialState = state;
+                                        dispatch_semaphore_signal(acceptedWaitSemaphore);
+                                    }];
+                                } else {
+                                    credentialState = state;
+                                    dispatch_semaphore_signal(acceptedWaitSemaphore);
+                                }
+                            }];
+                            
+                            dispatch_semaphore_wait(acceptedWaitSemaphore, DISPATCH_TIME_FOREVER);
+                            if (credentialState == 4) {
+                                NSLog(@"credential accepted");
+                                return completionBlock(state, nil);
+                                break;
+                            }
+                        }
+                    });
+                }];
+            }];
+        }];
+    }];
+    } @catch (NSException *exception) {
+        return completionBlock(nil, error);
+    }
+}
+
++(void) rejectCredentialOffer: (NSString*) serializedConnection
+         serializedCredential: (NSString*) serializedCredential
+        withCompletionHandler: (ResponseWithObject) completionBlock {
+    NSError* error;
+    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
+    
+    @try {
+        [sdkApi connectionDeserialize:serializedConnection
+                           completion:^(NSError *error, NSInteger connectionHandle) {
+            if (error && error.code > 0) {
+                return completionBlock(nil, error);
+            }
+            
+            [sdkApi credentialDeserialize:serializedCredential completion:^(NSError *error, NSInteger credentialHandle) {
+                if (error && error.code > 0) {
+                    return completionBlock(nil, error);
+                }
+                
+                [sdkApi credentialReject:credentialHandle
+                        connectionHandle:(int)connectionHandle
+                                 comment:@""
+                              completion:^(NSError *error) {
+                    if (error && error.code > 0) {
+                        return completionBlock(nil, error);
+                    }
+                    
+                    [sdkApi credentialSerialize:credentialHandle
+                                     completion:^(NSError *error, NSString *state) {
+                        if (error && error.code > 0) {
+                            return completionBlock(nil, error);
+                        }
+                        
+                        return completionBlock(state, nil);
+                    }];
+                }];
+            }];
+        }];
     } @catch (NSException *exception) {
         return completionBlock(nil, error);
     }

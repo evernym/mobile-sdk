@@ -12,6 +12,8 @@
 typedef void (^ResponseBlock)(NSString *successMessage, NSError *error);
 typedef void (^ResponseWithObject)(NSDictionary *responseObject, NSError *error);
 typedef void (^ResponseWithArray)(NSArray *responseArray, NSError *error);
+typedef void (^ResponseWithBoolean)(BOOL result, NSError *error);
+typedef void (^ResponseWithError)(NSError *error);
 
 @interface CMUtilities : NSObject
 
@@ -23,6 +25,7 @@ typedef void (^ResponseWithArray)(NSArray *responseArray, NSError *error);
 
 +(NSDictionary*)jsonToDictionary: (NSString*)json;
 +(NSArray*)jsonToArray: (NSString*)json;
++(NSDictionary*)parsedInvite: (NSString*)invite;
 
 +(void)printError: (NSError*)error;
 +(void)printErrorMessage: (NSString*)error;

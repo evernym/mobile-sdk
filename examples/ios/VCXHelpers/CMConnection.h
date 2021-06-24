@@ -16,13 +16,13 @@ typedef NS_ENUM(int, ConnectionType) {
 
 @interface CMConnection: NSObject
 
-+(NSString*)getPwDid: (NSString*) serializedConnection;
++(NSString*) getPwDid: (NSString*) serializedConnection;
 
 +(void) connect: (NSString*)connectJSON connectionType: (int)connectionType phoneNumber: (NSString*)phone withCompletionHandler: (ResponseWithObject)completionBlock;
 +(NSDictionary*)parseInvitationLink: (NSString*)link;
 
-+(NSString*)connectionID: connectValues;
++(NSString*) connectionID: connectValues;
 +(NSString*) connectionName: (NSDictionary*)connection;
-+(void)removeConnection: (NSString*) connection withCompletionHandler: (ResponseBlock) completionBlock;
++(void) removeConnection: (NSString*) connection withCompletionHandler: (ResponseBlock) completionBlock;
 
 @end

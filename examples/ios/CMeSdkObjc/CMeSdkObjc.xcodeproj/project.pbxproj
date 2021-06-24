@@ -7,9 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2F3A478E9B877926C3FE542F /* Pods_CMeSdkObjcUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B87475662495C90309CBDCB5 /* Pods_CMeSdkObjcUITests.framework */; };
-		45063ECF961867FD85F6D699 /* Pods_CMeSdkObjc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F2FED9B74B5DBC8193263460 /* Pods_CMeSdkObjc.framework */; };
-		4B16FA2258A8B8B30321F45F /* Pods_CMeSdkObjcTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6358E363E85142D56F58C5D /* Pods_CMeSdkObjcTests.framework */; };
+		0437DBAEFED7B5D439DDCA5F /* Pods_CMeSdkObjcUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C6E4FAB9BA117A61067618C8 /* Pods_CMeSdkObjcUITests.framework */; };
+		54D6EE9E976DFB32B3CA6F2B /* Pods_CMeSdkObjcTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 81196E0383653D9D67AF5E29 /* Pods_CMeSdkObjcTests.framework */; };
 		8E13456322A040C800B6DE1F /* PoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E13456222A040C800B6DE1F /* PoolTxnGenesis.m */; };
 		8E509FE62281EFC60098812A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E509FE52281EFC60098812A /* AppDelegate.m */; };
 		8E509FE92281EFC60098812A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E509FE82281EFC60098812A /* ViewController.m */; };
@@ -19,6 +18,7 @@
 		8E509FF42281EFC80098812A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E509FF32281EFC80098812A /* main.m */; };
 		8E509FFE2281EFC80098812A /* CMeSdkObjcTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E509FFD2281EFC80098812A /* CMeSdkObjcTests.m */; };
 		8E50A0092281EFC80098812A /* CMeSdkObjcUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E50A0082281EFC80098812A /* CMeSdkObjcUITests.m */; };
+		918AE7FF65ED10A8021AE502 /* Pods_CMeSdkObjc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 529CA7FBB8658A71991C110E /* Pods_CMeSdkObjc.framework */; };
 		AAE1A2632512AA0C00EB172A /* ProofDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE1A25B2512AA0B00EB172A /* ProofDetailsViewController.m */; };
 		AAE1A2642512AA0C00EB172A /* MessageTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE1A25C2512AA0B00EB172A /* MessageTableViewCell.m */; };
 		AAE1A2652512AA0C00EB172A /* ConnectionDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE1A25E2512AA0B00EB172A /* ConnectionDetailsViewController.m */; };
@@ -54,9 +54,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		1CF1DD4D658053A9DE7AA8ED /* Pods-CMeSdkObjcUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjcUITests/Pods-CMeSdkObjcUITests.release.xcconfig"; sourceTree = "<group>"; };
-		1F99172894208622D0564741 /* Pods-CMeSdkObjcUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcUITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjcUITests/Pods-CMeSdkObjcUITests.debug.xcconfig"; sourceTree = "<group>"; };
-		7BF2544064FF2885D7CE7E13 /* Pods-CMeSdkObjcTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjcTests/Pods-CMeSdkObjcTests.debug.xcconfig"; sourceTree = "<group>"; };
+		06702BEF7CBFBFECD93D4338 /* Pods-CMeSdkObjcTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcTests.release.xcconfig"; path = "Target Support Files/Pods-CMeSdkObjcTests/Pods-CMeSdkObjcTests.release.xcconfig"; sourceTree = "<group>"; };
+		29DE93C120B8E6BF0B5F3EA8 /* Pods-CMeSdkObjc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjc.debug.xcconfig"; path = "Target Support Files/Pods-CMeSdkObjc/Pods-CMeSdkObjc.debug.xcconfig"; sourceTree = "<group>"; };
+		529CA7FBB8658A71991C110E /* Pods_CMeSdkObjc.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CMeSdkObjc.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		81196E0383653D9D67AF5E29 /* Pods_CMeSdkObjcTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CMeSdkObjcTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E13456122A040C800B6DE1F /* PoolTxnGenesis.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PoolTxnGenesis.h; sourceTree = "<group>"; };
 		8E13456222A040C800B6DE1F /* PoolTxnGenesis.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PoolTxnGenesis.m; sourceTree = "<group>"; };
 		8E509FE12281EFC60098812A /* CMeSdkObjc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CMeSdkObjc.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -76,7 +77,7 @@
 		8E50A0082281EFC80098812A /* CMeSdkObjcUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CMeSdkObjcUITests.m; sourceTree = "<group>"; };
 		8E50A00A2281EFC80098812A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8EDE89A82281F26300B7300F /* CMeSdkObjc.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CMeSdkObjc.entitlements; sourceTree = "<group>"; };
-		A6358E363E85142D56F58C5D /* Pods_CMeSdkObjcTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CMeSdkObjcTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A118AE6529F82245E8D9D43F /* Pods-CMeSdkObjcUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcUITests.debug.xcconfig"; path = "Target Support Files/Pods-CMeSdkObjcUITests/Pods-CMeSdkObjcUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		AAE1A25B2512AA0B00EB172A /* ProofDetailsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProofDetailsViewController.m; sourceTree = "<group>"; };
 		AAE1A25C2512AA0B00EB172A /* MessageTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MessageTableViewCell.m; sourceTree = "<group>"; };
 		AAE1A25D2512AA0B00EB172A /* ProofAttributeTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProofAttributeTableViewCell.h; sourceTree = "<group>"; };
@@ -105,13 +106,12 @@
 		AAF9BF5E25C8EB4C00E4C1F4 /* CMConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CMConfig.h; path = ../../../VCXHelpers/CMConfig.h; sourceTree = "<group>"; };
 		AAF9BFD025C8F2A400E4C1F4 /* MobileSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MobileSDK.h; path = ../../../VCXHelpers/MobileSDK.h; sourceTree = "<group>"; };
 		AAF9BFD125C8F2A400E4C1F4 /* MobileSDK.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MobileSDK.m; path = ../../../VCXHelpers/MobileSDK.m; sourceTree = "<group>"; };
-		B302B7F5FAC0C1E964B66ED4 /* Pods-CMeSdkObjcTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjcTests/Pods-CMeSdkObjcTests.release.xcconfig"; sourceTree = "<group>"; };
-		B87475662495C90309CBDCB5 /* Pods_CMeSdkObjcUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CMeSdkObjcUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD5846B4D8D1926326397A8E /* Pods-CMeSdkObjc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjc.release.xcconfig"; path = "Target Support Files/Pods-CMeSdkObjc/Pods-CMeSdkObjc.release.xcconfig"; sourceTree = "<group>"; };
+		C6E4FAB9BA117A61067618C8 /* Pods_CMeSdkObjcUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CMeSdkObjcUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD045F0926023A7C0067D6AF /* DevTeam1PoolTxnGenesis.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DevTeam1PoolTxnGenesis.h; sourceTree = "<group>"; };
 		DD045F0A26023AD90067D6AF /* DevTeam1PoolTxnGenesis.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DevTeam1PoolTxnGenesis.m; sourceTree = "<group>"; };
-		E1200BCCD8ACD48971467097 /* Pods-CMeSdkObjc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjc.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjc/Pods-CMeSdkObjc.debug.xcconfig"; sourceTree = "<group>"; };
-		F18B0531CD0E6287F0DEFD61 /* Pods-CMeSdkObjc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjc.release.xcconfig"; path = "Pods/Target Support Files/Pods-CMeSdkObjc/Pods-CMeSdkObjc.release.xcconfig"; sourceTree = "<group>"; };
-		F2FED9B74B5DBC8193263460 /* Pods_CMeSdkObjc.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CMeSdkObjc.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		E2A5D790AD88AF152D60C96F /* Pods-CMeSdkObjcTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcTests.debug.xcconfig"; path = "Target Support Files/Pods-CMeSdkObjcTests/Pods-CMeSdkObjcTests.debug.xcconfig"; sourceTree = "<group>"; };
+		FF964D27C83E7E0010D00CA6 /* Pods-CMeSdkObjcUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcUITests.release.xcconfig"; path = "Target Support Files/Pods-CMeSdkObjcUITests/Pods-CMeSdkObjcUITests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,7 +119,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				45063ECF961867FD85F6D699 /* Pods_CMeSdkObjc.framework in Frameworks */,
+				918AE7FF65ED10A8021AE502 /* Pods_CMeSdkObjc.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -127,7 +127,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4B16FA2258A8B8B30321F45F /* Pods_CMeSdkObjcTests.framework in Frameworks */,
+				54D6EE9E976DFB32B3CA6F2B /* Pods_CMeSdkObjcTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -135,13 +135,36 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2F3A478E9B877926C3FE542F /* Pods_CMeSdkObjcUITests.framework in Frameworks */,
+				0437DBAEFED7B5D439DDCA5F /* Pods_CMeSdkObjcUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		19AD55A22ACF634B9B698890 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				529CA7FBB8658A71991C110E /* Pods_CMeSdkObjc.framework */,
+				81196E0383653D9D67AF5E29 /* Pods_CMeSdkObjcTests.framework */,
+				C6E4FAB9BA117A61067618C8 /* Pods_CMeSdkObjcUITests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		25FF0FB079ED3BEF643EA72D /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				29DE93C120B8E6BF0B5F3EA8 /* Pods-CMeSdkObjc.debug.xcconfig */,
+				BD5846B4D8D1926326397A8E /* Pods-CMeSdkObjc.release.xcconfig */,
+				E2A5D790AD88AF152D60C96F /* Pods-CMeSdkObjcTests.debug.xcconfig */,
+				06702BEF7CBFBFECD93D4338 /* Pods-CMeSdkObjcTests.release.xcconfig */,
+				A118AE6529F82245E8D9D43F /* Pods-CMeSdkObjcUITests.debug.xcconfig */,
+				FF964D27C83E7E0010D00CA6 /* Pods-CMeSdkObjcUITests.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		8E509FD82281EFC60098812A = {
 			isa = PBXGroup;
 			children = (
@@ -149,8 +172,8 @@
 				8E509FFC2281EFC80098812A /* CMeSdkObjcTests */,
 				8E50A0072281EFC80098812A /* CMeSdkObjcUITests */,
 				8E509FE22281EFC60098812A /* Products */,
-				C6BD478857A8606748A31652 /* Pods */,
-				E4F41F88EDEF2442ECA33564 /* Frameworks */,
+				25FF0FB079ED3BEF643EA72D /* Pods */,
+				19AD55A22ACF634B9B698890 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -237,29 +260,6 @@
 				DD045F0A26023AD90067D6AF /* DevTeam1PoolTxnGenesis.m */,
 			);
 			path = Helpers;
-			sourceTree = "<group>";
-		};
-		C6BD478857A8606748A31652 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				E1200BCCD8ACD48971467097 /* Pods-CMeSdkObjc.debug.xcconfig */,
-				F18B0531CD0E6287F0DEFD61 /* Pods-CMeSdkObjc.release.xcconfig */,
-				7BF2544064FF2885D7CE7E13 /* Pods-CMeSdkObjcTests.debug.xcconfig */,
-				B302B7F5FAC0C1E964B66ED4 /* Pods-CMeSdkObjcTests.release.xcconfig */,
-				1F99172894208622D0564741 /* Pods-CMeSdkObjcUITests.debug.xcconfig */,
-				1CF1DD4D658053A9DE7AA8ED /* Pods-CMeSdkObjcUITests.release.xcconfig */,
-			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
-		E4F41F88EDEF2442ECA33564 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				F2FED9B74B5DBC8193263460 /* Pods_CMeSdkObjc.framework */,
-				A6358E363E85142D56F58C5D /* Pods_CMeSdkObjcTests.framework */,
-				B87475662495C90309CBDCB5 /* Pods_CMeSdkObjcUITests.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -674,7 +674,7 @@
 		};
 		8E50A00E2281EFC80098812A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E1200BCCD8ACD48971467097 /* Pods-CMeSdkObjc.debug.xcconfig */;
+			baseConfigurationReference = 29DE93C120B8E6BF0B5F3EA8 /* Pods-CMeSdkObjc.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = CMeSdkObjc/CMeSdkObjc.entitlements;
@@ -709,7 +709,7 @@
 		};
 		8E50A00F2281EFC80098812A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F18B0531CD0E6287F0DEFD61 /* Pods-CMeSdkObjc.release.xcconfig */;
+			baseConfigurationReference = BD5846B4D8D1926326397A8E /* Pods-CMeSdkObjc.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = CMeSdkObjc/CMeSdkObjc.entitlements;
@@ -744,7 +744,7 @@
 		};
 		8E50A0112281EFC80098812A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7BF2544064FF2885D7CE7E13 /* Pods-CMeSdkObjcTests.debug.xcconfig */;
+			baseConfigurationReference = E2A5D790AD88AF152D60C96F /* Pods-CMeSdkObjcTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -764,7 +764,7 @@
 		};
 		8E50A0122281EFC80098812A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B302B7F5FAC0C1E964B66ED4 /* Pods-CMeSdkObjcTests.release.xcconfig */;
+			baseConfigurationReference = 06702BEF7CBFBFECD93D4338 /* Pods-CMeSdkObjcTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -784,7 +784,7 @@
 		};
 		8E50A0142281EFC80098812A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1F99172894208622D0564741 /* Pods-CMeSdkObjcUITests.debug.xcconfig */;
+			baseConfigurationReference = A118AE6529F82245E8D9D43F /* Pods-CMeSdkObjcUITests.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ES8QU3D2A4;
@@ -803,7 +803,7 @@
 		};
 		8E50A0152281EFC80098812A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1CF1DD4D658053A9DE7AA8ED /* Pods-CMeSdkObjcUITests.release.xcconfig */;
+			baseConfigurationReference = FF964D27C83E7E0010D00CA6 /* Pods-CMeSdkObjcUITests.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ES8QU3D2A4;
