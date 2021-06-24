@@ -10,6 +10,9 @@ import random
 import os
 
 
+NONCE_LEN = 16
+
+
 async def handle_message(request):
     body = await request.text()
     logging.info("Got message: " + body)
@@ -30,8 +33,7 @@ async def handle_generate(request):
 
 async def gen_token(sponsee_id):
     logging.info("Gen token")
-    nonce_len = int(cfg['nonce_len'])
-    nonce = gen_nonce(nonce_len)
+    nonce = gen_nonce(NONCE_LEN)
     sponsor_id = cfg['sponsor_id']
     timestamp = datetime.datetime.now().astimezone().isoformat()
     sig = await gen_sig(nonce + timestamp + sponsee_id + sponsor_id)
