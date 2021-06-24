@@ -43,7 +43,7 @@
 
 - **Q: How to send a credential with an image/photo?**
 
-    Check this [guide](./9.CredentialsWithAttachments.md)
+    Check this [guide](CredentialsWithAttachments.md)
 
 - **Q: How to send a message with custom action?**
 

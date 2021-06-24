@@ -38,8 +38,8 @@ Before starting, please read the [Base Concepts document](docs/0.BaseConcepts.md
 #### Additional Sources:
 * [Configuration](docs/Configuration.md) &#8212; The list of all VCX library configuration options. 
 * [Errors](docs/Errors.md) &#8212; The list of all possible errors and their definitions. 
-* [New Messages Processing](docs/8.Messages.md)
-* [Credentials With Attachments](docs/9.CredentialsWithAttachments.md)
+* [New Messages Processing](docs/MessagesFlow.md)
+* [Credentials With Attachments](docs/CredentialsWithAttachments.md)
 * [Push Notifications](docs/PushNotifications.md)
 * [Frequently asked questions](docs/FAQ.md)
 * [Advanced Techniques](docs/Advanced.md)

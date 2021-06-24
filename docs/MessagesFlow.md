@@ -1,6 +1,12 @@
-# Messages downloading
+# Messages flow
 
-There are two strategies regarding receiving messages from the agent by an application:
+In the [Initialization document](./2.Initialization.md) we described how to obtain your Cloud Agent.
+Cloud Agent can be considered as a mailbox which able to receive and collect messages for your application.
+In this document, we will describe how to deal with messages on the mobile application side.
+
+## Message downloading
+
+There are two strategies regarding receiving messages by the application from its Cloud Agent:
 
 * Polling - Application once in a while calls Cloud Agent to download all received messages for existing connections. 
     ![](/wiki-images/Polling.png)
@@ -8,9 +14,9 @@ There are two strategies regarding receiving messages from the agent by an appli
 * Push Notifications - Cloud Agent forwards messages to `Sponsor` which then notifies application. The application can download only message related to received push notification. 
     ![](/wiki-images/PushNotifications.png)
 
-After that, received from the Cloud Agent messages should be process depending on the type and updated on the Cloud Agent as reviewed.
+After that, received from the Cloud Agent messages should be handled depending on the type and updated on the Cloud Agent as reviewed.
 
-## 1.1 Get all pending messages
+## 1.1 Getting all pending messages
 
 messageStatus - Using `MS-103` message status you can receive the only pending messages.
 
@@ -24,7 +30,7 @@ messageStatus - Using `MS-103` message status you can receive the only pending m
         }];
 ```
 
-## 1.1 Get a specific message
+## 1.1 Getting a specific message
 
 messageStatus - Using `MS-103` message status you can receive the only pending messages.
 uid_s - Identifier of the message received from a push notification (`uid` field from a push notification)
@@ -40,7 +46,7 @@ pwdids - Identifier of connection to which the message relates to (`forDID` fiel
         }];
 ```
 
-## 2. Parse result
+## 2. Parsing result
 
 Received `messages` string is an JSON array string containing the list of received messages for each particular connection:
 * `pairwiseDID` - DID of a connection to which messages relate.
@@ -61,7 +67,6 @@ Base message types (`type` field):
 * Structured message:
     * `question`
     * `committed-question`
-
 
 ### Sample of message
 
