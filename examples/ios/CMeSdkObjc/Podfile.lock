@@ -93,6 +93,7 @@ PODS:
     - GoogleUtilities/Logger
   - GoogleUtilities/UserDefaults (7.4.1):
     - GoogleUtilities/Logger
+  - MGSwipeTableCell (1.6.11)
   - nanopb (2.30908.0):
     - nanopb/decode (= 2.30908.0)
     - nanopb/encode (= 2.30908.0)
@@ -105,6 +106,7 @@ PODS:
 DEPENDENCIES:
   - Firebase/Analytics
   - Firebase/Messaging
+  - MGSwipeTableCell
   - QRCodeReaderViewController
   - vcx (= 0.0.212)
 
@@ -121,6 +123,7 @@ SPEC REPOS:
     - GoogleAppMeasurement
     - GoogleDataTransport
     - GoogleUtilities
+    - MGSwipeTableCell
     - nanopb
     - PromisesObjC
     - QRCodeReaderViewController
@@ -135,11 +138,12 @@ SPEC CHECKSUMS:
   GoogleAppMeasurement: 31c7d7655818784b7dd34bdf6884f75b465d5f6c
   GoogleDataTransport: 04c3e9a480bbcaa2ec3f5d27f1cdeb6a92f20c8d
   GoogleUtilities: f8a43108b38a68eebe8b3540e1f4f2d28843ce20
+  MGSwipeTableCell: b804e4e450dee439c42250be90bd50458bf67fce
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
   QRCodeReaderViewController: e8f27d035b3e72b1d4b1c61ff66458287e3be0ff
   vcx: 87c401b118ca5f1044ccc9926edd780913ae9c31
 
-PODFILE CHECKSUM: 64d4526d640e5b5a60afe4d5abfdc5101d255b7e
+PODFILE CHECKSUM: 09dd505c1409bded43b8aae3dd8808385f2e6886
 
 COCOAPODS: 1.10.0

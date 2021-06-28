@@ -25,7 +25,6 @@ typedef void (^ResponseWithError)(NSError *error);
 
 +(NSDictionary*)jsonToDictionary: (NSString*)json;
 +(NSArray*)jsonToArray: (NSString*)json;
-+(NSDictionary*)parsedInvite: (NSString*)invite;
 
 +(void)printError: (NSError*)error;
 +(void)printErrorMessage: (NSString*)error;

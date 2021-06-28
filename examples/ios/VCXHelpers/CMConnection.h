@@ -14,11 +14,20 @@ typedef NS_ENUM(int, ConnectionType) {
     SMS = 1,
 };
 
+typedef enum {
+    Proprietary,
+    Connection,
+    OutOfBand
+} InvitationType;
+
 @interface CMConnection: NSObject
 
 +(NSString*) getPwDid: (NSString*) serializedConnection;
 
-+(void) connect: (NSString*)connectJSON connectionType: (int)connectionType phoneNumber: (NSString*)phone withCompletionHandler: (ResponseWithObject)completionBlock;
++(void) createConnection: (NSString*)connectJSON connectionType: (int)connectionType phoneNumber: (NSString*)phone withCompletionHandler: (ResponseWithObject)completionBlock;
++(void) connectWithInvite: (NSString*)connectJSON connectionType: (int)connectionType phoneNumber: (NSString*)phone withCompletionHandler: (ResponseWithObject)completionBlock;
++(void) connectWithOutofbandInvite: (NSString*)connectJSON connectionType: (int)connectionType phoneNumber: (NSString*)phone withCompletionHandler: (ResponseWithObject)completionBlock;
++(NSDictionary*)parsedInvite: (NSString*)invite;
 +(NSDictionary*)parseInvitationLink: (NSString*)link;
 
 +(NSString*) connectionID: connectValues;

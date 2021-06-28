@@ -30,6 +30,16 @@
     return connValues[@"data"][@"pw_did"];
 }
 
++(NSDictionary*)parsedInvite: (NSString*)invite {
+    if(!invite) {
+        return nil;
+    }
+    NSURL *url = [NSURL URLWithString:invite];
+    NSData *data = [[NSData alloc] initWithContentsOfURL:url];
+    NSAssert(data, @"No data received!");
+    NSDictionary *result = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
+    return result;
+}
 
 +(NSDictionary*) extractRequestAttach: (NSDictionary*)invite {
     NSArray* requestAttach = [invite objectForKey: @"request~attach"];
@@ -84,6 +94,40 @@
     return connectionName;
 }
 
++(void)connectionRedirectProprietary:(NSString *)invitationDetails
+                serializedConnection:(NSString *)serializedConnection
+               withCompletionHandler: (ResponseWithBoolean) completionBlock {
+    NSError* error;
+    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
+    
+    @try {
+        //TODO: Added parsed invite as input paramert
+        [sdkApi connectionCreateWithInvite:[self connectionID: invitationDetails]
+                             inviteDetails:invitationDetails
+                                completion:^(NSError *error, NSInteger handle) {
+            if (error && error.code > 0) {
+                return completionBlock(NO, error);
+            }
+            [sdkApi connectionDeserialize:serializedConnection
+                               completion:^(NSError *error, NSInteger connectionHandle) {
+                if (error && error.code > 0) {
+                    return completionBlock(NO, error);
+                }
+                [sdkApi connectionRedirect:(int)handle
+                      withConnectionHandle:(int)connectionHandle
+                            withCompletion:^(NSError *error) {
+                    if (error && error.code > 0) {
+                        return completionBlock(NO, error);
+                    }
+                    return completionBlock(YES, nil);
+                }];
+            }];
+        }];
+    } @catch (NSException *exception) {
+        return completionBlock(false, error);
+    }
+}
+
 +(void)connectionRedirectAriesOutOfBand: (NSString*)invitation
                    serializedConnection: (NSString*)serializedConnection
                   withCompletionHandler: (ResponseWithBoolean) completionBlock {
@@ -126,13 +170,151 @@
     }
 }
 
-+(void)connect: (NSString*)invitation
++(void)createConnection:(NSString *)invitation
+         connectionType: (int)connectionType
+            phoneNumber: (NSString*) phone
+  withCompletionHandler: (ResponseWithObject) completionBlock {
+    NSDictionary *connectValues = [self parsedInvite: invitation];
+    NSString* type = [connectValues objectForKey: @"@type"];
+    
+    if ([type rangeOfString:@"out-of-band"].location != NSNotFound) {
+        [self connectWithOutofbandInvite:invitation
+                                 connectionType:(int)connectionType
+                                    phoneNumber:phone
+                          withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+            return completionBlock(responseObject, error);
+        }];
+    } else {
+        [self connectWithInvite:invitation
+                                 connectionType:(int)connectionType
+                                    phoneNumber:phone
+                          withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+            return completionBlock(responseObject, error);
+        }];
+    }
+}
+
++(void)connectWithInvite:(NSString *)invitation
 connectionType: (int)connectionType
    phoneNumber: (NSString*) phone
 withCompletionHandler: (ResponseWithObject) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
 
-    NSDictionary *connectValues = [CMUtilities parsedInvite: invitation];
+    NSDictionary *connectValues = [self parsedInvite: invitation];
+    NSDictionary *requestAttach = [self extractRequestAttach: connectValues];
+    [LocalStorage store: @"request~attach"
+              andObject: requestAttach];
+    
+    if([[connectValues allKeys] count] < 1) {
+        connectValues = [CMConnection parseInvitationLink: invitation];
+        invitation = [CMUtilities toJsonString: connectValues];
+    }
+    
+    if([connectValues count] < 1) {
+        NSError* error = [NSError errorWithDomain: @"connections" code: 400 userInfo: @{
+            NSLocalizedDescriptionKey: @"Invalid Connection JSON"
+        }];
+
+        return completionBlock(nil, error);
+    }
+
+    [LocalStorage store: @"tempConnection" andObject: connectValues];
+    
+    [sdkApi connectionCreateWithInvite:[self connectionID: connectValues]
+                         inviteDetails:[CMUtilities dictToJsonString: connectValues]
+                            completion:^(NSError *error, NSInteger connectionHandle) {
+        if (error && error.code > 0) {
+            if(error && error.code != 1010) {
+                return completionBlock(nil, error);
+            }
+            [sdkApi connectionSendReuse: (int)connectionHandle
+                                 invite: invitation
+                         withCompletion: ^(NSError *error) {
+                if (error && error.code > 0) {
+                    return completionBlock(nil, error);
+                }
+            }];
+        }
+
+        [CMUtilities printSuccess: @[@"connectionCreateWithOutofbandInvite",  [NSNumber numberWithLong: connectionHandle]]];
+        
+        NSString *connectType = [NSString stringWithFormat:@"{\"connection_type\":\"%@\",\"phone\":%@\"\"}",
+                                    [CMConnection connectionByType: connectionType], phone];
+        [sdkApi connectionConnect: (int)connectionHandle
+                   connectionType: connectType
+                       completion: ^(NSError *error, NSString *inviteDetails) {
+
+            if (error && error.code > 0) {
+                return completionBlock(nil, error);
+            }
+            [CMUtilities printSuccess: @[@"connectionConnect", inviteDetails]];
+
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                    while (true) {
+                        dispatch_semaphore_t acceptedWaitSemaphore = dispatch_semaphore_create(0);
+                        __block NSInteger connectionState = 0;
+                        
+                        [sdkApi connectionGetState: (int)connectionHandle completion:^(NSError *error, NSInteger state) {
+                            if (error && error.code > 0) {
+                                dispatch_semaphore_signal(acceptedWaitSemaphore);
+                                return completionBlock(nil, error);
+                            }
+
+                            if(state != 4) {
+                                [sdkApi connectionUpdateState: (int)connectionHandle withCompletion:^(NSError *error, NSInteger state) {
+                                    if (error && error.code > 0) {
+                                        dispatch_semaphore_signal(acceptedWaitSemaphore);
+                                        return completionBlock(nil, error);
+                                    }
+                                    connectionState = state;
+                                    dispatch_semaphore_signal(acceptedWaitSemaphore);
+                                }];
+                            } else {
+                                connectionState = state;
+                                dispatch_semaphore_signal(acceptedWaitSemaphore);
+                            }
+                        }];
+                        
+                        dispatch_semaphore_wait(acceptedWaitSemaphore, DISPATCH_TIME_FOREVER);
+                        if (connectionState == 4) {
+                            
+                            [sdkApi connectionSerialize: (int)connectionHandle
+                                             completion: ^(NSError *error, NSString *connectionSerialized) {
+                                if (error && error.code > 0) {
+                                    return completionBlock(nil, error);
+                                }
+                                [CMUtilities printSuccess: @[@"Connection invitation success", connectionSerialized]];
+
+                                // Store the serialized connection
+                                NSDictionary* invitation = [LocalStorage getObjectForKey: @"tempConnection" shouldCreate: true];
+
+                                NSMutableDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
+                                NSDictionary* connectionObj = @{
+                                    @"serializedConnection": connectionSerialized,
+                                    @"invitation": invitation
+                                };
+
+                                [connections setValue: connectionObj forKey: [self connectionID: connectionObj]];
+                                [LocalStorage store: @"connections" andObject: connections];
+                                [LocalStorage deleteObjectForKey: @"tempConnection"];
+
+                                return completionBlock(connectionObj, nil);
+                            }];
+                            break;
+                        }
+                    }
+                });
+        }];
+    }];
+}
+
++(void)connectWithOutofbandInvite: (NSString*)invitation
+connectionType: (int)connectionType
+   phoneNumber: (NSString*) phone
+withCompletionHandler: (ResponseWithObject) completionBlock {
+    ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
+
+    NSDictionary *connectValues = [self parsedInvite: invitation];
     NSDictionary *requestAttach = [self extractRequestAttach: connectValues];
     [LocalStorage store: @"request~attach"
               andObject: requestAttach];

@@ -1,5 +1,5 @@
 //
-//  ViewController.h
+//  HomeViewController.h
 //  CMeSdkObjc
 //
 //  Created by Norman Jarvis on 5/3/19.
@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController<UITextViewDelegate, UITableViewDelegate, UITableViewDataSource>
+@interface HomeViewController : UIViewController<UITextViewDelegate, UITableViewDelegate, UITableViewDataSource>
 @property (weak, nonatomic) IBOutlet UILabel *addConnLabel;
 @property (weak, nonatomic) IBOutlet UITextView *addConnConfigTextView;
 

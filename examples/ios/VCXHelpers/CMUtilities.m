@@ -12,17 +12,6 @@
 
 @implementation CMUtilities
 
-+(NSDictionary*)parsedInvite: (NSString*)invite {
-    if(!invite) {
-        return nil;
-    }
-    NSURL *url = [NSURL URLWithString:invite];
-    NSData *data = [[NSData alloc] initWithContentsOfURL:url];
-    NSAssert(data, @"No data received!");
-    NSDictionary *result = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
-    return result;
-}
-
 +(NSString*)toJsonString: (NSDictionary*)json {
     NSError *error;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject: json options: 0 error: &error];

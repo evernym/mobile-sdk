@@ -20,19 +20,24 @@
 
 @implementation AppDelegate
 
-- (BOOL)application: (UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-
-    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
-    UIViewController *vc = [storyboard instantiateInitialViewController];
-
-    // Set root view controller and make windows visible
-    self.window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
-    self.window.rootViewController = vc;
-    [self.window makeKeyAndVisible];
-
+-(BOOL)application: (UIApplication *)application
+didFinishLaunchingWithOptions:(NSDictionary *) launchOptions {
+    self.window = [[UIWindow alloc]initWithFrame: UIScreen.mainScreen.bounds];
+    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    
+    UIViewController *homeViewController = [storyboard instantiateViewControllerWithIdentifier:@"HomeViewController"];
+    
+    UIViewController *historyViewController = [storyboard instantiateViewControllerWithIdentifier:@"HistoryViewController"];
+    
+    UITabBarController *tabBarController = [[UITabBarController alloc] init];
+    tabBarController.viewControllers = @[homeViewController, historyViewController];
+    
+    self.window.rootViewController = tabBarController;
+    [self.window makeKeyWindow];
+    
     [[MobileSDK shared] setSdkApi: [[ConnectMeVcx alloc] init]];
     [CMConfig initVCX];
-
+    
     return YES;
 }
 
