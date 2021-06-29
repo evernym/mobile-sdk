@@ -238,17 +238,17 @@ public class HomePageViewModel extends AndroidViewModel {
             try {
                 Action action = db.actionDao().getActionsById(actionId);
                 if (action.type == null) {
-                    StateConnections.createConnection(action, db, liveData);
+                    StateConnections.handleConnectionInvitation(action, db, liveData);
                     return;
                 }
                 if (action.type.equals(MessageType.CREDENTIAL_OFFER.toString())) {
                     CredentialOffer offer = db.credentialOffersDao().getByPwDidAndClaimId(action.claimId, action.pwDid);
-                    StateCredentialOffers.acceptCredentialOffer(offer, db, liveData, action);
+                    StateCredentialOffers.processCredentialOffer(offer, db, liveData, action);
                     return;
                 }
                 if (action.type.equals(MessageType.PROOF_REQUEST.toString())) {
                     ProofRequest proof = db.proofRequestDao().getByThreadId(action.threadId);
-                    StateProofRequests.acceptProofReq(proof, db, liveData, action);
+                    StateProofRequests.processProofRequest(proof, db, liveData, action);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -284,7 +284,7 @@ public class HomePageViewModel extends AndroidViewModel {
     private void createAction(String invite, SingleLiveData<Results> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
-                String parsedInvite = ConnectionsUtils.parseInvite(invite);
+                String parsedInvite = ConnectionsUtils.getInvitation(invite);
                 Connections.InvitationType invitationType = Connections.getInvitationType(parsedInvite);
                 JSONObject inviteObject = new JSONObject(parsedInvite);
                 JSONArray attach = inviteObject.getJSONArray("request~attach");
@@ -297,7 +297,7 @@ public class HomePageViewModel extends AndroidViewModel {
                     action.icon = inviteObject.getString("profileUrl");
                     action.status = HISTORIZED.toString();
                     db.actionDao().insertAll(action);
-                    StateConnections.createConnection(action, db, liveData);
+                    StateConnections.handleConnectionInvitation(action, db, liveData);
                 } else if (ConnectionsUtils.isOutOfBandType(invitationType) && attach.length() != 0) {
                     String extractedAttachRequest = OutOfBandHelper.extractRequestAttach(parsedInvite);
                     JSONObject attachRequestObject = Utils.convertToJSONObject(extractedAttachRequest);

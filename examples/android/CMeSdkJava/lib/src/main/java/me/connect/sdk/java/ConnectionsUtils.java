@@ -28,9 +28,9 @@ public class ConnectionsUtils {
         return type.contains("present-proof");
     }
 
-    public static String parseInvite(String invite) {
-        if (URLUtil.isValidUrl(invite)) {
-            Uri uri = Uri.parse(invite);
+    public static String getInvitation(String data) {
+        if (URLUtil.isValidUrl(data)) {
+            Uri uri = Uri.parse(data);
             String ariesConnection = uri.getQueryParameter("c_i");
             String ariesOutOfBand = uri.getQueryParameter("oob");
             if (ariesConnection != null) {
@@ -39,13 +39,13 @@ public class ConnectionsUtils {
             if (ariesOutOfBand != null) {
                 return new String(Base64.decode(ariesOutOfBand, Base64.NO_WRAP));
             }
-            return OutOfBandHelper.readDataFromUrl(invite);
+            return OutOfBandHelper.readDataFromUrl(data);
         } else {
-            return invite;
+            return data;
         }
     }
 
-    public static ConnDataHolder extractUserMetaFromInvite(String invite) {
+    public static ConnDataHolder extractUserMetaFromInvitation(String invite) {
         try {
             JSONObject json = Utils.convertToJSONObject(invite);
             if (json != null && json.has("label")) {

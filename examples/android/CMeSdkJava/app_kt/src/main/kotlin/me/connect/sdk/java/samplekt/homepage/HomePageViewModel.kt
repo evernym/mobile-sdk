@@ -193,17 +193,17 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
         try {
             val action = db.actionDao().getActionsById(actionId)
             if (action.type == null) {
-                StateConnections.createConnection(action, db, liveData)
+                StateConnections.handleConnectionInvitation(action, db, liveData)
                 return@launch
             }
             if (action.type == MessageType.CREDENTIAL_OFFER.toString()) {
                 val offer = db.credentialOffersDao().getByPwDidAndClaimId(action.claimId, action.pwDid)
-                StateCredentialOffers.acceptCredentialOffer(offer!!, db, liveData, action)
+                StateCredentialOffers.processCredentialOffer(offer!!, db, liveData, action)
                 return@launch
             }
             if (action.type == MessageType.PROOF_REQUEST.toString()) {
                 val proof = db.proofRequestDao().getByThreadId(action.threadId)
-                StateProofRequests.acceptProofReq(proof!!, db, liveData, action)
+                StateProofRequests.processProofRequest(proof!!, db, liveData, action)
             }
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
@@ -242,7 +242,7 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
         liveData: SingleLiveData<Results>
     ) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val parsedInvite = ConnectionsUtils.parseInvite(invite)
+            val parsedInvite = ConnectionsUtils.getInvitation(invite)
             val invitationType =
                 Connections.getInvitationType(parsedInvite)
             val inviteObject = JSONObject(parsedInvite)
@@ -258,7 +258,7 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
                 )
 
                 db.actionDao().insertAll(action)
-                StateConnections.createConnection(action, db, liveData)
+                StateConnections.handleConnectionInvitation(action, db, liveData)
             } else if (ConnectionsUtils.isOutOfBandType(invitationType) && attach.length() != 0) {
                 val extractedAttachRequest = OutOfBandHelper.extractRequestAttach(parsedInvite)
                 val attachRequestObject = Utils.convertToJSONObject(extractedAttachRequest)!!

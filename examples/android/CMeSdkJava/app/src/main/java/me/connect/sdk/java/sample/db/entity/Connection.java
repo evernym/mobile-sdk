@@ -20,4 +20,7 @@ public class Connection {
 
     @ColumnInfo(name = "pwdid")
     public String pwDid;
+
+    @ColumnInfo(name = "invitation")
+    public String invitation;
 }

@@ -9,8 +9,6 @@ import java.util.concurrent.Executors;
 import me.connect.sdk.java.Connections;
 import me.connect.sdk.java.OutOfBandHelper;
 import me.connect.sdk.java.Proofs;
-import me.connect.sdk.java.Utils;
-import me.connect.sdk.java.connection.QRConnection;
 import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Action;
@@ -23,36 +21,36 @@ import static me.connect.sdk.java.sample.homepage.Results.PROOF_MISSED;
 import static me.connect.sdk.java.sample.homepage.Results.PROOF_FAILURE;
 
 public class StateProofRequests {
-    public static void createProofStateObjectForExistingConnection(
+    public static void createProofStateObject(
             Database db,
             OutOfBandHelper.OutOfBandInvite outOfBandInvite,
             SingleLiveData<Results> liveData,
             Action action
     ) {
         try {
-            JSONObject connection = Utils.convertToJSONObject(outOfBandInvite.existingConnection);
-
-            assert connection != null;
-            JSONObject connectionData = connection.getJSONObject("data");
-
             JSONObject thread = outOfBandInvite.attach.getJSONObject("~thread");
             String threadId = thread.getString("thid");
-            Proofs.createWithRequest(UUID.randomUUID().toString(), outOfBandInvite.extractedAttachRequest).handle((pr, err) -> {
+
+            String pwDid = null;
+            if (outOfBandInvite.existingConnection != null) {
+                pwDid = Connections.getPwDid(outOfBandInvite.existingConnection);
+            }
+            String finalPwDid = pwDid;
+
+            Proofs.createWithRequest(UUID.randomUUID().toString(), outOfBandInvite.extractedAttachRequest).handle((serialized, err) -> {
                 if (err != null) {
                     err.printStackTrace();
                 } else {
                     ProofRequest proof = new ProofRequest();
-                    try {
-                        proof.serialized = pr;
-                        proof.pwDid = connectionData.getString("pw_did");
-                        proof.threadId = threadId;
-                        proof.attachConnectionLogo = new JSONObject(outOfBandInvite.parsedInvite).getString("profileUrl");
-                        db.proofRequestDao().insertAll(proof);
+                    proof.serialized = serialized;
+                    proof.pwDid = finalPwDid;
+                    proof.threadId = threadId;
+                    proof.attachConnection = outOfBandInvite.parsedInvite;
+                    proof.attachConnectionLogo = outOfBandInvite.userMeta.logo;
+                    proof.attachConnectionName = outOfBandInvite.userMeta.name;
+                    db.proofRequestDao().insertAll(proof);
 
-                        acceptProofReq(proof, db, liveData, action);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                    processProofRequest(proof, db, liveData, action);
                 }
                 return null;
             });
@@ -61,72 +59,52 @@ public class StateProofRequests {
         }
     }
 
-    public static void createProofStateObject(
-            Database db,
-            OutOfBandHelper.OutOfBandInvite outOfBandInvite,
-            SingleLiveData<Results> liveData,
-            Action action
-    ) {
-        Proofs.createWithRequest(UUID.randomUUID().toString(), outOfBandInvite.extractedAttachRequest).handle((pr, err) -> {
-            if (err != null) {
-                err.printStackTrace();
-            } else {
-                ProofRequest proof = new ProofRequest();
-                try {
-                    proof.serialized = pr;
-                    proof.pwDid = null;
-                    JSONObject thread = outOfBandInvite.attach.getJSONObject("~thread");
-                    proof.threadId = thread.getString("thid");
-                    proof.attachConnection = outOfBandInvite.parsedInvite;
-                    proof.attachConnectionName = outOfBandInvite.userMeta.name;
-                    proof.attachConnectionLogo = outOfBandInvite.userMeta.logo;
-                    db.proofRequestDao().insertAll(proof);
-
-                    acceptProofReq(proof, db, liveData, action);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        });
-    }
-
-    public static void acceptProofReq(
+    public static void processProofRequest(
             ProofRequest proof,
             Database db,
             SingleLiveData<Results> liveData,
             Action action
     ) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            if (proof.attachConnection != null && proof.pwDid == null) {
+            if (proof.pwDid == null) {
                 acceptProofReqAndCreateConnection(proof, db, liveData, action);
-                return;
+            } else {
+                Connection connection = db.connectionDao().getByPwDid(proof.pwDid);
+                acceptProofRequest(proof, connection, db, liveData, action);
             }
-            Connection con = db.connectionDao().getByPwDid(proof.pwDid);
-            Proofs.retrieveAvailableCredentials(proof.serialized).handle((creds, err) -> {
-                if (err != null) {
-                    liveData.postValue(PROOF_MISSED);
-                    return null;
+        });
+    }
+
+    public static void acceptProofRequest(
+            ProofRequest proof,
+            Connection connection,
+            Database db,
+            SingleLiveData<Results> liveData,
+            Action action
+    ) {
+        Proofs.retrieveAvailableCredentials(proof.serialized).handle((creds, err) -> {
+            if (err != null) {
+                liveData.postValue(PROOF_MISSED);
+                return null;
+            }
+            // We automatically map first of each provided credentials to final structure
+            // This process should be interactive in real app
+            String data = Proofs.mapCredentials(creds);
+            Proofs.send(connection.serialized, proof.serialized, data, "{}").handle((s, e) -> {
+                if (s != null) {
+                    proof.serialized = s;
+                    db.proofRequestDao().update(proof);
                 }
-                // We automatically map first of each provided credentials to final structure
-                // This process should be interactive in real app
-                String data = Proofs.mapCredentials(creds);
-                Proofs.send(con.serialized, proof.serialized, data, "{}").handle((s, e) -> {
-                    if (s != null) {
-                        proof.serialized = s;
-                        db.proofRequestDao().update(proof);
-                    }
-                    HomePageViewModel.addToHistory(
-                            action.id,
-                            "Proofs send",
-                            db,
-                            liveData
-                    );
-                    liveData.postValue(e == null ? PROOF_SUCCESS: PROOF_FAILURE);
-                    return null;
-                });
+                HomePageViewModel.addToHistory(
+                        action.id,
+                        "Proofs send",
+                        db,
+                        liveData
+                );
+                liveData.postValue(e == null ? PROOF_SUCCESS: PROOF_FAILURE);
                 return null;
             });
+            return null;
         });
     }
 
@@ -136,18 +114,18 @@ public class StateProofRequests {
             SingleLiveData<Results> liveData,
             Action action
     ) {
-        Connections.create(proof.attachConnection, new QRConnection())
+        Connections.create(proof.attachConnection, Connections.InvitationType.OutOfBand)
                 .handle((res, throwable) -> {
                     if (res != null) {
                         String pwDid = Connections.getPwDid(res);
-                        String serializedCon = Connections.awaitConnectionReceived(res, pwDid);
+                        String serializedCon = Connections.awaitConnectionCompleted(res, pwDid);
 
-                        Connection c = new Connection();
-                        c.name = proof.attachConnectionName;
-                        c.icon = proof.attachConnectionLogo;
-                        c.pwDid = pwDid;
-                        c.serialized = serializedCon;
-                        db.connectionDao().insertAll(c);
+                        Connection connection = new Connection();
+                        connection.name = proof.attachConnectionName;
+                        connection.icon = proof.attachConnectionLogo;
+                        connection.pwDid = pwDid;
+                        connection.serialized = serializedCon;
+                        db.connectionDao().insertAll(connection);
                         liveData.postValue(throwable == null ? CONNECTION_SUCCESS : CONNECTION_FAILURE);
 
                         proof.pwDid = pwDid;
@@ -161,32 +139,7 @@ public class StateProofRequests {
                                 liveData
                         );
 
-                        Proofs.retrieveAvailableCredentials(proof.serialized).handle((creds, err) -> {
-                            if (err != null) {
-                                liveData.postValue(PROOF_MISSED);
-                                return null;
-                            }
-                            // We automatically map first of each provided credentials to final structure
-                            // This process should be interactive in real app
-                            String data = Proofs.mapCredentials(creds);
-                            Proofs.send(serializedCon, proof.serialized, data, "{}").handle((s, e) -> {
-                                if (s != null) {
-                                    proof.serialized = s;
-                                    db.proofRequestDao().update(proof);
-                                }
-
-                                HomePageViewModel.addToHistory(
-                                        action.id,
-                                        "Credential accept",
-                                        db,
-                                        liveData
-                                );
-
-                                liveData.postValue(e == null ? PROOF_SUCCESS: PROOF_FAILURE);
-                                return null;
-                            });
-                            return null;
-                        });
+                        acceptProofRequest(proof, connection, db, liveData, action);
                     }
                     if (throwable != null) {
                         throwable.printStackTrace();

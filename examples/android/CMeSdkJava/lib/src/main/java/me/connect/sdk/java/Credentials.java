@@ -9,7 +9,6 @@ import com.evernym.sdk.vcx.utils.UtilsApi;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -291,7 +290,7 @@ public class Credentials {
             Integer handle = CredentialApi.credentialDeserialize(serializedCredential).get();
             while (true) {
                 try {
-                    Message message = Messages.downloadMessageByTypeAndThreadId(MessageType.CREDENTIAL, threadId).get();
+                    Message message = Messages.downloadMessage(MessageType.CREDENTIAL, threadId).get();
                     if (message != null) {
                         status = CredentialApi.credentialUpdateStateWithMessage(handle, message.getPayload()).get();
                         Messages.updateMessageStatus(pwDid, message.getUid());
