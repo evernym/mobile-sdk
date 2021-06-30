@@ -18,9 +18,32 @@ NS_ASSUME_NONNULL_BEGIN
     autofilledAttributes: attributes retreived from existing credentials (most of the attributes will be this type)
     selfAttestedAttributes: attributes which user will need to fill in UI form
  */
-+ (void) sendProofRequest: (NSDictionary*) proofObject proofAttributes: (NSDictionary*) proofAttributes andConnection: (NSDictionary*) connection withCompletionHandler: (ResponseBlock) completionBlock;
++ (void) sendProofRequest: (NSDictionary*) proofObject
+          proofAttributes: (NSDictionary*) proofAttributes
+            andConnection: (NSDictionary*) connection
+    withCompletionHandler: (ResponseBlock) completionBlock;
 
-+ (void) autofillAttributes: (NSDictionary*) proofObject andConnection: (NSDictionary*) connection withCompletionHandler: (ResponseWithObject) completionBlock;
++ (void) autofillAttributes: (NSDictionary*) proofObject
+              andConnection: (NSDictionary*) connection
+      withCompletionHandler: (ResponseWithObject) completionBlock;
+
++ (void) createWithRequest: (NSString *) request
+    withCompletionHandler: (ResponseWithObject) completionBlock;
+
++ (void) retrieveAvailableCredentials:(NSString *) serializedProof
+                withCompletionHandler:(ResponseWithObject) completionBlock;
+
++ (void) send:(NSString *) serializedConnection
+      serializedProof:(NSString *) serializedProof
+        selectedCreds:(NSString *) selectedCreds
+     selfAttestedAttr:(NSString *) selfAttestedAttr
+withCompletionHandler: (ResponseWithObject) completionBlock;
+
++ (void) reject:(NSString *) serializedConnection
+serializedProof:(NSString *) serializedProof
+withCompletionHandler: (ResponseWithObject) completionBlock;
+
++ (NSDictionary*)vcxMatchingCredentials: (NSString*) matchingCredentials;
 
 @end
 

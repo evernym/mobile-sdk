@@ -30,6 +30,11 @@ typedef enum {
 +(NSDictionary*)parsedInvite: (NSString*)invite;
 +(NSDictionary*)parseInvitationLink: (NSString*)link;
 
++(void)handleConnection:(NSString *)invite
+         connectionType: (int)connectionType
+            phoneNumber: (NSString*) phone
+  withCompletionHandler:(ResponseWithObject) completionBlock;
+
 +(NSString*) connectionID: connectValues;
 +(NSString*) connectionName: (NSDictionary*)connection;
 +(void) removeConnection: (NSString*) connection withCompletionHandler: (ResponseBlock) completionBlock;

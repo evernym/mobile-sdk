@@ -39,6 +39,8 @@ typedef enum {
 + (void)downloadMessages: (NSDictionary*) connection andType: (CMMessageStatusType) type andMessageID: (nullable NSString*) messageID withCompletionHandler: (ResponseWithArray) completionBlock;
 + (CMMessageType) typeEnum: (NSString*)type;
 
++ (void) downloadAllMessages:(ResponseWithArray) completionBlock;
+
 @end
 
 NS_ASSUME_NONNULL_END
