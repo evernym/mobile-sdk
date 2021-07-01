@@ -289,16 +289,7 @@ public class HomePageViewModel extends AndroidViewModel {
                 JSONObject inviteObject = new JSONObject(parsedInvite);
                 JSONArray attach = inviteObject.getJSONArray("request~attach");
 
-                if (ConnectionsUtils.isOutOfBandType(invitationType) && attach.length() == 0) {
-                    Action action = new Action();
-                    action.invite = invite;
-                    action.name = inviteObject.getString("label");
-                    action.description = inviteObject.getString("goal");
-                    action.icon = inviteObject.getString("profileUrl");
-                    action.status = HISTORIZED.toString();
-                    db.actionDao().insertAll(action);
-                    StateConnections.handleConnectionInvitation(action, db, liveData);
-                } else if (ConnectionsUtils.isOutOfBandType(invitationType) && attach.length() != 0) {
+                if (ConnectionsUtils.isOutOfBandType(invitationType) && attach.length() != 0) {
                     String extractedAttachRequest = OutOfBandHelper.extractRequestAttach(parsedInvite);
                     JSONObject attachRequestObject = Utils.convertToJSONObject(extractedAttachRequest);
 

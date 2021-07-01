@@ -38,7 +38,7 @@ public class StateConnections {
                 liveData.postValue(CONNECTION_REDIRECT);
             } else {
                 // create a new connection
-                connectionCreate(invitation, invitationType, db, userMeta, liveData);
+                connectionCreate(action.id, invitation, invitationType, db, userMeta, liveData);
             }
             return;
         }
@@ -56,7 +56,7 @@ public class StateConnections {
                             });
                 } else {
                     // create a new connection
-                    connectionCreate(invitation, invitationType, db, userMeta, liveData);
+                    connectionCreate(action.id, invitation, invitationType, db, userMeta, liveData);
                 }
             } else {
                 // handle invitation with attachment
@@ -166,6 +166,7 @@ public class StateConnections {
     }
 
     public static void connectionCreate(
+            int actionId,
             String parsedInvite,
             Connections.InvitationType invitationType,
             Database db,
@@ -186,6 +187,14 @@ public class StateConnections {
                         c.invitation = parsedInvite;
                         db.connectionDao().insertAll(c);
                     }
+
+                    HomePageViewModel.addToHistory(
+                            actionId,
+                            "Connection created",
+                            db,
+                            liveData
+                    );
+
                     if (throwable != null) {
                         throwable.printStackTrace();
                     }
