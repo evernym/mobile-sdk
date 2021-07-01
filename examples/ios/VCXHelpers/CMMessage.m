@@ -108,7 +108,6 @@
                     msgList = msgArray[0][@"msgs"];
                     for (int i = 0; i < msgArray.count; i++) {
                         NSDictionary* message = msgList[i];
-                        NSLog(@"message when wait %@", message);
                         NSDictionary* payload = [CMUtilities jsonToDictionary:[message objectForKey: @"decryptedPayload"]];
                         NSDictionary *typeObj = [payload objectForKey:@"@type"];
                         NSString *type = [typeObj objectForKey:@"name"];
@@ -121,6 +120,31 @@
         }];
     } @catch (NSException *exception) {
         return completionBlock(false, error);
+    }
+}
+
++ (void)updateMessageStatus:(NSString *) pwDid
+                  messageId:(NSString *) messageId
+        withCompletionBlock:(ResponseWithBoolean) completionBlock {
+    NSError* error;
+    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
+    
+    @try {
+        NSMutableDictionary *msgDict = [@{} mutableCopy];
+        [msgDict setValue:pwDid forKey:@"pairwiseDID"];
+        [msgDict setValue:messageId forKey:@"uids"];
+        
+        NSString* messageType = CMMessageStatusTypeValue(Reviewed);
+        [sdkApi updateMessages:messageType
+                    pwdidsJson:[CMUtilities dictToJsonString:msgDict]
+                    completion:^(NSError *error) {
+            if (error && error.code > 0) {
+                return completionBlock(NO, nil);
+            }
+            return completionBlock(YES, nil);
+        }];
+    } @catch (NSException *exception) {
+        return completionBlock(NO, error);
     }
 }
 

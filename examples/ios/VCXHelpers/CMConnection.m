@@ -54,7 +54,7 @@
 
 +(NSDictionary*) extractRequestAttach: (NSDictionary*)invite {
     NSArray* requestAttach = [invite objectForKey: @"request~attach"];
-    if (requestAttach) {
+    if (requestAttach.count != 0) {
         NSDictionary* requestAttachItem = requestAttach[0];
         NSDictionary* requestAttachData = [requestAttachItem objectForKey: @"data"];
         NSString* requestAttachBase64 = [requestAttachData objectForKey: @"base64"];
@@ -219,6 +219,7 @@ withCompletionHandler:(ResponseWithObject) completionBlock {
     NSString *type = [requestAttach objectForKey: @"@type"];
     
     if ([type rangeOfString:@"credential"].location != NSNotFound) {
+        NSLog(@"requestAttachrequestAttach credential");
         [CMCredential createWithOffer:[CMUtilities dictToJsonString:requestAttach]
                 withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
             if (error && error.code > 0) {
@@ -236,10 +237,14 @@ withCompletionHandler:(ResponseWithObject) completionBlock {
                 }
                 [LocalStorage addEventToHistory:@"Credential offer accept"];
                 NSLog(@"Credential Offer Accepted %@", error);
+                [LocalStorage deleteObjectForKey:@"request~attach"];
+
                 return completionBlock(responseObject, nil);
             }];
         }];
-    } else {
+    } else if ([type rangeOfString:@"present-proof"].location != NSNotFound){
+        NSLog(@"requestAttachrequestAttach present");
+
         [CMProofRequest createWithRequest:[CMUtilities dictToJsonString:requestAttach]
                     withCompletionHandler:^(NSDictionary *offer, NSError *error) {
             if (error && error.code > 0) {
@@ -255,7 +260,7 @@ withCompletionHandler:(ResponseWithObject) completionBlock {
 
                 NSLog(@"Proof Request retrieved %@", creds);
                 NSString *attr = [creds objectForKey: @"autofilledAttributes"];
-                
+
                 [CMProofRequest send:serializedConnection
                      serializedProof:[CMUtilities dictToJsonString:offer]
                        selectedCreds:attr
@@ -264,6 +269,7 @@ withCompletionHandler:(ResponseWithObject) completionBlock {
                     if (error && error.code > 0) {
                         return completionBlock(nil, error);
                     }
+                    [LocalStorage deleteObjectForKey:@"request~attach"];
                     [LocalStorage addEventToHistory:@"Proof request send"];
                     NSLog(@"Proof Request send %@", error);
                     return completionBlock(responseObject, nil);
@@ -278,7 +284,7 @@ withCompletionHandler:(ResponseWithObject) completionBlock {
             phoneNumber: (NSString*) phone
   withCompletionHandler:(ResponseWithObject) completionBlock {
     NSString* type = [[CMUtilities jsonToDictionary:invite] objectForKey: @"@type"];
-    NSLog(@"handleConnection");
+    NSLog(@"handleConnection %@", invite);
 
     [self verityConnectionExist:invite
                  withCompletion:^(NSString *response, NSError *error) {
@@ -343,11 +349,13 @@ withCompletionHandler:(ResponseWithObject) completionBlock {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
+            NSLog(@"requestAttachrequestAttach responseObject %@", responseObject);
+
             [LocalStorage addEventToHistory: @"Connection connect"];
             NSString* serializedConnection = [responseObject objectForKey: @"serializedConnection"];
 
             NSDictionary* requestAttach = [LocalStorage getObjectForKey: @"request~attach" shouldCreate:false];
-            
+            NSLog(@"requestAttachrequestAttach requestAttach %@", requestAttach);
             [self handleAttach:requestAttach
                 connectionData:serializedConnection
          withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
@@ -504,6 +512,7 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
 
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                     while (true) {
+                        NSLog(@"dispatch_async");
                         dispatch_semaphore_t acceptedWaitSemaphore = dispatch_semaphore_create(0);
                         __block NSInteger connectionState = 0;
                         

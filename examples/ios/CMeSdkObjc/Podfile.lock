@@ -1,4 +1,5 @@
 PODS:
+  - ALActionBlocks (1.0.3)
   - Firebase/Analytics (8.1.1):
     - Firebase/Core
   - Firebase/Core (8.1.1):
@@ -93,7 +94,6 @@ PODS:
     - GoogleUtilities/Logger
   - GoogleUtilities/UserDefaults (7.4.1):
     - GoogleUtilities/Logger
-  - MGSwipeTableCell (1.6.11)
   - nanopb (2.30908.0):
     - nanopb/decode (= 2.30908.0)
     - nanopb/encode (= 2.30908.0)
@@ -104,9 +104,9 @@ PODS:
   - vcx (0.0.212)
 
 DEPENDENCIES:
+  - ALActionBlocks
   - Firebase/Analytics
   - Firebase/Messaging
-  - MGSwipeTableCell
   - QRCodeReaderViewController
   - vcx (= 0.0.212)
 
@@ -114,6 +114,7 @@ SPEC REPOS:
   "git@gitlab.com:evernym/mobile/mobile-sdk.git":
     - vcx
   trunk:
+    - ALActionBlocks
     - Firebase
     - FirebaseAnalytics
     - FirebaseCore
@@ -123,12 +124,12 @@ SPEC REPOS:
     - GoogleAppMeasurement
     - GoogleDataTransport
     - GoogleUtilities
-    - MGSwipeTableCell
     - nanopb
     - PromisesObjC
     - QRCodeReaderViewController
 
 SPEC CHECKSUMS:
+  ALActionBlocks: ac91b1a37b60a8004fb687ddade0600446f3d3fa
   Firebase: 4bb49ae87756034cef870fa3c4006235eb46f475
   FirebaseAnalytics: d6dd061b26a04744cb988c66e29697181152b2a3
   FirebaseCore: 389c4ce9a7cce4a7e25eb22326b4bee0050557b2
@@ -138,12 +139,11 @@ SPEC CHECKSUMS:
   GoogleAppMeasurement: 31c7d7655818784b7dd34bdf6884f75b465d5f6c
   GoogleDataTransport: 04c3e9a480bbcaa2ec3f5d27f1cdeb6a92f20c8d
   GoogleUtilities: f8a43108b38a68eebe8b3540e1f4f2d28843ce20
-  MGSwipeTableCell: b804e4e450dee439c42250be90bd50458bf67fce
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
   QRCodeReaderViewController: e8f27d035b3e72b1d4b1c61ff66458287e3be0ff
   vcx: 87c401b118ca5f1044ccc9926edd780913ae9c31
 
-PODFILE CHECKSUM: 09dd505c1409bded43b8aae3dd8808385f2e6886
+PODFILE CHECKSUM: 1685ed1196ad8e36f866a3e8ff2d7610f77ae841
 
 COCOAPODS: 1.10.0

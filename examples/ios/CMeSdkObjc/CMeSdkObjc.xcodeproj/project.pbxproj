@@ -34,6 +34,7 @@
 		AAF9BF6725C8EB4C00E4C1F4 /* CMCredential.m in Sources */ = {isa = PBXBuildFile; fileRef = AAF9BF5C25C8EB4C00E4C1F4 /* CMCredential.m */; };
 		AAF9BFD225C8F2A400E4C1F4 /* MobileSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = AAF9BFD125C8F2A400E4C1F4 /* MobileSDK.m */; };
 		DD00E0C82685FED50050BC88 /* HistoryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E0C72685FED50050BC88 /* HistoryViewController.m */; };
+		DD00E107268D931D0050BC88 /* CustomTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E106268D931D0050BC88 /* CustomTableViewCell.m */; };
 		DD045F0B26023AD90067D6AF /* DevTeam1PoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = DD045F0A26023AD90067D6AF /* DevTeam1PoolTxnGenesis.m */; };
 /* End PBXBuildFile section */
 
@@ -111,6 +112,8 @@
 		C6E4FAB9BA117A61067618C8 /* Pods_CMeSdkObjcUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CMeSdkObjcUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD00E0C72685FED50050BC88 /* HistoryViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HistoryViewController.m; sourceTree = "<group>"; };
 		DD00E0C92685FF090050BC88 /* HistoryViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryViewController.h; sourceTree = "<group>"; };
+		DD00E105268D931D0050BC88 /* CustomTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomTableViewCell.h; sourceTree = "<group>"; };
+		DD00E106268D931D0050BC88 /* CustomTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomTableViewCell.m; sourceTree = "<group>"; };
 		DD045F0926023A7C0067D6AF /* DevTeam1PoolTxnGenesis.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DevTeam1PoolTxnGenesis.h; sourceTree = "<group>"; };
 		DD045F0A26023AD90067D6AF /* DevTeam1PoolTxnGenesis.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DevTeam1PoolTxnGenesis.m; sourceTree = "<group>"; };
 		E2A5D790AD88AF152D60C96F /* Pods-CMeSdkObjcTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcTests.debug.xcconfig"; path = "Target Support Files/Pods-CMeSdkObjcTests/Pods-CMeSdkObjcTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -216,6 +219,8 @@
 				8E13456222A040C800B6DE1F /* PoolTxnGenesis.m */,
 				DD00E0C72685FED50050BC88 /* HistoryViewController.m */,
 				DD00E0C92685FF090050BC88 /* HistoryViewController.h */,
+				DD00E105268D931D0050BC88 /* CustomTableViewCell.h */,
+				DD00E106268D931D0050BC88 /* CustomTableViewCell.m */,
 			);
 			path = CMeSdkObjc;
 			sourceTree = "<group>";
@@ -507,6 +512,7 @@
 				8E509FF42281EFC80098812A /* main.m in Sources */,
 				DD045F0B26023AD90067D6AF /* DevTeam1PoolTxnGenesis.m in Sources */,
 				AAE1A2652512AA0C00EB172A /* ConnectionDetailsViewController.m in Sources */,
+				DD00E107268D931D0050BC88 /* CustomTableViewCell.m in Sources */,
 				AAF9BF6625C8EB4C00E4C1F4 /* CMMessage.m in Sources */,
 				AAF9BF6025C8EB4C00E4C1F4 /* CMConnection.m in Sources */,
 				AAF9BF5F25C8EB4C00E4C1F4 /* StagingPoolTxnGenesis.m in Sources */,

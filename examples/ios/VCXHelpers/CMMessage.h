@@ -41,6 +41,10 @@ typedef enum {
 
 + (void) downloadAllMessages:(ResponseWithArray) completionBlock;
 
++ (void)updateMessageStatus:(NSString *) pwDid
+                  messageId:(NSString *) messageId
+        withCompletionBlock:(ResponseWithBoolean) completionBlock;
+
 @end
 
 NS_ASSUME_NONNULL_END

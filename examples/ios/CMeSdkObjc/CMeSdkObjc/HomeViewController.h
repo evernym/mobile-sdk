@@ -15,6 +15,5 @@
 - (IBAction)addNewConn:(id)sender;
 - (IBAction)scanQR: (UIButton*) sender;
 - (IBAction)checkMessages: (UIButton*) sender;
+
 @end
-
-
