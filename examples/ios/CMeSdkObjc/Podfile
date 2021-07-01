@@ -16,7 +16,6 @@ target 'CMeSdkObjc' do
   pod 'Firebase/Analytics'
   pod 'Firebase/Messaging'
   pod 'QRCodeReaderViewController'
-  pod 'ALActionBlocks'
 
   target 'CMeSdkObjcTests' do
     inherit! :search_paths
