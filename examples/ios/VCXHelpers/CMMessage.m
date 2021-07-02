@@ -21,8 +21,6 @@
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
     NSString* messageType = CMMessageStatusTypeValue(type);
     
-    NSLog(@"Connection details %@", connection);
-
     [sdkApi downloadMessages: messageType uid_s: nil pwdids: pwDid completion: ^(NSError *error, NSString *messages) {
         NSLog(@"Received Messages: %@ for type %@",  messages, messageType);
         NSMutableArray* msgList = [@[] mutableCopy];
@@ -52,7 +50,6 @@
 
             NSMutableArray* msgList = [@[] mutableCopy];
             NSArray* messagesArray = [CMUtilities jsonToArray: messages];
-            NSLog(@"messagesArray: %@",  messagesArray);
 
             for (NSInteger i = 0; i < messagesArray.count; i++) {
                 NSDictionary *message = messagesArray[i];
@@ -77,12 +74,9 @@
                     [msgDict setValue:uid forKey:@"uid"];
                     [msgDict setValue:ms forKey:@"payload"];
                     [msgDict setValue:status forKey:@"status"];
-                    NSLog(@"download mes msgDict: %@",  msgDict);
                     [msgList addObject:msgDict];
                 }
             };
-            NSLog(@"download all messages result: %@",  msgList);
-            
             return completionBlock(msgList, nil);
         }];
     } @catch (NSException *exception) {
@@ -130,13 +124,10 @@
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
     
     @try {
-        NSMutableDictionary *msgDict = [@{} mutableCopy];
-        [msgDict setValue:pwDid forKey:@"pairwiseDID"];
-        [msgDict setValue:messageId forKey:@"uids"];
+        NSString *pwdidsJson = [NSString stringWithFormat: @"[{\"pairwiseDID\":\"%@\",\"uids\":[\"%@\"]}]", pwDid, messageId];
         
-        NSString* messageType = CMMessageStatusTypeValue(Reviewed);
-        [sdkApi updateMessages:messageType
-                    pwdidsJson:[CMUtilities dictToJsonString:msgDict]
+        [sdkApi updateMessages:@"MS-106"
+                    pwdidsJson:pwdidsJson
                     completion:^(NSError *error) {
             if (error && error.code > 0) {
                 return completionBlock(NO, nil);
@@ -144,8 +135,59 @@
             return completionBlock(YES, nil);
         }];
     } @catch (NSException *exception) {
+        NSLog(@"NSException %@", exception);
         return completionBlock(NO, error);
     }
+}
+
++(void)downloadMessage:(NSString *) messageType
+              soughtId:(NSString *) soughtId
+   withCompletionBlock:(ResponseWithObject) completionBlock {
+    NSString *CREDENTIAL = CMMessageType(Credential);
+    NSString *CONNECTION_RESPONSE = CMMessageType(ConnectionResponse);
+    NSString *ACK = CMMessageType(Ack);
+    NSString *HANDSHAKE = CMMessageType(Handshake);
+
+    [CMMessage downloadAllMessages:^(NSArray *responseArray, NSError *error) {
+        for (NSInteger i = 0; i < responseArray.count; i++) {
+            NSDictionary *message = responseArray[i];
+            NSString *payload = [message objectForKey:@"payload"];
+            NSDictionary *payloadDict = [CMUtilities jsonToDictionary:payload];
+            NSString *type = [payloadDict objectForKey:@"@type"];
+
+            if ([messageType isEqual:CREDENTIAL] && [type rangeOfString:@"issue-credential/1.0/issue-credential"].location != NSNotFound) {
+                NSDictionary *thread = [payloadDict objectForKey:@"~thread"];
+                NSString *thid = [thread objectForKey:@"thid"];
+
+                if ([thid isEqual:soughtId]) {
+                    return completionBlock(message, nil);
+                    break;
+                }
+            }
+            if ([messageType isEqual:CONNECTION_RESPONSE] && [type rangeOfString:@"connections/1.0/response"].location != NSNotFound) {
+                NSString *pwDid = [message objectForKey:@"pwDid"];
+
+                if ([pwDid isEqual:soughtId]) {
+                    return completionBlock(message, nil);
+                    break;
+                }
+            }
+            if ([messageType isEqual:ACK] && [type rangeOfString:@"ack"].location != NSNotFound) {
+                return completionBlock(message, nil);
+                break;
+            }
+            if ([messageType isEqual:HANDSHAKE] && [type rangeOfString:@"handshake-reuse-accepted"].location != NSNotFound) {
+                NSDictionary *thread = [payloadDict objectForKey:@"~thread"];
+                NSString *thid = [thread objectForKey:@"thid"];
+                
+                if ([thid isEqual:soughtId]) {
+                    return completionBlock(message, nil);
+                    break;
+                }
+            }
+        }
+        return completionBlock(nil, nil);
+    }];
 }
 
 +(CMMessageType) typeEnum: (NSString *)type {

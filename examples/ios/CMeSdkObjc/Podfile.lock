@@ -1,5 +1,4 @@
 PODS:
-  - ALActionBlocks (1.0.3)
   - Firebase/Analytics (8.1.1):
     - Firebase/Core
   - Firebase/Core (8.1.1):
@@ -104,7 +103,6 @@ PODS:
   - vcx (0.0.212)
 
 DEPENDENCIES:
-  - ALActionBlocks
   - Firebase/Analytics
   - Firebase/Messaging
   - QRCodeReaderViewController
@@ -114,7 +112,6 @@ SPEC REPOS:
   "git@gitlab.com:evernym/mobile/mobile-sdk.git":
     - vcx
   trunk:
-    - ALActionBlocks
     - Firebase
     - FirebaseAnalytics
     - FirebaseCore
@@ -129,7 +126,6 @@ SPEC REPOS:
     - QRCodeReaderViewController
 
 SPEC CHECKSUMS:
-  ALActionBlocks: ac91b1a37b60a8004fb687ddade0600446f3d3fa
   Firebase: 4bb49ae87756034cef870fa3c4006235eb46f475
   FirebaseAnalytics: d6dd061b26a04744cb988c66e29697181152b2a3
   FirebaseCore: 389c4ce9a7cce4a7e25eb22326b4bee0050557b2
@@ -144,6 +140,6 @@ SPEC CHECKSUMS:
   QRCodeReaderViewController: e8f27d035b3e72b1d4b1c61ff66458287e3be0ff
   vcx: 87c401b118ca5f1044ccc9926edd780913ae9c31
 
-PODFILE CHECKSUM: 1685ed1196ad8e36f866a3e8ff2d7610f77ae841
+PODFILE CHECKSUM: 64d4526d640e5b5a60afe4d5abfdc5101d255b7e
 
 COCOAPODS: 1.10.0

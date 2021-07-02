@@ -14,6 +14,14 @@
 
 @implementation CMCredential
 
++(NSString *)getThid:(NSString *) credential {
+    NSError *error;
+    NSMutableDictionary *credValues = [NSJSONSerialization JSONObjectWithData: [credential dataUsingEncoding: NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
+    NSLog(@"thid credValues DMSG %@", credValues);
+
+    return credValues[@"~thread"][@"thid"];
+}
+
 +(void)acceptCredOfferWithMsgid: (NSDictionary*) messageObj
                   forConnection: (NSDictionary*) connection
           withCompletionHandler: (ResponseBlock) completionBlock {
@@ -133,6 +141,7 @@
 
 +(void) acceptCredentialOffer: (NSString*) serializedConnection
          serializedCredential: (NSString*) serializedCredential
+                        offer: (NSString*) offer
         withCompletionHandler: (ResponseWithObject) completionBlock {
     NSError* error;
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
@@ -158,48 +167,19 @@
                 }
                 
                 [sdkApi credentialSerialize:credentialHandle
-                                 completion:^(NSError *error, NSString *state) {
+                                 completion:^(NSError *error, NSString *handle) {
                     if (error && error.code > 0) {
                         return completionBlock(nil, error);
                     }
                     
-                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                        while(true) {
-                            dispatch_semaphore_t acceptedWaitSemaphore = dispatch_semaphore_create(0);
-                            __block NSInteger credentialState = 0;
-                            
-                            [sdkApi credentialGetState:credentialHandle
-                                            completion:^(NSError *error, NSInteger state) {
-                                if (error && error.code > 0) {
-                                    dispatch_semaphore_signal(acceptedWaitSemaphore);
-                                    return completionBlock(nil, error);
-                                }
-                                
-                                if (state != 4) {
-                                    [sdkApi credentialUpdateState:credentialHandle
-                                                       completion:^(NSError *error, NSInteger state) {
-                                        if (error && error.code > 0) {
-                                            dispatch_semaphore_signal(acceptedWaitSemaphore);
-                                            return completionBlock(nil, error);
-                                        }
-                                        
-                                        credentialState = state;
-                                        dispatch_semaphore_signal(acceptedWaitSemaphore);
-                                    }];
-                                } else {
-                                    credentialState = state;
-                                    dispatch_semaphore_signal(acceptedWaitSemaphore);
-                                }
-                            }];
-                            
-                            dispatch_semaphore_wait(acceptedWaitSemaphore, DISPATCH_TIME_FOREVER);
-                            if (credentialState == 4) {
-                                NSLog(@"credential accepted");
-                                return completionBlock([CMUtilities jsonToDictionary:state], nil);
-                                break;
-                            }
+                    [self awaitCredentialReceived:handle
+                                            offer:offer
+                              withCompletionBlock:^(NSString *successMessage, NSError *error) {
+                        if (error && error.code > 0) {
+                            return completionBlock(nil, error);
                         }
-                    });
+                        return completionBlock([CMUtilities jsonToDictionary:successMessage], error);
+                    }];
                 }];
             }];
         }];
@@ -249,6 +229,62 @@
     } @catch (NSException *exception) {
         return completionBlock(nil, error);
     }
+}
+
++(void)awaitCredentialReceived:(NSString *) serializedCredential
+                         offer:(NSString *) offer
+            withCompletionBlock:(ResponseBlock) completionBlock {
+    ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
+    NSString *CREDENTIAL = CMMessageType(Credential);
+    NSString *thid = [self getThid:offer];
+    NSLog(@"thid DMSG %@", thid);
+
+    [sdkApi credentialDeserialize:serializedCredential
+                       completion:^(NSError *error, NSInteger credentialHandle) {
+        if (error && error.code > 0) {
+            return completionBlock(nil, error);
+        }
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            while(true) {
+                dispatch_semaphore_t acceptedWaitSemaphore = dispatch_semaphore_create(0);
+                __block NSInteger credentialState = 0;
+                __block NSString *serialized = @"";
+                
+                [CMMessage downloadMessage:CREDENTIAL
+                                  soughtId:thid
+                       withCompletionBlock:^(NSDictionary *responseObject, NSError *error) {
+
+                    if (responseObject != nil) {
+                        [sdkApi credentialUpdateStateWithMessage:(int)credentialHandle
+                                                         message:[responseObject objectForKey:@"payload"]
+                                                  withCompletion:^(NSError *error, NSInteger state) {
+                            [CMMessage updateMessageStatus:[responseObject objectForKey:@"pwDid"]
+                                                 messageId:[responseObject objectForKey:@"uid"]
+                                       withCompletionBlock:^(BOOL result, NSError *error) {
+                                if (state == 4) {
+                                    [sdkApi credentialSerialize:credentialHandle
+                                                     completion:^(NSError *error, NSString *serializedResult) {
+                                        credentialState = state;
+                                        serialized = serializedResult;
+                                        dispatch_semaphore_signal(acceptedWaitSemaphore);
+                                    }];
+                                }
+                            }];
+                        }];
+                    } else {
+                        dispatch_semaphore_signal(acceptedWaitSemaphore);
+                    }
+                }];
+
+                dispatch_semaphore_wait(acceptedWaitSemaphore, DISPATCH_TIME_FOREVER);
+                if (credentialState == 4) {
+                    return completionBlock(serialized, error);
+                    break;
+                }
+            }
+        });
+    }];
 }
 
 @end

@@ -11,10 +11,8 @@
 #import "CMConnection.h"
 #import "CMCredential.h"
 #import "CMUtilities.h"
-#import "ConnectionDetailsViewController.h"
 #import "LocalStorage.h"
 #import "QRCodeReaderViewController.h"
-#import "ALActionBlocks.h"
 #import "CMMessage.h"
 #import "CMProofRequest.h"
 
@@ -150,6 +148,7 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
     NSDictionary *payloadDict = [CMUtilities jsonToDictionary:payload];
     NSArray *responses = [payloadDict objectForKey:@"valid_responses"];
 
+    //TODO: Put to connection class
     NSString *pwDidMes = [message objectForKey:@"pwDid"];
     
     NSDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
@@ -164,7 +163,8 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
             break;
         }
     }
-
+    //
+    
     UIAlertController * alert = [UIAlertController
                                      alertControllerWithTitle:[payloadDict objectForKey:@"question_text"]
                                      message:[payloadDict objectForKey:@"question_detail"]
@@ -215,9 +215,10 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
             return completionBlock(nil, error);
         }
         NSLog(@"offer created %@", serOffer);
-
+//TODO: fix me
         [CMCredential acceptCredentialOffer:offerConnection
                        serializedCredential:[CMUtilities dictToJsonString:serOffer]
+                                      offer:@""
                       withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
             if (error && error.code > 0) {
                 NSLog(@"offer accept error %@", error);
@@ -308,7 +309,6 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
 }
 
 - (IBAction)checkMessages: (UIButton*) sender {
-    NSLog(@"checkMessages");
     [CMMessage downloadAllMessages:^(NSArray *responseArray, NSError *error) {
         NSLog(@"downloadAllMessages %@", responseArray);
         for (NSInteger i = 0; i < responseArray.count; i++) {
@@ -421,8 +421,6 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
                                     [LocalStorage store: @"requests" andObject: processedDict];
                                     self.requests = processedDict;
                                     [self.tableView reloadData];
-                                    [cell.accept handleControlEvents:UIControlEventTouchUpInside
-                                                           withBlock:^(id weakControl) {}];
                                 });
                             }
                         }];

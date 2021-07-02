@@ -24,13 +24,15 @@ typedef enum {
 #define CMMessageStatusTypeValue(type) [[[NSArray alloc] initWithObjects: @"MS-101", @"MS-102", @"MS-103", @"MS-104", @"MS-105", @"MS-106", @"MS-107", nil] objectAtIndex: type];
 
 typedef enum {
-    CredentialOffer,
     Credential,
-    ProofRequest,
-    Question
+    ConnectionResponse,
+    Ack,
+    Handshake
 } CMMessageType;
 
-//[[[NSArray alloc] initWithObjects: @"credOffer", @"cred", @"proofReq", @"Question", nil] objectAtIndex: type];
+#define CMMessageType(type) [[[NSArray alloc] initWithObjects: @"Credential", @"CoonectionResponse", @"Ack", @"Handshake", nil] objectAtIndex: type];
+
+//[[[NSArray alloc] initWithObjects: @"CredentialOffer", @"Credential", @"CoonectionResponse", @"Ack", @"Handshake", nil] objectAtIndex: type];
 
 @interface CMMessage: NSObject
 
@@ -39,12 +41,15 @@ typedef enum {
 + (void)downloadMessages: (NSDictionary*) connection andType: (CMMessageStatusType) type andMessageID: (nullable NSString*) messageID withCompletionHandler: (ResponseWithArray) completionBlock;
 + (CMMessageType) typeEnum: (NSString*)type;
 
-+ (void) downloadAllMessages:(ResponseWithArray) completionBlock;
++ (void)downloadAllMessages:(ResponseWithArray) completionBlock;
 
 + (void)updateMessageStatus:(NSString *) pwDid
                   messageId:(NSString *) messageId
         withCompletionBlock:(ResponseWithBoolean) completionBlock;
 
++ (void)downloadMessage:(NSString *) messageType
+              soughtId:(NSString *) soughtId
+   withCompletionBlock:(ResponseWithObject) completionBlock;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -22,6 +22,7 @@
 
 +(void) acceptCredentialOffer: (NSString*) serializedConnection
          serializedCredential: (NSString*) serializedCredential
+                        offer: (NSString*) offer
         withCompletionHandler: (ResponseWithObject) completionBlock;
 
 +(void) rejectCredentialOffer: (NSString*) serializedConnection
