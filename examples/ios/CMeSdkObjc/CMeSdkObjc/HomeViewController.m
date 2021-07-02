@@ -117,30 +117,6 @@ UIGestureRecognizer *tapper;
     }];
 }
 
-- (void)answerQuestion:(NSString *)serializedConnection
-               message:(NSString *)message
-                answer:(NSString *)answer
-   withCompletionBlock:(ResponseWithBoolean) completionBlock {
-    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
-
-    [sdkApi connectionDeserialize:serializedConnection
-                       completion:^(NSError *error, NSInteger connectionHandle) {
-            if (error && error.code > 0) {
-                return completionBlock(nil, error);
-            }
-            [sdkApi connectionSendAnswer:(int)connectionHandle
-                                question:message
-                                  answer:answer
-                          withCompletion:^(NSError *error) {
-                if (error && error.code > 0) {
-                    return completionBlock(NO, error);
-                }
-                return completionBlock(YES, error);
-            }];
-        }
-    ];
-}
-
 - (void)answer:(NSString *) data
 withCompletionBlock:(ResponseWithBoolean) completionBlock {
     NSDictionary *message = [CMUtilities jsonToDictionary:data];
@@ -148,23 +124,9 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
     NSDictionary *payloadDict = [CMUtilities jsonToDictionary:payload];
     NSArray *responses = [payloadDict objectForKey:@"valid_responses"];
 
-    //TODO: Put to connection class
     NSString *pwDidMes = [message objectForKey:@"pwDid"];
-    
-    NSDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
-    NSString *offerConnection = @"";
-    for (NSInteger i = 0; i < connections.allKeys.count; i++) {
-        NSString *key = connections.allKeys[i];
-        NSDictionary *connection = [connections objectForKey:key];
-        NSString *serializedConnection = [connection objectForKey:@"serializedConnection"];
-        NSString *pwDid = [CMConnection getPwDid:serializedConnection];
-        if ([pwDidMes isEqual:pwDid]) {
-            offerConnection = serializedConnection;
-            break;
-        }
-    }
-    //
-    
+    NSString *questionsConnection = [CMConnection getConnectionByPwDid:pwDidMes];
+
     UIAlertController * alert = [UIAlertController
                                      alertControllerWithTitle:[payloadDict objectForKey:@"question_text"]
                                      message:[payloadDict objectForKey:@"question_detail"]
@@ -176,7 +138,7 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
                                 actionWithTitle:[response objectForKey:@"text"]
                                 style:UIAlertActionStyleDefault
                                 handler:^(UIAlertAction * action) {
-                                    [self answerQuestion:offerConnection
+                                    [CMMessage answerQuestion:questionsConnection
                                                  message:payload
                                                   answer:[CMUtilities dictToJsonString:response]
                                      withCompletionBlock:^(BOOL result, NSError *error) {
@@ -194,31 +156,20 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
     NSDictionary *message = [CMUtilities jsonToDictionary:data];
     NSString *pwDidMes = [message objectForKey:@"pwDid"];
     NSString *payload = [message objectForKey:@"payload"];
-    
-    NSDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
-    NSString *offerConnection = @"";
-    for (NSInteger i = 0; i < connections.allKeys.count; i++) {
-        NSString *key = connections.allKeys[i];
-        NSDictionary *connection = [connections objectForKey:key];
-        NSString *serializedConnection = [connection objectForKey:@"serializedConnection"];
-        NSString *pwDid = [CMConnection getPwDid:serializedConnection];
-        if ([pwDidMes isEqual:pwDid]) {
-            offerConnection = serializedConnection;
-            break;
-        }
-    }
+    NSArray *payloadArr = [CMUtilities jsonToArray:payload];
+    NSString *offerConnection = [CMConnection getConnectionByPwDid:pwDidMes];
+
+    NSLog(@"acceptCredential payload %@ - %@ - %@", message, payloadArr, payloadArr[0]);
     [CMCredential createWithOffer:payload
             withCompletionHandler:^(NSDictionary *serOffer, NSError *error) {
         if (error && error.code > 0) {
             NSLog(@"offer error %@", error);
-
             return completionBlock(nil, error);
         }
         NSLog(@"offer created %@", serOffer);
-//TODO: fix me
         [CMCredential acceptCredentialOffer:offerConnection
                        serializedCredential:[CMUtilities dictToJsonString:serOffer]
-                                      offer:@""
+                                      offer:[CMUtilities dictToJsonString:payloadArr[0]]
                       withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
             if (error && error.code > 0) {
                 NSLog(@"offer accept error %@", error);
@@ -425,7 +376,19 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
                             }
                         }];
                     }
-               rejectCallback:^() {}
+                rejectCallback:^() {
+                    NSMutableDictionary* processedDict;
+                    NSDictionary* req = [LocalStorage getObjectForKey: @"requests" shouldCreate: false];
+                    for (NSInteger i = 0; i < req.allKeys.count; i++) {
+                        NSString *key = req.allKeys[i];
+                        if ([key isEqual: uuid]) {
+                            [processedDict removeObjectForKey:key];
+                        }
+                    }
+                    [LocalStorage store: @"requests" andObject: processedDict];
+                    self -> requests = processedDict;
+                    [self.tableView reloadData];
+                }
          ];
         [cell.accept setTitle:@"Accept" forState:UIControlStateNormal];
         [cell.reject setHidden:NO];

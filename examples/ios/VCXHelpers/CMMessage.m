@@ -190,6 +190,30 @@
     }];
 }
 
++ (void)answerQuestion:(NSString *)serializedConnection
+               message:(NSString *)message
+                answer:(NSString *)answer
+   withCompletionBlock:(ResponseWithBoolean) completionBlock {
+    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
+
+    [sdkApi connectionDeserialize:serializedConnection
+                       completion:^(NSError *error, NSInteger connectionHandle) {
+            if (error && error.code > 0) {
+                return completionBlock(nil, error);
+            }
+            [sdkApi connectionSendAnswer:(int)connectionHandle
+                                question:message
+                                  answer:answer
+                          withCompletion:^(NSError *error) {
+                if (error && error.code > 0) {
+                    return completionBlock(NO, error);
+                }
+                return completionBlock(YES, error);
+            }];
+        }
+    ];
+}
+
 +(CMMessageType) typeEnum: (NSString *)type {
     NSArray* types = @[@"credOffer"];
     if(![types containsObject: type]) {

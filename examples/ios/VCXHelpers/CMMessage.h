@@ -50,6 +50,11 @@ typedef enum {
 + (void)downloadMessage:(NSString *) messageType
               soughtId:(NSString *) soughtId
    withCompletionBlock:(ResponseWithObject) completionBlock;
+
++ (void)answerQuestion:(NSString *)serializedConnection
+               message:(NSString *)message
+                answer:(NSString *)answer
+   withCompletionBlock:(ResponseWithBoolean) completionBlock;
 @end
 
 NS_ASSUME_NONNULL_END

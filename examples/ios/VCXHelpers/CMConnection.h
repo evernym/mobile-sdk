@@ -29,6 +29,7 @@ typedef enum {
 +(void) connectWithOutofbandInvite: (NSString*)connectJSON connectionType: (int)connectionType phoneNumber: (NSString*)phone withCompletionHandler: (ResponseWithObject)completionBlock;
 +(NSDictionary*)parsedInvite: (NSString*)invite;
 +(NSDictionary*)parseInvitationLink: (NSString*)link;
++(NSString*)getConnectionByPwDid: (NSString *) pwDidMes;
 
 +(void)handleConnection:(NSString *)invite
          connectionType: (int)connectionType

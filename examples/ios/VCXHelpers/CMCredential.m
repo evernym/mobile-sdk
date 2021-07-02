@@ -17,8 +17,11 @@
 +(NSString *)getThid:(NSString *) credential {
     NSError *error;
     NSMutableDictionary *credValues = [NSJSONSerialization JSONObjectWithData: [credential dataUsingEncoding: NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
-    NSLog(@"thid credValues DMSG %@", credValues);
-
+    NSLog(@"credValuescredValues %@", credValues);
+    
+    if (credValues[@"thread_id"]) {
+        return credValues[@"thread_id"];
+    }
     return credValues[@"~thread"][@"thid"];
 }
 

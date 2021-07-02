@@ -31,6 +31,22 @@
     return connValues[@"data"][@"pw_did"];
 }
 
++(NSString*)getConnectionByPwDid: (NSString *) pwDidMes {
+    NSDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
+    NSString *resultConnection = @"";
+    for (NSInteger i = 0; i < connections.allKeys.count; i++) {
+        NSString *key = connections.allKeys[i];
+        NSDictionary *connection = [connections objectForKey:key];
+        NSString *serializedConnection = [connection objectForKey:@"serializedConnection"];
+        NSString *pwDid = [CMConnection getPwDid:serializedConnection];
+        if ([pwDidMes isEqual:pwDid]) {
+            resultConnection = serializedConnection;
+            break;
+        }
+    }
+    return resultConnection;
+}
+
 +(NSDictionary*)parsedInvite: (NSString *)invite {
     if ([invite rangeOfString:@"oob"].location != NSNotFound) {
         return [self parseInvitationLink: invite];
