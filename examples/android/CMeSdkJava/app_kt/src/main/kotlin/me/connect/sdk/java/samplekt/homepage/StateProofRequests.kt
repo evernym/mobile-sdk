@@ -2,91 +2,72 @@ package me.connect.sdk.java.samplekt.homepage
 
 import kotlinx.coroutines.future.await
 import me.connect.sdk.java.*
-import me.connect.sdk.java.connection.QRConnection
 import me.connect.sdk.java.samplekt.SingleLiveData
 import me.connect.sdk.java.samplekt.db.Database
 import me.connect.sdk.java.samplekt.db.entity.Action
 import me.connect.sdk.java.samplekt.db.entity.Connection
 import me.connect.sdk.java.samplekt.db.entity.ProofRequest
 import me.connect.sdk.java.samplekt.homepage.Results.*
-
 import me.connect.sdk.java.samplekt.wrap
-import org.json.JSONException
-import org.json.JSONObject
 import java.util.*
 
 object StateProofRequests {
-    suspend fun createProofStateObjectForExistingConnection(
-        db: Database,
-        outOfBandInvite: OutOfBandHelper.OutOfBandInvite,
-        liveData: SingleLiveData<Results>,
-        action: Action
-    ) {
-        try {
-            val connection = Utils.convertToJSONObject(outOfBandInvite.existingConnection)!!
-            val connectionData = connection.getJSONObject("data")
-            val pr = Proofs.createWithRequest(UUID.randomUUID().toString(), outOfBandInvite.extractedAttachRequest).wrap().await()
-            val decodedProofAttach = ProofRequests.decodeProofRequestAttach(outOfBandInvite.attach)
-            val thread = outOfBandInvite.attach.getJSONObject("~thread")
-            val threadId = thread.getString("thid");
-            if(!db.proofRequestDao().checkProofExists(threadId)) {
-                val name = ProofRequests.extractRequestedNameFromProofRequest(decodedProofAttach)
-                val attr =
-                    ProofRequests.extractRequestedAttributesFromProofRequest(decodedProofAttach)
-                if (name != null && attr != null) {
-                    val proof = ProofRequest(
-                        serialized = pr,
-                        pwDid = connectionData.getString("pw_did"),
-                        threadId = threadId,
-                        attachConnectionLogo = JSONObject(outOfBandInvite.parsedInvite).getString("profileUrl")
-                    )
-                    db.proofRequestDao().insertAll(proof)
-
-                    acceptProofReq(proof, db, liveData, action);
-                }
-            }
-        } catch (e: JSONException) {
-            e.printStackTrace()
-        }
-    }
-
     suspend fun createProofStateObject(
         db: Database,
         outOfBandInvite: OutOfBandHelper.OutOfBandInvite,
         liveData: SingleLiveData<Results>,
         action: Action
     ) {
-        val pr = Proofs.createWithRequest(UUID.randomUUID().toString(), outOfBandInvite.extractedAttachRequest).wrap().await()
-        val decodedProofAttach = ProofRequests.decodeProofRequestAttach(outOfBandInvite.attach)
-        val thread: JSONObject = outOfBandInvite.attach.getJSONObject("~thread")
-        val name = ProofRequests.extractRequestedNameFromProofRequest(decodedProofAttach)
-        val attr = ProofRequests.extractRequestedAttributesFromProofRequest(decodedProofAttach)
-        if (name != null && attr != null) {
-            val proof = ProofRequest(
-                serialized = pr,
-                threadId = thread.getString("thid"),
+        val threadId = outOfBandInvite.attach.getJSONObject("~thread").getString("thid")
+
+        var pwDid: String? = outOfBandInvite.existingConnection
+        if (outOfBandInvite.existingConnection != null) {
+            pwDid = Connections.getPwDid(outOfBandInvite.existingConnection)
+        }
+
+        val serialized = Proofs.createWithRequest(
+                UUID.randomUUID().toString(),
+                outOfBandInvite.extractedAttachRequest
+        ).wrap().await()
+        val proof = ProofRequest(
+                serialized = serialized,
+                threadId = threadId,
+                pwDid = pwDid,
                 attachConnection = outOfBandInvite.parsedInvite,
                 attachConnectionName = outOfBandInvite.userMeta?.name,
                 attachConnectionLogo = outOfBandInvite.userMeta?.logo
-            )
-            db.proofRequestDao().insertAll(proof)
+        )
+        db.proofRequestDao().insertAll(proof)
+        processProofRequest(proof, db, liveData, action);
+    }
 
-            acceptProofReq(proof, db, liveData, action);
+    suspend fun processProofRequest(
+            proof: ProofRequest,
+            db: Database,
+            liveData: SingleLiveData<Results>,
+            action: Action
+    ) {
+        try {
+            if (proof.pwDid == null) {
+                acceptProofReqAndCreateConnection(proof, db, liveData, action)
+            } else {
+                val con: Connection = db.connectionDao().getByPwDid(proof.pwDid!!)
+                acceptProofRequest(proof, con, db, liveData, action)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            liveData.postValue(PROOF_FAILURE)
         }
     }
 
-    suspend fun acceptProofReq(
+    private suspend fun acceptProofRequest(
         proof: ProofRequest,
+        connection: Connection,
         db: Database,
         liveData: SingleLiveData<Results>,
         action: Action
     ) {
         try {
-            if (proof.attachConnection != null && proof.pwDid == null) {
-                acceptProofReqAndCreateConnection(proof, db, liveData, action)
-                return
-            }
-            val con: Connection = db.connectionDao().getByPwDid(proof.pwDid!!)
             var creds: String? = null
             try {
                 creds = Proofs.retrieveAvailableCredentials(proof.serialized).wrap().await()
@@ -94,7 +75,7 @@ object StateProofRequests {
                 liveData.postValue(PROOF_MISSED)
             }
             val data = Proofs.mapCredentials(creds)
-            val s =  Proofs.send(con.serialized, proof.serialized, data, "{}").wrap().await()
+            val s =  Proofs.send(connection.serialized, proof.serialized, data, "{}").wrap().await()
             if (s != null) {
                 proof.serialized = s
                 db.proofRequestDao().update(proof)
@@ -122,18 +103,18 @@ object StateProofRequests {
         liveData: SingleLiveData<Results>,
         action: Action
     ) {
-        val res = Connections.create(proof.attachConnection!!, QRConnection()).wrap().await()
+        val res = Connections.create(proof.attachConnection!!, Connections.InvitationType.OutOfBand).wrap().await()
         if (res != null) {
             val pwDid = Connections.getPwDid(res)
-            val serializedCon = Connections.awaitConnectionReceived(res, pwDid)
+            val serializedCon = Connections.awaitConnectionCompleted(res, pwDid)
 
-            val c = Connection(
+            val connection = Connection(
                 name = proof.attachConnectionName!!,
                 icon = proof.attachConnectionLogo,
                 pwDid = pwDid,
                 serialized = serializedCon
             )
-            db.connectionDao().insertAll(c)
+            db.connectionDao().insertAll(connection)
             liveData.postValue(CONNECTION_SUCCESS)
 
             proof.pwDid = pwDid
@@ -146,29 +127,7 @@ object StateProofRequests {
                 proof.attachConnectionLogo!!,
                 liveData
             );
-
-            var creds: String? = null
-            try {
-                creds = Proofs.retrieveAvailableCredentials(proof.serialized).wrap().await()
-            } catch (e: Exception) {
-                liveData.postValue(PROOF_MISSED)
-            }
-            val data = Proofs.mapCredentials(creds)
-            val s = Proofs.send(serializedCon, proof.serialized, data, "{}").wrap().await()
-            if (s != null) {
-                proof.serialized = s;
-                db.proofRequestDao().update(proof);
-                HomePageViewModel.HistoryActions.addToHistory(
-                    action.id,
-                    "Proofs send",
-                    db,
-                    liveData
-                );
-
-                liveData.postValue(PROOF_SUCCESS);
-            } else {
-                liveData.postValue(PROOF_FAILURE)
-            }
+            acceptProofRequest(proof, connection, db, liveData, action)
         } else {
             liveData.postValue(CONNECTION_FAILURE)
         }

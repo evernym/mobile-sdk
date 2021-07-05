@@ -5,7 +5,6 @@ import me.connect.sdk.java.Connections
 import me.connect.sdk.java.ConnectionsUtils
 import me.connect.sdk.java.OutOfBandHelper
 import me.connect.sdk.java.Utils
-import me.connect.sdk.java.connection.QRConnection
 import me.connect.sdk.java.samplekt.SingleLiveData
 import me.connect.sdk.java.samplekt.db.Database
 import me.connect.sdk.java.samplekt.db.entity.Action
@@ -16,11 +15,11 @@ import org.json.JSONException
 import org.json.JSONObject
 
 object StateConnections {
-    suspend fun createConnection(action: Action, db: Database, liveData: SingleLiveData<Results>) {
+    suspend fun handleConnectionInvitation(action: Action, db: Database, liveData: SingleLiveData<Results>) {
         try {
-            val parsedInvite: String? = ConnectionsUtils.parseInvite(action.invite)
+            val parsedInvite: String? = ConnectionsUtils.getInvitation(action.invite)
             val invitationType = Connections.getInvitationType(parsedInvite)
-            val userMeta: ConnectionsUtils.ConnDataHolder? = ConnectionsUtils.extractUserMetaFromInvite(parsedInvite)
+            val userMeta: ConnectionsUtils.ConnDataHolder? = ConnectionsUtils.extractUserMetaFromInvitation(parsedInvite)
             val serializedConns = db.connectionDao().getAllSerializedConnections()
             val existingConnection = parsedInvite?.let { Connections.verifyConnectionExists(it, serializedConns) }
             if (ConnectionsUtils.isProprietaryType(invitationType)) {
@@ -28,7 +27,7 @@ object StateConnections {
                     Connections.connectionRedirectProprietary(action.invite, existingConnection)
                     liveData.postValue(CONNECTION_REDIRECT)
                 } else {
-                    connectionCreate(parsedInvite!!, db, userMeta!!, liveData)
+                    connectionCreate(parsedInvite!!, invitationType, db, userMeta!!, liveData)
                 }
                 return
             }
@@ -37,7 +36,7 @@ object StateConnections {
                     liveData.postValue(CONNECTION_REDIRECT)
                     return
                 } else {
-                    connectionCreate(parsedInvite!!, db, userMeta!!, liveData)
+                    connectionCreate(parsedInvite!!, invitationType, db, userMeta!!, liveData)
                 }
                 return
             }
@@ -49,15 +48,15 @@ object StateConnections {
                         Connections.connectionRedirectAriesOutOfBand(
                             parsedInvite,
                             existingConnection
-                        )
+                        ).wrap().await()
                         liveData.postValue(CONNECTION_REDIRECT)
                     } else {
-                        connectionCreate(parsedInvite!!, db, userMeta!!, liveData)
+                        connectionCreate(parsedInvite!!, invitationType, db, userMeta!!, liveData)
                     }
                     return
                 }
                 if (parsedInvite != null) {
-                    processAttachment(
+                    processInvitationWithAttachment(
                         db,
                         parsedInvite,
                         extractedAttachRequest,
@@ -75,7 +74,7 @@ object StateConnections {
         }
     }
 
-    private suspend fun processAttachment(
+    private suspend fun processInvitationWithAttachment(
         db: Database,
         parsedInvite: String,
         extractedAttachRequest: String?,
@@ -96,40 +95,43 @@ object StateConnections {
                     .build()
             val attachType = attachRequestObject.getString("@type")
             if (ConnectionsUtils.isCredentialInviteType(attachType)) {
-                processCredentialAttachment(outOfBandInvite, db, liveData, action)
+                processInvitationWithCredentialAttachment(outOfBandInvite, db, liveData, action)
                 return
             }
             if (ConnectionsUtils.isProofInviteType(attachType)) {
-                processProofAttachment(outOfBandInvite, db, liveData, action)
+                processInvitationWithProofAttachment(outOfBandInvite, db, liveData, action)
             }
         } catch (e: JSONException) {
             e.printStackTrace()
         }
     }
 
-    private suspend fun processCredentialAttachment(
+    private suspend fun processInvitationWithCredentialAttachment(
         outOfBandInvite: OutOfBandHelper.OutOfBandInvite,
         db: Database,
         liveData: SingleLiveData<Results>,
         action: Action
     ) {
         if (outOfBandInvite.existingConnection != null) {
-            Connections.connectionRedirectAriesOutOfBand(outOfBandInvite.parsedInvite, outOfBandInvite.existingConnection)
-            StateCredentialOffers.createCredentialStateObjectForExistingConnection(outOfBandInvite, db, liveData, action)
+            Connections.connectionRedirectAriesOutOfBand(
+                    outOfBandInvite.parsedInvite,
+                    outOfBandInvite.existingConnection
+            ).wrap().await()
             liveData.postValue(CONNECTION_REDIRECT)
-            return
+            StateCredentialOffers.createCredentialStateObject(db, outOfBandInvite, liveData, action)
+        } else {
+            StateCredentialOffers.createCredentialStateObject(db, outOfBandInvite, liveData, action)
         }
-        StateCredentialOffers.createCredentialStateObject(db, outOfBandInvite, liveData, action)
     }
 
-    private suspend fun processProofAttachment(
+    private suspend fun processInvitationWithProofAttachment(
         outOfBandInvite: OutOfBandHelper.OutOfBandInvite,
         db: Database,
         liveData: SingleLiveData<Results>,
         action: Action
     ) {
         if (outOfBandInvite.existingConnection != null) {
-            StateProofRequests.createProofStateObjectForExistingConnection(db, outOfBandInvite, liveData, action)
+            StateProofRequests.createProofStateObject(db, outOfBandInvite, liveData, action)
             liveData.postValue(CONNECTION_REDIRECT)
             return
         }
@@ -138,14 +140,15 @@ object StateConnections {
 
     private suspend fun connectionCreate(
         parsedInvite: String,
+        invitationType: Connections.InvitationType,
         db: Database,
         data: ConnectionsUtils.ConnDataHolder,
         liveData: SingleLiveData<Results>
     ) {
         try {
-            val co = Connections.create(parsedInvite, QRConnection()).wrap().await()
+            val co = Connections.create(parsedInvite, invitationType).wrap().await()
             val pwDid = Connections.getPwDid(co)
-            val serializedCon = Connections.awaitConnectionReceived(co, pwDid)
+            val serializedCon = Connections.awaitConnectionCompleted(co, pwDid)
             val c = Connection(
                 name = data.name,
                 icon = data.logo,
