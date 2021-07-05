@@ -187,19 +187,8 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
     NSDictionary *message = [CMUtilities jsonToDictionary:data];
     NSString *pwDidMes = [message objectForKey:@"pwDid"];
     NSString *payload = [message objectForKey:@"payload"];
+    NSString *offerConnection = [CMConnection getConnectionByPwDid:pwDidMes];
     
-    NSDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
-    NSString *offerConnection = @"";
-    for (NSInteger i = 0; i < connections.allKeys.count; i++) {
-        NSString *key = connections.allKeys[i];
-        NSDictionary *connection = [connections objectForKey:key];
-        NSString *serializedConnection = [connection objectForKey:@"serializedConnection"];
-        NSString *pwDid = [CMConnection getPwDid:serializedConnection];
-        if ([pwDidMes isEqual:pwDid]) {
-            offerConnection = serializedConnection;
-            break;
-        }
-    }
     [CMProofRequest createWithRequest:payload
                 withCompletionHandler:^(NSDictionary *offer, NSError *error) {
         if (error && error.code > 0) {
@@ -235,9 +224,14 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
 - (IBAction)addNewConn: (id)sender {
     if(addConnConfigTextView.text.length > 3 && ![addConnConfigTextView.text isEqual: @"enter code here"]) {
         NSDictionary *connectValues = [CMConnection parsedInvite: addConnConfigTextView.text];
-
+        NSLog(@"addNewconn %@ - ", connectValues);
         NSString *label = [connectValues objectForKey: @"label"];
-        NSString *goal = [connectValues objectForKey: @"goal"];
+        NSString *goal = @"";
+        if ([connectValues valueForKey:@"goal"] != nil) {
+            goal = [connectValues objectForKey: @"goal"];
+        } else {
+            goal = @"New connection";
+        }
         NSString *profileUrl = [connectValues objectForKey: @"profileUrl"];
         
         NSMutableDictionary* requestsDict = [[LocalStorage getObjectForKey: @"requests" shouldCreate: true] mutableCopy];
@@ -266,6 +260,7 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
             NSDictionary *message = responseArray[i];
 
             NSString *type = [message objectForKey:@"type"];
+            NSLog(@"typetypetype %@", type);
             if ([type isEqual:@"credential-offer"]) {
                 NSMutableDictionary* requestsDict = [[LocalStorage getObjectForKey: @"requests" shouldCreate: true] mutableCopy];
                 NSString *uuid = [[NSUUID UUID] UUIDString];
@@ -279,7 +274,7 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
                 };
                 [requestsDict setValue: requestObj forKey: uuid];
                 [LocalStorage store: @"requests" andObject: requestsDict];
-                
+
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [CMMessage updateMessageStatus:[message objectForKey:@"pwDid"]
                                          messageId:[message objectForKey:@"uid"]
@@ -289,7 +284,7 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
                         }
                     }];
                 });
-                
+
                 dispatch_async(dispatch_get_main_queue(), ^{
                     self.requests = requestsDict;
                     [self.tableView reloadData];
@@ -308,7 +303,7 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
                 };
                 [requestsDict setValue: requestObj forKey: uuid];
                 [LocalStorage store: @"requests" andObject: requestsDict];
-                
+
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [CMMessage updateMessageStatus:[message objectForKey:@"pwDid"]
                                          messageId:[message objectForKey:@"uid"]
@@ -318,7 +313,36 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
                         }
                     }];
                 });
-                
+
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    self.requests = requestsDict;
+                    [self.tableView reloadData];
+                });
+            }
+            if ([type isEqual:@"presentation-request"]) {
+                NSMutableDictionary* requestsDict = [[LocalStorage getObjectForKey: @"requests" shouldCreate: true] mutableCopy];
+                NSString *uuid = [[NSUUID UUID] UUIDString];
+
+                NSDictionary* requestObj = @{
+                    @"name": @"Proof Request",
+                    @"goal": @"Proog from Alice",
+                    @"uuid": [message objectForKey:@"uid"],
+                    @"type": type,
+                    @"data": [CMUtilities dictToJsonString:message]
+                };
+                [requestsDict setValue: requestObj forKey: uuid];
+                [LocalStorage store: @"requests" andObject: requestsDict];
+
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [CMMessage updateMessageStatus:[message objectForKey:@"pwDid"]
+                                         messageId:[message objectForKey:@"uid"]
+                               withCompletionBlock:^(BOOL result, NSError *error) {
+                        if (error) {
+                            NSLog(@"%@", error);
+                        }
+                    }];
+                });
+
                 dispatch_async(dispatch_get_main_queue(), ^{
                     self.requests = requestsDict;
                     [self.tableView reloadData];
@@ -448,6 +472,34 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
          ];
         [cell.accept setTitle:@"Answer" forState:UIControlStateNormal];
         [cell.reject setHidden:YES];
+    } else if ([type isEqual:@"presentation-request"]) {
+        [cell updateAttribute:name
+                     subtitle:goal
+                      logoUrl:@""
+               acceptCallback:^() {
+                        [self sendProof:data
+                 withCompletionBlock:^(BOOL result, NSError *error) {
+                            if (result) {
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                    NSMutableDictionary* processedDict;
+                                    NSDictionary* req = [LocalStorage getObjectForKey: @"requests" shouldCreate: false];
+                                    for (NSInteger i = 0; i < req.allKeys.count; i++) {
+                                        NSString *key = req.allKeys[i];
+                                        if ([key isEqual: uuid]) {
+                                            [processedDict removeObjectForKey:key];
+                                        }
+                                    }
+                                    [LocalStorage store: @"requests" andObject: processedDict];
+                                    self -> requests = processedDict;
+                                    [self.tableView reloadData];
+                                });
+                            };
+                        }];
+                    }
+               rejectCallback:^() {}
+         ];
+        [cell.accept setTitle:@"Accept" forState:UIControlStateNormal];
+        [cell.reject setHidden:NO];
     }
     return cell;
 }
