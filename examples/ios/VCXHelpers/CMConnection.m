@@ -137,7 +137,6 @@
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
     
     @try {
-        //TODO: Added parsed invite as input paramert
         [sdkApi connectionCreateWithInvite:[self connectionID: invitationDetails]
                              inviteDetails:invitationDetails
                                 completion:^(NSError *error, NSInteger handle) {
@@ -234,13 +233,14 @@
     }
 }
 
-+(void)handleAttach:(NSDictionary *)requestAttach
-     connectionData:(NSString *)serializedConnection
-withCompletionHandler:(ResponseWithObject) completionBlock {
++(void)handleAttach: (NSDictionary *) requestAttach
+     connectionData: (NSString *) serializedConnection
+               name: (NSString*) name
+withCompletionHandler: (ResponseWithObject) completionBlock {
     NSString *type = [requestAttach objectForKey: @"@type"];
-    
+    NSLog(@"requestAttachrequestAttach %@", requestAttach);
+
     if ([type rangeOfString:@"credential"].location != NSNotFound) {
-        NSLog(@"requestAttachrequestAttach credential");
         [CMCredential createWithOffer:[CMUtilities dictToJsonString:requestAttach]
                 withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
             if (error && error.code > 0) {
@@ -257,7 +257,7 @@ withCompletionHandler:(ResponseWithObject) completionBlock {
                     NSLog(@"Error acceptCredentialOffer %@", error);
                     return completionBlock(nil, error);
                 }
-                [LocalStorage addEventToHistory:@"Credential offer accept"];
+                [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Credential offer accept", name]];
                 NSLog(@"Credential Offer Accepted %@", error);
                 [LocalStorage deleteObjectForKey:@"request~attach"];
 
@@ -292,7 +292,7 @@ withCompletionHandler:(ResponseWithObject) completionBlock {
                         return completionBlock(nil, error);
                     }
                     [LocalStorage deleteObjectForKey:@"request~attach"];
-                    [LocalStorage addEventToHistory:@"Proof request send"];
+                    [NSString stringWithFormat:@"%@ - Proof request send", name];
                     NSLog(@"Proof Request send %@", error);
                     return completionBlock(responseObject, nil);
                 }];
@@ -305,6 +305,8 @@ withCompletionHandler:(ResponseWithObject) completionBlock {
          connectionType: (int)connectionType
             phoneNumber: (NSString*) phone
   withCompletionHandler:(ResponseWithObject) completionBlock {
+    NSDictionary* inviteDict = [CMUtilities jsonToDictionary:invite];
+    NSString* name = [inviteDict objectForKey:@"label"];
     NSString* type = [[CMUtilities jsonToDictionary:invite] objectForKey: @"@type"];
     [self verityConnectionExist:invite
                  withCompletion:^(NSString *response, NSError *error) {
@@ -312,16 +314,19 @@ withCompletionHandler:(ResponseWithObject) completionBlock {
             return completionBlock(nil, error);
         }
         if (response != nil) {
+            NSLog(@"connectionRedirectProprietary");
+
             if ([type rangeOfString:@"out-of-band"].location != NSNotFound) {
                 [self connectionRedirectAriesOutOfBand:invite
                                   serializedConnection:response
                                  withCompletionHandler:^(BOOL result, NSError *error) {
-                    [LocalStorage addEventToHistory:@"Connection redirect"];
+                    [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
                     NSDictionary *requestAttach = [self extractRequestAttach: [CMUtilities jsonToDictionary:invite]];
 
                     if (requestAttach) {
                         [self handleAttach:requestAttach
                             connectionData:response
+                                name:name
                      withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
                             return completionBlock(responseObject, error);
                         }];
@@ -329,17 +334,19 @@ withCompletionHandler:(ResponseWithObject) completionBlock {
                     return completionBlock(nil, error);
                 }];
             } else {
+                NSLog(@"connectionRedirectProprietary");
                 [self connectionRedirectProprietary:invite
                                   serializedConnection:response
                                  withCompletionHandler:^(BOOL result, NSError *error) {
-                    [LocalStorage addEventToHistory:@"Connection redirect"];
+                    [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
                     return completionBlock(nil, error);
                 }];
             }
         } else {
-            [self createConnection:invite
+            [self createConnection:inviteDict
                     connectionType:connectionType
                        phoneNumber:phone
+                              name:name
              withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
                 if (error && error.code > 0) {
                     return completionBlock(nil, error);
@@ -350,14 +357,14 @@ withCompletionHandler:(ResponseWithObject) completionBlock {
     }];
 }
 
-+(void)createConnection:(NSString *)invitation
++(void)createConnection: (NSDictionary *) inviteDict
          connectionType: (int)connectionType
             phoneNumber: (NSString*) phone
+                   name: (NSString*) name
   withCompletionHandler: (ResponseWithObject) completionBlock {
-    NSDictionary* inviteDict = [CMUtilities jsonToDictionary:invitation];
     NSString* type = [inviteDict objectForKey: @"@type"];
     if ([type rangeOfString:@"out-of-band"].location != NSNotFound) {
-        [self connectWithOutofbandInvite:invitation
+        [self connectWithOutofbandInvite:[CMUtilities dictToJsonString:inviteDict]
                                  connectionType:(int)connectionType
                                     phoneNumber:phone
                           withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
@@ -365,21 +372,27 @@ withCompletionHandler:(ResponseWithObject) completionBlock {
                 return completionBlock(nil, error);
             }
 
-            [LocalStorage addEventToHistory: @"Connection connect"];
+            [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection connect", name]];
             NSString* serializedConnection = [responseObject objectForKey: @"serializedConnection"];
 
             NSDictionary* requestAttach = [LocalStorage getObjectForKey: @"request~attach" shouldCreate:false];
-            [self handleAttach:requestAttach
-                connectionData:serializedConnection
-         withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
-                return completionBlock(responseObject, error);
-            }];
+            if (requestAttach) {
+                [self handleAttach:requestAttach
+                    connectionData:serializedConnection
+                              name:name
+             withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+                    return completionBlock(responseObject, error);
+                }];
+            }
+            return completionBlock(nil, error);
+
         }];
     } else {
-        [self connectWithInvite:invitation
+        [self connectWithInvite:[CMUtilities dictToJsonString:inviteDict]
                                  connectionType:(int)connectionType
                                     phoneNumber:phone
                           withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+            [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection connect", [inviteDict objectForKey:@"label"]]];
             return completionBlock(responseObject, error);
         }];
     }

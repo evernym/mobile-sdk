@@ -45,6 +45,11 @@ withCompletionHandler: (ResponseWithObject) completionBlock;
 
 + (NSDictionary*)vcxMatchingCredentials: (NSString*) matchingCredentials;
 
++(void)sendProofRequestFromMessage:(NSString *) data
+             withCompletionHandler:(ResponseWithBoolean) completionBlock;
+
++(void)rejectProofRequestFromMessage:(NSString *) data
+               withCompletionHandler:(ResponseWithBoolean) completionBlock;
 @end
 
 NS_ASSUME_NONNULL_END

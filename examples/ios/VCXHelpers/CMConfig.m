@@ -23,7 +23,8 @@ NSString* sponsorServerURL = @"https://97fc85683d98.ngrok.io";
 
 // Below settings will depend on your choosen environment
 // Selected here is Production Enviroment
-CMEnvironment environment = Staging;
+//CMEnvironment environment = Staging;
+CMEnvironment environment = Production;
 
 +(NSString*)agencyConfig {
     NSString* walletKey = [CMConfig walletKey];

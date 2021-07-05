@@ -8,6 +8,8 @@
 
 #import "CMProofRequest.h"
 #import "MobileSDK.h"
+#import "CMConnection.h"
+#import "LocalStorage.h"
 
 @implementation CMProofRequest
 
@@ -297,4 +299,72 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
         return completionBlock(nil, error);
     }
 }
+
++(void)sendProofRequestFromMessage:(NSString *) data
+             withCompletionHandler:(ResponseWithBoolean) completionBlock {
+    NSDictionary *message = [CMUtilities jsonToDictionary:data];
+    NSString *pwDidMes = [message objectForKey:@"pwDid"];
+    NSString *payload = [message objectForKey:@"payload"];
+    NSString *offerConnection = [CMConnection getConnectionByPwDid:pwDidMes];
+    NSDictionary *payloadDict = [CMUtilities jsonToDictionary:payload];
+    
+    [CMProofRequest createWithRequest:payload
+                withCompletionHandler:^(NSDictionary *offer, NSError *error) {
+        if (error && error.code > 0) {
+            return completionBlock(nil, error);
+        }
+        NSLog(@"Proof Request created %@", error);
+
+        [CMProofRequest retrieveAvailableCredentials:[CMUtilities dictToJsonString:offer]
+                               withCompletionHandler:^(NSDictionary *creds, NSError *error) {
+            if (error && error.code > 0) {
+                return completionBlock(nil, error);
+            };
+
+            NSLog(@"Proof Request retrieved %@", creds);
+            NSString *attr = [creds objectForKey: @"autofilledAttributes"];
+            
+            [CMProofRequest send:offerConnection
+                 serializedProof:[CMUtilities dictToJsonString:offer]
+                   selectedCreds:attr
+                selfAttestedAttr:@"{}"
+           withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+                if (error && error.code > 0) {
+                    return completionBlock(nil, error);
+                }
+                [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Proof request send", [payloadDict objectForKey:@"comment"]]];
+                NSLog(@"Proof Request send %@", error);
+                return completionBlock(responseObject, nil);
+            }];
+        }];
+    }];
+}
+
++(void)rejectProofRequestFromMessage:(NSString *) data
+             withCompletionHandler:(ResponseWithBoolean) completionBlock {
+    NSDictionary *message = [CMUtilities jsonToDictionary:data];
+    NSString *pwDidMes = [message objectForKey:@"pwDid"];
+    NSString *payload = [message objectForKey:@"payload"];
+    NSString *offerConnection = [CMConnection getConnectionByPwDid:pwDidMes];
+    NSDictionary *payloadDict = [CMUtilities jsonToDictionary:payload];
+
+    [self createWithRequest:payload
+                withCompletionHandler:^(NSDictionary *request, NSError *error) {
+        if (error && error.code > 0) {
+            return completionBlock(nil, error);
+        }
+        NSLog(@"Proof Request created %@", error);
+        
+        [self reject:offerConnection serializedProof:[CMUtilities dictToJsonString:request]
+                               withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+            if (error && error.code > 0) {
+                return completionBlock(nil, error);
+            }
+            [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Proof request reject", [payloadDict objectForKey:@"comment"]]];
+            NSLog(@"Proof Request reject %@", error);
+            return completionBlock(responseObject, nil);
+        }];
+    }];
+}
+
 @end

@@ -13,10 +13,6 @@
 
 @interface CMCredential: NSObject
 
-+(void) acceptCredOfferWithMsgid: (NSDictionary*) messageObj
-                  forConnection: (NSDictionary*) connection
-          withCompletionHandler: (ResponseBlock) completionBlock;
-
 +(void) createWithOffer: (NSString*)offer
   withCompletionHandler: (ResponseWithObject) completionBlock;
 
@@ -29,6 +25,11 @@
          serializedCredential: (NSString*) serializedCredential
         withCompletionHandler: (ResponseWithObject) completionBlock;
 
++(void)acceptCredentilaFromMessage:(NSString *) data
+               withCompletionBlock:(ResponseWithBoolean) completionBlock;
+
++(void)rejectCredentilaFromMessage:(NSString *) data
+               withCompletionBlock:(ResponseWithBoolean) completionBlock;
 @end
 
 #endif /* CMCredential_h */
