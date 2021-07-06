@@ -57,7 +57,7 @@
     NSDictionary* object = [NSJSONSerialization JSONObjectWithData: [json dataUsingEncoding: NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
 
     if(error != nil) {
-        NSLog(@"Error deserialization: %@", error.localizedDescription);
+//        NSLog(@"Error deserialization: %@", error.localizedDescription);
         return @{};
     }
 

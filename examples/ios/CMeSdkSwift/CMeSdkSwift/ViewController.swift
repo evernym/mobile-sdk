@@ -56,18 +56,18 @@ class ViewController: UIViewController {
     @IBAction func addNewConnection(_ sender: Any) {
         let connectionText = addConnConfigTextView.text ?? ""
         if connectionText.count > 3 && connectionText != "enter code here" {
-            CMConnection.connect(connectionText, connectionType: ConnectionType.QR.rawValue, phoneNumber: "") { connectionData, error  in
-                if let error = error {
-                    //                if (error != nil && error > 0) {
-                    print("Error", error.localizedDescription)
-                    return
-                }
-
-                if((connectionData) != nil) {
-                    self.addConnConfigTextView.text = ""
-                    self.performSegue(withIdentifier: "openConnectionDetails", sender: connectionData)
-                }
-            }
+//            CMConnection.connect(connectionText, connectionType: ConnectionType.QR.rawValue, phoneNumber: "") { connectionData, error  in
+//                if let error = error {
+//                    //                if (error != nil && error > 0) {
+//                    print("Error", error.localizedDescription)
+//                    return
+//                }
+//
+//                if((connectionData) != nil) {
+//                    self.addConnConfigTextView.text = ""
+//                    self.performSegue(withIdentifier: "openConnectionDetails", sender: connectionData)
+//                }
+//            }
         }
     }
 

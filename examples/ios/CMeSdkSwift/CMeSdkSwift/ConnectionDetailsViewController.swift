@@ -45,9 +45,9 @@ class ConnectionDetailsViewController: UIViewController {
                 let messageType = decryptedMessageJson["@type"] as! [String: String]
                 let messageTypeName = messageType["name"]!
                 if (messageTypeName == "credential-offer") {
-                    CMCredential.acceptCredOffer(decryptedMessageJson, forConnection: connection) { (message, error) in
-                        
-                    }
+//                    CMCredential.acceptCredOffer(decryptedMessageJson, forConnection: connection) { (message, error) in
+//
+//                    }
                 } else if (["proof_request", "proof-request", "presentation-request"].contains(messageTypeName)) {
                     
                 }
@@ -64,13 +64,13 @@ class ConnectionDetailsViewController: UIViewController {
             self.performSegue(withIdentifier: "openProofDetails", sender: proofObj)
             return
 
-        case "credOffer":
-            CMCredential.acceptCredOffer(message, forConnection: connection) { (credentialDetails, error) in
-                print("credential offer results ", credentialDetails ?? "", error?.localizedDescription ?? "")
-                DispatchQueue.main.async {
-                    self.goBack()
-                }
-            }
+//        case "credOffer":
+//            CMCredential.acceptCredOffer(message, forConnection: connection) { (credentialDetails, error) in
+//                print("credential offer results ", credentialDetails ?? "", error?.localizedDescription ?? "")
+//                DispatchQueue.main.async {
+//                    self.goBack()
+//                }
+//            }
 
         default:
             break
