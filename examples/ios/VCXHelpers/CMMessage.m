@@ -12,28 +12,6 @@
 
 @implementation CMMessage
 
-+ (void)downloadMessages: (NSDictionary*) connection
-                 andType: (CMMessageStatusType) type
-            andMessageID: (nullable NSString*) messageID
-   withCompletionHandler: (ResponseWithArray) completionBlock {
-    
-    NSString* pwDid = [CMConnection getPwDid: connection[@"serializedConnection"]];
-    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
-    NSString* messageType = CMMessageStatusTypeValue(type);
-    
-    [sdkApi downloadMessages: messageType uid_s: nil pwdids: pwDid completion: ^(NSError *error, NSString *messages) {
-        NSLog(@"Received Messages: %@ for type %@",  messages, messageType);
-        NSMutableArray* msgList = [@[] mutableCopy];
-        if(messages) {
-            NSArray* msgArray = [CMUtilities jsonToArray: messages];
-            if(msgArray && [msgArray count] > 0) {
-                msgList = msgArray[0][@"msgs"];
-            }
-        }
-        return completionBlock(msgList, error);
-    }];
-}
-
 + (void) downloadAllMessages:(ResponseWithArray) completionBlock {
     NSError* error;
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
