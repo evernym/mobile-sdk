@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 +(NSDictionary*)getObjectForKey: (NSString*) key shouldCreate: (BOOL) shouldCreateIfEmpty;
 +(NSString*)getValueForKey: (NSString*) key;
 +(void)deleteObjectForKey: (NSString*) key;
-
++(void)addEventToHistory:(NSString *)name;
 @end
 
 NS_ASSUME_NONNULL_END

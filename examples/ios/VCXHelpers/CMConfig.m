@@ -19,20 +19,21 @@
 
 // Define your wallet name constant here
 NSString* walletName = @"Lor6Ohwaichool"; //@"PleaseSetYourConnectMeWalletName";
-NSString* sponsorServerURL = @"http://127.0.0.1:4321";
+NSString* sponsorServerURL = @"https://97fc85683d98.ngrok.io";
 
 // Below settings will depend on your choosen environment
 // Selected here is Production Enviroment
-CMEnvironment environment = DevTeam1;
+//CMEnvironment environment = Staging;
+CMEnvironment environment = Production;
 
 +(NSString*)agencyConfig {
     NSString* walletKey = [CMConfig walletKey];
     
     NSDictionary* configs = @{
         @"1": @{
-                @"agencyUrl": @"https://agency.evernym.com",
-                @"agencyDid": @"DwXzE7GdE5DNfsrRXJChSD",
-                @"agencyVerKey": @"844sJfb2snyeEugKvpY7Y4jZJk9LT6BnS6bnuKoiqbip",
+                @"agencyUrl": @"https://agency.pps.evernym.com",
+                @"agencyDid": @"3mbwr7i85JNSL3LoNQecaW",
+                @"agencyVerKey": @"2WXxo6y1FJvXWgZnoYUP5BJej2mceFrqBDNPE3p6HDPf",
         },
         @"2": @{
                 @"agencyUrl": @"https://agency.pstg.evernym.com",
@@ -50,7 +51,7 @@ CMEnvironment environment = DevTeam1;
                 @"agencyVerKey": @"Bk9wFrud3rz8v3nAFKGib6sQs8zHWzZxfst7Wh3Mbc9W",
         }
     };
-    
+    NSLog(@"ENV %u@", environment);
     NSString* agencyUrl = [[configs objectForKey:[NSString stringWithFormat:@"%i", environment]] valueForKey: @"agencyUrl"];
     NSString* agencyDid = [[configs objectForKey:[NSString stringWithFormat:@"%i", environment]] valueForKey: @"agencyDid"];
     NSString* agencyVerKey = [[configs objectForKey:[NSString stringWithFormat:@"%i", environment]] valueForKey: @"agencyVerKey"];

@@ -43,4 +43,15 @@
     [[NSUserDefaults standardUserDefaults] removeObjectForKey: key];
 }
 
++(void) addEventToHistory:(NSString *)name {
+    NSMutableDictionary* history = [[LocalStorage getObjectForKey: @"history" shouldCreate: true] mutableCopy];
+
+    NSDictionary* historyObj = @{
+        @"name": name,
+    };
+    NSString *uuid = [[NSUUID UUID] UUIDString];
+    [history setValue: historyObj forKey: uuid];
+    [LocalStorage store: @"history" andObject: history];
+}
+
 @end

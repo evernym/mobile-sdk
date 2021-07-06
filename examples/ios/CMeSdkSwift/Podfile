@@ -2,7 +2,7 @@
 platform :ios, '10.0'
 
 source 'https://cdn.cocoapods.org/'
-source 'git@github.com:evernym/mobile-sdk.git'
+source 'git@gitlab.com:evernym/mobile/mobile-sdk.git'
 
 target 'CMeSdkSwift' do
   # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
@@ -11,7 +11,7 @@ target 'CMeSdkSwift' do
   # Below line will be enabled when we go public with our cocoapod
   # pod 'vcx', '0.0.198'
   # Below line will be removed when we go public with our cocoapod
-  pod 'vcx', :path => '../../../vcx.podspec'
+  pod 'vcx', '0.0.212'
   pod 'QRCodeReaderViewController'
 
   target 'CMeSdkSwiftTests' do

@@ -12,6 +12,8 @@
 typedef void (^ResponseBlock)(NSString *successMessage, NSError *error);
 typedef void (^ResponseWithObject)(NSDictionary *responseObject, NSError *error);
 typedef void (^ResponseWithArray)(NSArray *responseArray, NSError *error);
+typedef void (^ResponseWithBoolean)(BOOL result, NSError *error);
+typedef void (^ResponseWithError)(NSError *error);
 
 @interface CMUtilities : NSObject
 

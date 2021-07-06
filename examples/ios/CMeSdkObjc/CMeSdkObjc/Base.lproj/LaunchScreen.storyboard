@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097.3" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="qpr-dc-ZFU">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="qpr-dc-ZFU">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -23,6 +23,7 @@
                                 <rect key="frame" x="123" y="782" width="261" height="60"/>
                             </imageView>
                         </subviews>
+                        <viewLayoutGuide key="safeArea" id="Tk0-3y-iSH"/>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="33G-ms-sH0" firstAttribute="leading" secondItem="Tk0-3y-iSH" secondAttribute="leading" id="1ID-Eh-x2q"/>
@@ -33,7 +34,6 @@
                             <constraint firstItem="Tk0-3y-iSH" firstAttribute="bottom" secondItem="8rr-8z-sd5" secondAttribute="bottom" constant="20" id="ZGf-X7-kCC"/>
                             <constraint firstItem="Tk0-3y-iSH" firstAttribute="trailing" secondItem="8rr-8z-sd5" secondAttribute="trailing" constant="30" id="p7M-Tl-TWI"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="Tk0-3y-iSH"/>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="kAV-I5-ptj" userLabel="First Responder" sceneMemberID="firstResponder"/>

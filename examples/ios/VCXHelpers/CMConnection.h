@@ -14,15 +14,30 @@ typedef NS_ENUM(int, ConnectionType) {
     SMS = 1,
 };
 
+typedef enum {
+    Proprietary,
+    Connection,
+    OutOfBand
+} InvitationType;
+
 @interface CMConnection: NSObject
 
-+(NSString*)getPwDid: (NSString*) serializedConnection;
++(NSString*) getPwDid: (NSString*) serializedConnection;
 
-+(void) connect: (NSString*)connectJSON connectionType: (int)connectionType phoneNumber: (NSString*)phone withCompletionHandler: (ResponseWithObject)completionBlock;
++(void) createConnection: (NSString*)connectJSON connectionType: (int)connectionType phoneNumber: (NSString*)phone withCompletionHandler: (ResponseWithObject)completionBlock;
++(void) connectWithInvite: (NSString*)connectJSON connectionType: (int)connectionType phoneNumber: (NSString*)phone withCompletionHandler: (ResponseWithObject)completionBlock;
++(void) connectWithOutofbandInvite: (NSString*)connectJSON connectionType: (int)connectionType phoneNumber: (NSString*)phone withCompletionHandler: (ResponseWithObject)completionBlock;
++(NSDictionary*)parsedInvite: (NSString*)invite;
 +(NSDictionary*)parseInvitationLink: (NSString*)link;
++(NSString*)getConnectionByPwDid: (NSString *) pwDidMes;
 
-+(NSString*)connectionID: connectValues;
++(void)handleConnection:(NSString *)invite
+         connectionType: (int)connectionType
+            phoneNumber: (NSString*) phone
+  withCompletionHandler:(ResponseWithObject) completionBlock;
+
++(NSString*) connectionID: connectValues;
 +(NSString*) connectionName: (NSDictionary*)connection;
-+(void)removeConnection: (NSString*) connection withCompletionHandler: (ResponseBlock) completionBlock;
++(void) removeConnection: (NSString*) connection withCompletionHandler: (ResponseBlock) completionBlock;
 
 @end
