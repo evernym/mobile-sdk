@@ -31,8 +31,8 @@
 		AAF9BFD225C8F2A400E4C1F4 /* MobileSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = AAF9BFD125C8F2A400E4C1F4 /* MobileSDK.m */; };
 		DD00E0C82685FED50050BC88 /* HistoryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E0C72685FED50050BC88 /* HistoryViewController.m */; };
 		DD00E107268D931D0050BC88 /* CustomTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E106268D931D0050BC88 /* CustomTableViewCell.m */; };
-		DD00E113269457180050BC88 /* Log.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E112269457180050BC88 /* Log.m */; };
-		DD045F0B26023AD90067D6AF /* DevTeam1PoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = DD045F0A26023AD90067D6AF /* DevTeam1PoolTxnGenesis.m */; };
+		DD00E118269471B50050BC88 /* Log.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E116269471B50050BC88 /* Log.m */; };
+		DD00E13C269473130050BC88 /* DevTeam1PoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E13A269473130050BC88 /* DevTeam1PoolTxnGenesis.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -103,11 +103,11 @@
 		DD00E0C92685FF090050BC88 /* HistoryViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryViewController.h; sourceTree = "<group>"; };
 		DD00E105268D931D0050BC88 /* CustomTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomTableViewCell.h; sourceTree = "<group>"; };
 		DD00E106268D931D0050BC88 /* CustomTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomTableViewCell.m; sourceTree = "<group>"; };
-		DD00E1112694570C0050BC88 /* Log.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Log.h; sourceTree = "<group>"; };
-		DD00E112269457180050BC88 /* Log.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Log.m; sourceTree = "<group>"; };
 		DD00E114269457560050BC88 /* CMeSdkObjc-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CMeSdkObjc-Prefix.pch"; sourceTree = "<group>"; };
-		DD045F0926023A7C0067D6AF /* DevTeam1PoolTxnGenesis.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DevTeam1PoolTxnGenesis.h; sourceTree = "<group>"; };
-		DD045F0A26023AD90067D6AF /* DevTeam1PoolTxnGenesis.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DevTeam1PoolTxnGenesis.m; sourceTree = "<group>"; };
+		DD00E116269471B50050BC88 /* Log.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Log.m; path = ../../../VCXHelpers/Log.m; sourceTree = "<group>"; };
+		DD00E117269471B50050BC88 /* Log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Log.h; path = ../../../VCXHelpers/Log.h; sourceTree = "<group>"; };
+		DD00E13A269473130050BC88 /* DevTeam1PoolTxnGenesis.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DevTeam1PoolTxnGenesis.m; path = ../../../VCXHelpers/DevTeam1PoolTxnGenesis.m; sourceTree = "<group>"; };
+		DD00E13B269473130050BC88 /* DevTeam1PoolTxnGenesis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DevTeam1PoolTxnGenesis.h; path = ../../../VCXHelpers/DevTeam1PoolTxnGenesis.h; sourceTree = "<group>"; };
 		E2A5D790AD88AF152D60C96F /* Pods-CMeSdkObjcTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcTests.debug.xcconfig"; path = "Target Support Files/Pods-CMeSdkObjcTests/Pods-CMeSdkObjcTests.debug.xcconfig"; sourceTree = "<group>"; };
 		FF964D27C83E7E0010D00CA6 /* Pods-CMeSdkObjcUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkObjcUITests.release.xcconfig"; path = "Target Support Files/Pods-CMeSdkObjcUITests/Pods-CMeSdkObjcUITests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -231,6 +231,10 @@
 		AAF9BF4C25C8EB3600E4C1F4 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				DD00E13B269473130050BC88 /* DevTeam1PoolTxnGenesis.h */,
+				DD00E13A269473130050BC88 /* DevTeam1PoolTxnGenesis.m */,
+				DD00E117269471B50050BC88 /* Log.h */,
+				DD00E116269471B50050BC88 /* Log.m */,
 				AAF9BFD025C8F2A400E4C1F4 /* MobileSDK.h */,
 				AAF9BFD125C8F2A400E4C1F4 /* MobileSDK.m */,
 				AAF9BF5E25C8EB4C00E4C1F4 /* CMConfig.h */,
@@ -251,10 +255,6 @@
 				AAF9BF5925C8EB4C00E4C1F4 /* ProductionPoolTxnGenesis.m */,
 				AAF9BF5025C8EB4B00E4C1F4 /* StagingPoolTxnGenesis.h */,
 				AAF9BF4E25C8EB4B00E4C1F4 /* StagingPoolTxnGenesis.m */,
-				DD045F0926023A7C0067D6AF /* DevTeam1PoolTxnGenesis.h */,
-				DD045F0A26023AD90067D6AF /* DevTeam1PoolTxnGenesis.m */,
-				DD00E1112694570C0050BC88 /* Log.h */,
-				DD00E112269457180050BC88 /* Log.m */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -484,6 +484,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DD00E13C269473130050BC88 /* DevTeam1PoolTxnGenesis.m in Sources */,
 				8E509FE92281EFC60098812A /* HomeViewController.m in Sources */,
 				AAF9BF6125C8EB4C00E4C1F4 /* CMUtilities.m in Sources */,
 				AAF9BFD225C8F2A400E4C1F4 /* MobileSDK.m in Sources */,
@@ -494,9 +495,8 @@
 				AAF9BF6725C8EB4C00E4C1F4 /* CMCredential.m in Sources */,
 				AAF9BF6425C8EB4C00E4C1F4 /* LocalStorage.m in Sources */,
 				8E509FF42281EFC80098812A /* main.m in Sources */,
-				DD045F0B26023AD90067D6AF /* DevTeam1PoolTxnGenesis.m in Sources */,
 				DD00E107268D931D0050BC88 /* CustomTableViewCell.m in Sources */,
-				DD00E113269457180050BC88 /* Log.m in Sources */,
+				DD00E118269471B50050BC88 /* Log.m in Sources */,
 				AAF9BF6625C8EB4C00E4C1F4 /* CMMessage.m in Sources */,
 				AAF9BF6025C8EB4C00E4C1F4 /* CMConnection.m in Sources */,
 				AAF9BF5F25C8EB4C00E4C1F4 /* StagingPoolTxnGenesis.m in Sources */,
