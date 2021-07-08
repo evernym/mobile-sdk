@@ -9,21 +9,15 @@
 /* Begin PBXBuildFile section */
 		823385D4A034DAB207B8EAAF /* Pods_CMeSdkSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2302E339415D213221562CDC /* Pods_CMeSdkSwift.framework */; };
 		8EAE24B02282058F00F49443 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EAE24AF2282058F00F49443 /* AppDelegate.swift */; };
-		8EAE24B22282058F00F49443 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EAE24B12282058F00F49443 /* ViewController.swift */; };
 		8EAE24B52282058F00F49443 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8EAE24B32282058F00F49443 /* Main.storyboard */; };
 		8EAE24B72282059000F49443 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8EAE24B62282059000F49443 /* Assets.xcassets */; };
 		8EAE24BA2282059000F49443 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8EAE24B82282059000F49443 /* LaunchScreen.storyboard */; };
 		8EAE24C52282059000F49443 /* CMeSdkSwiftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EAE24C42282059000F49443 /* CMeSdkSwiftTests.swift */; };
 		8EAE24D02282059000F49443 /* CMeSdkSwiftUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EAE24CF2282059000F49443 /* CMeSdkSwiftUITests.swift */; };
 		9E3B97700342E314B45F2D7C /* Pods_CMeSdkSwiftTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E38E5751FEEF929B42B3A33F /* Pods_CMeSdkSwiftTests.framework */; };
-		AAD4B57D25CB69710009588A /* MessageTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B57B25CB69710009588A /* MessageTableViewCell.swift */; };
-		AAD4B57E25CB69710009588A /* MessageTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = AAD4B57C25CB69710009588A /* MessageTableViewCell.xib */; };
-		AAD4B58425CB69880009588A /* ProofAttributeTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B58225CB69880009588A /* ProofAttributeTableViewCell.swift */; };
-		AAD4B58525CB69880009588A /* ProofAttributeTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = AAD4B58325CB69880009588A /* ProofAttributeTableViewCell.xib */; };
+		AAD4B57E25CB69710009588A /* CustomTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = AAD4B57C25CB69710009588A /* CustomTableViewCell.xib */; };
 		AAD4B58B25CB70480009588A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AAD4B58925CB70480009588A /* GoogleService-Info.plist */; };
 		AAD4B58C25CB70480009588A /* GoogleService-InfoTemplate.plist in Resources */ = {isa = PBXBuildFile; fileRef = AAD4B58A25CB70480009588A /* GoogleService-InfoTemplate.plist */; };
-		AAD4B5BE25CB7CC60009588A /* ConnectionDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B5BD25CB7CC60009588A /* ConnectionDetailsViewController.swift */; };
-		AAD4B5C325CB95B70009588A /* ProofDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD4B5C225CB95B70009588A /* ProofDetailsViewController.swift */; };
 		DD00E1E8269477B80050BC88 /* CMCredential.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E1D0269477B70050BC88 /* CMCredential.m */; };
 		DD00E1E9269477B80050BC88 /* CMUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E1D3269477B80050BC88 /* CMUtilities.m */; };
 		DD00E1EA269477B80050BC88 /* LocalStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E1D6269477B80050BC88 /* LocalStorage.m */; };
@@ -36,6 +30,9 @@
 		DD00E1F1269477B80050BC88 /* ProductionPoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E1E3269477B80050BC88 /* ProductionPoolTxnGenesis.m */; };
 		DD00E1F2269477B80050BC88 /* CMMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E1E5269477B80050BC88 /* CMMessage.m */; };
 		DD00E1F3269477B80050BC88 /* DevTeam1PoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E1E6269477B80050BC88 /* DevTeam1PoolTxnGenesis.m */; };
+		DD00E1F5269482120050BC88 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00E1F4269482120050BC88 /* HomeViewController.swift */; };
+		DD00E1F72694822C0050BC88 /* HistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00E1F62694822C0050BC88 /* HistoryViewController.swift */; };
+		DD00E1FB2695F7C00050BC88 /* CustomTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00E1FA2695F7C00050BC88 /* CustomTableViewCell.swift */; };
 		E3598AA1529F3F9A8D414C04 /* Pods_CMeSdkSwiftUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92222F28015B863EEE067CBC /* Pods_CMeSdkSwiftUITests.framework */; };
 /* End PBXBuildFile section */
 
@@ -64,7 +61,6 @@
 		873BCFD536E267521C116D04 /* Pods-CMeSdkSwiftTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkSwiftTests.release.xcconfig"; path = "Target Support Files/Pods-CMeSdkSwiftTests/Pods-CMeSdkSwiftTests.release.xcconfig"; sourceTree = "<group>"; };
 		8EAE24AC2282058F00F49443 /* CMeSdkSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CMeSdkSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8EAE24AF2282058F00F49443 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		8EAE24B12282058F00F49443 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		8EAE24B42282058F00F49443 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		8EAE24B62282059000F49443 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8EAE24B92282059000F49443 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -77,15 +73,10 @@
 		8EAE24D12282059000F49443 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		92222F28015B863EEE067CBC /* Pods_CMeSdkSwiftUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CMeSdkSwiftUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9246816491E26704DCD6341E /* Pods-CMeSdkSwiftUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkSwiftUITests.release.xcconfig"; path = "Target Support Files/Pods-CMeSdkSwiftUITests/Pods-CMeSdkSwiftUITests.release.xcconfig"; sourceTree = "<group>"; };
-		AAD4B57B25CB69710009588A /* MessageTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageTableViewCell.swift; sourceTree = "<group>"; };
-		AAD4B57C25CB69710009588A /* MessageTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MessageTableViewCell.xib; sourceTree = "<group>"; };
-		AAD4B58225CB69880009588A /* ProofAttributeTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProofAttributeTableViewCell.swift; sourceTree = "<group>"; };
-		AAD4B58325CB69880009588A /* ProofAttributeTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ProofAttributeTableViewCell.xib; sourceTree = "<group>"; };
+		AAD4B57C25CB69710009588A /* CustomTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CustomTableViewCell.xib; sourceTree = "<group>"; };
 		AAD4B58925CB70480009588A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		AAD4B58A25CB70480009588A /* GoogleService-InfoTemplate.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-InfoTemplate.plist"; sourceTree = "<group>"; };
 		AAD4B59025CB70600009588A /* CMeSdkSwift.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CMeSdkSwift.entitlements; sourceTree = "<group>"; };
-		AAD4B5BD25CB7CC60009588A /* ConnectionDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionDetailsViewController.swift; sourceTree = "<group>"; };
-		AAD4B5C225CB95B70009588A /* ProofDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProofDetailsViewController.swift; sourceTree = "<group>"; };
 		B7A6B6F06729797F9A7C11ED /* Pods-CMeSdkSwiftUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CMeSdkSwiftUITests.debug.xcconfig"; path = "Target Support Files/Pods-CMeSdkSwiftUITests/Pods-CMeSdkSwiftUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		DD00E1CF269477B70050BC88 /* CMeSdkSwift-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CMeSdkSwift-Bridging-Header.h"; sourceTree = "<group>"; };
 		DD00E1D0269477B70050BC88 /* CMCredential.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CMCredential.m; path = ../../../VCXHelpers/CMCredential.m; sourceTree = "<group>"; };
@@ -112,6 +103,10 @@
 		DD00E1E5269477B80050BC88 /* CMMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CMMessage.m; path = ../../../VCXHelpers/CMMessage.m; sourceTree = "<group>"; };
 		DD00E1E6269477B80050BC88 /* DevTeam1PoolTxnGenesis.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DevTeam1PoolTxnGenesis.m; path = ../../../VCXHelpers/DevTeam1PoolTxnGenesis.m; sourceTree = "<group>"; };
 		DD00E1E7269477B80050BC88 /* MobileSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MobileSDK.h; path = ../../../VCXHelpers/MobileSDK.h; sourceTree = "<group>"; };
+		DD00E1F4269482120050BC88 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
+		DD00E1F62694822C0050BC88 /* HistoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViewController.swift; sourceTree = "<group>"; };
+		DD00E1F8269482600050BC88 /* CMeSdkSwift-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CMeSdkSwift-Prefix.pch"; sourceTree = "<group>"; };
+		DD00E1FA2695F7C00050BC88 /* CustomTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTableViewCell.swift; sourceTree = "<group>"; };
 		E38E5751FEEF929B42B3A33F /* Pods_CMeSdkSwiftTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CMeSdkSwiftTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -183,17 +178,15 @@
 				8EAE24AF2282058F00F49443 /* AppDelegate.swift */,
 				AAD4B58925CB70480009588A /* GoogleService-Info.plist */,
 				AAD4B58A25CB70480009588A /* GoogleService-InfoTemplate.plist */,
-				8EAE24B12282058F00F49443 /* ViewController.swift */,
-				AAD4B5BD25CB7CC60009588A /* ConnectionDetailsViewController.swift */,
-				AAD4B57B25CB69710009588A /* MessageTableViewCell.swift */,
-				AAD4B58225CB69880009588A /* ProofAttributeTableViewCell.swift */,
-				AAD4B58325CB69880009588A /* ProofAttributeTableViewCell.xib */,
-				AAD4B5C225CB95B70009588A /* ProofDetailsViewController.swift */,
-				AAD4B57C25CB69710009588A /* MessageTableViewCell.xib */,
+				AAD4B57C25CB69710009588A /* CustomTableViewCell.xib */,
 				8EAE24B32282058F00F49443 /* Main.storyboard */,
 				8EAE24B62282059000F49443 /* Assets.xcassets */,
 				8EAE24B82282059000F49443 /* LaunchScreen.storyboard */,
 				8EAE24BB2282059000F49443 /* Info.plist */,
+				DD00E1F4269482120050BC88 /* HomeViewController.swift */,
+				DD00E1F62694822C0050BC88 /* HistoryViewController.swift */,
+				DD00E1F8269482600050BC88 /* CMeSdkSwift-Prefix.pch */,
+				DD00E1FA2695F7C00050BC88 /* CustomTableViewCell.swift */,
 			);
 			path = CMeSdkSwift;
 			sourceTree = "<group>";
@@ -370,9 +363,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AAD4B58525CB69880009588A /* ProofAttributeTableViewCell.xib in Resources */,
 				8EAE24BA2282059000F49443 /* LaunchScreen.storyboard in Resources */,
-				AAD4B57E25CB69710009588A /* MessageTableViewCell.xib in Resources */,
+				AAD4B57E25CB69710009588A /* CustomTableViewCell.xib in Resources */,
 				AAD4B58C25CB70480009588A /* GoogleService-InfoTemplate.plist in Resources */,
 				8EAE24B72282059000F49443 /* Assets.xcassets in Resources */,
 				8EAE24B52282058F00F49443 /* Main.storyboard in Resources */,
@@ -488,19 +480,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				DD00E1F3269477B80050BC88 /* DevTeam1PoolTxnGenesis.m in Sources */,
-				8EAE24B22282058F00F49443 /* ViewController.swift in Sources */,
 				DD00E1F0269477B80050BC88 /* StagingPoolTxnGenesis.m in Sources */,
-				AAD4B5BE25CB7CC60009588A /* ConnectionDetailsViewController.swift in Sources */,
+				DD00E1FB2695F7C00050BC88 /* CustomTableViewCell.swift in Sources */,
 				DD00E1EA269477B80050BC88 /* LocalStorage.m in Sources */,
+				DD00E1F72694822C0050BC88 /* HistoryViewController.swift in Sources */,
 				DD00E1E8269477B80050BC88 /* CMCredential.m in Sources */,
 				8EAE24B02282058F00F49443 /* AppDelegate.swift in Sources */,
+				DD00E1F5269482120050BC88 /* HomeViewController.swift in Sources */,
 				DD00E1E9269477B80050BC88 /* CMUtilities.m in Sources */,
 				DD00E1EB269477B80050BC88 /* Log.m in Sources */,
-				AAD4B57D25CB69710009588A /* MessageTableViewCell.swift in Sources */,
-				AAD4B5C325CB95B70009588A /* ProofDetailsViewController.swift in Sources */,
 				DD00E1EE269477B80050BC88 /* CMConnection.m in Sources */,
 				DD00E1EC269477B80050BC88 /* MobileSDK.m in Sources */,
-				AAD4B58425CB69880009588A /* ProofAttributeTableViewCell.swift in Sources */,
 				DD00E1EF269477B80050BC88 /* CMProofRequest.m in Sources */,
 				DD00E1F2269477B80050BC88 /* CMMessage.m in Sources */,
 				DD00E1F1269477B80050BC88 /* ProductionPoolTxnGenesis.m in Sources */,
@@ -685,6 +675,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ES8QU3D2A4;
 				ENABLE_BITCODE = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "CMeSdkSwift/CMeSdkSwift-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCore/FirebaseCore.framework/Headers\"",
@@ -728,6 +720,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ES8QU3D2A4;
 				ENABLE_BITCODE = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "CMeSdkSwift/CMeSdkSwift-Prefix.pch";
 				INFOPLIST_FILE = CMeSdkSwift/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (

@@ -184,7 +184,6 @@ CMEnvironment environment = Production;
     
     __block NSString* token = [[MobileSDK shared] provisioningToken];
     
-    [sdkApi initSovToken];
     NSString* agencyConfig = [CMConfig agencyConfig];
     NSLog(@"Agency config %@", agencyConfig);
     
