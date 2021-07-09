@@ -17,7 +17,7 @@
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject: json options: 0 error: &error];
 
     if(! jsonData) {
-        NSLog(@"%s: error: %@", __func__, error.localizedDescription);
+        NSLog(@"%s: error", __func__);
         return @"{}";
     }
     return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
@@ -30,7 +30,7 @@
     NSError* error;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject: json options: 0 error: &error];
     if (! jsonData) {
-        NSLog(@"%s: error: %@", __func__, error.localizedDescription);
+        NSLog(@"%s: error", __func__);
         return @"[]";
     }
     return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
@@ -43,7 +43,7 @@
     NSError* error;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject: json options: 0 error: &error];
     if (! jsonData) {
-        NSLog(@"%s: error: %@", __func__, error.localizedDescription);
+        NSLog(@"%s: error", __func__);
         return @"[]";
     }
     return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
@@ -55,11 +55,11 @@
     }
     NSError* error;
     NSDictionary* object = [NSJSONSerialization JSONObjectWithData: [json dataUsingEncoding: NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
-
-    if(error != nil) {
-        NSLog(@"Error deserialization: %@", error.localizedDescription);
-        return @{};
-    }
+    
+//    if(error != nil) {
+//        NSLog(@"Error deserialization");
+//        return @{};
+//    }
 
     return object;
 }
@@ -72,7 +72,7 @@
     NSArray* array = [NSJSONSerialization JSONObjectWithData: [json dataUsingEncoding: NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
 
     if(error != nil) {
-        NSLog(@"Error deserialization: %@", error.localizedDescription);
+        NSLog(@"Error deserialization");
         return @[];
     }
 
@@ -96,7 +96,7 @@
 
 +(void)printError: (NSError*)error{
     NSString *indyErrorCode = [NSString stringWithFormat:@"%ld", (long)error.code];
-    NSLog(@"5) Value of indyErrorCode is: %@ (%@)", indyErrorCode, error.localizedDescription);
+    NSLog(@"5) Value of indyErrorCode is: %@", indyErrorCode);
 }
 
 +(void)printSuccess: (NSArray*) message {
@@ -124,7 +124,7 @@
 
     NSURLSessionTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if(error != nil) {
-            NSLog(@"Error getting %@: %@", serverURL, error.localizedDescription);
+            NSLog(@"Error getting %@", serverURL);
             return completionBlock(nil, error);
         }
             NSString *str = [[NSString alloc] initWithData: data encoding:NSUTF8StringEncoding];
