@@ -31,11 +31,11 @@ typedef enum {
 +(NSDictionary*)parseInvitationLink: (NSString*)link;
 +(NSString*)getConnectionByPwDid: (NSString *) pwDidMes;
 
-+(void)handleConnection:(NSString *)invite
++(void)handleConnection: (NSString *)invite
          connectionType: (int)connectionType
             phoneNumber: (NSString*) phone
-  withCompletionHandler:(ResponseWithObject) completionBlock;
-
+  withCompletionHandler: (ResponseWithObject) completionBlock;
++(NSString*)readInviteFromUrl: (NSString*)invite;
 +(NSString*) connectionID: connectValues;
 +(NSString*) connectionName: (NSDictionary*)connection;
 +(void) removeConnection: (NSString*) connection withCompletionHandler: (ResponseBlock) completionBlock;

@@ -19,7 +19,7 @@
 
 // Define your wallet name constant here
 NSString* walletName = @"Lor6Ohwaichool"; //@"PleaseSetYourConnectMeWalletName";
-NSString* sponsorServerURL = @"https://97fc85683d98.ngrok.io";
+NSString* sponsorServerURL = @"https://ee26c19aacdd.ngrok.io";
 
 // Below settings will depend on your choosen environment
 // Selected here is Production Enviroment
@@ -176,7 +176,7 @@ CMEnvironment environment = Production;
 
 +(void)initVCX {
     [VcxLogger setDefaultLogger: @"TRACE"];
-    ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
+//    ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
     
     [VcxLogger setLogger: ^(NSObject *context, NSNumber *level, NSString *target, NSString *message, NSString *modulePath, NSString *file, NSNumber *line) {
         NSLog(@"[Inside VcxLogger.setLogger callback] %@    %@:%@ | %@", [levelMappings valueForKey: [NSString stringWithFormat: @"%@", level]], file, line, message);
@@ -184,6 +184,7 @@ CMEnvironment environment = Production;
     
     __block NSString* token = [[MobileSDK shared] provisioningToken];
     
+//    [sdkApi initSovToken];
     NSString* agencyConfig = [CMConfig agencyConfig];
     NSLog(@"Agency config %@", agencyConfig);
     

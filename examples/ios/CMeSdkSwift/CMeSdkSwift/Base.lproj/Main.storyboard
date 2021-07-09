@@ -85,7 +85,7 @@
                                             <color key="titleColor" white="1" alpha="0.95813160210000003" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         </state>
                                         <connections>
-                                            <action selector="scanQR:" destination="d2S-4s-qdi" eventType="touchUpInside" id="PNh-x0-lhl"/>
+                                            <action selector="scanQR:" destination="d2S-4s-qdi" eventType="touchUpInside" id="8vi-kP-ek8"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="F3p-D3-NE9">
@@ -98,7 +98,7 @@
                                             <color key="titleColor" white="1" alpha="0.95813160210000003" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         </state>
                                         <connections>
-                                            <action selector="addNewConnection:" destination="d2S-4s-qdi" eventType="touchUpInside" id="j5s-0y-yDB"/>
+                                            <action selector="addNewConnection:" destination="d2S-4s-qdi" eventType="touchUpInside" id="eoU-yV-f19"/>
                                         </connections>
                                     </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="New Connection" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rF1-s3-6mX">
@@ -128,7 +128,7 @@
                                             <color key="titleColor" white="1" alpha="0.95813160210000003" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         </state>
                                         <connections>
-                                            <action selector="checkMessages:" destination="d2S-4s-qdi" eventType="touchUpInside" id="c2F-N9-ecH"/>
+                                            <action selector="checkMessages:" destination="d2S-4s-qdi" eventType="touchUpInside" id="I3G-lf-Sak"/>
                                         </connections>
                                     </button>
                                 </subviews>
@@ -274,10 +274,7 @@
                     <navigationItem key="navigationItem" id="OeJ-a0-qUr"/>
                     <connections>
                         <outlet property="addConnConfigTextView" destination="Rls-ZI-fmQ" id="kAa-4O-xna"/>
-                        <outlet property="addConnectionBtn" destination="F3p-D3-NE9" id="XK2-YX-BXH"/>
-                        <outlet property="checkMessages" destination="L85-y3-16A" id="m6w-yi-MVC"/>
                         <outlet property="infoLbl" destination="RQJ-gn-HpF" id="bMz-rX-uYT"/>
-                        <outlet property="scanQR" destination="A2h-yl-wMq" id="jTD-Ro-ZxA"/>
                         <outlet property="tableView" destination="F1t-BN-5mf" id="rdT-AS-THG"/>
                     </connections>
                 </viewController>

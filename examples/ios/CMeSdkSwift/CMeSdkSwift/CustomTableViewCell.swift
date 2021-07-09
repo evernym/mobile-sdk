@@ -33,14 +33,23 @@ class CustomTableViewCell: UITableViewCell {
         _rejectCallback!();
     }
     
-    func updateCellAttributes(title: String, subtitle: String, logoUrl: String, acceptCallback: @escaping ActionBlock, rejectCallback: @escaping ActionBlock) {
+    func updateCellAttributes(title: String, subtitle: String, logoUrl: String) {
         self.title.text = title;
         self.subtitle.text = subtitle;
-        self.loadImage(logoUrl);
         
+        if logoUrl != "" {
+            let url = URL(string: logoUrl)
+            let data = try? Data(contentsOf: url!)
+            self.logo.image = UIImage(data: data!)
+        }
+    }
+    
+    func addAceptCallback(acceptCallback: @escaping ActionBlock) {
         _acceptCallback = acceptCallback;
         self.accept.addTarget(self, action: #selector(callAcceptBlock), for: UIControl.Event.touchUpInside)
-        
+    }
+    
+    func addRejectCallback(rejectCallback: @escaping ActionBlock) {
         _rejectCallback = rejectCallback;
         self.reject.addTarget(self, action: #selector(callRejectBlock), for: UIControl.Event.touchUpInside)
     }

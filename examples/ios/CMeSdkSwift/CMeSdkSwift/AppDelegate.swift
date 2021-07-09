@@ -29,8 +29,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.rootViewController = tabBarController;
         window?.makeKeyAndVisible();
         
-//        MobileSDK.shared().sdkApi = ConnectMeVcx.init();
-//        CMConfig.initVCX();
+        MobileSDK.shared().sdkApi = ConnectMeVcx.init();
+        CMConfig.initVCX();
 
         return true;
     }

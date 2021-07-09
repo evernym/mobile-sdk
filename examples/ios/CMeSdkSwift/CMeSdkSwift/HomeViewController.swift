@@ -11,10 +11,7 @@ import QRCodeReaderViewController
 class HomeViewController: UIViewController {
     
     @IBOutlet var tableView: UITableView!
-    @IBOutlet var addConnectionBtn: UIButton!
     @IBOutlet var infoLbl: UILabel!
-    @IBOutlet var checkMessages: UIButton!
-    @IBOutlet var scanQR: UIButton!
     @IBOutlet var addConnConfigTextView: UITextView!
     
     var requests: [String: Any] = [:]
@@ -28,9 +25,6 @@ class HomeViewController: UIViewController {
         self.tableView.dataSource = self;
         self.addConnConfigTextView.delegate = self;
         self.addConnConfigTextView.layer.cornerRadius = 5;
-        self.addConnectionBtn.layer.cornerRadius = 5;
-        self.scanQR.layer.cornerRadius = 5;
-        self.checkMessages.layer.cornerRadius = 5;
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -40,7 +34,6 @@ class HomeViewController: UIViewController {
             self.tableView.reloadData();
             NotificationCenter.default.addObserver(self, selector: #selector(self.vcxInitialized), name: NSNotification.Name(rawValue: "vcxInitialized"), object: nil)
             isInitialized = MobileSDK.shared().sdkInited
-            addConnectionBtn.isEnabled = isInitialized
         }
     }
     
@@ -76,7 +69,6 @@ class HomeViewController: UIViewController {
     @objc func vcxInitialized() {
         self.infoLbl.text = "VCX initialized!"
         isInitialized = true;
-        addConnectionBtn.isEnabled = true
         let delayInSeconds: Double = 15.0
         DispatchQueue.main.asyncAfter(deadline: .now() + delayInSeconds, execute: {
             self.infoLbl.text = ""
@@ -84,6 +76,7 @@ class HomeViewController: UIViewController {
     }
     
     @IBAction func addNewConnection(_ sender: Any) {
+        do {
         let connectionText = addConnConfigTextView.text ?? ""
         if connectionText.count > 3 && connectionText != "enter code here" {
             let connectValues = CMConnection.parsedInvite(connectionText);
@@ -93,14 +86,19 @@ class HomeViewController: UIViewController {
                 let goal = connectValues?["goal"] ?? "New connection";
                 let profileUrl = connectValues?["profileUrl"];
                 let uuid = UUID().uuidString
+//                let data = CMUtilities.dict(toJsonString: connectValues) ?? "";
                 
-                let newRequest:[String:String] = [
+                let messageDictionary = connectValues;
+                let jsonData = try JSONSerialization.data(withJSONObject: messageDictionary as Any, options: [])
+                let jsonString = String(data: jsonData, encoding: String.Encoding.ascii)!
+                
+                let newRequest:[String:Any] = [
                     "name": label as? String ?? "",
                     "goal": goal as? String ?? "",
                     "profileUrl": profileUrl as? String ?? "",
                     "uuid": uuid,
                     "type": "null",
-                    "data": CMUtilities.dict(toJsonString: connectValues) ?? ""
+                    "data": CMUtilities.toJsonString(connectValues)
                 ];
                 
                 storageRequests[uuid] = newRequest;
@@ -109,6 +107,9 @@ class HomeViewController: UIViewController {
                 self.requests = storageRequests;
                 self.tableView.reloadData();
             }
+        }
+        } catch {
+            print(error)
         }
     }
     
@@ -201,14 +202,21 @@ class HomeViewController: UIViewController {
         }
     }
     
-    private func newConnection(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
-        CMConnection.handle(_:data, connectionType:ConnectionType.QR.rawValue, phoneNumber:"") { result, error in
+    @objc private func newConnection(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
+//        CMConnection.handle(_:data, connectionType:ConnectionType.QR.rawValue, phoneNumber:"") { result, error in
+//            if error != nil {
+//                return completionHandler(false, error);
+//            }
+//            return completionHandler(true, nil);
+//        }
+        
+        CMConnection.handle(data, connectionType:ConnectionType.QR.rawValue, phoneNumber:"") { result, error in
             if error != nil {
                 return completionHandler(false, error);
             }
             return completionHandler(true, nil);
-        }
-        
+        };
+        return completionHandler(false, nil);
     }
     
     private func acceptCredential(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
@@ -280,23 +288,24 @@ class HomeViewController: UIViewController {
     
     private func requestByIndex(_ index: Int) -> Any? {
         let requestsIDs = Array(requests.keys);
-        let requestsID = requestsIDs[index];
-        return requests[requestsID];
+        if requestsIDs.count > 0 {
+            let requestsID = requestsIDs[index];
+            return requests[requestsID];
+        }
+        return [:]
     }
     
-    private func switchRequestToHistoryView(_ uuid: String) {
-        if var storageRequests = LocalStorage.getObjectForKey("requests", shouldCreate: false) as? [String:String] {
-            for index in 0...storageRequests.keys.count {
-                let keys = Array(storageRequests.keys)
-                let key = keys[index];
-                if key == uuid {
-                    storageRequests.removeValue(forKey: key);
-                }
+    private func switchRequestToHistoryView(_ uuid: String, completionHandler: @escaping CompletionHandler) -> Any? {
+        var storageRequests = requests;
+        for key in Array(storageRequests.keys) {
+            if key == uuid {
+                storageRequests.removeValue(forKey: key);
             }
-            LocalStorage.store("requests", andObject: storageRequests);
-            self.requests = storageRequests;
-            self.tableView.reloadData();
         }
+        LocalStorage.store("requests", andObject: storageRequests);
+        self.requests = storageRequests;
+        self.tableView.reloadData();
+        return completionHandler(true, nil);
     }
 }
 
@@ -310,7 +319,7 @@ extension HomeViewController: UITextViewDelegate, UITableViewDelegate, UITableVi
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3;
+        return requests.count;
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -328,70 +337,74 @@ extension HomeViewController: UITextViewDelegate, UITableViewDelegate, UITableVi
             cell.updateCellAttributes(
                 title: name,
                 subtitle: goal,
-                logoUrl: logoPath) {
-                self.newConnection(data) { result, _ in
+                logoUrl: logoPath);
+            cell.addAceptCallback(acceptCallback: { () -> () in
+                _ = self.newConnection(data) { result, _ in
                     if (result) {
-                        self.switchRequestToHistoryView(uuid);
+                        _ = self.switchRequestToHistoryView(uuid) { _, _ in }
                     }
                 }
-            } rejectCallback: {
-                self.switchRequestToHistoryView(uuid);
-            }
-
+            });
+            cell.addRejectCallback(rejectCallback: { () -> () in
+                _ = self.switchRequestToHistoryView(uuid) { _, _ in }
+            });
         }
-        if (type == "credential-offer") {
-            cell.updateCellAttributes(
-                title: name,
-                subtitle: goal,
-                logoUrl: "") {
-                self.acceptCredential(data) { result, _ in
-                    if (result) {
-                        self.switchRequestToHistoryView(uuid);
-                    }
-                }
-            } rejectCallback: {
-                self.rejectCredential(data) { result, _ in
-                    if (result) {
-                        self.switchRequestToHistoryView(uuid);
-                    }
-                }
-            }
-
-        }
-        if (type == "committed-question") {
-            cell.updateCellAttributes(
-                title: name,
-                subtitle: goal,
-                logoUrl: "") {
-                self.answer(data) { result, error in
-                    if (result) {
-                        self.switchRequestToHistoryView(uuid);
-                    }
-                }
-            } rejectCallback: {
-                self.switchRequestToHistoryView(uuid);
-            }
-
-        }
-        if (type == "presentation-request") {
-            cell.updateCellAttributes(
-                title: name,
-                subtitle: goal,
-                logoUrl: "") {
-                self.sendProof(data) { result, error in
-                    if (result) {
-                        self.switchRequestToHistoryView(uuid);
-                    }
-                }
-            } rejectCallback: {
-                self.rejectProof(data) { result, error in
-                    if (result) {
-                        self.switchRequestToHistoryView(uuid);
-                    }
-                }
-            }
-
-        }
+//        if (type == "credential-offer") {
+//            cell.updateCellAttributes(
+//                title: name,
+//                subtitle: goal,
+//                logoUrl: "");
+//            cell.addAceptCallback(acceptCallback: { () -> () in
+//                _ = self.acceptCredential(data) { result, error in
+//                    if (result) {
+//                        _ = self.switchRequestToHistoryView(uuid) { _, _ in };
+//                    }
+//                }
+//            });
+//            cell.addRejectCallback(rejectCallback: { () -> () in
+//                _ = self.rejectCredential(data) { result, error in
+//                    if (result) {
+//                        _ = self.switchRequestToHistoryView(uuid) { _, _ in }
+//                    }
+//                }
+//            });
+//        }
+//        if (type == "committed-question") {
+//            cell.updateCellAttributes(
+//                title: name,
+//                subtitle: goal,
+//                logoUrl: "");
+//            cell.addAceptCallback(acceptCallback: { () -> () in
+//                _ = self.answer(data) { result, error in
+//                    if (result) {
+//                        _ = self.switchRequestToHistoryView(uuid) { _, _ in };
+//                    }
+//                }
+//            });
+//            cell.addRejectCallback(rejectCallback: { () -> () in
+//                _ = self.switchRequestToHistoryView(uuid) { _, _ in }
+//            });
+//        }
+//        if (type == "presentation-request") {
+//            cell.updateCellAttributes(
+//                title: name,
+//                subtitle: goal,
+//                logoUrl: "");
+//            cell.addAceptCallback(acceptCallback: { () -> () in
+//                _ = self.sendProof(data) { result, error in
+//                    if (result) {
+//                        _ = self.switchRequestToHistoryView(uuid) { _, _ in };
+//                    }
+//                }
+//            });
+//            cell.addRejectCallback(rejectCallback: { () -> () in
+//                _ = self.rejectProof(data) { result, error in
+//                    if (result) {
+//                        _ = self.switchRequestToHistoryView(uuid) { _, _ in }
+//                    }
+//                }
+//            });
+//        }
         return cell;
     }
 }

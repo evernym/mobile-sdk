@@ -73,6 +73,21 @@
     }
 }
 
++(NSString*)readInviteFromUrl: (NSString*)invite {
+    if(!invite) {
+        return nil;
+    }
+    NSLog(@"readFromUrl %@ - ", invite);
+    NSURL *url = [NSURL URLWithString:invite];
+    NSData *data = [[NSData alloc] initWithContentsOfURL:url];
+    if (url && data) {
+        NSString *result = [CMUtilities dictToJsonString:[NSJSONSerialization JSONObjectWithData:data options:0 error:NULL]];
+        return result;
+    } else {
+        return invite;
+    }
+}
+
 +(NSDictionary*) extractRequestAttach: (NSDictionary*)invite {
     NSArray* requestAttach = [invite objectForKey: @"request~attach"];
     if (requestAttach.count != 0) {
@@ -135,7 +150,7 @@
                withCompletionHandler: (ResponseWithBoolean) completionBlock {
     NSError* error;
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
-    
+
     @try {
         [sdkApi connectionCreateWithInvite:[self connectionID: invitationDetails]
                              inviteDetails:invitationDetails
@@ -301,13 +316,15 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
     }
 }
 
-+(void)handleConnection:(NSString *)invite
++(void)handleConnection: (NSString *)invite
          connectionType: (int)connectionType
             phoneNumber: (NSString*) phone
   withCompletionHandler:(ResponseWithObject) completionBlock {
-    NSDictionary* inviteDict = [CMUtilities jsonToDictionary:invite];
+    NSLog(@"handleConnection %@ - ", invite);
+
+    NSDictionary* inviteDict = [self parsedInvite:invite];
     NSString* name = [inviteDict objectForKey:@"label"];
-    NSString* type = [[CMUtilities jsonToDictionary:invite] objectForKey: @"@type"];
+    NSString* type = [inviteDict objectForKey:@"@type"];
     [self verityConnectionExist:invite
                  withCompletion:^(NSString *response, NSError *error) {
         if (error && error.code > 0) {
@@ -529,6 +546,7 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
                     NSDictionary* invitation = [LocalStorage getObjectForKey: @"tempConnection" shouldCreate: true];
 
                     NSMutableDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
+                    
                     NSDictionary* connectionObj = @{
                         @"serializedConnection": successMessage,
                         @"invitation": invitation

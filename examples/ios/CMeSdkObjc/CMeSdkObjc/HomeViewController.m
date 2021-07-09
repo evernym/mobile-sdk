@@ -18,7 +18,6 @@
 
 @interface HomeViewController ()
 
-@property (weak, nonatomic) IBOutlet UIButton *addConnectionBtn;
 @property (weak, nonatomic) IBOutlet UILabel *infoLbl;
 @property (nonatomic, readwrite, strong) IBOutlet UITableView *tableView;
 
@@ -28,7 +27,7 @@
 @end
 
 @implementation HomeViewController
-@synthesize addConnLabel, addConnConfigTextView, addConnectionBtn, requests;
+@synthesize addConnLabel, addConnConfigTextView, requests;
 
 UIGestureRecognizer *tapper;
 
@@ -38,7 +37,6 @@ UIGestureRecognizer *tapper;
     self.tableView.delegate = self;
     addConnConfigTextView.delegate = self;
     addConnConfigTextView.layer.cornerRadius = 5;
-    addConnectionBtn.layer.cornerRadius = 5;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -47,7 +45,6 @@ UIGestureRecognizer *tapper;
     [self.tableView reloadData];
     [[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(vcxInitialized) name:@"vcxInitialized" object: nil];
     _isInitialized = [[MobileSDK shared] sdkInited];
-    addConnectionBtn.enabled = [[MobileSDK shared] sdkInited];
 }
 
 - (void) viewWillDisappear:(BOOL)animated {
@@ -61,7 +58,6 @@ UIGestureRecognizer *tapper;
 - (void)vcxInitialized {
     self.infoLbl.text = @"VCX initialized!";
     _isInitialized = true;
-    addConnectionBtn.enabled = true;
     double delayInSeconds = 10.0;
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
     dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
@@ -212,7 +208,7 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
     }
 }
 
-- (IBAction)checkMessages: (UIButton*) sender {
+- (IBAction)checkMessages:(id)sender {
     [CMMessage downloadAllMessages:^(NSArray *responseArray, NSError *error) {
         NSLog(@"downloadAllMessages %@", responseArray);
         for (NSInteger i = 0; i < responseArray.count; i++) {
@@ -322,8 +318,7 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
             }
         }
     }];
-};
-
+}
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return [requests.allKeys count];
@@ -433,7 +428,7 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
 
 - (void) switchActionToHistoryView:(NSString *) uuid {
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSMutableDictionary* processedDict;
+        NSMutableDictionary* processedDict = nil;
         NSDictionary* req = [LocalStorage getObjectForKey: @"requests" shouldCreate: false];
         for (NSInteger i = 0; i < req.allKeys.count; i++) {
             NSString *key = req.allKeys[i];
