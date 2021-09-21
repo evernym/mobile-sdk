@@ -1,5 +1,39 @@
 # Changelog
 
+# Release notes - MSDK 1.5.0 - Jun 17 2021
+
+## Change
+* Changed division of published iOS artifacts.
+    * From:
+        *  vcx.libvcxall_*_universal.zip`  - for phones + simulators
+        *  vcx.libvcxpartial_*_universal.zip` - for phones
+    * To:
+        * vcx.libvcxarm64 - for phones
+        * vcx.libvcxx86_64 - for simulators
+    
+## Features
+* [MSDK-406] - Added `vcx_create_pairwise_agent` function to create a pairwise agent which can be later used for connection establishment.
+  It allows to speed up the connection establishing process.
+  The result value should be passed into `connectionConnect` function as `pairwise_agent_info` field of `connection_options` parameter.
+    * Android - `UtilsApi.vcxCreatePairwiseAgent`
+    * iOS - `createPairwiseAgent`
+* [MSDK-444] - Added support for connectionless credentials. You can pass 0 as connection handle into `credentialSendRequest`
+  function in order to get a credential for a connectionless credential offer (containing `~service` decorator).
+* Added wrapper for React-Native.
+* [MSDK-455] - Updated `vcx_connection_send_answer` function to reply on a question related to `committedanswer` protocol.
+    * Android - `ConnectionApi.connectionSendAnswer`
+    * iOS - `connectionSendAnswer`
+
+## Bugs
+* [MSDK-435] - Added async version of function to provision agent with token - `vcx_provision_agent_with_token_async`.
+    * Android - `UtilsApi.vcxAgentProvisionWithTokenAsync`
+    * iOS - `agentProvisionWithTokenAsync`
+* Various efficiency improvements.
+* [MSDK-421] - VCX does not update the status of the Connection Request message as read.
+* Pool connection is optional for getting records from the cache.
+* Objective-C: Added missing function to get connection information - `getConnectionInviteDetails`.
+* Objective-C: Added API functions for Proof Verifier.
+
 # Release notes - MSDK 1.4.1 - Mar 22 2021
 
 ## Bugs
