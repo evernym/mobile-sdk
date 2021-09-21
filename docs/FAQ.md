@@ -48,3 +48,9 @@
 - **Q: How to send a message with custom action?**
 
     Check this [guide](./6.StructuredMessages.md)
+
+- **Q: Do connections and credentials are stored between wallet re-installations?**
+
+    No, when you delete the application wallet all data get lost. 
+    When you install the application again it does provisioning of a new Cloud Agent (`provision_with_token`).
+    The newly created Cloud Agent does not know anything about previous. So all previous connections and credentials will be lost. 
