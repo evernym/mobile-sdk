@@ -54,3 +54,7 @@
     No, when you delete the application wallet all data get lost. 
     When you install the application again it does provisioning of a new Cloud Agent (`provision_with_token`).
     The newly created Cloud Agent does not know anything about previous. So all previous connections and credentials will be lost. 
+
+- **Q: What does the `Item not found on ledger` error means?**
+
+  This error occurs when the Holder mobile application and Issue service are connected to different Pool Ledger Networks.

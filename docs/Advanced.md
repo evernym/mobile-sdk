@@ -2,8 +2,51 @@
 
 This document contains explanations for additional flows that can be implemented and optimizations can be done using Mobile SDK API functions.
 
+* [Postponed Ledger connectivity](#postponed-ledger-connectivity)
 * [Holder Present Proof](#holder-present-proof) 
 * [Preparation of Connection Agent in advance](#preparation-of-connection-agent-in-advance)
+
+## Postponed Ledger connectivity
+
+As the first step of working with MDK (assume you app is already completed provisioning) you have to call a function to initialize it with prepared config (Java `VcxApi.vcxInitWithConfig(config)` and Objective-C `[[[ConnectMeVcx alloc] init] initWithConfig:config`).
+Internally this function does three things:
+1. Sets settings passed within the config JSON
+2. Open secured Wallet
+3. Connects to a Pool Ledger Network
+
+Connection to a Pool Ledger Network may take several seconds that significantly slow down library initialization.
+In fact, Pool Ledger connectivity required only when you receive credentials and prove them for the first time ( if you don't use [Cache data for Proof generation](./4.Credentials.md#cache-data-for-proof-generation---optional) technique).
+Your application can make connections, answer questions and prove credentials without establishing a connection with Pool Ledger Network.
+
+SDK allows you to skip Pool Ledger Network connectivity on the Library initialization step and do it later by demand or right after initialization as a background task.
+
+#### Steps
+
+1. Do not set `path` field in the config JSON passing into `vcxAgentProvisionWithToken` function. Remove `genesis_path` filed from the resulting config (it should contain `<CHANGE_ME>` value).
+
+1. Init SDK usual way by calling `initWithConfig` function.
+
+1. Later, call function (for instance as a background task) to perform a connection to the Pool Ledger.
+
+   > **NOTE:** The recommended way is to call it in a separate thread as it may take several seconds.
+
+    ```
+    config = {
+        "genesis_path": string,
+        "pool_name": string, // optional
+    }
+    ```
+
+   Java pseudocode:
+    ```
+        VcxApi.vcxInitPool(config)
+    ```
+
+   Objective-C pseudocode
+    ```
+        [[[ConnectMeVcx alloc] init] initPool:config...]
+    
+    ```
 
 ### Holder Present Proof
 
