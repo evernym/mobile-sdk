@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 
+import me.connect.sdk.java.ConnectionInvitations;
 import me.connect.sdk.java.Connections;
 import me.connect.sdk.java.Credentials;
 import me.connect.sdk.java.OutOfBandHelper;
@@ -117,7 +118,7 @@ public class StateCredentialOffers {
             SingleLiveData<Results> data,
             Action action
     ) {
-        Connections.create(offer.attachConnection, Connections.InvitationType.OutOfBand)
+        Connections.create(offer.attachConnection, ConnectionInvitations.InvitationType.OutOfBand)
         .handle((res, throwable) -> {
             if (res != null) {
                 String pwDid = Connections.getPwDid(res);

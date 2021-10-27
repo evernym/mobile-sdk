@@ -4,8 +4,6 @@ import androidx.annotation.NonNull;
 
 import com.evernym.sdk.vcx.VcxException;
 import com.evernym.sdk.vcx.connection.ConnectionApi;
-import com.evernym.sdk.vcx.credential.CredentialApi;
-import com.evernym.sdk.vcx.utils.UtilsApi;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -13,170 +11,33 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import java9.util.concurrent.CompletableFuture;
-import me.connect.sdk.java.connection.Connection;
-import me.connect.sdk.java.message.AriesMessageType;
 import me.connect.sdk.java.message.Message;
-import me.connect.sdk.java.message.MessageState;
+import me.connect.sdk.java.message.StateMachineState;
 import me.connect.sdk.java.message.MessageType;
 
 /**
  * Class containing methods to work with connections
  */
 public class Connections {
-
-    public static final String TAG = "ConnectMeVcx";
-
-    public enum InvitationType {
-        Proprietary,
-        Connection,
-        OutOfBand
-    }
-
     public static String verifyConnectionExists(
             @NonNull String invitationDetails,
             @NonNull List<String> serializedConnections
     ) {
         try {
             Logger.getInstance().i("Starting invite verification");
-            return findExistingConnection(invitationDetails, serializedConnections);
+            for (String sc : serializedConnections) {
+                int handle = ConnectionApi.connectionDeserialize(sc).get();
+                String storedInvite = ConnectionApi.connectionInviteDetails(handle, 0).get();
+                ConnectionApi.connectionRelease(handle);
+                if (ConnectionInvitations.compareInvites(invitationDetails, storedInvite)) {
+                    return sc;
+                }
+            }
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
-    }
-
-    public static InvitationType getInvitationType(String invite) {
-        try {
-            JSONObject json = new JSONObject(invite);
-            boolean hasId = json.has("@id");
-            if (json.has("@type") && hasId) {
-                String invitationType = json.getString("@type");
-                if (invitationType.contains(AriesMessageType.OUTOFBAND_INVITATION)) {
-                    return InvitationType.OutOfBand;
-                }
-                if (invitationType.contains(AriesMessageType.CONNECTION_INVITATION)) {
-                    return InvitationType.Connection;
-                } else {
-                    return InvitationType.Proprietary;
-                }
-            } else {
-                throw new Exception("Invalid invite format");
-            }
-        } catch (Exception e ) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private static boolean isAriesInvitation(String invite) {
-        InvitationType type = getInvitationType(invite);
-        return type == InvitationType.Connection || type == InvitationType.OutOfBand;
-    }
-
-    public static String findExistingConnection(String newInvite, List<String> serializedConnections) throws Exception {
-        String existingConnection = null;
-        for (String sc : serializedConnections) {
-            int handle = ConnectionApi.connectionDeserialize(sc).get();
-            String storedInvite = ConnectionApi.connectionInviteDetails(handle, 0).get();
-            if (compareInvites(newInvite, storedInvite)) {
-                existingConnection = sc;
-            }
-            ConnectionApi.connectionRelease(handle);
-            if (existingConnection != null) {
-                break;
-            }
-        }
-        return existingConnection;
-    }
-
-    private static boolean compareInvites(String newInvite, String storedInvite) throws Exception {
-        boolean newInviteIsAries = isAriesInvitation(newInvite);
-        boolean storedInviteIsAries = isAriesInvitation(storedInvite);
-        JSONObject newJson = new JSONObject(newInvite);
-        JSONObject storedJson = new JSONObject(storedInvite);
-
-        if (newInviteIsAries && storedInviteIsAries) {
-            String newPublicDid = newJson.optString("public_did");
-            String storedPublicDid = storedJson.optString("public_did");
-            if (!storedPublicDid.isEmpty()) {
-                return storedPublicDid.equals(newPublicDid);
-            } else {
-                String newDid = newJson.getJSONArray("recipientKeys").getString(0);
-                String storedDid = storedJson.getJSONArray("recipientKeys").optString(0);
-                return storedDid.equals(newDid);
-            }
-        }
-
-        if (!newInviteIsAries && !storedInviteIsAries) {
-            if (newJson.has("senderDetail")) {
-                String newPublicDid = newJson.getJSONObject("senderDetail").optString("publicDID");
-                String storedPublicDid = storedJson.getJSONObject("senderDetail").optString("publicDID");
-                if (!storedPublicDid.isEmpty()) {
-                    return storedPublicDid.equals(newPublicDid);
-                } else {
-                    String storedDid = storedJson.getJSONObject("senderDetail").getString("DID");
-                    String newDid = newJson.getJSONObject("senderDetail").getString("DID");
-                    return storedDid.equals(newDid);
-                }
-            } else { // use abbreviated
-                String newPublicDid = newJson.getJSONObject("s").optString("publicDID");
-                String storedPublicDid = storedJson.getJSONObject("senderDetail").optString("publicDID");
-                if (!storedPublicDid.isEmpty()) {
-                    return storedPublicDid.equals(newPublicDid);
-                } else {
-                    String storedDid = storedJson.getJSONObject("senderDetail").getString("DID");
-                    String newDid = newJson.getJSONObject("s").getString("d");
-                    return storedDid.equals(newDid);
-                }
-            }
-        }
-        return false;
-    }
-
-
-    /**
-     * Redirect proprietary connection if needed
-     */
-    public static void connectionRedirectProprietary(String invitationDetails, String serializedConnection) {
-        CompletableFuture<Boolean> result = new CompletableFuture<>();
-        if (serializedConnection == null) {
-            result.complete(false);
-            return;
-        }
-        try {
-            JSONObject inviteJson = new JSONObject(invitationDetails);
-            String invitationId = inviteJson.getString("id");
-            ConnectionApi.vcxCreateConnectionWithInvite(invitationId, invitationDetails).whenComplete((handle, err) -> {
-                if (err != null) {
-                    Logger.getInstance().e("Failed to create connection with invite: ", err);
-                    result.completeExceptionally(err);
-                }
-                try {
-                    ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((oldHandle, error) -> {
-                        if (error != null) {
-                            Logger.getInstance().e("Failed to deserialize stored connection: ", error);
-                            result.completeExceptionally(error);
-                        }
-                        try {
-                            ConnectionApi.vcxConnectionRedirect(handle, oldHandle).whenComplete((res, t) -> {
-                                if (t != null) {
-                                    Logger.getInstance().e("Failed to redirect connection: ", t);
-                                    result.completeExceptionally(t);
-                                } else {
-                                    result.complete(true);
-                                }
-                            });
-                        } catch (Exception ex) {
-                            result.completeExceptionally(ex);
-                        }
-                    });
-                } catch (VcxException ex) {
-                    result.completeExceptionally(ex);
-                }
-            });
-        } catch (Exception ex) {
-            result.completeExceptionally(ex);
-        }
     }
 
     /**
@@ -218,7 +79,6 @@ public class Connections {
                                     try {
                                         Message message = Messages.downloadMessage(MessageType.HANDSHAKE, threadId).get();
                                         System.out.println("Message Received " + message.getPayload());
-                                        System.out.println(invitation);
                                         if (message != null) {
                                             String pwDid = Connections.getPwDid(serializedConnection);
                                             Messages.updateMessageStatus(pwDid, message.getUid());
@@ -254,7 +114,7 @@ public class Connections {
      */
     public static @NonNull
     CompletableFuture<String> create(@NonNull String invitationDetails,
-                                     Connections.InvitationType invitationType) {
+                                     ConnectionInvitations.InvitationType invitationType) {
         Logger.getInstance().i("Starting connection creation");
         CompletableFuture<String> result = new CompletableFuture<>();
 
@@ -263,7 +123,7 @@ public class Connections {
             String invitationId = json.getString("@id");
 
             CompletableFuture<Integer> creationStep;
-            if (ConnectionsUtils.isOutOfBandType(invitationType)) {
+            if (ConnectionInvitations.isAriesOutOfBandConnectionInvitation(invitationType)) {
                 creationStep = ConnectionApi.vcxCreateConnectionWithOutofbandInvite(invitationId, invitationDetails);
             } else {
                 creationStep = ConnectionApi.vcxCreateConnectionWithInvite(invitationId, invitationDetails);
@@ -335,7 +195,7 @@ public class Connections {
                 Logger.getInstance().i("Awaiting connection state change: attempt #" + count);
                 Integer state = ConnectionApi.vcxConnectionUpdateState(handle).get();
                 Logger.getInstance().i("Awaiting connection state change: got state=" + state);
-                if (MessageState.ACCEPTED.matches(state)) {
+                if (StateMachineState.ACCEPTED.matches(state)) {
                     return ConnectionApi.connectionSerialize(handle).get();
                 }
                 count++;
@@ -365,7 +225,7 @@ public class Connections {
                     Message message = Messages.downloadMessage(MessageType.CONNECTION_RESPONSE, pwDid).get();
                         status = ConnectionApi.vcxConnectionUpdateStateWithMessage(handle, message.getPayload()).get();
                         Messages.updateMessageStatus(pwDid, message.getUid());
-                        if (MessageState.ACCEPTED.matches(status)) {
+                        if (StateMachineState.ACCEPTED.matches(status)) {
                             return ConnectionApi.connectionSerialize(handle).get();
                         }
                     Thread.sleep(2000);

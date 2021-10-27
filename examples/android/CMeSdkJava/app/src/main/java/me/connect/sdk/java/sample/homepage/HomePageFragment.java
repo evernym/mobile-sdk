@@ -99,27 +99,27 @@ public class HomePageFragment extends Fragment {
                     Toast.makeText(getActivity(), "Connection created", Toast.LENGTH_SHORT).show();
                     break;
                 case CONNECTION_REDIRECT:
-                    Toast.makeText(getActivity(), "Connection redirect", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Connection reused", Toast.LENGTH_SHORT).show();
                     break;
                 case CONNECTION_FAILURE:
-                    Toast.makeText(getActivity(), "Connection create failure", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Connection failed", Toast.LENGTH_SHORT).show();
                     break;
 
                 case OFFER_SUCCESS:
-                    Toast.makeText(getActivity(), "Offer request accepted", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Credential received", Toast.LENGTH_SHORT).show();
                     break;
                 case OFFER_FAILURE:
-                    Toast.makeText(getActivity(), "Offer request accept failure", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Credential issuance failed", Toast.LENGTH_SHORT).show();
                     break;
 
                 case PROOF_SUCCESS:
-                    Toast.makeText(getActivity(), "Proof request accepted", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Proof shared", Toast.LENGTH_SHORT).show();
                     break;
                 case PROOF_MISSED:
                     Toast.makeText(getActivity(), "Credentials missed", Toast.LENGTH_SHORT).show();
                     break;
                 case PROOF_FAILURE:
-                    Toast.makeText(getActivity(), "Proof request accept failure", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Failed to share proof", Toast.LENGTH_SHORT).show();
                     break;
             }
         });

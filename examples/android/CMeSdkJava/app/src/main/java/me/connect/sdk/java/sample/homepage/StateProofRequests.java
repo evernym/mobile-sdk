@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 
+import me.connect.sdk.java.ConnectionInvitations;
 import me.connect.sdk.java.Connections;
 import me.connect.sdk.java.OutOfBandHelper;
 import me.connect.sdk.java.Proofs;
@@ -114,7 +115,7 @@ public class StateProofRequests {
             SingleLiveData<Results> liveData,
             Action action
     ) {
-        Connections.create(proof.attachConnection, Connections.InvitationType.OutOfBand)
+        Connections.create(proof.attachConnection, ConnectionInvitations.InvitationType.OutOfBand)
                 .handle((res, throwable) -> {
                     if (res != null) {
                         String pwDid = Connections.getPwDid(res);

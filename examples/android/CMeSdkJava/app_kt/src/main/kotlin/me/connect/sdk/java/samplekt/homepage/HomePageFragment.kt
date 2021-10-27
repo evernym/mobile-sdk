@@ -84,13 +84,13 @@ class HomePageFragment: Fragment() {
             Observer { ok: Results ->
                 when (ok) {
                     CONNECTION_SUCCESS -> Toast.makeText(activity, "Connection created", Toast.LENGTH_SHORT).show()
-                    CONNECTION_REDIRECT -> Toast.makeText(activity, "Connection redirect", Toast.LENGTH_SHORT).show()
-                    CONNECTION_FAILURE -> Toast.makeText(activity, "Connection create failure", Toast.LENGTH_SHORT).show()
-                    OFFER_SUCCESS -> Toast.makeText(activity, "Offer request accepted", Toast.LENGTH_SHORT).show()
-                    OFFER_FAILURE -> Toast.makeText(activity, "Offer request accept failure", Toast.LENGTH_SHORT).show()
-                    PROOF_SUCCESS -> Toast.makeText(activity, "Proof request accepted", Toast.LENGTH_SHORT).show()
+                    CONNECTION_REDIRECT -> Toast.makeText(activity, "Connection reused", Toast.LENGTH_SHORT).show()
+                    CONNECTION_FAILURE -> Toast.makeText(activity, "Connection failed", Toast.LENGTH_SHORT).show()
+                    OFFER_SUCCESS -> Toast.makeText(activity, "Credential received", Toast.LENGTH_SHORT).show()
+                    OFFER_FAILURE -> Toast.makeText(activity, "Credential issuance failed", Toast.LENGTH_SHORT).show()
+                    PROOF_SUCCESS -> Toast.makeText(activity, "Proof shared", Toast.LENGTH_SHORT).show()
                     PROOF_MISSED -> Toast.makeText(activity, "Credentials missed", Toast.LENGTH_SHORT).show()
-                    PROOF_FAILURE -> Toast.makeText(activity, "Proof request accept failure", Toast.LENGTH_SHORT).show()
+                    PROOF_FAILURE -> Toast.makeText(activity, "Failed to share proof", Toast.LENGTH_SHORT).show()
                     else -> return@Observer
                 }
             })

@@ -1,6 +1,6 @@
 package me.connect.sdk.java.message;
 
-public enum MessageState {
+public enum StateMachineState {
     NONE(0),
     INITIALIZED(1),
     OFFER_SENT(2),
@@ -14,7 +14,7 @@ public enum MessageState {
 
     private final int value;
 
-    MessageState(int value) {
+    StateMachineState(int value) {
         this.value = value;
     }
 

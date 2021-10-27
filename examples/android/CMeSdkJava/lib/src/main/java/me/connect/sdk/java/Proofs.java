@@ -13,11 +13,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 
 import java9.util.concurrent.CompletableFuture;
-import me.connect.sdk.java.message.MessageState;
-import me.connect.sdk.java.message.MessageType;
 
 /**
  * Class containing methods to work with proofs.
@@ -77,37 +74,6 @@ public class Proofs {
             result.completeExceptionally(ex);
         }
         return result;
-    }
-
-    /**
-     * Loops indefinitely until proof request status is not changed
-     *
-     * @param serializedProof string containing serialized proof request
-     * @param messageState    desired message state
-     * @return string containing serialized proof request
-     */
-    public static String awaitStatusChange(String serializedProof, MessageState messageState) {
-        Logger.getInstance().i("Awaiting proof state change");
-        int count = 1;
-        try {
-            Integer handle = DisclosedProofApi.proofDeserialize(serializedProof).get();
-            while (true) {
-                Logger.getInstance().i("Awaiting proof state change: attempt #" + count);
-                Integer state0 = DisclosedProofApi.proofUpdateState(handle).get();
-                Logger.getInstance().i("Awaiting proof state change: update state=" + state0);
-                Integer state = DisclosedProofApi.proofGetState(handle).get();
-                Logger.getInstance().i("Awaiting proof state change: got state=" + state);
-                if (messageState.matches(state)) {
-                    return DisclosedProofApi.proofSerialize(handle).get();
-                }
-                count++;
-                Thread.sleep(1000);
-            }
-        } catch (Exception e) {
-            Logger.getInstance().e("Failed to await proof state", e);
-            e.printStackTrace();
-        }
-        return serializedProof;
     }
 
     /**
@@ -171,7 +137,7 @@ public class Proofs {
                             Logger.getInstance().e("Failed to retrieve proof credentials: ", e);
                             result.completeExceptionally(e);
                         } else {
-                            if (checkProofCorrectly(retrievedCreds)) {
+                            if (checkProofCorrectness(retrievedCreds)) {
                                 result.complete(retrievedCreds);
                             } else {
                                 result.completeExceptionally(new Exception("Missed credential"));
@@ -188,7 +154,7 @@ public class Proofs {
         return result;
     }
 
-    private static boolean checkProofCorrectly(String retrievedCreds) {
+    private static boolean checkProofCorrectness(String retrievedCreds) {
         try {
             JSONObject retrievedCredsObject = new JSONObject(retrievedCreds).getJSONObject("attrs");
             Iterator<String> keys = retrievedCredsObject.keys();
