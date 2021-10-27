@@ -5,12 +5,10 @@ import org.json.JSONObject;
 
 import java.util.List;
 
+import me.connect.sdk.java.ConnectionInvitations;
 import me.connect.sdk.java.Connections;
 import me.connect.sdk.java.ConnectionsUtils;
-import me.connect.sdk.java.Logger;
 import me.connect.sdk.java.OutOfBandHelper;
-import me.connect.sdk.java.Utils;
-import me.connect.sdk.java.connection.QRConnection;
 import me.connect.sdk.java.sample.SingleLiveData;
 import me.connect.sdk.java.sample.db.Database;
 import me.connect.sdk.java.sample.db.entity.Action;
@@ -22,17 +20,17 @@ import static me.connect.sdk.java.sample.homepage.Results.CONNECTION_SUCCESS;
 
 public class StateConnections {
     public static void handleConnectionInvitation(Action action, Database db, SingleLiveData<Results> liveData) {
-        // get invitation data, type, and meta to show
-        String invitation = ConnectionsUtils.getInvitation(action.invite);
-        Connections.InvitationType invitationType = Connections.getInvitationType(invitation);
-        ConnectionsUtils.ConnDataHolder userMeta = ConnectionsUtils.extractUserMetaFromInvitation(invitation);
+        // 1. Get invitation data, type, and metadata to show on UI
+        String invitation = ConnectionInvitations.getConnectionInvitationFromData(action.invite);
+        ConnectionInvitations.InvitationType invitationType = ConnectionInvitations.getInvitationType(invitation);
+        ConnectionsUtils.ConnDataHolder userMeta = ConnectionInvitations.extractUserMetaFromInvitation(invitation);
 
-        // get existing invitations and check if we already has correspondent connection
+        // 2. Get existing invitations and check if we already has correspondent connection
         List<String> serializedConnections = db.connectionDao().getAllSerializedConnections();
         String existingConnection = Connections.verifyConnectionExists(invitation, serializedConnections);
 
-        if (ConnectionsUtils.isAriesConnection(invitationType)) {
-            // aries connection
+        // 3. Handle Aries Connection Invitation
+        if (ConnectionInvitations.isAriesConnectionInvitation(invitationType)) {
             if (existingConnection != null) {
                 // duplicates - nothing to do
                 liveData.postValue(CONNECTION_REDIRECT);
@@ -42,11 +40,12 @@ public class StateConnections {
             }
             return;
         }
-        if (ConnectionsUtils.isOutOfBandType(invitationType)) {
-            // aries out-of-band connection
-            String extractedAttachRequest = OutOfBandHelper.extractRequestAttach(invitation);
-            JSONObject attachRequestObject = Utils.convertToJSONObject(extractedAttachRequest);
-            if (attachRequestObject == null) {
+
+        // 4. Handle Aries Out-Of-Band Connection Invitation
+        if (ConnectionInvitations.isAriesOutOfBandConnectionInvitation(invitationType)) {
+            JSONObject attachment = OutOfBandHelper.extractRequestAttach(invitation);
+
+            if (attachment == null) {
                 // no attachment in the invitation
                 if (existingConnection != null) {
                     // reuse existing connection
@@ -60,11 +59,11 @@ public class StateConnections {
                 }
             } else {
                 // handle invitation with attachment
-                processInvitationWithAttachment(
+                handleOutOfBandConnectionInvitationWithAttachment(
                         db,
                         invitation,
-                        extractedAttachRequest,
-                        attachRequestObject,
+                        attachment.toString(),
+                        attachment,
                         existingConnection,
                         userMeta,
                         action,
@@ -74,7 +73,7 @@ public class StateConnections {
         }
     }
 
-    private static void processInvitationWithAttachment(
+    private static void handleOutOfBandConnectionInvitationWithAttachment(
             Database db,
             String parsedInvite,
             String extractedAttachRequest,
@@ -93,13 +92,12 @@ public class StateConnections {
                     .withUserMeta(userMeta)
                     .build();
 
-            String attachType = attachRequestObject.getString("@type");
-            if (ConnectionsUtils.isCredentialInviteType(attachType)) {
+            String attachmentType = attachRequestObject.getString("@type");
+            if (ConnectionInvitations.isCredentialAttachment(attachmentType)) {
                 // handle invitation with attached credential offer
                 processInvitationWithCredentialAttachment(outOfBandInvite, db, liveData, action);
-                return;
             }
-            if (ConnectionsUtils.isProofInviteType(attachType)) {
+            if (ConnectionInvitations.isProofAttachment(attachmentType)) {
                 // handle invitation with attached proof request
                 processInvitationWithProofAttachment(outOfBandInvite, db, liveData, action);
             }
@@ -168,38 +166,38 @@ public class StateConnections {
     public static void connectionCreate(
             int actionId,
             String parsedInvite,
-            Connections.InvitationType invitationType,
+            ConnectionInvitations.InvitationType invitationType,
             Database db,
             ConnectionsUtils.ConnDataHolder data,
             SingleLiveData<Results> liveData
     ) {
         Connections.create(parsedInvite, invitationType)
-                .handle((serialized, throwable) -> {
-                    if (serialized != null) {
-                        String pwDid = Connections.getPwDid(serialized);
-                        serialized = Connections.awaitConnectionCompleted(serialized, pwDid);
+            .handle((serialized, throwable) -> {
+                if (serialized != null) {
+                    String pwDid = Connections.getPwDid(serialized);
+                    serialized = Connections.awaitConnectionCompleted(serialized, pwDid);
 
-                        Connection c = new Connection();
-                        c.pwDid = pwDid;
-                        c.icon = data.logo;
-                        c.name = data.name;
-                        c.serialized = serialized;
-                        c.invitation = parsedInvite;
-                        db.connectionDao().insertAll(c);
-                    }
+                    Connection c = new Connection();
+                    c.pwDid = pwDid;
+                    c.icon = data.logo;
+                    c.name = data.name;
+                    c.serialized = serialized;
+                    c.invitation = parsedInvite;
+                    db.connectionDao().insertAll(c);
+                }
 
-                    HomePageViewModel.addToHistory(
-                            actionId,
-                            "Connection created",
-                            db,
-                            liveData
-                    );
+                HomePageViewModel.addToHistory(
+                        actionId,
+                        "Connection created",
+                        db,
+                        liveData
+                );
 
-                    if (throwable != null) {
-                        throwable.printStackTrace();
-                    }
-                    liveData.postValue(throwable == null ? CONNECTION_SUCCESS : CONNECTION_FAILURE);
-                    return serialized;
-                });
+                if (throwable != null) {
+                    throwable.printStackTrace();
+                }
+                liveData.postValue(throwable == null ? CONNECTION_SUCCESS : CONNECTION_FAILURE);
+                return serialized;
+            });
     }
 }

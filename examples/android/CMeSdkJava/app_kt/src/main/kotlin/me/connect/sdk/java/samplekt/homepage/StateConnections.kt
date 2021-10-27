@@ -1,10 +1,11 @@
 package me.connect.sdk.java.samplekt.homepage
 
 import kotlinx.coroutines.future.await
+import me.connect.sdk.java.ConnectionInvitations
 import me.connect.sdk.java.Connections
 import me.connect.sdk.java.ConnectionsUtils
 import me.connect.sdk.java.OutOfBandHelper
-import me.connect.sdk.java.Utils
+import me.connect.sdk.java.OutOfBandHelper.OutOfBandInvite
 import me.connect.sdk.java.samplekt.SingleLiveData
 import me.connect.sdk.java.samplekt.db.Database
 import me.connect.sdk.java.samplekt.db.entity.Action
@@ -17,54 +18,58 @@ import org.json.JSONObject
 object StateConnections {
     suspend fun handleConnectionInvitation(action: Action, db: Database, liveData: SingleLiveData<Results>) {
         try {
-            val parsedInvite: String? = ConnectionsUtils.getInvitation(action.invite)
-            val invitationType = Connections.getInvitationType(parsedInvite)
-            val userMeta: ConnectionsUtils.ConnDataHolder? = ConnectionsUtils.extractUserMetaFromInvitation(parsedInvite)
-            val serializedConns = db.connectionDao().getAllSerializedConnections()
-            val existingConnection = parsedInvite?.let { Connections.verifyConnectionExists(it, serializedConns) }
-            if (ConnectionsUtils.isProprietaryType(invitationType)) {
+            // 1. Get invitation data, type, and metadata to show on UI
+
+            // 1. Get invitation data, type, and metadata to show on UI
+            val invitation = ConnectionInvitations.getConnectionInvitationFromData(action.invite)
+            val invitationType = ConnectionInvitations.getInvitationType(invitation)
+            val userMeta = ConnectionInvitations.extractUserMetaFromInvitation(invitation)
+
+            // 2. Get existing invitations and check if we already has correspondent connection
+            val serializedConnections = db.connectionDao().getAllSerializedConnections()
+            val existingConnection = Connections.verifyConnectionExists(invitation, serializedConnections)
+
+            // 3. Handle Aries Connection Invitation
+
+            // 3. Handle Aries Connection Invitation
+            if (ConnectionInvitations.isAriesConnectionInvitation(invitationType)) {
                 if (existingConnection != null) {
-                    Connections.connectionRedirectProprietary(action.invite, existingConnection)
+                    // duplicates - nothing to do
                     liveData.postValue(CONNECTION_REDIRECT)
                 } else {
-                    connectionCreate(parsedInvite!!, invitationType, db, userMeta!!, liveData)
+                    // create a new connection
+
+                    // create a new connection
+                    connectionCreate(action.id, invitation, invitationType, db, userMeta, liveData)
                 }
                 return
             }
-            if (ConnectionsUtils.isAriesConnection(invitationType)) {
-                if (existingConnection != null) {
-                    liveData.postValue(CONNECTION_REDIRECT)
-                    return
-                } else {
-                    connectionCreate(parsedInvite!!, invitationType, db, userMeta!!, liveData)
-                }
-                return
-            }
-            if (ConnectionsUtils.isOutOfBandType(invitationType)) {
-                val extractedAttachRequest: String? = OutOfBandHelper.extractRequestAttach(parsedInvite)
-                val attachRequestObject: JSONObject? = Utils.convertToJSONObject(extractedAttachRequest)
-                if (attachRequestObject == null) {
+
+            // 4. Handle Aries Out-Of-Band Connection Invitation
+            if (ConnectionInvitations.isAriesOutOfBandConnectionInvitation(invitationType)) {
+                val attachment: JSONObject? = OutOfBandHelper.extractRequestAttach(invitation)
+
+                if (attachment == null) {
                     if (existingConnection != null) {
-                        Connections.connectionRedirectAriesOutOfBand(
-                            parsedInvite,
-                            existingConnection
-                        ).wrap().await()
+                        // reuse existing connection
+                        Connections.connectionRedirectAriesOutOfBand(invitation, existingConnection).wrap().await()
                         liveData.postValue(CONNECTION_REDIRECT)
                     } else {
-                        connectionCreate(parsedInvite!!, invitationType, db, userMeta!!, liveData)
+                        // create a new connection
+                        connectionCreate(action.id, invitation, invitationType, db, userMeta, liveData)
                     }
                     return
-                }
-                if (parsedInvite != null) {
-                    processInvitationWithAttachment(
-                        db,
-                        parsedInvite,
-                        extractedAttachRequest,
-                        attachRequestObject,
-                        existingConnection,
-                        userMeta!!,
-                        action,
-                        liveData
+                } else {
+                    // handle invitation with attachment
+                    handleOutOfBandConnectionInvitationWithAttachment(
+                            db,
+                            invitation,
+                            attachment.toString(),
+                            attachment,
+                            existingConnection,
+                            userMeta,
+                            action,
+                            liveData
                     )
                 }
             }
@@ -74,7 +79,7 @@ object StateConnections {
         }
     }
 
-    private suspend fun processInvitationWithAttachment(
+    private suspend fun handleOutOfBandConnectionInvitationWithAttachment(
         db: Database,
         parsedInvite: String,
         extractedAttachRequest: String?,
@@ -85,20 +90,21 @@ object StateConnections {
         liveData: SingleLiveData<Results>
     ) {
         try {
-            val outOfBandInvite: OutOfBandHelper.OutOfBandInvite =
-                OutOfBandHelper.OutOfBandInvite.builder()
+            val outOfBandInvite = OutOfBandInvite.builder()
                     .withParsedInvite(parsedInvite)
                     .withExtractedAttachRequest(extractedAttachRequest)
                     .withAttach(attachRequestObject)
                     .withExistingConnection(existingConnection)
                     .withUserMeta(userMeta)
                     .build()
-            val attachType = attachRequestObject.getString("@type")
-            if (ConnectionsUtils.isCredentialInviteType(attachType)) {
+
+            val attachmentType = attachRequestObject.getString("@type")
+            if (ConnectionInvitations.isCredentialAttachment(attachmentType)) {
+                // handle invitation with attached credential offer
                 processInvitationWithCredentialAttachment(outOfBandInvite, db, liveData, action)
-                return
             }
-            if (ConnectionsUtils.isProofInviteType(attachType)) {
+            if (ConnectionInvitations.isProofAttachment(attachmentType)) {
+                // handle invitation with attached proof request
                 processInvitationWithProofAttachment(outOfBandInvite, db, liveData, action)
             }
         } catch (e: JSONException) {
@@ -107,16 +113,13 @@ object StateConnections {
     }
 
     private suspend fun processInvitationWithCredentialAttachment(
-        outOfBandInvite: OutOfBandHelper.OutOfBandInvite,
+        outOfBandInvite: OutOfBandInvite,
         db: Database,
         liveData: SingleLiveData<Results>,
         action: Action
     ) {
         if (outOfBandInvite.existingConnection != null) {
-            Connections.connectionRedirectAriesOutOfBand(
-                    outOfBandInvite.parsedInvite,
-                    outOfBandInvite.existingConnection
-            ).wrap().await()
+            Connections.connectionRedirectAriesOutOfBand(outOfBandInvite.parsedInvite, outOfBandInvite.existingConnection).wrap().await()
             liveData.postValue(CONNECTION_REDIRECT)
             StateCredentialOffers.createCredentialStateObject(db, outOfBandInvite, liveData, action)
         } else {
@@ -125,7 +128,7 @@ object StateConnections {
     }
 
     private suspend fun processInvitationWithProofAttachment(
-        outOfBandInvite: OutOfBandHelper.OutOfBandInvite,
+        outOfBandInvite: OutOfBandInvite,
         db: Database,
         liveData: SingleLiveData<Results>,
         action: Action
@@ -133,14 +136,15 @@ object StateConnections {
         if (outOfBandInvite.existingConnection != null) {
             StateProofRequests.createProofStateObject(db, outOfBandInvite, liveData, action)
             liveData.postValue(CONNECTION_REDIRECT)
-            return
+        } else{
+            StateProofRequests.createProofStateObject(db, outOfBandInvite, liveData, action)
         }
-        StateProofRequests.createProofStateObject(db, outOfBandInvite, liveData, action)
     }
 
     private suspend fun connectionCreate(
+        actionId: Int,
         parsedInvite: String,
-        invitationType: Connections.InvitationType,
+        invitationType: ConnectionInvitations.InvitationType,
         db: Database,
         data: ConnectionsUtils.ConnDataHolder,
         liveData: SingleLiveData<Results>

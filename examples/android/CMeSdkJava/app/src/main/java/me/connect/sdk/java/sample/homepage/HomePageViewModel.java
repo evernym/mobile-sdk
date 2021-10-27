@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,15 +13,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 
-import me.connect.sdk.java.Connections;
-import me.connect.sdk.java.ConnectionsUtils;
+import me.connect.sdk.java.ConnectionInvitations;
 import me.connect.sdk.java.Credentials;
 import me.connect.sdk.java.Messages;
 import me.connect.sdk.java.OutOfBandHelper;
 import me.connect.sdk.java.ProofRequests;
 import me.connect.sdk.java.Proofs;
 import me.connect.sdk.java.StructuredMessages;
-import me.connect.sdk.java.Utils;
 import me.connect.sdk.java.message.Message;
 import me.connect.sdk.java.message.MessageType;
 import me.connect.sdk.java.message.StructuredMessageHolder;
@@ -284,31 +281,27 @@ public class HomePageViewModel extends AndroidViewModel {
     private void createAction(String invite, SingleLiveData<Results> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
-                String parsedInvite = ConnectionsUtils.getInvitation(invite);
-                Connections.InvitationType invitationType = Connections.getInvitationType(parsedInvite);
+                String parsedInvite = ConnectionInvitations.getConnectionInvitationFromData(invite);
                 JSONObject inviteObject = new JSONObject(parsedInvite);
-                JSONArray attach = inviteObject.getJSONArray("request~attach");
+                ConnectionInvitations.InvitationType invitationType = ConnectionInvitations.getInvitationType(parsedInvite);
+                JSONObject attachment = OutOfBandHelper.extractRequestAttach(parsedInvite);
 
-                if (ConnectionsUtils.isOutOfBandType(invitationType) && attach.length() != 0) {
-                    String extractedAttachRequest = OutOfBandHelper.extractRequestAttach(parsedInvite);
-                    JSONObject attachRequestObject = Utils.convertToJSONObject(extractedAttachRequest);
+                if (ConnectionInvitations.isAriesOutOfBandConnectionInvitation(invitationType) && attachment != null) {
+                    String attachmentType = attachment.getString("@type");
 
-                    assert attachRequestObject != null;
-                    String attachType = attachRequestObject.getString("@type");
-
-                    if (ConnectionsUtils.isCredentialInviteType(attachType)) {
-                        JSONObject preview = attachRequestObject.getJSONObject("credential_preview");
+                    if (ConnectionInvitations.isCredentialAttachment(attachmentType)) {
+                        JSONObject preview = attachment.getJSONObject("credential_preview");
                         Action action = new Action();
                         action.invite = invite;
-                        action.name = attachRequestObject.getString("comment");
+                        action.name = attachment.getString("comment");
                         action.description = inviteObject.getString("goal");
                         action.details = preview.getJSONArray("attributes").getString(0);
                         action.icon = inviteObject.getString("profileUrl");
                         action.status = PENDING.toString();
                         db.actionDao().insertAll(action);
                     }
-                    if (ConnectionsUtils.isProofInviteType(attachType)) {
-                        JSONObject decodedProofAttach = ProofRequests.decodeProofRequestAttach(attachRequestObject);
+                    if (ConnectionInvitations.isProofAttachment(attachmentType)) {
+                        JSONObject decodedProofAttach = ProofRequests.decodeProofRequestAttach(attachment);
 
                         Action action = new Action();
                         action.invite = invite;

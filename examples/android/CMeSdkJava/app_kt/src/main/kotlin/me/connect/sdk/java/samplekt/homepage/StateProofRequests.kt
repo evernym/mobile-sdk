@@ -85,9 +85,9 @@ object StateProofRequests {
                     "Proofs send",
                     db,
                     liveData
-                );
+                )
 
-                liveData.postValue(PROOF_SUCCESS);
+                liveData.postValue(PROOF_SUCCESS)
             } else {
                 liveData.postValue(PROOF_FAILURE)
             }
@@ -103,7 +103,7 @@ object StateProofRequests {
         liveData: SingleLiveData<Results>,
         action: Action
     ) {
-        val res = Connections.create(proof.attachConnection!!, Connections.InvitationType.OutOfBand).wrap().await()
+        val res = Connections.create(proof.attachConnection!!, ConnectionInvitations.InvitationType.OutOfBand).wrap().await()
         if (res != null) {
             val pwDid = Connections.getPwDid(res)
             val serializedCon = Connections.awaitConnectionCompleted(res, pwDid)
@@ -126,7 +126,7 @@ object StateProofRequests {
                 "Connection created",
                 proof.attachConnectionLogo!!,
                 liveData
-            );
+            )
             acceptProofRequest(proof, connection, db, liveData, action)
         } else {
             liveData.postValue(CONNECTION_FAILURE)
@@ -136,9 +136,9 @@ object StateProofRequests {
     suspend fun rejectProofReq(proof: ProofRequest, db: Database, liveData: SingleLiveData<Results>) {
         try {
             if (proof.pwDid == null) {
-                db.proofRequestDao().update(proof);
-                liveData.postValue(PROOF_SUCCESS);
-                return;
+                db.proofRequestDao().update(proof)
+                liveData.postValue(PROOF_SUCCESS)
+                return
             }
             val con = db.connectionDao().getByPwDid(proof.pwDid!!)
             val s = Proofs.reject(con.serialized, proof.serialized).wrap().await()

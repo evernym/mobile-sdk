@@ -32,7 +32,7 @@ public class OutOfBandHelper {
         return null;
     }
 
-    public static String extractRequestAttach(String invite) {
+    public static JSONObject extractRequestAttach(String invite) {
         try {
             JSONObject json = Utils.convertToJSONObject(invite);
             if (json != null && json.has("request~attach")) {
@@ -48,7 +48,7 @@ public class OutOfBandHelper {
                 JSONObject result = Utils.convertToJSONObject(requestAttachDecode);
                 if (result != null) {
                     result.put("@id", requestsAttachItem.getString("@id"));
-                    return result.toString();
+                    return result;
                 }
                 return null;
             }

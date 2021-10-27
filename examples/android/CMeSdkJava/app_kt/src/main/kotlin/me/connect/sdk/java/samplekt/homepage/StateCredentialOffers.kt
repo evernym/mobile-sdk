@@ -1,6 +1,7 @@
 package me.connect.sdk.java.samplekt.homepage
 
 import kotlinx.coroutines.future.await
+import me.connect.sdk.java.ConnectionInvitations
 import me.connect.sdk.java.Connections
 import me.connect.sdk.java.Credentials
 import me.connect.sdk.java.OutOfBandHelper
@@ -22,7 +23,7 @@ object StateCredentialOffers {
         action: Action
     ) {
         try {
-            val claimId: String = outOfBandInvite.attach.getString("@id");
+            val claimId: String = outOfBandInvite.attach.getString("@id")
             if (!db.credentialOffersDao().checkOfferExists(claimId)) {
                 val thread = outOfBandInvite.attach.getJSONObject("~thread")
                 val threadId = thread.getString("thid")
@@ -44,7 +45,7 @@ object StateCredentialOffers {
                         attachConnectionName = outOfBandInvite.userMeta.name
                 )
                 db.credentialOffersDao().insertAll(offer)
-                processCredentialOffer(offer, db, liveData, action);
+                processCredentialOffer(offer, db, liveData, action)
             }
         } catch (e: JSONException) {
             e.printStackTrace()
@@ -88,16 +89,16 @@ object StateCredentialOffers {
                     "Credential accept",
                     db,
                     data
-                );
+                )
 
-                data.postValue(OFFER_SUCCESS);
+                data.postValue(OFFER_SUCCESS)
             } else {
                 HomePageViewModel.HistoryActions.addToHistory(
                     action.id,
                     "Credential accept failure",
                     db,
                     data
-                );
+                )
                 data.postValue(OFFER_FAILURE)
             }
         } catch (e: Exception) {
@@ -112,7 +113,7 @@ object StateCredentialOffers {
         data: SingleLiveData<Results>,
         action: Action
     ) {
-        val res = Connections.create(offer.attachConnection!!, Connections.InvitationType.OutOfBand).wrap().await()
+        val res = Connections.create(offer.attachConnection!!, ConnectionInvitations.InvitationType.OutOfBand).wrap().await()
         if (res != null) {
             val pwDid = Connections.getPwDid(res)
             val serializedCon = Connections.awaitConnectionCompleted(res, pwDid)

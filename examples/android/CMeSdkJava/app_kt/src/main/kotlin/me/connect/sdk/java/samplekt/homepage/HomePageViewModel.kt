@@ -12,7 +12,8 @@ import me.connect.sdk.java.message.Message
 import me.connect.sdk.java.message.MessageType
 import me.connect.sdk.java.message.StructuredMessageHolder
 import me.connect.sdk.java.samplekt.SingleLiveData
-import me.connect.sdk.java.samplekt.db.ActionStatus.*
+import me.connect.sdk.java.samplekt.db.ActionStatus.HISTORIZED
+import me.connect.sdk.java.samplekt.db.ActionStatus.PENDING
 import me.connect.sdk.java.samplekt.db.Database
 import me.connect.sdk.java.samplekt.db.entity.*
 import me.connect.sdk.java.samplekt.homepage.Results.*
@@ -242,32 +243,18 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
         liveData: SingleLiveData<Results>
     ) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val parsedInvite = ConnectionsUtils.getInvitation(invite)
-            val invitationType =
-                Connections.getInvitationType(parsedInvite)
+            val parsedInvite = ConnectionInvitations.getConnectionInvitationFromData(invite)
             val inviteObject = JSONObject(parsedInvite)
-            val attach = inviteObject.getJSONArray("request~attach")
+            val invitationType = ConnectionInvitations.getInvitationType(parsedInvite)
+            val attachment = OutOfBandHelper.extractRequestAttach(parsedInvite)
 
-            if (ConnectionsUtils.isOutOfBandType(invitationType) && attach.length() == 0) {
-                val action = Action(
-                    invite = invite,
-                    name = inviteObject.getString("label"),
-                    description = inviteObject.getString("goal"),
-                    icon = inviteObject.getString("profileUrl"),
-                    status = HISTORIZED.toString()
-                )
-
-                db.actionDao().insertAll(action)
-                StateConnections.handleConnectionInvitation(action, db, liveData)
-            } else if (ConnectionsUtils.isOutOfBandType(invitationType) && attach.length() != 0) {
-                val extractedAttachRequest = OutOfBandHelper.extractRequestAttach(parsedInvite)
-                val attachRequestObject = Utils.convertToJSONObject(extractedAttachRequest)!!
-                val attachType = attachRequestObject.getString("@type")
-                if (ConnectionsUtils.isCredentialInviteType(attachType)) {
-                    val preview = attachRequestObject.getJSONObject("credential_preview")
+            if (ConnectionInvitations.isAriesOutOfBandConnectionInvitation(invitationType) && attachment != null) {
+                val attachmentType = attachment.getString("@type")
+                if (ConnectionInvitations.isCredentialAttachment(attachmentType)) {
+                    val preview = attachment.getJSONObject("credential_preview")
                     val action = Action(
                         invite = invite,
-                        name = attachRequestObject.getString("comment"),
+                        name = attachment.getString("comment"),
                         description = inviteObject.getString("goal"),
                         details = preview.getJSONArray("attributes").getString(0)!!,
                         icon = inviteObject.getString("profileUrl"),
@@ -277,8 +264,8 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
                     liveData.postValue(ACTION_SUCCESS)
                     return@launch
                 }
-                if (ConnectionsUtils.isProofInviteType(attachType)) {
-                    val decodedProofAttach = ProofRequests.decodeProofRequestAttach(attachRequestObject)
+                if (ConnectionInvitations.isProofAttachment(attachmentType)) {
+                    val decodedProofAttach = ProofRequests.decodeProofRequestAttach(attachment)
                     val action = Action(
                         invite = invite,
                         name = ProofRequests.extractRequestedNameFromProofRequest(decodedProofAttach),

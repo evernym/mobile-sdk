@@ -14,9 +14,6 @@ import java.util.ArrayList;
 
 import java9.util.concurrent.CompletableFuture;
 import me.connect.sdk.java.message.Message;
-import me.connect.sdk.java.message.MessageHolder;
-import me.connect.sdk.java.message.MessageStatusType;
-import me.connect.sdk.java.message.MessageUtils;
 import me.connect.sdk.java.message.StructuredMessageHolder;
 
 /**
@@ -28,7 +25,6 @@ public class StructuredMessages {
     private StructuredMessages() {
 
     }
-
 
     /**
      * answer structured message
@@ -72,99 +68,6 @@ public class StructuredMessages {
         }
         return result;
     }
-
-
-//    private static @NonNull
-//    CompletableFuture<Void> answerProprietary(
-//            @NonNull String serializedConnection,
-//            @NonNull String messageId,
-//            @NonNull String structuredMessage,
-//            @NonNull String answer
-//    ) {
-//        Logger.getInstance().i("Respond to structured message");
-//        CompletableFuture<Void> result = new CompletableFuture<>();
-//        try {
-//            JSONObject structMessageJson = new JSONObject(structuredMessage);
-//            JSONArray responses = structMessageJson.getJSONArray("valid_responses");
-//            String nonce = null;
-//            String msgId = structMessageJson.getString("@id");
-//            for (int i = 0; i < responses.length(); i++) {
-//                JSONObject response = responses.getJSONObject(i);
-//                String text = response.getString("text");
-//                if (text.equals(answer)) {
-//                    nonce = response.getString("nonce");
-//                    break;
-//                }
-//            }
-//            if (nonce == null) {
-//                result.completeExceptionally(new Exception("nonce was not found for selected answer"));
-//                return result;
-//            }
-//            final String answerNonce = nonce;
-//            ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((conHandle, err) -> {
-//                if (err != null) {
-//                    Logger.getInstance().e("Failed to deserialize connection: ", err);
-//                    result.completeExceptionally(err);
-//                    return;
-//                }
-//                byte[] encodedAnswer = Base64.encode(answerNonce.getBytes(), Base64.NO_WRAP);
-//                try {
-//                    ConnectionApi.connectionSignData(conHandle, encodedAnswer, encodedAnswer.length).whenComplete((signature, e) -> {
-//                        if (e != null) {
-//                            Logger.getInstance().e("Failed to sign data: ", e);
-//                            result.completeExceptionally(e);
-//                            return;
-//                        }
-//                        try {
-//                            MessageHolder msg = MessageUtils.prepareAnswer(encodedAnswer, signature, messageId, msgId);
-//                            ConnectionApi.connectionSendMessage(conHandle, msg.getMessage(), msg.getMessageOptions()).whenComplete((r, t) -> {
-//                                if (t != null) {
-//                                    Logger.getInstance().e("Failed to send message: ", t);
-//                                    result.completeExceptionally(t);
-//                                } else {
-//                                    try {
-//                                        ConnectionApi.connectionGetPwDid(conHandle).whenComplete((pwDid, th) -> {
-//                                            if (th != null) {
-//                                                Logger.getInstance().e("Failed to get pwDid: ", th);
-//                                                result.completeExceptionally(th);
-//                                                return;
-//                                            }
-//                                            try {
-//                                                String jsonMsg = Messages.prepareUpdateMessage(pwDid, messageId);
-//                                                UtilsApi.vcxUpdateMessages(MessageStatusType.REVIEWED, jsonMsg).whenComplete((v1, error) -> {
-//                                                    if (error != null) {
-//                                                        Logger.getInstance().e("Failed to update messages", error);
-//                                                        result.completeExceptionally(error);
-//                                                    } else {
-//                                                        result.complete(null);
-//                                                    }
-//
-//                                                });
-//                                            } catch (Exception ex) {
-//                                                result.completeExceptionally(ex);
-//                                            }
-//                                        });
-//                                    } catch (Exception ex) {
-//                                        result.completeExceptionally(ex);
-//                                    }
-//
-//
-//                                }
-//                            });
-//                        } catch (Exception ex) {
-//                            result.completeExceptionally(ex);
-//                        }
-//                    });
-//
-//                } catch (Exception ex) {
-//                    result.completeExceptionally(ex);
-//                }
-//            });
-//        } catch (Exception ex) {
-//            result.completeExceptionally(ex);
-//        }
-//        return result;
-//    }
 
     /**
      * Temporary method to parse structured question message JSON string and extract {@link StructuredMessageHolder} from it.

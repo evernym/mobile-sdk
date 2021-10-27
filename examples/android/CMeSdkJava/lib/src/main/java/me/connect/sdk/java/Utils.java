@@ -1,6 +1,9 @@
 package me.connect.sdk.java;
 
 import android.content.Context;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.util.Base64;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
@@ -12,7 +15,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.SecureRandom;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -29,6 +34,20 @@ public class Utils {
     private static final int BUFFER_SIZE = 4096;
     private static String TAG = "BRIDGEUTILS";
     static final String ROOT_DIR = "connectMeVcx";
+
+    public static void configureStoragePermissions(Context context) {
+        Logger.getInstance().i("Configuring storage permissions");
+        try {
+            // When we restore data, then we are not calling createOneTimeInfo
+            // and hence ca-crt is not written within app directory
+            // since the logic to write ca cert checks for file existence
+            // we won't have to pay too much cost for calling this function inside init
+            Utils.writeCACert(context);
+            Os.setenv("EXTERNAL_STORAGE", Utils.getRootDir(context), true);
+        } catch (ErrnoException e) {
+            Logger.getInstance().e("Failed to set environment variable storage", e);
+        }
+    }
 
     public static void writeCACert(Context context) {
         ContextWrapper cw = new ContextWrapper(context);
@@ -78,6 +97,35 @@ public class Utils {
         return "";
     }
 
+    public static File writeGenesisFile(Context context, Integer genesisPoolResId) {
+        File genesisFile = new File(Utils.getRootDir(context), "pool_transactions_genesis");
+        if (!genesisFile.exists()) {
+            try (FileOutputStream stream = new FileOutputStream(genesisFile)) {
+                Logger.getInstance().d("writing poolTxnGenesis to file: " + genesisFile.getAbsolutePath());
+                if (genesisPoolResId != null) {
+                    try (InputStream genesisStream = context.getResources().openRawResource(genesisPoolResId)) {
+                        byte[] buffer = new byte[8 * 1024];
+                        int bytesRead;
+                        while ((bytesRead = genesisStream.read(buffer)) != -1) {
+                            stream.write(buffer, 0, bytesRead);
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return genesisFile;
+    }
+
+    public static String createWalletKey() {
+        int lengthOfKey = 128;
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[lengthOfKey];
+        random.nextBytes(bytes);
+        return Base64.encodeToString(bytes, Base64.NO_WRAP);
+    }
+
     static String getFileContents(File file) throws IOException {
         StringBuffer text = new StringBuffer(99999);
         FileInputStream fileStream = new FileInputStream(file);
@@ -116,15 +164,6 @@ public class Utils {
 
     static String makeWalletName(String name) {
         return String.format("%s-wallet", name);
-    }
-
-    static String makePoolName(String name) {
-        return String.format("%s-pool", name);
-    }
-
-    static boolean makeRootDir(Context context) {
-        String rootDir = getRootDir(context);
-        return new File(rootDir).mkdirs();
     }
 
     public static void zipFiles(String sourcePath, String outputPath) throws IOException {

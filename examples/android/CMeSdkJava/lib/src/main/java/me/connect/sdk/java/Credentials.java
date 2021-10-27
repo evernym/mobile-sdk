@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutionException;
 
 import java9.util.concurrent.CompletableFuture;
 import me.connect.sdk.java.message.Message;
-import me.connect.sdk.java.message.MessageState;
+import me.connect.sdk.java.message.StateMachineState;
 import me.connect.sdk.java.message.MessageType;
 
 /**
@@ -262,7 +262,7 @@ public class Credentials {
                 Logger.getInstance().i("Awaiting cred state change: update state=" + state0);
                 Integer state = CredentialApi.credentialGetState(handle).get();
                 Logger.getInstance().i("Awaiting cred state change: got state=" + state);
-                if (MessageState.ACCEPTED.matches(state)) {
+                if (StateMachineState.ACCEPTED.matches(state)) {
                     UtilsApi.vcxFetchPublicEntities();
                     return CredentialApi.credentialSerialize(handle).get();
                 }
@@ -294,7 +294,7 @@ public class Credentials {
                     if (message != null) {
                         status = CredentialApi.credentialUpdateStateWithMessage(handle, message.getPayload()).get();
                         Messages.updateMessageStatus(pwDid, message.getUid());
-                        if (MessageState.ACCEPTED.matches(status)) {
+                        if (StateMachineState.ACCEPTED.matches(status)) {
                             UtilsApi.vcxFetchPublicEntities();
                             return CredentialApi.credentialSerialize(handle).get();
                         }

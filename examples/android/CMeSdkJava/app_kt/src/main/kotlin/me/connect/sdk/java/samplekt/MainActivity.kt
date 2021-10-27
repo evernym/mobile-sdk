@@ -1,18 +1,18 @@
 package me.connect.sdk.java.samplekt
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import me.connect.sdk.java.ConnectMeVcx
+import me.connect.sdk.java.Initialization
+import me.connect.sdk.java.Logger
+import me.connect.sdk.java.Utils
 import me.connect.sdk.java.samplekt.databinding.MainActivityBinding
 import org.json.JSONException
-import java.util.*
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
-    private val TAG = "MainActivity"
     private lateinit var viewBinding: MainActivityBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initViews()
@@ -30,10 +30,10 @@ class MainActivity : AppCompatActivity() {
     private fun initSdk() {
         Toast.makeText(this, "Started SDK initialization", Toast.LENGTH_SHORT).show()
         Executors.newSingleThreadExecutor().execute {
-            if (!ConnectMeVcx.configAlreadyExist(this)) {
+            if (!Initialization.isCloudAgentProvisioned(this)) {
                 firstTimeRun()
             } else {
-                usuallyTimeRun()
+                regularRun()
             }
         }
     }
@@ -41,27 +41,24 @@ class MainActivity : AppCompatActivity() {
     private fun firstTimeRun() {
         try {
             val constants = buildConstants()
-            ConnectMeVcx.createOneTimeInfo(this, constants, R.raw.genesis)
+
+            // 1. Configure storage permissions
+            Utils.configureStoragePermissions(this)
+            // 2. Configure Logger
+            Logger.configureLogger(this)
+            // 3. Start provisioning
+
+            Initialization.provisionCloudAgentAndInitializeSdk(this, constants, R.raw.genesis)
                 .whenComplete { res: Void?, ex: Throwable? ->
                     val message: String
                     if (ex != null) {
-                        message = "SDK was not initialized!"
-                        Log.e(TAG, "Sdk not initialized: ", ex)
+                        runOnUiThread {
+                            Toast.makeText(this, "Sdk not initialized: ", Toast.LENGTH_SHORT).show()
+                        }
                     } else {
-                        message = "SDK initialized successfully."
-                        ConnectMeVcx.sendToken(
-                            this,
-                            Constants.PREFS_NAME,
-                            Constants.FCM_TOKEN,
-                            Constants.FCM_TOKEN_SENT
-                        )
-                    }
-                    runOnUiThread {
-                        Toast.makeText(
-                            this,
-                            message,
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        runOnUiThread {
+                            Toast.makeText(this, "SDK initialized successfully.", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
         } catch (e: JSONException) {
@@ -69,41 +66,38 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun buildConstants(): ConnectMeVcx.Constants {
-        return ConnectMeVcx.Constants.builder()
-            .withWalletName(Constants.WALLET_NAME)
-            .withPrefsName(Constants.PREFS_NAME)
-            .withSponseeId(Constants.SPONSEE_ID)
-            .withProvisionToken(Constants.PROVISION_TOKEN)
-            .withProvisionTokenRetrieved(Constants.PROVISION_TOKEN_RETRIEVED)
-            .withPlaceholderServerUrl(Constants.PLACEHOLDER_SERVER_URL)
-            .withServerUrl(Constants.SERVER_URL)
-            .build()
-    }
-
-    private fun usuallyTimeRun() {
-        ConnectMeVcx.init(this, R.raw.genesis).handleAsync<Any?> { res: Void?, err: Throwable? ->
+    private fun regularRun() {
+        // 1. Configure Logger
+        Logger.configureLogger(this)
+        // 2. Start initialization
+        Initialization.initializeSdk(this, R.raw.genesis).handleAsync<Any?> { res: Void?, err: Throwable? ->
             val message: String
             if (err == null) {
-                message = "SDK initialized successfully."
-                ConnectMeVcx.sendToken(
-                    this,
-                    Constants.PREFS_NAME,
-                    Constants.FCM_TOKEN,
-                    Constants.FCM_TOKEN_SENT
-                )
+                runOnUiThread {
+                    Toast.makeText(this, "SDK initialized successfully.", Toast.LENGTH_SHORT).show()
+                }
             } else {
-                message = "SDK was not initialized!"
-                Log.e(TAG, "Sdk not initialized: ", err)
+                runOnUiThread {
+                    Toast.makeText(this, "SDK was not initialized!", Toast.LENGTH_SHORT).show()
+                }
             }
-            runOnUiThread {
-                Toast.makeText(
-                    this,
-                    message,
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-            null
         }
+    }
+
+    private fun buildConstants(): Initialization.Constants {
+        return Initialization.Constants.builder()
+                .withAgencyEndpoint(Constants.AGENCY_ENDPOINT)
+                .withAgencyDid(Constants.AGENCY_DID)
+                .withAgencyVerkey(Constants.AGENCY_VERKEY)
+                .withWalletName(Constants.WALLET_NAME)
+                .withPrefsName(Constants.PREFS_NAME)
+                .withSponseeId(Constants.SPONSEE_ID)
+                .withProvisionToken(Constants.PROVISION_TOKEN)
+                .withProvisionTokenRetrieved(Constants.PROVISION_TOKEN_RETRIEVED)
+                .withPlaceholderServerUrl(Constants.PLACEHOLDER_SERVER_URL)
+                .withServerUrl(Constants.SERVER_URL)
+                .withLogo(Constants.LOGO)
+                .withName(Constants.NAME)
+                .build()
     }
 }
