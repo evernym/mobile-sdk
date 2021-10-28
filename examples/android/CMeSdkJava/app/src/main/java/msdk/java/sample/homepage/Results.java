@@ -1,0 +1,24 @@
+package msdk.java.sample.homepage;
+
+public enum Results {
+    ACTION_SUCCESS,
+    ACTION_FAILURE,
+
+    REJECT,
+    SUCCESS,
+    FAILURE,
+
+    CONNECTION_SUCCESS,
+    CONNECTION_REDIRECT,
+    CONNECTION_FAILURE,
+
+    PROOF_SUCCESS,
+    PROOF_MISSED,
+    PROOF_FAILURE,
+
+    OFFER_SUCCESS,
+    OFFER_FAILURE,
+
+    QUESTION_SUCCESS,
+    QUESTION_FAILURE
+}
