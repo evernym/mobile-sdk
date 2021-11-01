@@ -1,6 +1,6 @@
 # Changelog
 
-# Release notes - MSDK 1.5.0 - Jun 17 2021
+# Release notes - MSDK 2.0.0 - Jun 17 2021
 
 ## Change
 * Changed division of published iOS artifacts.

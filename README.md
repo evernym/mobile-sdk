@@ -36,13 +36,14 @@ Before starting, please read the [Base Concepts document](docs/0.BaseConcepts.md
 ![Mobile SDK Flow](wiki-images/ConnectMeMobileSDK.png)
 
 #### Additional Sources:
-* [Configuration](docs/Configuration.md) &#8212; The list of all VCX library configuration options. 
-* [Errors](docs/Errors.md) &#8212; The list of all possible errors and their definitions. 
+* [Configuration](docs/Configuration.md) &#8212; The list of all VCX library configuration options.
 * [New Messages Processing](docs/MessagesFlow.md)
 * [Credentials With Attachments](docs/CredentialsWithAttachments.md)
 * [Push Notifications](docs/PushNotifications.md)
 * [Frequently asked questions](docs/FAQ.md)
 * [Advanced Techniques](docs/Advanced.md)
+* [Troubleshooting](docs/Troubleshooting.md)
+* [Errors](docs/Errors.md) &#8212; The list of all possible errors and their definitions.
 
 ### Helpful links
 - [Verity-SDK Samples](https://github.com/evernym/verity-sdk#sample-code) - samples can be used for testing of different application use cases.
