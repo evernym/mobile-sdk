@@ -1,21 +1,25 @@
 PODS:
+  - QRCodeReader.swift (10.1.0)
   - QRCodeReaderViewController (4.0.2)
-  - vcx (0.0.212)
+  - vcx (0.0.215)
 
 DEPENDENCIES:
+  - QRCodeReader.swift (~> 10.1.0)
   - QRCodeReaderViewController
-  - vcx (= 0.0.212)
+  - vcx (= 0.0.215)
 
 SPEC REPOS:
   "git@gitlab.com:evernym/mobile/mobile-sdk.git":
     - vcx
   trunk:
+    - QRCodeReader.swift
     - QRCodeReaderViewController
 
 SPEC CHECKSUMS:
+  QRCodeReader.swift: 373a389fe9a22d513c879a32a6f647c58f4ef572
   QRCodeReaderViewController: e8f27d035b3e72b1d4b1c61ff66458287e3be0ff
-  vcx: 87c401b118ca5f1044ccc9926edd780913ae9c31
+  vcx: b832b8c0c9350fe2a3424803121568ee60306f16
 
-PODFILE CHECKSUM: 38feb9c79b96891441b0e59a43eeea3cbc549f0a
+PODFILE CHECKSUM: b1747b944196fc973aa1f3236d6a631960f9857b
 
-COCOAPODS: 1.10.0
+COCOAPODS: 1.11.2

@@ -552,7 +552,7 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
                         return completionBlock(nil, error);
                     }
 //                    NSDictionary* readyConnection = [LocalStorage getObjectForKey: @"readyConnection" shouldCreate: true];
-                    NSLog(@"Connection invitation success %@", successMessage)
+                    NSLog(@"Connection invitation success %@", successMessage);
 
                     // Store the serialized connection
                     NSDictionary* invitation = [LocalStorage getObjectForKey: @"tempConnection" shouldCreate: true];
@@ -616,7 +616,6 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
             [sdkApi connectionUpdateStateWithMessage:(int)connectionHandle
                                              message:[responseObject objectForKey:@"payload"]
                                       withCompletion:^(NSError *error, NSInteger state) {
-                NSLog(@"state DMSG %d", state);
                 
                 [CMMessage updateMessageStatus:[responseObject objectForKey:@"pwDid"]
                                      messageId:[responseObject objectForKey:@"uid"]
