@@ -1,6 +1,6 @@
 # Messages flow
 
-In the [Initialization document](./2.Initialization.md) we described how to obtain your Cloud Agent.
+In the [Initialization document](3.Initialization.md) we described how to obtain your Cloud Agent.
 Cloud Agent can be considered as a mailbox which able to receive and collect messages for your application.
 In this document, we will describe how to deal with messages on the mobile application side.
 

@@ -3,7 +3,18 @@
 # Mobile SDK
 
 ## Introduction
-The tools in this repository will help you to build mobile identity agents to hold verifiable credentials in a self sovereign identity ecosystem. These identity agents will be compatible with standards such as:
+
+Self Sovereign Identity is a lifetime portable identity for any person, organization, or thing that does not depend on any centralized authority and can never be taken away. Self-sovereign identity is a two-party relationship model, with no third party coming between you and the organization, now considered your “peer”.
+
+SSI is possible today with DIDs and Verifiable Credentials.
+
+### Verifiable Credentials
+Verifiable Credential (VC) is the new format for interoperable digital credential being defined by the W3C Verifiable Claims Working Group. Verifiable credentials conform to the [W3C’s Verifiable Credentials Data Model](https://www.w3.org/TR/vc-data-model/), and they facilitate interactions using a pattern called the triangle of trust:
+
+Issuers create credentials, usually by having JSON docs [digitally signed](https://en.wikipedia.org/wiki/Digital_signature) in a special way. Holders store them, and verifiers ask for proof based upon them. Verifiable presentations that Holders provide to Verifiers are packages of evidence—either credentials, or data derived from one or more credentials—built by holders to satisfy a verifier’s requirements. Verifiers learn with certainty which issuers have attested something by checking digital signatures against a verifiable data registry (typically, a blockchain).
+
+## What's here
+The set of guidelines and tools in this repository will help you to build mobile identity agents to hold verifiable credentials in a self sovereign identity ecosystem. These identity agents will be compatible with standards such as:
 * [Trust Over IP](https://trustoverip.org/)
 * [Hyperledger Aries](https://www.hyperledger.org/use/aries)
 * [DIDComm](https://identity.foundation/working-groups/did-comm.html)
@@ -12,11 +23,9 @@ The tools in this repository will help you to build mobile identity agents to ho
 
 These tools depend on the Evernym Consumer Agency SaaS service to act as a communication mediator in the cloud which provides a persistent address for communication and herd anonymity. Access to the Consumer Agency is provided to Evernym customers (see the section "[Getting Help](#getting-help)").
 
-
 ## Getting Help
 
 Evernym provides commercial support to customers. If you would like help from Evernym, please [contact us](https://www.evernym.com/our-team/#contact).
-
 
 ## Getting Started
 Connecting and exchanging encrypted data between an Agency (server side) and an Edge Client (mobile application) consists of several steps and is supported by a secured, encrypted protocol library (VCX). 
@@ -26,12 +35,12 @@ Going through this tutorial we will create a simple application which will allow
 Before starting, please read the [Base Concepts document](docs/0.BaseConcepts.md) containing explanations for terms that will be frequently used in this guide.
 
 1. [Create a new App](docs/1.ProjectSetup.md)
-1. [Initialize Wallet and Agent](docs/2.Initialization.md) on a specific Agency (web server)
-2. [Establish a connection](docs/3.Connections.md) with an another user  
-3. [Accept offered credential](docs/4.Credentials.md)
-4. [Respond to a proof request](docs/5.Proofs.md)
-5. [Exchange secured structured messages](docs/6.StructuredMessages.md)
-7. [Connection Redirection](docs/7.ConnectionRedirection.md)
+1. [Configure application storage](docs/2.Storage.md)
+1. [Initialize Wallet and Cloud Agent](docs/3.Initialization.md) on a specific Agency (web server)
+1. [Establish a connection](docs/4.Connections.md) with another user  
+1. [Accept offered credential](docs/5.Credentials.md)
+1. [Respond to a proof request](docs/6.Proofs.md)
+1. [Exchange secured structured messages](docs/7.StructuredMessages.md)
 
 ![Mobile SDK Flow](wiki-images/ConnectMeMobileSDK.png)
 

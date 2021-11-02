@@ -181,4 +181,4 @@ https://agency.pps.evernym.com
 {"reqSignature":{"type":"ED25519","values":[{"from":"QvRvmc3A8armEGN9Lif1Ak","value":"62BqExU2XwpiZ8tnKd4XS47SpNRxVT3FJ6Xcv2ysekTpUdbgBfzrRDvMNficEQP4TDyB5DZe3zaQKsCBCSrgci9i"}]},"txn":{"data":{"data":{"alias":"lab10","services":[]},"dest":"7vruXjaKFp2t1WrsMTcVZuNQtmn35yimDrN7THYwcPof"},"metadata":{"digest":"2058e2070a391db6d96f5c59ff92eb76980272e8c6a62256b84522ce7d6fe5f8","from":"QvRvmc3A8armEGN9Lif1Ak","payloadDigest":"9440e7b9a29829879ad9fa007d4ad0a7e3bc3f06b10a17254edfd3273fdfc583","reqId":1627822104311061000},"protocolVersion":2,"type":"0"},"txnMetadata":{"seqNo":163,"txnTime":1627822104},"ver":"1"}
 ```
 
-[<< Continue with initialization](../docs/2.Initialization.md)
+[<< Continue with initialization](../docs/3.Initialization.md)
