@@ -22,6 +22,7 @@
                            uid_s:nil
                           pwdids:nil
                       completion:^(NSError *error, NSString *messages) {
+            NSLog(@"downloadMessages123 %@", messages);
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             };
@@ -31,7 +32,7 @@
 
             for (NSInteger i = 0; i < messagesArray.count; i++) {
                 NSDictionary *message = messagesArray[i];
-                
+
                 NSArray *msgs = [message objectForKey:@"msgs"];
                 NSString *pwDid = [message objectForKey:@"pairwiseDID"];
                 for (NSInteger j = 0; j < msgs.count; j++) {
@@ -125,13 +126,17 @@
     NSString *CONNECTION_RESPONSE = CMMessageType(ConnectionResponse);
     NSString *ACK = CMMessageType(Ack);
     NSString *HANDSHAKE = CMMessageType(Handshake);
+    NSLog(@"state CDMSG message11 %@", messageType);
 
     [CMMessage downloadAllMessages:^(NSArray *responseArray, NSError *error) {
+        NSLog(@"state CDMSG message22 %@", responseArray);
+
         for (NSInteger i = 0; i < responseArray.count; i++) {
             NSDictionary *message = responseArray[i];
             NSString *payload = [message objectForKey:@"payload"];
             NSDictionary *payloadDict = [CMUtilities jsonToDictionary:payload];
             NSString *type = [payloadDict objectForKey:@"@type"];
+            NSLog(@"state CDMSG message33 %@", message);
 
             if ([messageType isEqual:CREDENTIAL] && [type rangeOfString:@"issue-credential/1.0/issue-credential"].location != NSNotFound) {
                 NSDictionary *thread = [payloadDict objectForKey:@"~thread"];

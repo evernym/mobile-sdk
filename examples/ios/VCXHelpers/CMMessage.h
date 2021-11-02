@@ -38,7 +38,10 @@ typedef enum {
 
 + (void)waitHandshakeReuse: (ResponseWithBoolean) completionBlock;
 
-+ (void)downloadMessages: (NSDictionary*) connection andType: (CMMessageStatusType) type andMessageID: (nullable NSString*) messageID withCompletionHandler: (ResponseWithArray) completionBlock;
++ (void)downloadMessages: (NSDictionary*) connection
+                 andType: (CMMessageStatusType) type
+            andMessageID: (nullable NSString*) messageID
+   withCompletionHandler: (ResponseWithArray) completionBlock;
 + (CMMessageType) typeEnum: (NSString*)type;
 
 + (void)downloadAllMessages:(ResponseWithArray) completionBlock;

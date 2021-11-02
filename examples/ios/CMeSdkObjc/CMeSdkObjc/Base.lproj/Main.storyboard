@@ -278,7 +278,9 @@
                     <navigationItem key="navigationItem" id="Qdk-po-ISV"/>
                     <connections>
                         <outlet property="addConnConfigTextView" destination="V4t-FQ-tPr" id="OU3-Ju-Q9H"/>
+                        <outlet property="addConnectionButton" destination="7Fu-9b-NqC" id="awW-hE-0Cy"/>
                         <outlet property="infoLbl" destination="cSI-SB-hxr" id="5Iv-li-aaJ"/>
+                        <outlet property="newConnLabel" destination="MEY-2N-9Cs" id="GPW-c2-6Oa"/>
                         <outlet property="tableView" destination="YcT-ww-Lli" id="K1b-eh-P5i"/>
                     </connections>
                 </viewController>

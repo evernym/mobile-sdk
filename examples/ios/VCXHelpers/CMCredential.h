@@ -19,7 +19,7 @@
 +(void) acceptCredentialOffer: (NSString*) serializedConnection
          serializedCredential: (NSString*) serializedCredential
                         offer: (NSString*) offer
-        withCompletionHandler: (ResponseWithObject) completionBlock;
+        withCompletionHandler: (ResponseBlock) completionBlock;
 
 +(void) rejectCredentialOffer: (NSString*) serializedConnection
          serializedCredential: (NSString*) serializedCredential
@@ -30,6 +30,10 @@
 
 +(void)rejectCredentilaFromMessage:(NSString *) data
                withCompletionBlock:(ResponseWithBoolean) completionBlock;
+
++(void)awaitCredentialReceived:(NSString *) serializedCredential
+                         offer:(NSString *) offer
+           withCompletionBlock:(ResponseBlock) completionBlock;
 @end
 
 #endif /* CMCredential_h */
