@@ -418,7 +418,6 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
                             withCompletionBlock:^(BOOL result, NSError *error) {
                             if (result) {
                                 [self switchActionToHistoryView: uuid];
-                                [self addRejectAction: name];
                             };
                         }];
                     }
@@ -439,7 +438,6 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
                     }
                rejectCallback:^() {
                         [self switchActionToHistoryView: uuid];
-                        [self addRejectAction: name];
                }
          ];
         [cell.accept setTitle:@"Answer" forState:UIControlStateNormal];
@@ -460,7 +458,6 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
              withCompletionBlock:^(BOOL result, NSError *error) {
                         if (result) {
                             [self switchActionToHistoryView: uuid];
-                            [self addRejectAction: name];
                         };
                     }];
                 }
