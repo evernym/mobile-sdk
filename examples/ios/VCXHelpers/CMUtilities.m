@@ -68,15 +68,15 @@
     if(!json) {
         return nil;
     }
-    NSError* error;
-    NSArray* array = [NSJSONSerialization JSONObjectWithData: [json dataUsingEncoding: NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
+    
+    @try {
+        NSError* error;
+        NSArray* array = [NSJSONSerialization JSONObjectWithData: [json dataUsingEncoding: NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
 
-    if(error != nil) {
-        NSLog(@"Error deserialization");
+        return array;
+    } @catch(NSException* ex) {
         return @[];
     }
-
-    return array;
 }
 
 +(NSString*)encodeStringTo64: (NSString*)fromString {

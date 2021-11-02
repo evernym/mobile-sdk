@@ -214,7 +214,7 @@
     }
 }
 
-+(void) verityConnectionExist:(NSString *)invite
++(void)  verityConnectionExist:(NSString *)invite
                withCompletion:(ResponseBlock) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
     NSDictionary* newInviteDict = [CMUtilities jsonToDictionary:invite];
@@ -254,6 +254,7 @@
 withCompletionHandler: (ResponseWithObject) completionBlock {
     NSString *type = [requestAttach objectForKey: @"@type"];
     NSLog(@"requestAttachrequestAttach %@", requestAttach);
+    NSLog(@"requestAttachrequestAttach %@", serializedConnection);
 
     if ([type rangeOfString:@"credential"].location != NSNotFound) {
         [CMCredential createWithOffer:[CMUtilities dictToJsonString:requestAttach]
@@ -263,20 +264,30 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
                 return completionBlock(nil, error);
             }
             NSLog(@"Created offer %@", responseObject);
+            NSLog(@"Created offer serializedConnection %@", serializedConnection);
 
             [CMCredential acceptCredentialOffer:serializedConnection
                            serializedCredential:[CMUtilities dictToJsonString:responseObject]
                                           offer:[CMUtilities dictToJsonString:requestAttach]
-                          withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+                          withCompletionHandler:^(NSString *responseObject, NSError *error) {
                 if (error && error.code > 0) {
                     NSLog(@"Error acceptCredentialOffer %@", error);
                     return completionBlock(nil, error);
                 }
-                [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Credential offer accept", name]];
-                NSLog(@"Credential Offer Accepted %@", error);
-                [LocalStorage deleteObjectForKey:@"request~attach"];
+                NSLog(@"Created offer acceptCredentialOffer %@", responseObject);
+                [CMCredential awaitCredentialReceived:responseObject
+                                        offer:[CMUtilities dictToJsonString:requestAttach]
+                          withCompletionBlock:^(NSString *successMessage, NSError *error) {
+                    if (error && error.code > 0) {
+                        return completionBlock(nil, error);
+                    }
+                    [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Credential offer accept", name]];
+                    NSLog(@"Credential Offer Accepted %@", error);
+                    [LocalStorage deleteObjectForKey:@"request~attach"];
 
-                return completionBlock(responseObject, nil);
+                    return completionBlock([CMUtilities jsonToDictionary:successMessage], nil);
+                }];
+                
             }];
         }];
     } else if ([type rangeOfString:@"present-proof"].location != NSNotFound){
@@ -307,7 +318,7 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
                         return completionBlock(nil, error);
                     }
                     [LocalStorage deleteObjectForKey:@"request~attach"];
-                    [NSString stringWithFormat:@"%@ - Proof request send", name];
+                    [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Proof request send", name]];
                     NSLog(@"Proof Request send %@", error);
                     return completionBlock(responseObject, nil);
                 }];
@@ -540,8 +551,9 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
                     if (error && error.code > 0) {
                         return completionBlock(nil, error);
                     }
-                    [CMUtilities printSuccess: @[@"Connection invitation success", successMessage]];
-                    
+//                    NSDictionary* readyConnection = [LocalStorage getObjectForKey: @"readyConnection" shouldCreate: true];
+                    NSLog(@"Connection invitation success %@", successMessage)
+
                     // Store the serialized connection
                     NSDictionary* invitation = [LocalStorage getObjectForKey: @"tempConnection" shouldCreate: true];
 
@@ -555,6 +567,7 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
                     [connections setValue: connectionObj forKey: [self connectionID: connectionObj]];
                     [LocalStorage store: @"connections" andObject: connections];
                     [LocalStorage deleteObjectForKey: @"tempConnection"];
+//                    [LocalStorage deleteObjectForKey: @"readyConnection"];
 
                     return completionBlock(connectionObj, nil);
                 }];
@@ -588,63 +601,73 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
     }];
 }
 
++(void)updateConnectionStatus:(NSInteger) connectionHandle
+                        pwDid:(NSString *) pwDid
+          withCompletionBlock:(ResponseBlock) completionBlock {
+    ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
+    NSString *CONNECTION_RESPONSE = CMMessageType(ConnectionResponse);
+
+    [CMMessage downloadMessage:CONNECTION_RESPONSE
+                      soughtId:pwDid
+           withCompletionBlock:^(NSDictionary *responseObject, NSError *error) {
+        NSLog(@"responseObject DMSG %@", responseObject);
+
+        if (responseObject != nil) {
+            [sdkApi connectionUpdateStateWithMessage:(int)connectionHandle
+                                             message:[responseObject objectForKey:@"payload"]
+                                      withCompletion:^(NSError *error, NSInteger state) {
+                NSLog(@"state DMSG %d", state);
+                
+                [CMMessage updateMessageStatus:[responseObject objectForKey:@"pwDid"]
+                                     messageId:[responseObject objectForKey:@"uid"]
+                           withCompletionBlock:^(BOOL result, NSError *error) {
+                    NSLog(@"updateMessageStatus DMSG %d - %@", result, error);
+                    
+                    if (state == 4) {
+                        [sdkApi connectionSerialize:connectionHandle
+                                         completion:^(NSError *error, NSString *serializedResult) {
+                            return completionBlock(serializedResult, error);
+                        }];
+                    } else {
+                        return completionBlock(nil, error);
+                    }
+                }];
+            }];
+        } else {
+            return completionBlock(nil, error);
+        }
+    }];
+}
+
 +(void)awaitConnectionCompleted:(NSString *) serializedConnection
             withCompletionBlock:(ResponseBlock) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
-    NSString *CONNECTION_RESPONSE = CMMessageType(ConnectionResponse);
     NSString *pwDid = [self getPwDid:serializedConnection];
-    NSLog(@"state DMSG %@", pwDid);
-
+    __block NSString *serialized = @"";
+    
     [sdkApi connectionDeserialize: serializedConnection
                        completion:^(NSError *error, NSInteger connectionHandle) {
         if (error && error.code > 0) {
             return completionBlock(nil, error);
         }
-        NSLog(@"responseObject DMSG %ld", (long)connectionHandle);
         
+        __block BOOL COMPLETE = NO;
+
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            while (true) {
+            while (1) {
                 dispatch_semaphore_t acceptedWaitSemaphore = dispatch_semaphore_create(0);
-                __block NSInteger connectionState = 0;
-                __block NSString *serialized = @"";
-
-                [CMMessage downloadMessage:CONNECTION_RESPONSE
-                                  soughtId:pwDid
-                       withCompletionBlock:^(NSDictionary *responseObject, NSError *error) {
-                    NSLog(@"responseObject DMSG %@", responseObject);
-
-                    if (responseObject != nil) {
-                        [sdkApi connectionUpdateStateWithMessage:(int)connectionHandle
-                                                         message:[responseObject objectForKey:@"payload"]
-                                                  withCompletion:^(NSError *error, NSInteger state) {
-                            NSLog(@"state DMSG %ld", (long)state);
-                            
-                            [CMMessage updateMessageStatus:[responseObject objectForKey:@"pwDid"]
-                                                 messageId:[responseObject objectForKey:@"uid"]
-                                       withCompletionBlock:^(BOOL result, NSError *error) {
-                                NSLog(@"updateMessageStatus result %d - %@", result, error);
-                                
-                                if (state == 4) {
-                                    [sdkApi connectionSerialize:connectionHandle
-                                                     completion:^(NSError *error, NSString *serializedResult) {
-                                        connectionState = state;
-                                        serialized = serializedResult;
-                                        dispatch_semaphore_signal(acceptedWaitSemaphore);
-                                    }];
-                                }
-                            }];
-                        }];
-                    } else {
-                        dispatch_semaphore_signal(acceptedWaitSemaphore);
+                [self updateConnectionStatus:connectionHandle
+                                       pwDid:pwDid
+                         withCompletionBlock:^(NSString *successMessage, NSError *error) {
+                    if (successMessage) {
+                        COMPLETE = YES;
+                        serialized = successMessage;
+                        completionBlock(successMessage, error);
                     }
+                    dispatch_semaphore_signal(acceptedWaitSemaphore);
                 }];
-                NSLog(@"connectionState DMSG %ld", (long)connectionState);
-
                 dispatch_semaphore_wait(acceptedWaitSemaphore, DISPATCH_TIME_FOREVER);
-                if (connectionState == 4) {
-                    return completionBlock(serialized, error);
-                    break;
-                }
+                if (COMPLETE) break;
             }
         });
     }];
