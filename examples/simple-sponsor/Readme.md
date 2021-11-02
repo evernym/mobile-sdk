@@ -4,7 +4,7 @@ This is a simple HTTP server performing generation and signing of tokens which c
 
 #### Prerequisite
 
-- Sponsor registered in Evernym's Cloud Service [see](../../docs/2.Initialization.md#sponsor-ie-you-onboarding-with-evernyms-cloud-service).
+- Sponsor registered in Evernym's Cloud Service [see](../../docs/3.Initialization.md#sponsor-ie-you-onboarding-with-evernyms-cloud-service).
 - Ngrok
 - Python3
 

@@ -1,8 +1,8 @@
 ### Push Notifications
 
-- Key definitions can be found [here](2.Initialization.md#definitions)
+- Key definitions can be found [here](3.Initialization.md#definitions)
 
-- Before you can get started with this, you as the `Sponsor` need to be [onboarded](2.Initialization.md#sponsor-ie-you-onboarding-with-evernyms-cloud-service) with Evernym's Cloud Service. You as the sponsor will need to provide an endpoint during this process.
+- Before you can get started with this, you as the `Sponsor` need to be [onboarded](3.Initialization.md#sponsor-ie-you-onboarding-with-evernyms-cloud-service) with Evernym's Cloud Service. You as the sponsor will need to provide an endpoint during this process.
 
 - To push notify a message to your customer's app (`Sponsee`), you will need to setup your own Push Notification System and handle Message Forwarding on your back-end.
 
@@ -17,13 +17,13 @@
 - Instead, you will need to host your own push notification service, and receive forwarded messages from each `Sponsee`'s cloud agent. This is done by registering with Evernym as a `Sponsor`. See below.
 
 1 Sponsor Registration with Evernym's Cloud Service
- - [As mentioned](2.Initialization.md#sponsor-registration-with-evernyms-cloud-service), you as a `Sponsor` will need to register with Evernym's Cloud Service. An endpoint is provided during this registration. \
+ - [As mentioned](3.Initialization.md#sponsor-registration-with-evernyms-cloud-service), you as a `Sponsor` will need to register with Evernym's Cloud Service. An endpoint is provided during this registration. \
  This `endpoint` will be whatever address you (`Sponsor`) want Evernym's Cloud Service to use to forward, via HTTPs, incoming messages meant for the end customer (`Sponsee`).
  - Your (`Sponsor's`) responsibility is to handle these forwarded messages by push notifying your customer's (`Sponsee's`) app or using some other preferred communication mechanism. \
  This means you (`Sponsor`) will have to implement a communication mechanism (e.g. Push Notification Service) with your customer (`Sponsee`).
 
 2 Sponsee Provisioning 
- - As mentioned [here](2.Initialization.md#mobile-sdk-customer-provisioning-overview), a customer (`Sponsee`) will need to provision with Evernym's Cloud Service using a token signed by you (`Sponsor`).
+ - As mentioned [here](3.Initialization.md#mobile-sdk-customer-provisioning-overview), a customer (`Sponsee`) will need to provision with Evernym's Cloud Service using a token signed by you (`Sponsor`).
  
  - After provisioning is complete, the customer's application (`Sponsee`) will need to call MSDK method to set communication method with the agent.
      * Android - `UtilsApi.vcxUpdateAgentInfo(config)`
@@ -41,7 +41,7 @@
 
   - The customer's `Sponsee's` messages are forwarded to you (the `Sponsor`). `value` will be the whatever information your (`Sponsor's`) back-end will need to deliver that message to the customer (`Sponsee`). You will receive this `value` in the field `sponseeDetails` in the message from CAS. 
   
-  - When Evernym's Cloud Service receives a message for this entity (through provisioned cloud agent), the cloud agent will forward the message to you (`Sponsor`) at whichever endpoint that was provided during [Onboarding](2.Initialization.md#your-sponsor-onboarding-with-evernyms-cloud-service).
+  - When Evernym's Cloud Service receives a message for this entity (through provisioned cloud agent), the cloud agent will forward the message to you (`Sponsor`) at whichever endpoint that was provided during [Onboarding](3.Initialization.md#your-sponsor-onboarding-with-evernyms-cloud-service).
     
   - The cloud agent will forward messages to you (the `Sponsor's`) back-end via http. No A2A encryption will be added. One thing to note here is that this webhook call does not contain cutomer's message. Your customer's cloud agent is only notifying your endpoint that there is a new message available for your customer. The http message will include:
       1. `msgId`:  This is the id that your customer (`Sponsee`) will use to actually download the message

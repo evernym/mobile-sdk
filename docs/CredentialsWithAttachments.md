@@ -15,7 +15,7 @@ Assume that attachments will be implemented the next way:
 
 ## Issuing credentials with attachments
 
-> **NOTE**: for general credential messages structure see [Credentials](4.Credentials.md) section.
+> **NOTE**: for general credential messages structure see [Credentials](5.Credentials.md) section.
 
 To use attachment field in credential the next JSON string will be used as value in credential attributes list:
 
@@ -49,7 +49,7 @@ So credential attributes in `credential_attrs` field should look like this
 
 ## Requesting field with attachment in proof request
 
-> **NOTE**: for proof request messages structure see [Proofs](5.Proofs.md) section
+> **NOTE**: for proof request messages structure see [Proofs](6.Proofs.md) section
 
 To request a credential with an attachment, field name with `_link` postfix should be used in proof request attributes.
 So requested attributes will look like this

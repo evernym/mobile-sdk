@@ -27,7 +27,7 @@ This document contains advice on how to troubleshoot the occurred errors.
 
 #### Investigate SDK logs
 
-1. Configure SDK [logging](./2.Initialization.md#logging) in your application. After doing that you should be able to see log records from SDK.
+1. Configure SDK [logging](3.Initialization.md#logging) in your application. After doing that you should be able to see log records from SDK.
  
 1. Find occurred error details in the log. It should contain either `VcxError` or `IndyError` substrings. 
 

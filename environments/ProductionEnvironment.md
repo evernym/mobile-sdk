@@ -120,4 +120,4 @@ DwXzE7GdE5DNfsrRXJChSD
 {"reqSignature":{"type":"ED25519","values":[{"from":"7Tqg6BwSSWapxgUDm9KKgg","value":"5jhRH4ZJ7YCz3grH2bEPisKuQmF9h3LFPLtDatmMTYxz3Q7YJBFaRXvYbU2ZLjqKdHpzeWb3onPddNxBz6m1DjJk"},{"from":"UkxnVqZFgbyYyh2EFm1pJa","value":"U72mXfFFofUME9SgCux38YjM6FWb6EW4JdF5wPMZBvzc9AsG8t5zYwN1MpLiq57StzHQmyoMoFVk5bZBgnhLXig"},{"from":"VwLvMEP2q7x2RP9QtZqGLE","value":"1Zsk7FaaF7T6ahdTPV3R2CfC9GC4dgr4rKpDEfic4zSzJ5tJevox7yiTLAzgApNk3txUDCNB7AP5GuDnj2nQnCr"}]},"txn":{"data":{"data":{"alias":"ServerVS","services":[]},"dest":"BrVSq23mLDYKJaxb9874MMA1ZudNq6YrUHziuMKjbEeL"},"metadata":{"digest":"d1e36ba7e4300f51025cc1c9762f2787f6d18a2ca90863ad1384d75be3ba0af9","from":"7Tqg6BwSSWapxgUDm9KKgg","payloadDigest":"d6a3918de6f8d30b2a43b0a2bc781b5f2f70c375580bb53a36e86ab121e8a23c","reqId":1628804054367728300},"protocolVersion":2,"type":"0"},"txnMetadata":{"seqNo":102,"txnTime":1628960435},"ver":"1"}
 ```
 
-[<< Continue with initialization](../docs/2.Initialization.md)
+[<< Continue with initialization](../docs/3.Initialization.md)
