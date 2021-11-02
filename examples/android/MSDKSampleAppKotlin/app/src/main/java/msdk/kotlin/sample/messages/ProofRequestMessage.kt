@@ -6,7 +6,7 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
-class ProofRequest(
+class ProofRequestMessage(
     var threadId: String,
     var name: String,
     var attributes: String,
@@ -14,7 +14,7 @@ class ProofRequest(
 ) {
 
     companion object {
-        fun parseProofRequestMessage(msg: Message): ProofRequest? {
+        fun parse(msg: Message): ProofRequestMessage? {
             return try {
                 val json = JSONObject(msg.payload)
                 val data = json.getJSONObject("proof_request_data")
@@ -31,7 +31,7 @@ class ProofRequest(
                         attributes.append(", ")
                     }
                 }
-                ProofRequest(
+                ProofRequestMessage(
                     threadId,
                     name,
                     attributes.toString(),

@@ -7,14 +7,14 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StructuredMessage {
+public class QuestionMessage {
     final String id;
     final String type;
     final String questionText;
     final String questionDetail;
     final List<Response> responses;
 
-    public StructuredMessage(String id, String type, String questionText, String questionDetail, List<Response> responses) {
+    public QuestionMessage(String id, String type, String questionText, String questionDetail, List<Response> responses) {
         this.id = id;
         this.type = type;
         this.questionText = questionText;
@@ -73,12 +73,12 @@ public class StructuredMessage {
     }
 
     /**
-     * Temporary method to parse structured question message JSON string and extract {@link StructuredMessage} from it.
+     * Temporary method to parse structured question message JSON string and extract {@link QuestionMessage} from it.
      *
      * @param message {@link Message}
-     * @return parsed {@link StructuredMessage}
+     * @return parsed {@link QuestionMessage}
      */
-    public static StructuredMessage extract(Message message) {
+    public static QuestionMessage parse(Message message) {
         try {
             JSONObject msg = new JSONObject(message.getPayload());
             String id = msg.getString("@id");
@@ -90,10 +90,10 @@ public class StructuredMessage {
                 JSONObject response = jsonResponses.getJSONObject(i);
                 String text = response.getString("text");
                 String nonce = response.optString("nonce");
-                StructuredMessage.Response res = new StructuredMessage.Response(text, nonce);
+                QuestionMessage.Response res = new QuestionMessage.Response(text, nonce);
                 responses.add(res);
             }
-            return new StructuredMessage(id, message.getType(), questionText, questionDetail, responses);
+            return new QuestionMessage(id, message.getType(), questionText, questionDetail, responses);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

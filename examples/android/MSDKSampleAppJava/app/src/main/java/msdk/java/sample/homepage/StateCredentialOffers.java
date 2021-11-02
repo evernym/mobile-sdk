@@ -56,7 +56,7 @@ public class StateCredentialOffers {
                         offer.attachConnectionName = outOfBandInvite.userMeta.name;
                         db.credentialOffersDao().insertAll(offer);
 
-                        processCredentialOffer(offer, db, liveData, action);
+                        acceptCredentialOffer(offer, db, liveData, action);
                     }
                     return null;
                 });
@@ -66,7 +66,7 @@ public class StateCredentialOffers {
         }
     }
 
-    public static void processCredentialOffer(
+    public static void acceptCredentialOffer(
             CredentialOffer offer,
             Database db,
             SingleLiveData<Results> data,

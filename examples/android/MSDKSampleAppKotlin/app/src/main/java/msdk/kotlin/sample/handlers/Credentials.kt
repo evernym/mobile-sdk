@@ -324,7 +324,7 @@ object Credentials {
             while (true) {
                 try {
                     val message =
-                        Messages.downloadMessage(
+                        Messages.downloadNextMessageFromTheThread(
                             MessageType.CREDENTIAL,
                             threadId
                         ).get()

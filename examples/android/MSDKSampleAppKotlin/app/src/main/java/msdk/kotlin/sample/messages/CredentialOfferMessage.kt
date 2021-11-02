@@ -3,7 +3,7 @@ package msdk.kotlin.sample.messages
 import org.json.JSONArray
 import org.json.JSONException
 
-class CredentialOffer(
+class CredentialOfferMessage(
     var id: String,
     var name: String,
     var attributes: String,
@@ -12,7 +12,7 @@ class CredentialOffer(
 ) {
 
     companion object {
-        fun parseCredentialOfferMessage(msg: Message): CredentialOffer? {
+        fun parse(msg: Message): CredentialOfferMessage? {
             return try {
                 val data = JSONArray(msg.payload).getJSONObject(0)
                 val id = data.getString("claim_id")
@@ -26,7 +26,7 @@ class CredentialOffer(
                     val value = attributesJson.getString(key)
                     attributes.append(String.format("%s: %s\n", key, value))
                 }
-                CredentialOffer(
+                CredentialOfferMessage(
                     id,
                     name,
                     attributes.toString(),

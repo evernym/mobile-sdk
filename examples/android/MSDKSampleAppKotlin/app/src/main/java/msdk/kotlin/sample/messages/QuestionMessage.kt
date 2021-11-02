@@ -4,7 +4,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 
-class StructuredMessage(
+class QuestionMessage(
     val id: String,
     val type: String?,
     val questionText: String,
@@ -30,12 +30,12 @@ class StructuredMessage(
 
     companion object {
         /**
-         * Temporary method to parse structured question message JSON string and extract [StructuredMessage] from it.
+         * Temporary method to parse structured question message JSON string and extract [QuestionMessage] from it.
          *
          * @param message [Message]
-         * @return parsed [StructuredMessage]
+         * @return parsed [QuestionMessage]
          */
-        fun extract(message: Message): StructuredMessage {
+        fun parse(message: Message): QuestionMessage {
             return try {
                 val msg = JSONObject(message.payload)
                 val id = msg.getString("@id")
@@ -52,7 +52,7 @@ class StructuredMessage(
                         Response(text, nonce)
                     responses.add(res)
                 }
-                StructuredMessage(
+                QuestionMessage(
                     id,
                     message.type,
                     questionText,

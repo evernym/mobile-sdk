@@ -51,7 +51,7 @@ public class StateProofRequests {
                     proof.attachConnectionName = outOfBandInvite.userMeta.name;
                     db.proofRequestDao().insertAll(proof);
 
-                    processProofRequest(proof, db, liveData, action);
+                    acceptProofRequest(proof, db, liveData, action);
                 }
                 return null;
             });
@@ -60,7 +60,7 @@ public class StateProofRequests {
         }
     }
 
-    public static void processProofRequest(
+    public static void acceptProofRequest(
             ProofRequest proof,
             Database db,
             SingleLiveData<Results> liveData,

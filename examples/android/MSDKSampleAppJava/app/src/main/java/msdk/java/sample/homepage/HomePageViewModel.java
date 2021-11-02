@@ -16,13 +16,15 @@ import java.util.concurrent.Executors;
 import msdk.java.messages.ConnectionInvitation;
 import msdk.java.handlers.Credentials;
 import msdk.java.handlers.Messages;
-import msdk.java.messages.ProofRequest;
+import msdk.java.messages.CredentialOfferMessage;
+import msdk.java.messages.ProofRequestMessage;
 import msdk.java.handlers.Proofs;
 import msdk.java.handlers.StructuredMessages;
 import msdk.java.messages.Message;
+import msdk.java.sample.db.entity.StructuredMessage;
 import msdk.java.types.MessageAttachment;
 import msdk.java.types.MessageType;
-import msdk.java.messages.StructuredMessage;
+import msdk.java.messages.QuestionMessage;
 import msdk.java.sample.SingleLiveData;
 import msdk.java.sample.db.Database;
 import msdk.java.sample.db.entity.Action;
@@ -57,13 +59,13 @@ public class HomePageViewModel extends AndroidViewModel {
 
     public SingleLiveData<Results> accept(int actionId) {
         SingleLiveData<Results> data = new SingleLiveData<>();
-        acceptProcess(actionId, data);
+        handleAcceptButton(actionId, data);
         return data;
     }
 
     public SingleLiveData<Results> reject(int actionId) {
         SingleLiveData<Results> data = new SingleLiveData<>();
-        rejectProcess(actionId, data);
+        handleRejectButton(actionId, data);
         return data;
     }
 
@@ -75,41 +77,17 @@ public class HomePageViewModel extends AndroidViewModel {
 
     public SingleLiveData<Results> checkMessages() {
         SingleLiveData<Results> data = new SingleLiveData<>();
-        checkAllMessages(data);
+        checkForNewEntryMessages(data);
         return data;
     }
 
     public SingleLiveData<Results> answerMessage(int actionId, JSONObject answer) {
         SingleLiveData<Results> data = new SingleLiveData<>();
-        answerStructMessage(actionId, answer, data);
+        answerQuestion(actionId, answer, data);
         return data;
     }
 
-    private void answerStructMessage(int actionId, JSONObject answer, SingleLiveData<Results> liveData) {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            Action action = db.actionDao().getActionsById(actionId);
-            msdk.java.sample.db.entity.StructuredMessage sm = db.structuredMessageDao().getByEntryIdAndPwDid(action.entryId, action.pwDid);
-
-            Connection connection = db.connectionDao().getByPwDid(sm.pwDid);
-            StructuredMessages.answer(connection.serialized, sm.serialized, answer).handle((res, err) -> {
-                if (err == null) {
-                    try {
-                        sm.selectedAnswer = answer.getString("text");
-                        db.structuredMessageDao().update(sm);
-                        liveData.postValue(QUESTION_SUCCESS);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    liveData.postValue(QUESTION_FAILURE);
-                }
-                return null;
-            });
-            addToHistory(actionId, "Ask to question", db, liveData);
-        });
-    }
-
-    private void checkAllMessages(SingleLiveData<Results> liveData) {
+    private void checkForNewEntryMessages(SingleLiveData<Results> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             Messages.getAllPendingMessages().handle((messages, throwable) -> {
                 if (throwable != null) {
@@ -118,13 +96,13 @@ public class HomePageViewModel extends AndroidViewModel {
                 liveData.postValue(SUCCESS);
                 for (Message message : messages) {
                     if (MessageType.CREDENTIAL_OFFER.matches(message.getType())) {
-                        credentialOffersProcess(message, liveData);
+                        handleReceivedCredentialOffer(message, liveData);
                     }
                     if (MessageType.PROOF_REQUEST.matches(message.getType())) {
-                        proofRequestProcess(message, liveData);
+                        handleReceivedProofRequest(message, liveData);
                     }
                     if (MessageType.QUESTION.matches(message.getType())) {
-                        questionsProcess(message, liveData);
+                        handleReceivedQuestion(message, liveData);
                     }
                 }
                 return null;
@@ -132,8 +110,8 @@ public class HomePageViewModel extends AndroidViewModel {
         });
     }
 
-    private void credentialOffersProcess(Message message, SingleLiveData<Results> liveData) {
-        msdk.java.messages.CredentialOffer credentialOffer = msdk.java.messages.CredentialOffer.parseCredentialOfferMessage(message);
+    private void handleReceivedCredentialOffer(Message message, SingleLiveData<Results> liveData) {
+        CredentialOfferMessage credentialOffer = CredentialOfferMessage.parse(message);
         String pwDid = message.getPwDid();
         Connection connection = db.connectionDao().getByPwDid(pwDid);
         try {
@@ -166,8 +144,8 @@ public class HomePageViewModel extends AndroidViewModel {
         }
     }
 
-    private void proofRequestProcess(Message message, SingleLiveData<Results> liveData) {
-        ProofRequest proofRequest = ProofRequest.parseProofRequestMessage(message);
+    private void handleReceivedProofRequest(Message message, SingleLiveData<Results> liveData) {
+        ProofRequestMessage proofRequest = ProofRequestMessage.parse(message);
         String pwDid = message.getPwDid();
         Connection connection = db.connectionDao().getByPwDid(pwDid);
         try {
@@ -197,29 +175,26 @@ public class HomePageViewModel extends AndroidViewModel {
         }
     }
 
-    private void questionsProcess(Message message, SingleLiveData<Results> liveData) {
-        StructuredMessage holder = StructuredMessage.extract(message);
-
+    private void handleReceivedQuestion(Message message, SingleLiveData<Results> liveData) {
+        QuestionMessage question = QuestionMessage.parse(message);
         String pwDid = message.getPwDid();
         try {
-            msdk.java.sample.db.entity.StructuredMessage sm = new msdk.java.sample.db.entity.StructuredMessage();
+            StructuredMessage sm = new StructuredMessage();
             sm.pwDid = pwDid;
-            sm.entryId = holder.getId();
-            sm.type = holder.getType();
+            sm.entryId = question.getId();
+            sm.type = question.getType();
             sm.serialized = message.getPayload();
-            sm.answers = holder.getResponses();
+            sm.answers = question.getResponses();
             db.structuredMessageDao().insertAll(sm);
 
-            if ("question".equals(holder.getType())) {
-                Messages.updateMessageStatus(pwDid, message.getUid());
-            }
+            Messages.updateMessageStatus(pwDid, message.getUid());
             createActionWithQuestion(
                     MessageType.QUESTION.toString(),
-                    holder.getQuestionText(),
-                    holder.getQuestionDetail(),
+                    question.getQuestionText(),
+                    question.getQuestionDetail(),
                     pwDid,
-                    holder.getId(),
-                    holder.getResponses(),
+                    question.getId(),
+                    question.getResponses(),
                     liveData
             );
         } catch (Exception e) {
@@ -227,7 +202,7 @@ public class HomePageViewModel extends AndroidViewModel {
         }
     }
 
-    private void acceptProcess(int actionId, SingleLiveData<Results> liveData) {
+    private void handleAcceptButton(int actionId, SingleLiveData<Results> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
                 Action action = db.actionDao().getActionsById(actionId);
@@ -237,12 +212,12 @@ public class HomePageViewModel extends AndroidViewModel {
                 }
                 if (action.type.equals(MessageType.CREDENTIAL_OFFER.toString())) {
                     CredentialOffer offer = db.credentialOffersDao().getByPwDidAndClaimId(action.claimId, action.pwDid);
-                    StateCredentialOffers.processCredentialOffer(offer, db, liveData, action);
+                    StateCredentialOffers.acceptCredentialOffer(offer, db, liveData, action);
                     return;
                 }
                 if (action.type.equals(MessageType.PROOF_REQUEST.toString())) {
                     msdk.java.sample.db.entity.ProofRequest proof = db.proofRequestDao().getByThreadId(action.threadId);
-                    StateProofRequests.processProofRequest(proof, db, liveData, action);
+                    StateProofRequests.acceptProofRequest(proof, db, liveData, action);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -251,7 +226,7 @@ public class HomePageViewModel extends AndroidViewModel {
         });
     }
 
-    private void rejectProcess(int actionId, SingleLiveData<Results> liveData) {
+    private void handleRejectButton(int actionId, SingleLiveData<Results> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
                 Action action = db.actionDao().getActionsById(actionId);
@@ -272,6 +247,30 @@ public class HomePageViewModel extends AndroidViewModel {
                 e.printStackTrace();
                 liveData.postValue(FAILURE);
             }
+        });
+    }
+
+    private void answerQuestion(int actionId, JSONObject answer, SingleLiveData<Results> liveData) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            Action action = db.actionDao().getActionsById(actionId);
+            StructuredMessage sm = db.structuredMessageDao().getByEntryIdAndPwDid(action.entryId, action.pwDid);
+
+            Connection connection = db.connectionDao().getByPwDid(sm.pwDid);
+            StructuredMessages.answer(connection.serialized, sm.serialized, answer).handle((res, err) -> {
+                if (err == null) {
+                    try {
+                        sm.selectedAnswer = answer.getString("text");
+                        db.structuredMessageDao().update(sm);
+                        liveData.postValue(QUESTION_SUCCESS);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    liveData.postValue(QUESTION_FAILURE);
+                }
+                return null;
+            });
+            addToHistory(actionId, "Ask to question", db, liveData);
         });
     }
 
@@ -297,13 +296,13 @@ public class HomePageViewModel extends AndroidViewModel {
                         db.actionDao().insertAll(action);
                     }
                     if (attachment.isProofAttachment()) {
-                        JSONObject decodedProofAttach = ProofRequest.decodeProofRequestAttach(attachment.data);
+                        JSONObject decodedProofAttach = ProofRequestMessage.decodeProofRequestAttach(attachment.data);
 
                         Action action = new Action();
                         action.invite = invite;
-                        action.name = ProofRequest.extractRequestedNameFromProofRequest(decodedProofAttach);
+                        action.name = ProofRequestMessage.extractRequestedNameFromProofRequest(decodedProofAttach);
                         action.description = inviteObject.getString("goal");
-                        action.details = ProofRequest.extractRequestedAttributesFromProofRequest(decodedProofAttach);
+                        action.details = ProofRequestMessage.extractRequestedAttributesFromProofRequest(decodedProofAttach);
                         action.icon = inviteObject.getString("profileUrl");
                         action.status = PENDING.toString();
                         db.actionDao().insertAll(action);
@@ -383,7 +382,7 @@ public class HomePageViewModel extends AndroidViewModel {
             String details,
             String pwDid,
             String entryId,
-            List<StructuredMessage.Response> messageAnswers,
+            List<QuestionMessage.Response> messageAnswers,
             SingleLiveData<Results> liveData
     ) {
         try {
