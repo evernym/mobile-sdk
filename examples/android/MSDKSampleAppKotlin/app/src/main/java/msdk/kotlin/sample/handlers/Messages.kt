@@ -7,6 +7,7 @@ import msdk.kotlin.sample.logger.Logger
 import msdk.kotlin.sample.messages.Message
 import msdk.kotlin.sample.types.MessageStatusType
 import msdk.kotlin.sample.types.MessageType
+import msdk.kotlin.sample.types.UpdateMessageStatusBody
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -17,7 +18,7 @@ import java.util.*
  */
 object Messages {
     /**
-     * Retrieve pending messages.
+     * Retrieve all pending messages.
      *
      * @return List of [Message]
      */
@@ -78,7 +79,10 @@ object Messages {
             return result
         }
 
-    fun downloadMessage(
+    /*
+    * Download and find message from the specific thread
+    * */
+    fun downloadNextMessageFromTheThread(
         messageType: MessageType,
         id: String
     ): CompletableFuture<Message?> {
@@ -93,47 +97,28 @@ object Messages {
                 var foundMessage: Message? = null
                 for (message in messages) {
                     try {
-                        val msg = message.payload
+                        val msg: String = message.payload
+                        val pwDid: String = message.pwDid
                         val msgPayload = JSONObject(msg)
                         val type = msgPayload.getString("@type")
-                        if (messageType == MessageType.CREDENTIAL && messageType.matchesValue(
-                                type
-                            )
-                        ) {
-                            val thread = msgPayload.getJSONObject("~thread")
-                            val thid = thread.getString("thid")
-                            if (thid == id) {
-                                foundMessage = message
-                                break
-                            }
-                        }
-                        if (messageType == MessageType.CONNECTION_RESPONSE && messageType.matchesValue(
-                                type
-                            )
-                        ) {
-                            val pwDid = message.pwDid
-                            if (pwDid == id) {
-                                foundMessage = message
-                                break
-                            }
-                        }
-                        if (messageType == MessageType.ACK && messageType.matchesValue(
-                                type
-                            )
-                        ) {
+                        val thread = msgPayload.getJSONObject("~thread")
+                        val thid = thread.getString("thid")
+
+                        if (messageType == MessageType.CREDENTIAL && messageType.matchesValue(type) && thid == id) {
                             foundMessage = message
                             break
                         }
-                        if (messageType == MessageType.HANDSHAKE && messageType.matchesValue(
-                                type
-                            )
-                        ) {
-                            val thread = msgPayload.getJSONObject("~thread")
-                            val thid = thread.getString("pthid")
-                            if (thid == id) {
-                                foundMessage = message
-                                break
-                            }
+                        if (messageType == MessageType.CONNECTION_RESPONSE && messageType.matchesValue(type) && pwDid == id) {
+                            foundMessage = message
+                            break
+                        }
+                        if (messageType == MessageType.ACK && messageType.matchesValue(type)) {
+                            foundMessage = message
+                            break
+                        }
+                        if (messageType == MessageType.HANDSHAKE && messageType.matchesValue(type) && thid == id) {
+                            foundMessage = message
+                            break
                         }
                     } catch (e: JSONException) {
                         e.printStackTrace()
@@ -145,17 +130,20 @@ object Messages {
         return result
     }
 
+    /*
+    * Update status of the message as reviewed
+    * */
     fun updateMessageStatus(pwDid: String?, messageId: String?) {
         val result =
             CompletableFuture<String?>()
         try {
-            val jsonMsg =
-                prepareUpdateMessage(pwDid, messageId)
-            UtilsApi.vcxUpdateMessages(MessageStatusType.REVIEWED, jsonMsg)
+            val messagesToUpdate: String = UpdateMessageStatusBody()
+                .addMessage(pwDid!!, messageId!!)
+                .toJSON()
+            UtilsApi.vcxUpdateMessages(MessageStatusType.REVIEWED, messagesToUpdate)
                 .whenComplete { v1: Void?, error: Throwable? ->
                     if (error != null) {
-                        Logger.instance
-                            .e("Failed to update messages", error)
+                        Logger.instance.e("Failed to update messages", error)
                         result.completeExceptionally(error)
                     } else {
                         result.complete(null)
@@ -164,16 +152,5 @@ object Messages {
         } catch (ex: Exception) {
             result.completeExceptionally(ex)
         }
-    }
-
-    fun prepareUpdateMessage(
-        pairwiseDid: String?,
-        messsageId: String?
-    ): String {
-        return String.format(
-            "[{\"pairwiseDID\" : \"%s\", \"uids\": [\"%s\"]}]",
-            pairwiseDid,
-            messsageId
-        )
     }
 }

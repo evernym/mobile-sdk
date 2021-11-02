@@ -79,7 +79,7 @@ public class Connections {
                             } else {
                                 while (true) {
                                     try {
-                                        Message message = Messages.downloadMessage(MessageType.HANDSHAKE, threadId).get();
+                                        Message message = Messages.downloadNextMessageFromTheThread(MessageType.HANDSHAKE, threadId).get();
                                         System.out.println("Message Received " + message.getPayload());
                                         if (message != null) {
                                             String pwDid = Connections.getPwDid(serializedConnection);
@@ -224,7 +224,7 @@ public class Connections {
             Integer handle = ConnectionApi.connectionDeserialize(serializedConnection).get();
             while (true) {
                 try {
-                    Message message = Messages.downloadMessage(MessageType.CONNECTION_RESPONSE, pwDid).get();
+                    Message message = Messages.downloadNextMessageFromTheThread(MessageType.CONNECTION_RESPONSE, pwDid).get();
                         status = ConnectionApi.vcxConnectionUpdateStateWithMessage(handle, message.getPayload()).get();
                         Messages.updateMessageStatus(pwDid, message.getUid());
                         if (StateMachineState.ACCEPTED.matches(status)) {

@@ -182,7 +182,7 @@ public class HomePageFragment extends Fragment {
 
     private void answer(int entryId, JSONObject answer) {
         model.answerMessage(entryId, answer).observeOnce(getViewLifecycleOwner(), ok -> {
-            Toast.makeText(getActivity(), "Struct message processed", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Question answered", Toast.LENGTH_SHORT).show();
         });
     }
 }

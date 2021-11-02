@@ -19,7 +19,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import msdk.java.messages.StructuredMessage;
+import msdk.java.messages.QuestionMessage;
 import msdk.java.sample.R;
 import msdk.java.sample.db.entity.Action;
 
@@ -77,7 +77,7 @@ public class HomePageAdapter extends RecyclerView.Adapter<HomePageAdapter.HomePa
                 holder.selectedAnswer.setText("Selected answer: " + action.selectedAnswer);
             } else {
                 holder.selectedAnswer.setVisibility(View.GONE);
-                for (StructuredMessage.Response response : action.messageAnswers) {
+                for (QuestionMessage.Response response : action.messageAnswers) {
                     Button btn = new AppCompatButton(holder.itemView.getContext());
                     btn.setText(response.getText());
                     holder.buttonHolder.addView(btn);

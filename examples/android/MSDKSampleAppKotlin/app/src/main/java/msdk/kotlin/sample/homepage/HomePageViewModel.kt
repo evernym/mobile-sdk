@@ -23,11 +23,11 @@ import msdk.kotlin.sample.homepage.Results.*
 import msdk.kotlin.sample.messages.ConnectionInvitation.getConnectionInvitationFromData
 import msdk.kotlin.sample.messages.ConnectionInvitation.getInvitationType
 import msdk.kotlin.sample.messages.ConnectionInvitation.isAriesOutOfBandConnectionInvitation
-import msdk.kotlin.sample.messages.CredentialOffer.Companion.parseCredentialOfferMessage
-import msdk.kotlin.sample.messages.ProofRequest.Companion.decodeProofRequestAttach
-import msdk.kotlin.sample.messages.ProofRequest.Companion.extractRequestedAttributesFromProofRequest
-import msdk.kotlin.sample.messages.ProofRequest.Companion.extractRequestedNameFromProofRequest
-import msdk.kotlin.sample.messages.ProofRequest.Companion.parseProofRequestMessage
+import msdk.kotlin.sample.messages.CredentialOfferMessage
+import msdk.kotlin.sample.messages.ProofRequestMessage
+import msdk.kotlin.sample.messages.ProofRequestMessage.Companion.decodeProofRequestAttach
+import msdk.kotlin.sample.messages.ProofRequestMessage.Companion.extractRequestedAttributesFromProofRequest
+import msdk.kotlin.sample.messages.ProofRequestMessage.Companion.extractRequestedNameFromProofRequest
 import msdk.kotlin.sample.utils.wrap
 import org.json.JSONException
 import org.json.JSONObject
@@ -43,13 +43,13 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
 
     fun accept(actionId: Int): SingleLiveData<Results> {
         val data = SingleLiveData<Results>()
-        acceptProcess(actionId, data)
+        handleAcceptButton(actionId, data)
         return data
     }
 
     fun reject(actionId: Int): SingleLiveData<Results> {
         val data = SingleLiveData<Results>()
-        rejectProcess(actionId, data)
+        handleRejectButton(actionId, data)
         return data
     }
 
@@ -61,61 +61,44 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
 
     fun checkMessages(): SingleLiveData<Results> {
         val data = SingleLiveData<Results>()
-        checkAllMessages(data)
+        checkForNewEntryMessages(data)
         return data
     }
 
     fun answerMessage(actionId: Int, answer: JSONObject): SingleLiveData<Results> {
         val data = SingleLiveData<Results>()
-        answerStructMessage(actionId, answer, data)
+        answerQuestion(actionId, answer, data)
         return data
     }
 
-    private fun answerStructMessage(actionId: Int, answer: JSONObject, liveData: SingleLiveData<Results>) = viewModelScope.launch(Dispatchers.IO) {
-        try {
-            val action = db.actionDao().getActionsById(actionId)
-            val con = db.connectionDao().getByPwDid(action.pwDid!!)
-            val sm = db.structuredMessageDao().getByEntryIdAndPwDid(action.entryId, action.pwDid)
-
-            StructuredMessages.answer(con.serialized, sm!!.serialized, answer).wrap().await()
-            sm.selectedAnswer = answer.getString("text")
-            db.structuredMessageDao().update(sm)
-            liveData.postValue(QUESTION_SUCCESS)
-            HistoryActions.addToHistory(actionId, "Ask to question", db, liveData)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            liveData.postValue(QUESTION_FAILURE)
-        }
-    }
-
-    private fun checkAllMessages(liveData: SingleLiveData<Results>) = viewModelScope.launch(Dispatchers.IO) {
+    private fun checkForNewEntryMessages(liveData: SingleLiveData<Results>) = viewModelScope.launch(Dispatchers.IO) {
         val messages = Messages.allPendingMessages.wrap().await()
         liveData.postValue(SUCCESS)
         for (message in messages) {
             if (MessageType.CREDENTIAL_OFFER.matches(message.type)) {
-                credentialOffersProcess(message, liveData)
+                handleReceivedCredentialOffer(message, liveData)
             }
             if (MessageType.PROOF_REQUEST.matches(message.type)) {
-                proofRequestProcess(message, liveData)
+                handleReceivedProofRequest(message, liveData)
             }
             if (MessageType.QUESTION.matches(message.type)) {
-                questionsProcess(message, liveData)
+                handleReceivedQuestion(message, liveData)
             }
         }
     }
 
-    private suspend fun credentialOffersProcess(message: Message, liveData: SingleLiveData<Results>) {
+    private suspend fun handleReceivedCredentialOffer(message: Message, liveData: SingleLiveData<Results>) {
         try {
-            val holder = parseCredentialOfferMessage(message)
+            val credentialOffer = CredentialOfferMessage.parse(message)
             val pwDid: String = message.pwDid
             val connection: Connection = db.connectionDao().getByPwDid(pwDid)
-            val co = Credentials.createWithOffer(UUID.randomUUID().toString(), holder!!.offer!!).wrap().await()
+            val co = Credentials.createWithOffer(UUID.randomUUID().toString(), credentialOffer!!.offer!!).wrap().await()
             val offer = CredentialOffer(
-                claimId = holder.id,
+                claimId = credentialOffer.id,
                 pwDid = pwDid,
                 serialized = co,
                 attachConnectionLogo = connection.icon,
-                threadId = holder.threadId
+                threadId = credentialOffer.threadId
             )
             db.credentialOffersDao().insertAll(offer)
 
@@ -123,10 +106,10 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
 
             createActionWithOffer(
                 MessageType.CREDENTIAL_OFFER.toString(),
-                holder.name,
+                credentialOffer.name,
                 connection.icon!!,
-                holder.attributes,
-                holder.id,
+                credentialOffer.attributes,
+                credentialOffer.id,
                 pwDid,
                 liveData
             )
@@ -135,16 +118,16 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    private suspend fun proofRequestProcess(message: Message, liveData: SingleLiveData<Results>) {
+    private suspend fun handleReceivedProofRequest(message: Message, liveData: SingleLiveData<Results>) {
         try {
-            val holder = parseProofRequestMessage(message)!!
+            val proofRequest = ProofRequestMessage.parse(message)!!
             val pwDid: String = message.pwDid
             val connection: Connection = db.connectionDao().getByPwDid(pwDid)
-            val pr = Proofs.createWithRequest(UUID.randomUUID().toString(), holder.proofReq!!).wrap().await()
+            val pr = Proofs.createWithRequest(UUID.randomUUID().toString(), proofRequest.proofReq!!).wrap().await()
             val proof = ProofRequest(
                     serialized = pr,
                     pwDid = pwDid,
-                    threadId = holder.threadId,
+                    threadId = proofRequest.threadId,
                     attachConnectionLogo = connection.icon
             )
             db.proofRequestDao().insertAll(proof)
@@ -153,9 +136,9 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
 
             createActionWithProof(
                 MessageType.CREDENTIAL_OFFER.toString(),
-                holder.name,
+                proofRequest.name,
                 connection.icon!!,
-                holder.threadId,
+                proofRequest.threadId,
                 liveData
             )
         } catch (e: Exception) {
@@ -163,32 +146,30 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    private suspend fun questionsProcess(
+    private suspend fun handleReceivedQuestion(
         message: Message,
         liveData: SingleLiveData<Results>
     ) {
-        val holder = msdk.kotlin.sample.messages.StructuredMessage.extract(message)
+        val question = msdk.kotlin.sample.messages.QuestionMessage.parse(message)
         val pwDid = message.pwDid
         try {
             val sm = StructuredMessage(
                 pwDid = pwDid,
-                entryId = holder.id,
-                type = holder.type!!,
+                entryId = question.id,
+                type = question.type!!,
                 serialized = message.payload,
-                answers = holder.responses
+                answers = question.responses
             )
 
             db.structuredMessageDao().insertAll(sm)
-            if ("question" == holder.type) {
-                Messages.updateMessageStatus(pwDid, message.uid)
-            }
+            Messages.updateMessageStatus(pwDid, message.uid)
             createActionWithQuestion(
                 MessageType.CREDENTIAL_OFFER.toString(),
-                holder.questionText,
-                holder.questionDetail,
+                question.questionText,
+                question.questionDetail,
                 pwDid,
-                holder.id,
-                holder.responses,
+                question.id,
+                question.responses,
                 liveData
             )
         } catch (e: java.lang.Exception) {
@@ -196,7 +177,7 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    private fun acceptProcess(
+    private fun handleAcceptButton(
         actionId: Int,
         liveData: SingleLiveData<Results>
     ) = viewModelScope.launch(Dispatchers.IO) {
@@ -221,7 +202,7 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    private fun rejectProcess(
+    private fun handleRejectButton(
         actionId: Int,
         liveData: SingleLiveData<Results>
     ) = viewModelScope.launch(Dispatchers.IO) {
@@ -245,6 +226,23 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
             liveData.postValue(FAILURE)
         }
 
+    }
+
+    private fun answerQuestion(actionId: Int, answer: JSONObject, liveData: SingleLiveData<Results>) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val action = db.actionDao().getActionsById(actionId)
+            val con = db.connectionDao().getByPwDid(action.pwDid!!)
+            val sm = db.structuredMessageDao().getByEntryIdAndPwDid(action.entryId, action.pwDid)
+
+            StructuredMessages.answer(con.serialized, sm!!.serialized, answer).wrap().await()
+            sm.selectedAnswer = answer.getString("text")
+            db.structuredMessageDao().update(sm)
+            liveData.postValue(QUESTION_SUCCESS)
+            HistoryActions.addToHistory(actionId, "Ask to question", db, liveData)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            liveData.postValue(QUESTION_FAILURE)
+        }
     }
 
     private fun createAction(
@@ -360,13 +358,13 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
     }
 
     private suspend fun createActionWithQuestion(
-            type: String,
-            name: String,
-            details: String,
-            pwDid: String,
-            entryId: String,
-            messageAnswers: List<msdk.kotlin.sample.messages.StructuredMessage.Response>,
-            liveData: SingleLiveData<Results>
+        type: String,
+        name: String,
+        details: String,
+        pwDid: String,
+        entryId: String,
+        messageAnswers: List<msdk.kotlin.sample.messages.QuestionMessage.Response>,
+        liveData: SingleLiveData<Results>
     ) {
         try {
             val action = Action(

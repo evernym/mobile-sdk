@@ -5,8 +5,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import msdk.kotlin.sample.databinding.MainActivityBinding
 import msdk.kotlin.sample.handlers.Initialization
-import org.json.JSONException
 import java.util.concurrent.Executors
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var viewBinding: MainActivityBinding
@@ -14,7 +14,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initViews()
-        initSdk()
+        initialize()
     }
 
     private fun initViews() {
@@ -25,53 +25,23 @@ class MainActivity : AppCompatActivity() {
         viewBinding.tabLayout.setupWithViewPager(viewBinding.pager)
     }
 
-    private fun initSdk() {
-        Toast.makeText(this, "Started SDK initialization", Toast.LENGTH_SHORT).show()
+    private fun initialize() {
+        Toast.makeText(this, "Application initialization started", Toast.LENGTH_SHORT).show()
         Executors.newSingleThreadExecutor().execute {
-            if (!Initialization.isCloudAgentProvisioned(this)) {
-                firstTimeRun()
-            } else {
-                regularRun()
-            }
-        }
-    }
-
-    private fun firstTimeRun() {
-        try {
+            // 1. Start initialization
             val constants = buildConstants()
-
-            // 1. Start provisioning
-            Initialization.provisionCloudAgentAndInitializeSdk(this, constants, R.raw.genesis)
+            Initialization.initialize(this, constants, R.raw.genesis)
                 .whenComplete { res: Void?, ex: Throwable? ->
-                    val message: String
                     if (ex != null) {
                         runOnUiThread {
-                            Toast.makeText(this, "Sdk not initialized: ", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Application initialization failed", Toast.LENGTH_SHORT).show()
                         }
                     } else {
                         runOnUiThread {
-                            Toast.makeText(this, "SDK initialized successfully.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Application successfully initialized", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
-        } catch (e: JSONException) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun regularRun() {
-        // 1. Start initialization
-        Initialization.initializeSdk(this, R.raw.genesis).handleAsync<Any?> { res: Void?, err: Throwable? ->
-            val message: String
-            if (err == null) {
-                runOnUiThread {
-                    Toast.makeText(this, "SDK initialized successfully.", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                runOnUiThread {
-                    Toast.makeText(this, "SDK was not initialized!", Toast.LENGTH_SHORT).show()
-                }
-            }
         }
     }
 

@@ -1,7 +1,7 @@
 package msdk.kotlin.sample.db
 
 import androidx.room.TypeConverter
-import msdk.kotlin.sample.messages.StructuredMessage
+import msdk.kotlin.sample.messages.QuestionMessage
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -9,12 +9,12 @@ import org.json.JSONObject
 
 class ResponseConverter {
     @TypeConverter
-    fun fromString(value: String?): List<StructuredMessage.Response> = try {
-        val responses = mutableListOf<StructuredMessage.Response>()
+    fun fromString(value: String?): List<QuestionMessage.Response> = try {
+        val responses = mutableListOf<QuestionMessage.Response>()
         val json = JSONArray(value)
         for (i in 0 until json.length()) {
             val entry = json.getJSONObject(i)
-            val response = StructuredMessage.Response(entry.getString("text"), entry.getString("nonce"))
+            val response = QuestionMessage.Response(entry.getString("text"), entry.getString("nonce"))
             responses.add(response)
         }
         responses
@@ -23,7 +23,7 @@ class ResponseConverter {
     }
 
     @TypeConverter
-    fun fromResponseList(responses: List<StructuredMessage.Response>?): String {
+    fun fromResponseList(responses: List<QuestionMessage.Response>?): String {
         try {
             val json = JSONArray()
             if (responses != null) {

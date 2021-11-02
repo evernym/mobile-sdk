@@ -6,14 +6,14 @@ import org.json.JSONObject;
 
 import java.util.Iterator;
 
-public class CredentialOffer {
+public class CredentialOfferMessage {
     public String id;
     public String name;
     public String attributes;
     public String offer;
     public String threadId;
 
-    public CredentialOffer(String id, String name, String attributes, String offer, String threadId) {
+    public CredentialOfferMessage(String id, String name, String attributes, String offer, String threadId) {
         this.id = id;
         this.name = name;
         this.attributes = attributes;
@@ -21,7 +21,7 @@ public class CredentialOffer {
         this.threadId = threadId;
     }
 
-    public static CredentialOffer parseCredentialOfferMessage(Message msg) {
+    public static CredentialOfferMessage parse(Message msg) {
         try {
             JSONObject data = new JSONArray(msg.getPayload()).getJSONObject(0);
             String id = data.getString("claim_id");
@@ -35,7 +35,7 @@ public class CredentialOffer {
                 String value = attributesJson.getString(key);
                 attributes.append(String.format("%s: %s\n", key, value));
             }
-            return new CredentialOffer(
+            return new CredentialOfferMessage(
                     id,
                     name,
                     attributes.toString(),

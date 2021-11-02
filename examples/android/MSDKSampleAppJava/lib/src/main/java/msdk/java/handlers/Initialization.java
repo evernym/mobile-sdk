@@ -49,21 +49,67 @@ public class Initialization {
     }
 
     /**
-     * Provision Cloud Agent and initialize library
+     * Initialize library and provision Cloud Agent if it's not done yet
      */
-    public static CompletableFuture<Void> provisionCloudAgentAndInitializeSdk(
+    public static @NonNull
+    CompletableFuture<Void> initialize(
             Context context,
             Constants constants,
             @RawRes int genesisPool
+    ) {
+        Logger.getInstance().setLogLevel(LogLevel.DEBUG);
+
+        CompletableFuture<Void> result = new CompletableFuture<>();
+
+        try {
+            // 1. Configure storage permissions
+            configureStoragePermissions(context);
+            // 2. Configure Logger
+            Logger.configureLogger(context);
+
+            // 3. Provision Cloud Agent if needed
+            if (!Initialization.isCloudAgentProvisioned(context)) {
+                Initialization.provisionCloudAgent(context, constants).get();
+            }
+
+            // 4. Receive config from the storage
+            String config = SecurePreferencesHelper.getLongStringValue(context, SECURE_PREF_VCX_CONFIG, null);
+
+            // 5. Initialize VCX library
+            VcxApi.vcxInitWithConfig(config).whenComplete((integer, err) -> {
+                if (err != null) {
+                    result.completeExceptionally(err);
+                } else {
+                    // 3. Initialize pool
+                    initializePool(context, genesisPool);
+                    result.complete(null);
+                }
+            });
+        }catch (AlreadyInitializedException e) {
+            // even if we get already initialized exception
+            // then also we will resolve promise, because we don't care if vcx is already
+            // initialized
+            result.complete(null);
+        } catch (VcxException e) {
+            e.printStackTrace();
+            result.completeExceptionally(e);
+        } catch (Exception e) {
+            result.completeExceptionally(e);
+        }
+        return result;
+    }
+
+    /**
+     * Provision Cloud Agent and store populated config
+     */
+    public static CompletableFuture<Void> provisionCloudAgent(
+            Context context,
+            Constants constants
     ) throws JSONException {
         Logger.getInstance().setLogLevel(LogLevel.DEBUG);
 
         Activity activity = (Activity) context;
 
-        // 1. Configure storage permissions
-        configureStoragePermissions(context);
-        // 2. Configure Logger
-        Logger.configureLogger(context);
         // 3. Prepare provisioning config
         String provisioningConfig = ProvisioningConfig.builder()
                 .withAgencyEndpoint(constants.AGENCY_ENDPOINT)
@@ -95,17 +141,7 @@ public class Initialization {
                             try {
                                 // 6. Store config with provisioned Cloud Agent data
                                 SecurePreferencesHelper.setLongStringValue(context, SECURE_PREF_VCX_CONFIG, oneTimeInfo);
-
-                                // 7. Initialize library
-                                initialize(context, genesisPool).whenComplete((returnCode, error) -> {
-                                    if (error != null) {
-                                        Logger.getInstance().e("Init failed", error);
-                                        result.completeExceptionally(error);
-                                    } else {
-                                        Logger.getInstance().i("Init completed");
-                                        result.complete(null);
-                                    }
-                                });
+                                result.complete(null);
                             } catch (Exception e) {
                                 result.completeExceptionally(e);
                             }
@@ -121,60 +157,9 @@ public class Initialization {
     }
 
     /**
-     * Initialize library without Cloud Agent provisioning
+     * Connect to Pool Ledger in a separate thread
      */
-    public static @NonNull
-    CompletableFuture<Void> initializeSdk(Context context, @RawRes int genesisPool) {
-        Logger.getInstance().setLogLevel(LogLevel.DEBUG);
-
-        CompletableFuture<Void> result = new CompletableFuture<>();
-
-        // 1. Configure storage permissions
-        configureStoragePermissions(context);
-        // 2. Configure Logger
-        Logger.configureLogger(context);
-        // 3. Initialize library
-        initialize(context, genesisPool).whenComplete((returnCode, err) -> {
-            if (err != null) {
-                Logger.getInstance().e("Init failed", err);
-                result.completeExceptionally(err);
-            } else {
-                Logger.getInstance().i("Init completed");
-                result.complete(null);
-            }
-        });
-        return result;
-    }
-
-    private static CompletableFuture<Void> initialize(Context context, @RawRes int genesisPool) {
-        CompletableFuture<Void> result = new CompletableFuture<>();
-        try {
-            // 1. Receive config from the storage
-            String config = SecurePreferencesHelper.getLongStringValue(context, SECURE_PREF_VCX_CONFIG, null);
-
-            // 2. Initialize VCX library
-            VcxApi.vcxInitWithConfig(config).whenComplete((integer, err) -> {
-                if (err != null) {
-                    result.completeExceptionally(err);
-                } else {
-                    // 3. Initialize pool
-                    initPool(context, genesisPool);
-                    result.complete(null);
-                }
-            });
-        } catch (AlreadyInitializedException e) {
-            // even if we get already initialized exception
-            // then also we will resolve promise, because we don't care if vcx is already
-            // initialized
-            result.complete(null);
-        } catch (VcxException e) {
-            e.printStackTrace();
-            result.completeExceptionally(e);
-        }
-        return result;
-    }
-
-    private static void initPool(Context context, @RawRes int genesisPool) {
+    private static void initializePool(Context context, @RawRes int genesisPool) {
         // 1. Run Pool initialization in a separate thread
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
@@ -190,6 +175,9 @@ public class Initialization {
         });
     }
 
+    /**
+     * Retrieve provisioning token from Sponsor Server
+     */
     private static String retrieveToken(Activity activity, Constants constants) throws Exception {
         Log.d(TAG, "Retrieving token");
 
@@ -229,59 +217,6 @@ public class Initialization {
         }
         Log.d(TAG, "Retrieved token: " + token);
         return token;
-    }
-
-//    public static void sendToken(
-//            Activity activity,
-//            String PREFERENCES_KEY,
-//            String FCM_TOKEN) {
-//        SharedPreferences prefs = activity.getSharedPreferences(PREFERENCES_KEY, Context.MODE_PRIVATE);
-//        String token = prefs.getString(FCM_TOKEN, null);
-//        if (token != null) {
-//            ConnectMeVcx.updateAgentInfo(UUID.randomUUID().toString(), token).whenComplete((res, err) -> {
-//                if (err == null) {
-//                    Log.d(TAG, "FCM token updated successfully");
-//                } else {
-//                    Log.e(TAG, "FCM token was not updated: ", err);
-//                }
-//            });
-//        }
-//    }
-//
-//    public static CompletableFuture<Void> updateAgentInfo(String id, String token) {
-//        CompletableFuture<Void> result = new CompletableFuture<>();
-//        try {
-//            JSONObject config = new JSONObject();
-//            config.put("type", 3);
-//            config.put("id", id);
-//            config.put("value", "FCM:" + token);
-//            UtilsApi.vcxUpdateAgentInfo(config.toString()).whenComplete((v, err) -> {
-//                if (err != null) {
-//                    // Fixme workaround due to issues on agency side
-//                    if (err instanceof InvalidAgencyResponseException
-//                            && ((InvalidAgencyResponseException) err).getSdkCause().contains("data did not match any variant of untagged enum MessageTypes")) {
-//                        result.complete(null);
-//                    } else {
-//                        Logger.getInstance().e("Failed to update agent info", err);
-//                        result.completeExceptionally(err);
-//                    }
-//                } else {
-//                    result.complete(null);
-//                }
-//            });
-//        } catch (Exception ex) {
-//            result.completeExceptionally(ex);
-//        }
-//        return result;
-//    }
-
-    public void shutdownVcx(Boolean deleteWallet) {
-        Logger.getInstance().d(" ==> shutdownVcx() called with: deleteWallet = [" + deleteWallet);
-        try {
-            VcxApi.vcxShutdown(deleteWallet);
-        } catch (VcxException e) {
-            e.printStackTrace();
-        }
     }
 
     public static final class ConstantsBuilder {

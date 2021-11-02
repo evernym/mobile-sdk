@@ -3,7 +3,7 @@ package msdk.kotlin.sample.db.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import msdk.kotlin.sample.messages.StructuredMessage
+import msdk.kotlin.sample.messages.QuestionMessage
 
 @Entity
 data class Action(
@@ -47,5 +47,5 @@ data class Action(
     var selectedAnswer: String? = null,
 
     @ColumnInfo(name = "messageAnswers")
-    var messageAnswers: List<StructuredMessage.Response>? = null
+    var messageAnswers: List<QuestionMessage.Response>? = null
 )

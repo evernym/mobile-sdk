@@ -81,7 +81,7 @@ object Connections {
                                         while (true) {
                                             try {
                                                 val message =
-                                                    Messages.downloadMessage(
+                                                    Messages.downloadNextMessageFromTheThread(
                                                         MessageType.HANDSHAKE,
                                                         threadId
                                                     ).get()
@@ -250,7 +250,7 @@ object Connections {
             while (true) {
                 try {
                     val message =
-                        Messages.downloadMessage(
+                        Messages.downloadNextMessageFromTheThread(
                             MessageType.CONNECTION_RESPONSE,
                             pwDid
                         ).get()

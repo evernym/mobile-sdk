@@ -10,20 +10,20 @@ import java.util.Iterator;
 
 import msdk.java.utils.CommonUtils;
 
-public class ProofRequest {
+public class ProofRequestMessage {
     public String threadId;
     public String name;
     public String attributes;
     public String proofReq;
 
-    public ProofRequest(String threadId, String name, String attributes, String proofReq) {
+    public ProofRequestMessage(String threadId, String name, String attributes, String proofReq) {
         this.threadId = threadId;
         this.name = name;
         this.attributes = attributes;
         this.proofReq = proofReq;
     }
 
-    public static ProofRequest parseProofRequestMessage(Message msg) {
+    public static ProofRequestMessage parse(Message msg) {
         try {
             JSONObject json = new JSONObject(msg.getPayload());
             JSONObject data = json.getJSONObject("proof_request_data");
@@ -40,7 +40,7 @@ public class ProofRequest {
                     attributes.append(", ");
                 }
             }
-            return new ProofRequest(threadId, name, attributes.toString(), msg.getPayload());
+            return new ProofRequestMessage(threadId, name, attributes.toString(), msg.getPayload());
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
