@@ -15,6 +15,13 @@ import java.util.concurrent.ExecutionException
  * Class containing methods to work with connections
  */
 object Connections {
+    /*
+     * Check if a connection already exists for passed invitation
+     *
+     * @param invitationDetails             String containing JSON with invitation details.
+     * @param serializedConnections         List of existing connections
+     * @return {@link CompletableFuture}    Found connection
+     */
     fun verifyConnectionExists(
         invitationDetails: String,
         serializedConnections: List<String?>
@@ -38,94 +45,11 @@ object Connections {
     }
 
     /**
-     * Redirect aries and out-of-band connections if needed
-     */
-    fun connectionRedirectAriesOutOfBand(
-        invitation: String?,
-        serializedConnection: String?
-    ): CompletableFuture<Boolean> {
-        val result =
-            CompletableFuture<Boolean>()
-        try {
-            val inviteJson = JSONObject(invitation)
-            // Current implementation assume that 'request~attach' array is not presented
-            val handshakeProtocols = inviteJson.optJSONArray("handshake_protocols")
-            if (serializedConnection == null) {
-                // Connection does not exist, could create new connection
-                result.complete(false)
-                return result
-            }
-            if (handshakeProtocols == null) {
-                result.completeExceptionally(Exception("Invite does not have 'handshake_protocols' entry."))
-                return result
-            }
-            val threadId = inviteJson.getString("@id")
-
-            // Connection already exists and should be reused and wait handshake reuse accepted message
-            try {
-                ConnectionApi.connectionDeserialize(serializedConnection)
-                    .whenComplete { handle: Int?, err: Throwable? ->
-                        if (err != null) {
-                            Logger.instance
-                                .e("Failed to deserialize stored connection: ", err)
-                            result.completeExceptionally(err)
-                        }
-                        try {
-                            ConnectionApi.connectionSendReuse(handle!!, invitation)
-                                .whenComplete { res: Void?, e: Throwable? ->
-                                    if (e != null) {
-                                        Logger.instance
-                                            .e("Failed to reuse connection: ", e)
-                                        result.completeExceptionally(e)
-                                    } else {
-                                        while (true) {
-                                            try {
-                                                val message =
-                                                    Messages.downloadMessage(
-                                                        MessageType.HANDSHAKE,
-                                                        threadId
-                                                    ).get()
-                                                println("Message Received " + message!!.payload)
-                                                if (message != null) {
-                                                    val pwDid =
-                                                        getPwDid(
-                                                            serializedConnection
-                                                        )
-                                                    Messages.updateMessageStatus(
-                                                        pwDid,
-                                                        message.uid
-                                                    )
-                                                    result.complete(true)
-                                                    return@whenComplete
-                                                }
-                                                Thread.sleep(2000)
-                                            } catch (ex: ExecutionException) {
-                                                ex.printStackTrace()
-                                            } catch (ex: InterruptedException) {
-                                                ex.printStackTrace()
-                                            }
-                                        }
-                                    }
-                                }
-                        } catch (ex: VcxException) {
-                            result.completeExceptionally(ex)
-                        }
-                    }
-            } catch (ex: Exception) {
-                result.completeExceptionally(ex)
-            }
-        } catch (ex: Exception) {
-            result.completeExceptionally(ex)
-        }
-        return result
-    }
-
-    /**
-     * Creates new connection from invitation.
+     * Creates new connection state object from invitation.
      *
      * @param invitationDetails String containing JSON with invitation details.
      * @param invitationType    Type of the invitation
-     * @return [CompletableFuture] with serialized connection handle.
+     * @return {@link CompletableFuture} with serialized connection handle.
      */
     fun create(
         invitationDetails: String,
@@ -190,6 +114,99 @@ object Connections {
         return result
     }
 
+    /**
+     * Redirect aries and out-of-band connections if needed
+     *
+     * @param invitation                    String containing JSON with invitation details.
+     * @param serializedConnection          Existing connection
+     * @return {@link CompletableFuture}    with no value
+     */
+    fun redirectAriesOutOfBand(
+        invitation: String?,
+        serializedConnection: String?
+    ): CompletableFuture<Boolean> {
+        val result =
+            CompletableFuture<Boolean>()
+        try {
+            val inviteJson = JSONObject(invitation)
+            // Current implementation assume that 'request~attach' array is not presented
+            val handshakeProtocols = inviteJson.optJSONArray("handshake_protocols")
+            if (serializedConnection == null) {
+                // Connection does not exist, could create new connection
+                result.complete(false)
+                return result
+            }
+            if (handshakeProtocols == null) {
+                result.completeExceptionally(Exception("Invite does not have 'handshake_protocols' entry."))
+                return result
+            }
+            val threadId = inviteJson.getString("@id")
+
+            // Connection already exists and should be reused and wait handshake reuse accepted message
+            try {
+                ConnectionApi.connectionDeserialize(serializedConnection)
+                    .whenComplete { handle: Int?, err: Throwable? ->
+                        if (err != null) {
+                            Logger.instance
+                                .e("Failed to deserialize stored connection: ", err)
+                            result.completeExceptionally(err)
+                        }
+                        try {
+                            ConnectionApi.connectionSendReuse(handle!!, invitation)
+                                .whenComplete { res: Void?, e: Throwable? ->
+                                    if (e != null) {
+                                        Logger.instance
+                                            .e("Failed to reuse connection: ", e)
+                                        result.completeExceptionally(e)
+                                    } else {
+                                        while (true) {
+                                            try {
+                                                val message =
+                                                    Messages.downloadNextMessageFromTheThread(
+                                                        MessageType.HANDSHAKE,
+                                                        threadId
+                                                    ).get()
+                                                println("Message Received " + message!!.payload)
+                                                if (message != null) {
+                                                    val pwDid =
+                                                        getPwDid(
+                                                            serializedConnection
+                                                        )
+                                                    Messages.updateMessageStatus(
+                                                        pwDid,
+                                                        message.uid
+                                                    )
+                                                    result.complete(true)
+                                                    return@whenComplete
+                                                }
+                                                Thread.sleep(2000)
+                                            } catch (ex: ExecutionException) {
+                                                ex.printStackTrace()
+                                            } catch (ex: InterruptedException) {
+                                                ex.printStackTrace()
+                                            }
+                                        }
+                                    }
+                                }
+                        } catch (ex: VcxException) {
+                            result.completeExceptionally(ex)
+                        }
+                    }
+            } catch (ex: Exception) {
+                result.completeExceptionally(ex)
+            }
+        } catch (ex: Exception) {
+            result.completeExceptionally(ex)
+        }
+        return result
+    }
+
+    /**
+     * Get connection pairwise DID
+     *
+     * @param serializedConnection          Connection
+     * @return {@link CompletableFuture}    Pairwise DID
+     */
     fun getPwDid(serializedConnection: String): String {
         var pwDid: String? = null
         try {
@@ -250,7 +267,7 @@ object Connections {
             while (true) {
                 try {
                     val message =
-                        Messages.downloadMessage(
+                        Messages.downloadNextMessageFromTheThread(
                             MessageType.CONNECTION_RESPONSE,
                             pwDid
                         ).get()

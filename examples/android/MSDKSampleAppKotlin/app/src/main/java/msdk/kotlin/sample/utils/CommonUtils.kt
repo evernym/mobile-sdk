@@ -8,6 +8,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.*
+import java.lang.Exception
 import java.security.SecureRandom
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -36,41 +37,6 @@ object CommonUtils {
         val bytes = ByteArray(lengthOfKey)
         random.nextBytes(bytes)
         return Base64.encodeToString(bytes, Base64.NO_WRAP)
-    }
-
-    @Throws(IOException::class)
-    fun getFileContents(file: File?): String {
-        val text = StringBuffer(99999)
-        val fileStream = FileInputStream(file)
-        val br =
-            BufferedReader(InputStreamReader(fileStream))
-        var line: String
-        while (br.readLine().also { line = it } != null) {
-            text.append(line + System.lineSeparator())
-        }
-        return text.toString()
-    }
-
-    fun getBetweenStrings(
-        text: String?,
-        textFrom: String,
-        textTo: String?
-    ): String {
-        var result = ""
-
-        // Cut the beginning of the text to not occasionally meet a
-        // 'textTo' value in it:
-        result = text!!.substring(
-            text.indexOf(textFrom) + textFrom.length,
-            text.length
-        )
-
-        // Cut the excessive ending of the text:
-        result = result.substring(
-            0,
-            result.indexOf(textTo!!)
-        )
-        return result
     }
 
     fun getRootDir(context: Context): String {

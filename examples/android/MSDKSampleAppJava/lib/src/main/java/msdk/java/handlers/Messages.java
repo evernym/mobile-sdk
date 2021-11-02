@@ -18,18 +18,14 @@ import msdk.java.logger.Logger;
 import msdk.java.messages.Message;
 import msdk.java.types.MessageStatusType;
 import msdk.java.types.MessageType;
+import msdk.java.types.UpdateMessageStatusBody;
 
 /**
  * Class containing methods to work with messages.
  */
 public class Messages {
-    public static final String TAG = "ConnectMeVcx";
-
-    private Messages() {
-    }
-
     /**
-     * Retrieve pending messages.
+     * Retrieve all pending messages.
      *
      * @return List of {@link Message}
      */
@@ -76,9 +72,14 @@ public class Messages {
         return result;
     }
 
-    public static CompletableFuture<Message> downloadMessage(
+    /*
+    * Download and find message from the specific thread
+    *
+    * @return {@link Message}
+    * */
+    public static CompletableFuture<Message> downloadNextMessageFromTheThread(
             MessageType messageType,
-            String id
+            String threadId
     ) {
         CompletableFuture<Message> result = new CompletableFuture<>();
         Messages.getAllPendingMessages().handle((messages, throwable) -> {
@@ -90,38 +91,28 @@ public class Messages {
             for (Message message : messages) {
                 try {
                     String msg = message.getPayload();
+                    String pwDid = message.getPwDid();
                     JSONObject msgPayload = new JSONObject(msg);
                     String type = msgPayload.getString("@type");
+                    JSONObject thread = msgPayload.getJSONObject("~thread");
+                    String thid = thread.getString("thid");
+                    String pthid = thread.optString("pthid");
 
-                    if (messageType.equals(MessageType.CREDENTIAL) && messageType.matchesValue(type)) {
-                        JSONObject thread = msgPayload.getJSONObject("~thread");
-                        String thid = thread.getString("thid");
-
-                        if (thid.equals(id)) {
-                            foundMessage = message;
-                            break;
-                        }
+                    if (messageType.equals(MessageType.CREDENTIAL) && messageType.matchesValue(type) && thid.equals(threadId)) {
+                        foundMessage = message;
+                        break;
                     }
-                    if (messageType.equals(MessageType.CONNECTION_RESPONSE) && messageType.matchesValue(type)) {
-                        String pwDid = message.getPwDid();
-
-                        if (pwDid.equals(id)) {
-                            foundMessage = message;
-                            break;
-                        }
+                    if (messageType.equals(MessageType.CONNECTION_RESPONSE) && messageType.matchesValue(type) && pwDid.equals(threadId)) {
+                        foundMessage = message;
+                        break;
                     }
                     if (messageType.equals(MessageType.ACK) && messageType.matchesValue(type)) {
                         foundMessage = message;
                         break;
                     }
-                    if (messageType.equals(MessageType.HANDSHAKE) && messageType.matchesValue(type)) {
-                        JSONObject thread = msgPayload.getJSONObject("~thread");
-                        String thid = thread.getString("pthid");
-
-                        if (thid.equals(id)) {
-                            foundMessage = message;
-                            break;
-                        }
+                    if (messageType.equals(MessageType.HANDSHAKE) && messageType.matchesValue(type) && pthid.equals(threadId)) {
+                        foundMessage = message;
+                        break;
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -133,11 +124,17 @@ public class Messages {
         return result;
     }
 
-    public static void updateMessageStatus(String pwDid, String messageId) {
+    /*
+    * Update status of the message as reviewed
+    * */
+    public static CompletableFuture<String> updateMessageStatus(String pwDid, String messageId) {
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
-            String jsonMsg = prepareUpdateMessage(pwDid, messageId);
-            UtilsApi.vcxUpdateMessages(MessageStatusType.REVIEWED, jsonMsg).whenComplete((v1, error) -> {
+            String messagesToUpdate =
+                    new UpdateMessageStatusBody()
+                        .addMessage(pwDid, messageId)
+                        .toJSON();
+            UtilsApi.vcxUpdateMessages(MessageStatusType.REVIEWED, messagesToUpdate).whenComplete((v1, error) -> {
                 if (error != null) {
                     Logger.getInstance().e("Failed to update messages", error);
                     result.completeExceptionally(error);
@@ -148,9 +145,6 @@ public class Messages {
         } catch (Exception ex) {
             result.completeExceptionally(ex);
         }
-    }
-
-    static String prepareUpdateMessage(String pairwiseDid, String messsageId) {
-        return String.format("[{\"pairwiseDID\" : \"%s\", \"uids\": [\"%s\"]}]", pairwiseDid, messsageId);
+        return result;
     }
 }

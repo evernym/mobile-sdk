@@ -15,7 +15,7 @@ import msdk.kotlin.sample.types.ProvisioningConfig
 import msdk.kotlin.sample.utils.CommonUtils
 import msdk.kotlin.sample.utils.SecurePreferencesHelper
 import msdk.kotlin.sample.utils.StorageUtils
-import okhttp3.MediaType
+import msdk.kotlin.sample.utils.StorageUtils.configureStoragePermissions
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -25,61 +25,213 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONException
 import org.json.JSONObject
 import pl.brightinventions.slf4android.LogLevel
+import java.io.File
 import java.util.*
 import java.util.concurrent.Executors
 
-class Initialization {
-    //    public static void sendToken(
-    //            Activity activity,
-    //            String PREFERENCES_KEY,
-    //            String FCM_TOKEN) {
-    //        SharedPreferences prefs = activity.getSharedPreferences(PREFERENCES_KEY, Context.MODE_PRIVATE);
-    //        String token = prefs.getString(FCM_TOKEN, null);
-    //        if (token != null) {
-    //            ConnectMeVcx.updateAgentInfo(UUID.randomUUID().toString(), token).whenComplete((res, err) -> {
-    //                if (err == null) {
-    //                    Log.d(TAG, "FCM token updated successfully");
-    //                } else {
-    //                    Log.e(TAG, "FCM token was not updated: ", err);
-    //                }
-    //            });
-    //        }
-    //    }
-    //
-    //    public static CompletableFuture<Void> updateAgentInfo(String id, String token) {
-    //        CompletableFuture<Void> result = new CompletableFuture<>();
-    //        try {
-    //            JSONObject config = new JSONObject();
-    //            config.put("type", 3);
-    //            config.put("id", id);
-    //            config.put("value", "FCM:" + token);
-    //            UtilsApi.vcxUpdateAgentInfo(config.toString()).whenComplete((v, err) -> {
-    //                if (err != null) {
-    //                    // Fixme workaround due to issues on agency side
-    //                    if (err instanceof InvalidAgencyResponseException
-    //                            && ((InvalidAgencyResponseException) err).getSdkCause().contains("data did not match any variant of untagged enum MessageTypes")) {
-    //                        result.complete(null);
-    //                    } else {
-    //                        Logger.getInstance().e("Failed to update agent info", err);
-    //                        result.completeExceptionally(err);
-    //                    }
-    //                } else {
-    //                    result.complete(null);
-    //                }
-    //            });
-    //        } catch (Exception ex) {
-    //            result.completeExceptionally(ex);
-    //        }
-    //        return result;
-    //    }
-    fun shutdownVcx(deleteWallet: Boolean) {
-        Logger.instance
-            .d(" ==> shutdownVcx() called with: deleteWallet = [$deleteWallet")
+object Initialization {
+    private const val SECURE_PREF_VCX_CONFIG = "msdk.config"
+
+    /*
+     * Check if Cloud Agent already provisioned
+     *
+     * @param context                       {@link Context}
+     * @return {@link CompletableFuture}
+     */
+    fun isCloudAgentProvisioned(context: Context?): Boolean {
+        return SecurePreferencesHelper.containsLongStringValue(
+            context,
+            SECURE_PREF_VCX_CONFIG
+        )
+    }
+
+    /*
+     * Initialize library and provision Cloud Agent if it's not done yet
+     *
+     * @param context                       {@link Context}
+     * @param constants                     SDK settings
+     * @param genesisPool                   Genesis transactions
+     * @return {@link CompletableFuture}
+     */
+    fun initialize(
+        context: Context,
+        constants: Constants,
+        @RawRes genesisPool: Int
+    ): CompletableFuture<Void?> {
+        Logger.instance.setLogLevel(LogLevel.DEBUG)
+        val result =
+            CompletableFuture<Void?>()
         try {
-            VcxApi.vcxShutdown(deleteWallet)
+            // 1. Configure storage permissions
+            StorageUtils.configureStoragePermissions(context)
+
+            // 2. Configure Logger
+            Logger.configureLogger(context)
+
+            // 3. Provision Cloud Agent if needed
+            if (!isCloudAgentProvisioned(context)) {
+                provisionCloudAgent(context, constants).get()
+            }
+
+            // 4. Receive config from the storage
+            val config: String? = SecurePreferencesHelper.getLongStringValue(context, SECURE_PREF_VCX_CONFIG)
+
+            // 5. Initialize VCX library
+            VcxApi.vcxInitWithConfig(config)
+                .whenComplete { integer: Int?, err: Throwable? ->
+                    if (err != null) {
+                        result.completeExceptionally(err)
+                    } else {
+                        // 3. Initialize pool
+                        initializePool(context, genesisPool)
+                        result.complete(null)
+                    }
+                }
+        } catch (e: AlreadyInitializedException) {
+            // even if we get already initialized exception
+            // then also we will resolve promise, because we don't care if vcx is already
+            // initialized
+            result.complete(null)
         } catch (e: VcxException) {
             e.printStackTrace()
+            result.completeExceptionally(e)
+        } catch (e: Exception) {
+            result.completeExceptionally(e)
         }
+        return result
+    }
+
+    /*
+     * Provision Cloud Agent and store populated config
+     *
+     * @param context                       {@link Context}
+     * @param constants                     SDK settings
+     * @return {@link CompletableFuture}
+     */
+    @Throws(JSONException::class)
+    fun provisionCloudAgent(
+        context: Context,
+        constants: Constants
+    ): CompletableFuture<Void?> {
+        Logger.instance.setLogLevel(LogLevel.DEBUG)
+        val activity = context as Activity
+
+        // 3. Prepare provisioning config
+        val provisioningConfig: String = ProvisioningConfig.builder()
+            .withAgencyEndpoint(constants.AGENCY_ENDPOINT!!)
+            .withAgencyDid(constants.AGENCY_DID!!)
+            .withAgencyVerkey(constants.AGENCY_VERKEY!!)
+            .withWalletName(CommonUtils.makeWalletName(constants.WALLET_NAME!!))
+            .withWalletKey(CommonUtils.createWalletKey())
+            .withLogo(constants.LOGO!!)
+            .withName(constants.NAME!!)
+            .build()
+        val result =
+            CompletableFuture<Void?>()
+        try {
+            // 4. Receive provisioning token from Sponsor Server
+            val token = retrieveToken(activity, constants)
+
+            // 5. Provision Cloud Agent with prepared config and received token
+            UtilsApi.vcxAgentProvisionWithTokenAsync(provisioningConfig, token)
+                .whenComplete { oneTimeInfo: String?, err: Throwable? ->
+                    try {
+                        if (err != null) {
+                            Logger.instance.e("createOneTimeInfo failed: ", err)
+                            result.completeExceptionally(err)
+                        } else if (oneTimeInfo == null) {
+                            throw Exception("oneTimeInfo is null")
+                        } else {
+                            Logger.instance.i("createOneTimeInfo called: $oneTimeInfo")
+                            try {
+                                // 6. Store config with provisioned Cloud Agent data
+                                SecurePreferencesHelper.setLongStringValue(context, SECURE_PREF_VCX_CONFIG, oneTimeInfo)
+                                result.complete(null)
+                            } catch (e: Exception) {
+                                result.completeExceptionally(e)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+        } catch (e: Exception) {
+            result.completeExceptionally(e)
+        }
+        return result
+    }
+
+    /*
+     * Connect to Pool Ledger
+     *
+     * @param context                       {@link Context}
+     * @param genesisPool                   Genesis transactions
+     * @return {@link CompletableFuture}
+     */
+    private fun initializePool(
+        context: Context,
+        @RawRes genesisPool: Int
+    ) {
+        // 1. Run Pool initialization in a separate thread
+        Executors.newSingleThreadExecutor().execute {
+            try {
+                val genesisFile: File = PoolConfig.writeGenesisFile(context, genesisPool)
+                val poolConfig: String = PoolConfig.builder()
+                    .withgGenesisPath(genesisFile.absolutePath)
+                    .withgPoolName("android-sample-pool")
+                    .build()
+                VcxApi.vcxInitPool(poolConfig)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    /**
+     * Retrieve provisioning token from Sponsor Server
+     */
+    @Throws(Exception::class)
+    private fun retrieveToken(
+        activity: Activity,
+        constants: Constants
+    ): String {
+        if (constants.SERVER_URL == null || constants.SERVER_URL.length == 0) {
+            activity.runOnUiThread {
+                Toast.makeText(
+                    activity,
+                    "Error: sponsor server URL is not set.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            throw Exception("Sponsor's server URL seems to be not set, please set your server URL in constants file to provision the app.")
+        }
+        val prefs = activity.getSharedPreferences(
+            constants.PREFERENCES_KEY,
+            Context.MODE_PRIVATE
+        )
+        var sponseeId = prefs.getString(constants.SPONSEE_ID, null)
+        if (sponseeId == null) {
+            sponseeId = UUID.randomUUID().toString()
+            prefs.edit()
+                .putString(constants.SPONSEE_ID, sponseeId)
+                .apply()
+        }
+        val json = JSONObject()
+        json.put("sponseeId", sponseeId)
+        val logging = HttpLoggingInterceptor()
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY)
+        val client = OkHttpClient.Builder().addInterceptor(logging).build()
+        val body: RequestBody = json.toString().toRequestBody("application/json".toMediaType())
+        val request = Request.Builder()
+            .url(constants.SERVER_URL)
+            .post(body)
+            .build()
+        val response = client.newCall(request).execute()
+        if (!response.isSuccessful) {
+            throw Exception("Response failed with code " + response.code)
+        }
+        val token = response.body!!.string() ?: throw Exception("Token is not received ")
+        return token
     }
 
     class ConstantsBuilder {
@@ -179,7 +331,6 @@ class Initialization {
         val LOGO: String?,
         val NAME: String?
     ) {
-
         companion object {
             /**
              * Creates builder for [Constants].
@@ -191,225 +342,5 @@ class Initialization {
             }
         }
 
-    }
-
-    companion object {
-        private const val SECURE_PREF_VCX_CONFIG = "me.connect.vcx.config"
-        fun isCloudAgentProvisioned(context: Context?): Boolean {
-            return SecurePreferencesHelper.containsLongStringValue(
-                context,
-                SECURE_PREF_VCX_CONFIG
-            )
-        }
-
-        /**
-         * Provision Cloud Agent and initialize library
-         */
-        @Throws(JSONException::class)
-        fun provisionCloudAgentAndInitializeSdk(
-            context: Context,
-            constants: Constants,
-            @RawRes genesisPool: Int
-        ): CompletableFuture<Void?> {
-            Logger.instance.setLogLevel(LogLevel.DEBUG)
-            val activity = context as Activity
-
-            // 1. Configure storage permissions
-            StorageUtils.configureStoragePermissions(context)
-            // 2. Configure Logger
-            Logger.configureLogger(context)
-            // 3. Prepare provisioning config
-            val provisioningConfig = ProvisioningConfig.builder()
-                .withAgencyEndpoint(constants.AGENCY_ENDPOINT!!)
-                .withAgencyDid(constants.AGENCY_DID!!)
-                .withAgencyVerkey(constants.AGENCY_VERKEY!!)
-                .withWalletName(CommonUtils.makeWalletName(constants.WALLET_NAME))
-                .withWalletKey(CommonUtils.createWalletKey())
-                .withLogo(constants.LOGO)
-                .withName(constants.NAME)
-                .build()
-            val result =
-                CompletableFuture<Void?>()
-            try {
-                // 4. Receive provisioning token from Sponsor Server
-                val token =
-                    retrieveToken(activity, constants)
-
-                // 5. Provision Cloud Agent with prepared config and received token
-                UtilsApi.vcxAgentProvisionWithTokenAsync(provisioningConfig, token)
-                    .whenComplete { oneTimeInfo: String?, err: Throwable? ->
-                        try {
-                            if (err != null) {
-                                Logger.instance
-                                    .e("createOneTimeInfo failed: ", err)
-                                result.completeExceptionally(err)
-                            } else if (oneTimeInfo == null) {
-                                throw Exception("oneTimeInfo is null")
-                            } else {
-                                Logger.instance
-                                    .i("createOneTimeInfo called: $oneTimeInfo")
-                                try {
-                                    // 6. Store config with provisioned Cloud Agent data
-                                    SecurePreferencesHelper.setLongStringValue(
-                                        context,
-                                        SECURE_PREF_VCX_CONFIG,
-                                        oneTimeInfo
-                                    )
-
-                                    // 7. Initialize library
-                                    initialize(context, genesisPool)
-                                        .whenComplete { returnCode: Void?, error: Throwable? ->
-                                            if (error != null) {
-                                                Logger.instance
-                                                    .e("Init failed", error)
-                                                result.completeExceptionally(error)
-                                            } else {
-                                                Logger.instance
-                                                    .i("Init completed")
-                                                result.complete(null)
-                                            }
-                                        }
-                                } catch (e: Exception) {
-                                    result.completeExceptionally(e)
-                                }
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    }
-            } catch (e: Exception) {
-                result.completeExceptionally(e)
-            }
-            return result
-        }
-
-        /**
-         * Initialize library without Cloud Agent provisioning
-         */
-        fun initializeSdk(
-            context: Context,
-            @RawRes genesisPool: Int
-        ): CompletableFuture<Void?> {
-            Logger.instance.setLogLevel(LogLevel.DEBUG)
-            val result =
-                CompletableFuture<Void?>()
-
-            // 1. Configure storage permissions
-            StorageUtils.configureStoragePermissions(context)
-            // 2. Configure Logger
-            Logger.configureLogger(context)
-            // 3. Initialize library
-            initialize(context, genesisPool)
-                .whenComplete { returnCode: Void?, err: Throwable? ->
-                    if (err != null) {
-                        Logger.instance.e("Init failed", err)
-                        result.completeExceptionally(err)
-                    } else {
-                        Logger.instance.i("Init completed")
-                        result.complete(null)
-                    }
-                }
-            return result
-        }
-
-        private fun initialize(
-            context: Context,
-            @RawRes genesisPool: Int
-        ): CompletableFuture<Void?> {
-            val result =
-                CompletableFuture<Void?>()
-            try {
-                // 1. Receive config from the storage
-                val config = SecurePreferencesHelper.getLongStringValue(
-                    context,
-                    SECURE_PREF_VCX_CONFIG
-                )
-
-                // 2. Initialize VCX library
-                VcxApi.vcxInitWithConfig(config)
-                    .whenComplete { integer: Int?, err: Throwable? ->
-                        if (err != null) {
-                            result.completeExceptionally(err)
-                        } else {
-                            // 3. Initialize pool
-                            initPool(context, genesisPool)
-                            result.complete(null)
-                        }
-                    }
-            } catch (e: AlreadyInitializedException) {
-                // even if we get already initialized exception
-                // then also we will resolve promise, because we don't care if vcx is already
-                // initialized
-                result.complete(null)
-            } catch (e: VcxException) {
-                e.printStackTrace()
-                result.completeExceptionally(e)
-            }
-            return result
-        }
-
-        private fun initPool(
-            context: Context,
-            @RawRes genesisPool: Int
-        ) {
-            // 1. Run Pool initialization in a separate thread
-            Executors.newSingleThreadExecutor().execute {
-                try {
-                    val genesisFile =
-                        PoolConfig.writeGenesisFile(context, genesisPool)
-                    val poolConfig = PoolConfig.builder()
-                        .withgGenesisPath(genesisFile.absolutePath)
-                        .withgPoolName("android-sample-pool")
-                        .build()
-                    VcxApi.vcxInitPool(poolConfig)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
-
-        @Throws(Exception::class)
-        private fun retrieveToken(
-            activity: Activity,
-            constants: Constants
-        ): String {
-            if (constants.SERVER_URL == null || constants.SERVER_URL.length == 0) {
-                activity.runOnUiThread {
-                    Toast.makeText(
-                        activity,
-                        "Error: sponsor server URL is not set.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-                throw Exception("Sponsor's server URL seems to be not set, please set your server URL in constants file to provision the app.")
-            }
-            val prefs = activity.getSharedPreferences(
-                constants.PREFERENCES_KEY,
-                Context.MODE_PRIVATE
-            )
-            var sponseeId = prefs.getString(constants.SPONSEE_ID, null)
-            if (sponseeId == null) {
-                sponseeId = UUID.randomUUID().toString()
-                prefs.edit()
-                    .putString(constants.SPONSEE_ID, sponseeId)
-                    .apply()
-            }
-            val json = JSONObject()
-            json.put("sponseeId", sponseeId)
-            val logging = HttpLoggingInterceptor()
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY)
-            val client =
-                OkHttpClient.Builder().addInterceptor(logging).build()
-            val body: RequestBody = json.toString().toRequestBody("application/json".toMediaType())
-            val request = Request.Builder()
-                .url(constants.SERVER_URL)
-                .post(body)
-                .build()
-            val response = client.newCall(request).execute()
-            if (!response.isSuccessful) {
-                throw Exception("Response failed with code " + response.code)
-            }
-            return response.body!!.string() ?: throw Exception("Token is not received ")
-        }
     }
 }

@@ -5,12 +5,10 @@ import android.util.Base64;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.security.SecureRandom;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -48,38 +46,6 @@ public class CommonUtils {
         byte[] bytes = new byte[lengthOfKey];
         random.nextBytes(bytes);
         return Base64.encodeToString(bytes, Base64.NO_WRAP);
-    }
-
-    static String getFileContents(File file) throws IOException {
-        StringBuffer text = new StringBuffer(99999);
-        FileInputStream fileStream = new FileInputStream(file);
-        BufferedReader br = new BufferedReader(new InputStreamReader(fileStream));
-        for (String line; (line = br.readLine()) != null; )
-            text.append(line + System.lineSeparator());
-        return text.toString();
-    }
-
-    public static String getBetweenStrings(
-            String text,
-            String textFrom,
-            String textTo) {
-
-        String result = "";
-
-        // Cut the beginning of the text to not occasionally meet a
-        // 'textTo' value in it:
-        result =
-                text.substring(
-                        text.indexOf(textFrom) + textFrom.length(),
-                        text.length());
-
-        // Cut the excessive ending of the text:
-        result =
-                result.substring(
-                        0,
-                        result.indexOf(textTo));
-
-        return result;
     }
 
     public static String getRootDir(Context context) {

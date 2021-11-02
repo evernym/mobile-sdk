@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey;
 
 import java.util.List;
 
-import msdk.java.messages.StructuredMessage.Response;
+import msdk.java.messages.QuestionMessage.Response;
 
 @Entity
 public class StructuredMessage {

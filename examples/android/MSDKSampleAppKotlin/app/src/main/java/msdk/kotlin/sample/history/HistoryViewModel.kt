@@ -3,10 +3,11 @@ package msdk.kotlin.sample.history
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import msdk.kotlin.sample.SingleLiveData
+import msdk.kotlin.sample.db.ActionStatus.HISTORIZED
 import msdk.kotlin.sample.db.Database
 import msdk.kotlin.sample.db.entity.Action
-
-import msdk.kotlin.sample.db.ActionStatus.HISTORIZED
+import msdk.kotlin.sample.homepage.Results
 
 class HistoryViewModel(application: Application) : AndroidViewModel(application) {
     private var db = Database.getInstance(application)

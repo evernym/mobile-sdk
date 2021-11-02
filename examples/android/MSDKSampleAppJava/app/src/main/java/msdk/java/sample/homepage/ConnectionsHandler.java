@@ -9,13 +9,15 @@ import msdk.java.sample.SingleLiveData;
 import msdk.java.sample.db.Database;
 import msdk.java.sample.db.entity.Action;
 import msdk.java.sample.db.entity.Connection;
+import msdk.java.sample.history.HistoryHandler;
+import msdk.java.sample.history.HistoryViewModel;
 import msdk.java.types.MessageAttachment;
 
 import static msdk.java.sample.homepage.Results.CONNECTION_FAILURE;
 import static msdk.java.sample.homepage.Results.CONNECTION_REDIRECT;
 import static msdk.java.sample.homepage.Results.CONNECTION_SUCCESS;
 
-public class StateConnections {
+public class ConnectionsHandler {
     public static void handleConnectionInvitation(Action action, Database db, SingleLiveData<Results> liveData) {
         // 1. Get invitation data, type, and metadata to show on UI
         String invitation = ConnectionInvitation.getConnectionInvitationFromData(action.invite);
@@ -31,6 +33,12 @@ public class StateConnections {
             if (existingConnection != null) {
                 // duplicates - nothing to do
                 liveData.postValue(CONNECTION_REDIRECT);
+                HistoryHandler.addToHistory(
+                        action.id,
+                        "Connection reused",
+                        db,
+                        liveData
+                );
             } else {
                 // create a new connection
                 connectionCreate(action.id, invitation, invitationType, db, userMeta, liveData);
@@ -46,9 +54,15 @@ public class StateConnections {
                 // no attachment in the invitation
                 if (existingConnection != null) {
                     // reuse existing connection
-                    Connections.connectionRedirectAriesOutOfBand(invitation, existingConnection)
+                    Connections.redirectAriesOutOfBand(invitation, existingConnection)
                             .whenComplete((sc, err) -> {
                                 liveData.postValue(CONNECTION_REDIRECT);
+                                HistoryHandler.addToHistory(
+                                        action.id,
+                                        "Connection reused",
+                                        db,
+                                        liveData
+                                );
                             });
                 } else {
                     // create a new connection
@@ -103,12 +117,12 @@ public class StateConnections {
     ) {
         if (outOfBandInvite.existingConnection != null) {
             // connection exists - redirect and create credential state object
-            Connections.connectionRedirectAriesOutOfBand(
+            Connections.redirectAriesOutOfBand(
                     outOfBandInvite.invitation,
                     outOfBandInvite.existingConnection
             ).whenComplete((sc, err) -> {
                 liveData.postValue(CONNECTION_REDIRECT);
-                StateCredentialOffers.createCredentialStateObject(
+                CredentialOffersHandler.createCredentialStateObject(
                         db,
                         outOfBandInvite,
                         liveData,
@@ -117,7 +131,7 @@ public class StateConnections {
             });
         } else {
             // create credential state object
-            StateCredentialOffers.createCredentialStateObject(
+            CredentialOffersHandler.createCredentialStateObject(
                     db,
                     outOfBandInvite,
                     liveData,
@@ -134,11 +148,11 @@ public class StateConnections {
     ) {
         if (outOfBandInvite.existingConnection != null) {
             // connection exists - redirect and create proof state object
-            Connections.connectionRedirectAriesOutOfBand(
+            Connections.redirectAriesOutOfBand(
                     outOfBandInvite.invitation,
                     outOfBandInvite.existingConnection
             ).whenComplete((sc, err) -> {
-                StateProofRequests.createProofStateObject(
+                ProofRequestsHandler.createProofStateObject(
                         db,
                         outOfBandInvite,
                         liveData,
@@ -148,7 +162,7 @@ public class StateConnections {
             });
         } else {
             // create proof state object
-            StateProofRequests.createProofStateObject(db, outOfBandInvite, liveData, action);
+            ProofRequestsHandler.createProofStateObject(db, outOfBandInvite, liveData, action);
         }
     }
 
@@ -175,7 +189,7 @@ public class StateConnections {
                     db.connectionDao().insertAll(c);
                 }
 
-                HomePageViewModel.addToHistory(
+                HistoryHandler.addToHistory(
                         actionId,
                         "Connection created",
                         db,

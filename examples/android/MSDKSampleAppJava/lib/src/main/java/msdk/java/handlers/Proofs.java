@@ -21,12 +21,8 @@ import msdk.java.logger.Logger;
  * Class containing methods to work with proofs.
  */
 public class Proofs {
-    private Proofs() {
-    }
-
     /**
      * Get proof requests
-     * Deprecated. Use {@link Messages}.getPendingMessages(String, MessageType) instead.
      *
      * @param connection serialized connection
      * @return {@link CompletableFuture} containing list of proof requests as JSON strings.
@@ -76,7 +72,7 @@ public class Proofs {
     }
 
     /**
-     * Creates proof request
+     * Creates proof state object
      *
      * @param sourceId custom string for this cred offer
      * @param message  proof request string

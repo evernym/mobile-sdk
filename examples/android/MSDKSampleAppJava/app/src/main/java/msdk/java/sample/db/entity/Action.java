@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey;
 
 import java.util.List;
 
-import msdk.java.messages.StructuredMessage;
+import msdk.java.messages.QuestionMessage;
 
 @Entity
 public class Action {
@@ -50,5 +50,5 @@ public class Action {
     public String selectedAnswer;
 
     @ColumnInfo(name = "messageAnswers")
-    public List<StructuredMessage.Response> messageAnswers;
+    public List<QuestionMessage.Response> messageAnswers;
 }

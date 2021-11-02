@@ -13,12 +13,11 @@ import msdk.java.sample.databinding.MainActivityBinding;
 import msdk.java.handlers.Initialization;
 
 public class MainActivity extends AppCompatActivity {
-    private MainActivityBinding viewBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewBinding = MainActivityBinding.inflate(getLayoutInflater());
+        MainActivityBinding viewBinding = MainActivityBinding.inflate(getLayoutInflater());
         setContentView(viewBinding.getRoot());
 
         MainPagerAdapter adapter = new MainPagerAdapter(getSupportFragmentManager());
@@ -29,42 +28,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initialize() {
-        Toast.makeText(this, "Started SDK initialization", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Application initialization started", Toast.LENGTH_SHORT).show();
         Executors.newSingleThreadExecutor().execute(() -> {
-            if (!Initialization.isCloudAgentProvisioned(this)) {
-                firstTimeRun();
-            } else {
-                regularRun();
-            }
-        });
-    }
-
-    private void firstTimeRun() {
-        try {
+            // 1. Start initialization
             Initialization.Constants constants = buildConstants();
-            // 1. Start provisioning
-            Initialization.provisionCloudAgentAndInitializeSdk(this, constants, R.raw.genesis)
-                .whenComplete((res, ex) -> {
-                    if (ex != null) {
-                        runOnUiThread(() -> Toast.makeText(this, "SDK was not initialized!", Toast.LENGTH_SHORT).show());
-                    } else {
-                        runOnUiThread(() -> Toast.makeText(this, "SDK initialized successfully.", Toast.LENGTH_SHORT).show());
-                    }
-                });
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void regularRun() {
-        // 1. Start initialization
-        Initialization.initializeSdk(this, R.raw.genesis).handleAsync((res, err) -> {
-            if (err != null) {
-                runOnUiThread(() -> Toast.makeText(this, "SDK was not initialized!", Toast.LENGTH_SHORT).show());
-            } else {
-                runOnUiThread(() -> Toast.makeText(this, "SDK initialized successfully.", Toast.LENGTH_SHORT).show());
-            }
-            return null;
+            Initialization.initialize(this, constants, R.raw.genesis).handleAsync((res, err) -> {
+                if (err != null) {
+                    runOnUiThread(() -> Toast.makeText(this, "Application was not initialized!", Toast.LENGTH_SHORT).show());
+                } else {
+                    runOnUiThread(() -> Toast.makeText(this, "Application successfully initialized", Toast.LENGTH_SHORT).show());
+                }
+                return null;
+            });
         });
     }
 

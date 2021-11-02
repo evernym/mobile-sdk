@@ -18,11 +18,10 @@ import java.util.concurrent.ExecutionException
  */
 object Credentials {
     /**
-     * Get credential offers
-     * Deprecated. Use [Messages] Messages.getPendingMessages(String, MessageType) instead.
+     * Get the list of received credential offers
      *
      * @param connection serialized connection
-     * @return [CompletableFuture] containing list of credential offers as JSON strings.
+     * @return {@link CompletableFuture} containing list of credential offers as JSON strings.
      */
     fun getOffers(connection: String): CompletableFuture<List<String>> {
         Logger.instance.i("Getting credential offers")
@@ -74,7 +73,7 @@ object Credentials {
     }
 
     /**
-     * Create credential offer
+     * Create credential offer state object
      *
      * @param sourceId             custom string for this cred offer
      * @param message              credential offer string
@@ -324,7 +323,7 @@ object Credentials {
             while (true) {
                 try {
                     val message =
-                        Messages.downloadMessage(
+                        Messages.downloadNextMessageFromTheThread(
                             MessageType.CREDENTIAL,
                             threadId
                         ).get()

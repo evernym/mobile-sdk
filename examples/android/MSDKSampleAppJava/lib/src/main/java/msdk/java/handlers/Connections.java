@@ -21,6 +21,13 @@ import msdk.java.types.MessageType;
  * Class containing methods to work with connections
  */
 public class Connections {
+    /*
+     * Check if a connection already exists for passed invitation
+    *
+     * @param invitationDetails             String containing JSON with invitation details.
+     * @param serializedConnections         List of existing connections
+     * @return {@link CompletableFuture}    Found connection
+     */
     public static String verifyConnectionExists(
             @NonNull String invitationDetails,
             @NonNull List<String> serializedConnections
@@ -43,72 +50,7 @@ public class Connections {
     }
 
     /**
-     * Redirect aries and out-of-band connections if needed
-     */
-    public static CompletableFuture<Boolean> connectionRedirectAriesOutOfBand(String invitation, String serializedConnection) {
-        CompletableFuture<Boolean> result = new CompletableFuture<>();
-        try {
-            JSONObject inviteJson = new JSONObject(invitation);
-            // Current implementation assume that 'request~attach' array is not presented
-            JSONArray handshakeProtocols = inviteJson.optJSONArray("handshake_protocols");
-
-            if (serializedConnection == null) {
-                // Connection does not exist, could create new connection
-                result.complete(false);
-                return result;
-            }
-            if (handshakeProtocols == null) {
-                result.completeExceptionally(new Exception("Invite does not have 'handshake_protocols' entry."));
-                return result;
-            }
-
-            String threadId = inviteJson.getString("@id");
-
-            // Connection already exists and should be reused and wait handshake reuse accepted message
-            try {
-                ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((handle, err) -> {
-                    if (err != null) {
-                        Logger.getInstance().e("Failed to deserialize stored connection: ", err);
-                        result.completeExceptionally(err);
-                    }
-                    try {
-                        ConnectionApi.connectionSendReuse(handle, invitation).whenComplete((res, e) -> {
-                            if (e != null) {
-                                Logger.getInstance().e("Failed to reuse connection: ", e);
-                                result.completeExceptionally(e);
-                            } else {
-                                while (true) {
-                                    try {
-                                        Message message = Messages.downloadMessage(MessageType.HANDSHAKE, threadId).get();
-                                        System.out.println("Message Received " + message.getPayload());
-                                        if (message != null) {
-                                            String pwDid = Connections.getPwDid(serializedConnection);
-                                            Messages.updateMessageStatus(pwDid, message.getUid());
-                                            result.complete(true);
-                                            return;
-                                        }
-                                        Thread.sleep(2000);
-                                    } catch (ExecutionException | InterruptedException ex) {
-                                        ex.printStackTrace();
-                                    }
-                                }
-                            }
-                        });
-                    } catch (VcxException ex) {
-                        result.completeExceptionally(ex);
-                    }
-                });
-            } catch (Exception ex) {
-                result.completeExceptionally(ex);
-            }
-        } catch (Exception ex) {
-            result.completeExceptionally(ex);
-        }
-        return result;
-    }
-
-    /**
-     * Creates new connection from invitation.
+     * Creates new connection state object from invitation.
      *
      * @param invitationDetails String containing JSON with invitation details.
      * @param invitationType    Type of the invitation
@@ -167,19 +109,92 @@ public class Connections {
         return result;
     }
 
-    public static @NonNull
-    String getPwDid(@NonNull String serializedConnection) {
+    /**
+     * Redirect aries and out-of-band connections if needed
+     *
+     * @param invitation                    String containing JSON with invitation details.
+     * @param serializedConnection          Existing connection
+     * @return {@link CompletableFuture}    with no value
+     */
+    public static CompletableFuture<Void> redirectAriesOutOfBand(String invitation, String serializedConnection) {
+        CompletableFuture<Void> result = new CompletableFuture<>();
+        try {
+            JSONObject inviteJson = new JSONObject(invitation);
+            // Current implementation assume that 'request~attach' array is not presented
+            JSONArray handshakeProtocols = inviteJson.optJSONArray("handshake_protocols");
+
+            if (serializedConnection == null) {
+                // Connection does not exist, could create new connection
+                result.completeExceptionally(new Exception("Connection doesn't exist."));
+                return result;
+            }
+            if (handshakeProtocols == null) {
+                result.completeExceptionally(new Exception("Invite does not have 'handshake_protocols' entry."));
+                return result;
+            }
+
+            String threadId = inviteJson.getString("@id");
+
+            // Connection already exists and should be reused and wait handshake reuse accepted message
+            try {
+                ConnectionApi.connectionDeserialize(serializedConnection).whenComplete((handle, err) -> {
+                    if (err != null) {
+                        Logger.getInstance().e("Failed to deserialize stored connection: ", err);
+                        result.completeExceptionally(err);
+                    }
+                    try {
+                        ConnectionApi.connectionSendReuse(handle, invitation).whenComplete((res, e) -> {
+                            if (e != null) {
+                                Logger.getInstance().e("Failed to reuse connection: ", e);
+                                result.completeExceptionally(e);
+                            } else {
+                                while (true) {
+                                    try {
+                                        Message message = Messages.downloadNextMessageFromTheThread(MessageType.HANDSHAKE, threadId).get();
+                                        System.out.println("Message Received " + message.getPayload());
+                                        if (message != null) {
+                                            String pwDid = Connections.getPwDid(serializedConnection);
+                                            Messages.updateMessageStatus(pwDid, message.getUid());
+                                            result.complete(null);
+                                            return;
+                                        }
+                                        Thread.sleep(2000);
+                                    } catch (ExecutionException | InterruptedException ex) {
+                                        ex.printStackTrace();
+                                    }
+                                }
+                            }
+                        });
+                    } catch (VcxException ex) {
+                        result.completeExceptionally(ex);
+                    }
+                });
+            } catch (Exception ex) {
+                result.completeExceptionally(ex);
+            }
+        } catch (Exception ex) {
+            result.completeExceptionally(ex);
+        }
+        return result;
+    }
+
+    /**
+     * Get connection pairwise DID
+     *
+     * @param serializedConnection          Connection
+     * @return {@link CompletableFuture}    Pairwise DID
+     */
+    public static String getPwDid(@NonNull String serializedConnection) {
         String pwDid = null;
         try {
             Integer handle = ConnectionApi.connectionDeserialize(serializedConnection).get();
             pwDid = ConnectionApi.connectionGetPwDid(handle).get();
         } catch (Exception e) {
-            Logger.getInstance().e("Failed to get connection pwDID", e);
+            Logger.getInstance().e("Failed to get connection pairwise DID", e);
             e.printStackTrace();
         }
         return pwDid;
     }
-
 
     /**
      * Loops indefinitely until connection status is not changed
@@ -224,7 +239,7 @@ public class Connections {
             Integer handle = ConnectionApi.connectionDeserialize(serializedConnection).get();
             while (true) {
                 try {
-                    Message message = Messages.downloadMessage(MessageType.CONNECTION_RESPONSE, pwDid).get();
+                    Message message = Messages.downloadNextMessageFromTheThread(MessageType.CONNECTION_RESPONSE, pwDid).get();
                         status = ConnectionApi.vcxConnectionUpdateStateWithMessage(handle, message.getPayload()).get();
                         Messages.updateMessageStatus(pwDid, message.getUid());
                         if (StateMachineState.ACCEPTED.matches(status)) {

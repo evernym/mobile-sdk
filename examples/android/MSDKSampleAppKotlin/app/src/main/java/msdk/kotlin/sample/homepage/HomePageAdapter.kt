@@ -35,24 +35,25 @@ class HomePageAdapter(private val itemClickListener: ItemClickListener) : Recycl
         holder.selectedAnswer.visibility = View.INVISIBLE
         holder.buttonHolder.visibility = View.INVISIBLE
 
-        if (action.entryId == null || action.messageAnswers == null) {
-            holder.buttonHolder.removeAllViews();
+        if (action.entryId == null && action.messageAnswers == null) {
+            holder.buttonHolder.removeAllViews()
             holder.buttonAccept.visibility = View.VISIBLE
             holder.buttonReject.visibility = View.VISIBLE
             holder.buttonAccept.isEnabled = true
             holder.buttonReject.isEnabled = true
-            holder.buttonAccept.setOnClickListener {
+            holder.buttonAccept.setOnClickListener { v: View? ->
                 holder.buttonAccept.isEnabled = false
                 holder.buttonReject.isEnabled = false
                 itemClickListener.onAcceptClick(action.id)
             }
-            holder.buttonReject.setOnClickListener {
+            holder.buttonReject.setOnClickListener { v: View? ->
                 holder.buttonAccept.isEnabled = false
                 holder.buttonReject.isEnabled = false
                 itemClickListener.onRejectClick(action.id)
             }
         } else {
             holder.buttonHolder.removeAllViews()
+            holder.buttonHolder.visibility = View.VISIBLE
             if (action.selectedAnswer != null) {
                 holder.selectedAnswer.visibility = View.VISIBLE
                 holder.selectedAnswer.text = "Selected answer: " + action.selectedAnswer
@@ -60,7 +61,7 @@ class HomePageAdapter(private val itemClickListener: ItemClickListener) : Recycl
                 holder.selectedAnswer.visibility = View.GONE
                 for (response in action.messageAnswers!!) {
                     val btn: Button = AppCompatButton(holder.itemView.context)
-                    btn.text = response.text
+                    btn.setText(response.text)
                     holder.buttonHolder.addView(btn)
                     btn.setOnClickListener { v: View? ->
                         for (i in 0 until holder.buttonHolder.childCount) {
