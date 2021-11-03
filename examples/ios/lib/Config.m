@@ -1,21 +1,21 @@
 //
-//  CMConfig.m
-//  CMeSdkObjc
+//  Config.m
+//  MSDKSampleAppObjC
 //
 //  Created by Predrag Jevtic on 28/05/2020.
 //  Copyright © 2020 Evernym Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
-#import "CMConfig.h"
-#import "CMUtilities.h"
+#import "Config.h"
+#import "Utilities.h"
 #import "ProductionPoolTxnGenesis.h"
-#import "StagingPoolTxnGenesis.h"
-#import "DevTeam1PoolTxnGenesis.h"
+//#import "StagingPoolTxnGenesis.h"
+//#import "DevTeam1PoolTxnGenesis.h"
 #import "MobileSDK.h"
 #import "LocalStorage.h"
 
-@implementation CMConfig
+@implementation Config
 
 // Define your wallet name constant here
 NSString* walletName = @"Lor6Ohwaichool"; //@"PleaseSetYourConnectMeWalletName";
@@ -23,11 +23,11 @@ NSString* sponsorServerURL = @"https://3341-83-139-159-140.ngrok.io";
 
 // Below settings will depend on your choosen environment
 // Selected here is Production Enviroment
-//CMEnvironment environment = Staging;
-CMEnvironment environment = Production;
+//Environment environment = Staging;
+Environment environment = Production;
 
 +(NSString*)agencyConfig {
-    NSString* walletKey = [CMConfig walletKey];
+    NSString* walletKey = [Config walletKey];
 
     NSDictionary* configs = @{
         @"1": @{
@@ -73,14 +73,14 @@ CMEnvironment environment = Production;
         }
         return walletKey;
     } @catch (NSException *exception) {
-        [CMUtilities printErrorMessage: exception.reason];
+        [Utilities printErrorMessage: exception.reason];
     }
 
     return walletKey;
 }
 
 // MARK: - Genesis file for server node
-+(NSString*)genesisFileName: (CMEnvironment)environment {
++(NSString*)genesisFileName: (Environment)environment {
     switch (environment) {
         case Sandbox:
             return @"pool_transactions_genesis_DEMO";
@@ -96,13 +96,13 @@ CMEnvironment environment = Production;
     }
 }
 
-+(NSString*)genesisFile: (CMEnvironment)environment {
++(NSString*)genesisFile: (Environment)environment {
     switch (environment) {
             // Default is Production genesis file:
-        case Staging:
-            return stagingPoolTxnGenesisDef;
-        case DevTeam1:
-            return devTeam1PoolTxnGenesisDef;
+//        case Staging:
+//            return stagingPoolTxnGenesisDef;
+//        case DevTeam1:
+//            return devTeam1PoolTxnGenesisDef;
         default:
             return productionPoolTxnGenesisDef;
             break;
@@ -111,20 +111,20 @@ CMEnvironment environment = Production;
 
 +(NSString*)genesisFilePath {
     NSError* error;
-    NSString *filePath = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject] stringByAppendingPathComponent: [CMConfig genesisFileName: environment]];
+    NSString *filePath = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject] stringByAppendingPathComponent: [Config genesisFileName: environment]];
     NSFileManager *fileManager = [NSFileManager defaultManager];
 
     if (![fileManager fileExistsAtPath: filePath]) {
-        BOOL success = [[CMConfig genesisFile: environment] writeToFile: filePath atomically: YES encoding: NSUTF8StringEncoding error: &error];
+        BOOL success = [[Config genesisFile: environment] writeToFile: filePath atomically: YES encoding: NSUTF8StringEncoding error: &error];
 
         if(!success) {
             NSLog(@"error while creating pool transaction genesis file");
-            [CMUtilities printError: error];
+            [Utilities printError: error];
             return @"";
         }
     }
 
-    [CMUtilities printSuccess: @[@"Creating pool transaction genesis file was successful:", filePath]];
+    [Utilities printSuccess: @[@"Creating pool transaction genesis file was successful:", filePath]];
     return filePath;
 }
 
@@ -133,10 +133,10 @@ CMEnvironment environment = Production;
     NSError* error;
     NSMutableDictionary *parsedValues = [@{} mutableCopy];
     if (values) {
-        parsedValues = [[CMUtilities jsonToDictionary: values] mutableCopy];
+        parsedValues = [[Utilities jsonToDictionary: values] mutableCopy];
     }
 
-    NSMutableDictionary *currentConfig = [[CMUtilities jsonToDictionary: jsonConfig] mutableCopy];
+    NSMutableDictionary *currentConfig = [[Utilities jsonToDictionary: jsonConfig] mutableCopy];
 
     for (NSString *obj in parsedValues) {
         [currentConfig removeObjectForKey: obj];
@@ -151,9 +151,9 @@ CMEnvironment environment = Production;
     NSError* error;
     NSMutableDictionary *parsedValues = [@{} mutableCopy];
     if (values) {
-        parsedValues =  [[CMUtilities jsonToDictionary: values] mutableCopy];
+        parsedValues =  [[Utilities jsonToDictionary: values] mutableCopy];
     }
-    NSMutableDictionary *currentConfig = [[CMUtilities jsonToDictionary: jsonConfig] mutableCopy];
+    NSMutableDictionary *currentConfig = [[Utilities jsonToDictionary: jsonConfig] mutableCopy];
 
     for (NSString *obj in parsedValues) {
         currentConfig[obj] = parsedValues[obj];
@@ -166,7 +166,7 @@ CMEnvironment environment = Production;
 
 +(NSString*)updateJSONConfig: (NSString*)jsonConfig  withKey: (NSString*)key withValue: (NSString*)value {
     NSError* error;
-    NSMutableDictionary *currentConfig = [[CMUtilities jsonToDictionary: jsonConfig] mutableCopy];
+    NSMutableDictionary *currentConfig = [[Utilities jsonToDictionary: jsonConfig] mutableCopy];
     currentConfig[key] = value;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject: currentConfig options: (NSJSONWritingOptions) (0) error: &error];
     return [[NSString alloc] initWithData: jsonData encoding: NSUTF8StringEncoding];
@@ -183,7 +183,7 @@ CMEnvironment environment = Production;
 
     __block NSString* token = [[MobileSDK shared] provisioningToken];
 
-    NSString* agencyConfig = [CMConfig agencyConfig];
+    NSString* agencyConfig = [Config agencyConfig];
     NSLog(@"Agency config %@", agencyConfig);
 
     if(token != nil) {
@@ -204,7 +204,7 @@ CMEnvironment environment = Production;
 
 +(void) initializeMobileSDK: (NSString*) agencyConfig withProvisioningToken: (NSString*) provisioningToken {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
-    NSMutableDictionary* config = [[CMUtilities jsonToDictionary: agencyConfig] mutableCopy];
+    NSMutableDictionary* config = [[Utilities jsonToDictionary: agencyConfig] mutableCopy];
 
     if (provisioningToken == nil) {
         NSLog(@"Fail to init vcx because provisioning token is empty");
@@ -218,7 +218,7 @@ CMEnvironment environment = Production;
         return;
     }
 
-    NSDictionary* oneTimeInfoDict = [CMUtilities jsonToDictionary: [NSString stringWithUTF8String: oneTimeInfo]];
+    NSDictionary* oneTimeInfoDict = [Utilities jsonToDictionary: [NSString stringWithUTF8String: oneTimeInfo]];
     [config addEntriesFromDictionary: oneTimeInfoDict];
 
     NSMutableDictionary *keychainVcxConfig = [@{} mutableCopy];
@@ -227,17 +227,17 @@ CMEnvironment environment = Production;
     keychainVcxConfig[(__bridge id)kSecAttrType] = @"vcxConfig";
     keychainVcxConfig[(__bridge id)kSecAttrLabel] = walletName;
 
-    NSString *vcxConfig = [CMConfig vsxConfig: [NSString stringWithUTF8String: oneTimeInfo]
+    NSString *vcxConfig = [Config vsxConfig: [NSString stringWithUTF8String: oneTimeInfo]
                            withKeychainConfig: keychainVcxConfig];
 
     [sdkApi initWithConfig: vcxConfig completion:^(NSError *error) {
         if (error && error.code > 0) {
-            return [CMUtilities printError: error];
+            return [Utilities printError: error];
         }
 
         [MobileSDK shared].sdkInited = true;
         [[NSNotificationCenter defaultCenter] postNotificationName:@"vcxInitialized" object: nil userInfo: nil];
-        [CMUtilities printSuccess:@[@"######## VCX Init Successful! :) #########"]];
+        [Utilities printSuccess:@[@"######## VCX Init Successful! :) #########"]];
     }];
 }
 
@@ -257,7 +257,7 @@ CMEnvironment environment = Production;
             vcxConfig = [[NSString alloc] initWithData: vcxConfigData encoding: NSUTF8StringEncoding];
         } else {
             NSLog(@"Error Code while finding vcxConfig: %d", (int)sts);
-            [CMUtilities printErrorMessage: [NSString stringWithFormat: @"Error Code while finding vcxConfig: %d", (int)sts]];
+            [Utilities printErrorMessage: [NSString stringWithFormat: @"Error Code while finding vcxConfig: %d", (int)sts]];
         }
         return vcxConfig;
     }
@@ -268,7 +268,7 @@ CMEnvironment environment = Production;
     // - pool_name,
     // - config and
     // - genesis_path
-    vcxConfig = [CMConfig updateJSONConfig: oneTimeInfo withValues: [NSString stringWithFormat: @"{\"genesis_path\": \"%@\", \"institution_logo_url\": \"%@\", \"institution_name\": \"%@\", \"pool_name\":\"7e96cbb3b0a1711f3b843af3cb28e31dcmpool\", \"protocol_version\":\"2\"}", [CMConfig genesisFilePath], @"https://robothash.com/logo.png", @"real institution name"]];
+    vcxConfig = [Config updateJSONConfig: oneTimeInfo withValues: [NSString stringWithFormat: @"{\"genesis_path\": \"%@\", \"institution_logo_url\": \"%@\", \"institution_name\": \"%@\", \"pool_name\":\"7e96cbb3b0a1711f3b843af3cb28e31dcmpool\", \"protocol_version\":\"2\"}", [Config genesisFilePath], @"https://robothash.com/logo.png", @"real institution name"]];
 
     // Check if the keychainVcxConfig already exists.
     // Store the vcxConfig into the secure keychain storage!
@@ -278,11 +278,11 @@ CMEnvironment environment = Production;
         attributesToUpdate[(__bridge id)kSecValueData] = [vcxConfig dataUsingEncoding:NSUTF8StringEncoding];
         OSStatus sts = SecItemUpdate((__bridge CFDictionaryRef)keychainVcxConfig, (__bridge CFDictionaryRef)attributesToUpdate);
 
-        [CMUtilities printErrorMessage: [NSString stringWithFormat: @"Error Code while updating vcxConfig: %d", (int)sts]];
+        [Utilities printErrorMessage: [NSString stringWithFormat: @"Error Code while updating vcxConfig: %d", (int)sts]];
     } else {
         keychainVcxConfig[(__bridge id)kSecValueData] = [vcxConfig dataUsingEncoding: NSUTF8StringEncoding];
         OSStatus sts = SecItemAdd((__bridge CFDictionaryRef)keychainVcxConfig, NULL);
-        [CMUtilities printErrorMessage: [NSString stringWithFormat: @"Error Code while adding new vcxConfig: %d", (int)sts]];
+        [Utilities printErrorMessage: [NSString stringWithFormat: @"Error Code while adding new vcxConfig: %d", (int)sts]];
     }
 
     return vcxConfig;
@@ -298,7 +298,7 @@ CMEnvironment environment = Production;
     NSString* sponseeID = [[[NSUUID alloc] init] UUIDString];
     [LocalStorage store:sponseeID andString:@"sponseeID"];
 
-    [CMUtilities sendPostRequest: [sponsorServerURL stringByAppendingString:@"/generate"]
+    [Utilities sendPostRequest: [sponsorServerURL stringByAppendingString:@"/generate"]
                         withBody:@{@"sponseeId": sponseeID }
                    andCompletion:^(NSString *token, NSError *error) {
         if(error != nil) {

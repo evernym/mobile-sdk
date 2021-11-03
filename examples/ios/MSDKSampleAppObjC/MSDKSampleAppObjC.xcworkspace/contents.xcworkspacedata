@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:/Users/Evernym/Desktop/Evernym/mobile-sdk/examples/ios/MSDKSampleAppObjC/MSDKSampleAppObjC.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Pods/Pods.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:MSDKSampleAppObjC.xcodeproj">
+   </FileRef>
+</Workspace>
