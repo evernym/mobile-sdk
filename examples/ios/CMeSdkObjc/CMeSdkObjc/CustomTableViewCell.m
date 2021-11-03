@@ -38,7 +38,7 @@ typedef void (^ActionBlock)(void);
 - (void)updateAttribute: (NSString*) title
                subtitle: (NSString*) subtitle
                 logoUrl: (NSString*) logoUrl
-                 acceptCallback: (ActionBlock) acceptCallback
+         acceptCallback: (ActionBlock) acceptCallback
          rejectCallback: (ActionBlock) rejectCallback {
     self.title.text = title;
     self.subtitle.text = subtitle;
@@ -48,11 +48,11 @@ typedef void (^ActionBlock)(void);
     UIImage *image = [UIImage imageWithData:data];
     self.logo.image = image;
     
-    _acceptBlock = acceptCallback;
+    _acceptBlock = [acceptCallback copy];
     [self.accept addTarget:self action:@selector(callAcceptBlock:) forControlEvents:UIControlEventTouchUpInside];
     [self.accept showsTouchWhenHighlighted];
 
-    _rejectBlock = rejectCallback;
+    _rejectBlock = [rejectCallback copy];
     [self.reject addTarget:self action:@selector(callRejectBlock:) forControlEvents:UIControlEventTouchUpInside];
     [self.reject showsTouchWhenHighlighted];
 }

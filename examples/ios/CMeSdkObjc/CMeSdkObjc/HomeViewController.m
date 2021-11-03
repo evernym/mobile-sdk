@@ -20,6 +20,8 @@
 
 @property (weak, nonatomic) IBOutlet UILabel *infoLbl;
 @property (nonatomic, readwrite, strong) IBOutlet UITableView *tableView;
+@property (retain, nonatomic) IBOutlet UIButton *addConnectionButton;
+@property (retain, nonatomic) IBOutlet UILabel *newConnLabel;
 
 @property NSDictionary* requests;
 @property BOOL isInitialized;
@@ -27,16 +29,24 @@
 @end
 
 @implementation HomeViewController
-@synthesize addConnLabel, addConnConfigTextView, requests;
+@synthesize addConnLabel, addConnConfigTextView, requests, newConnLabel, addConnectionButton;
 
 UIGestureRecognizer *tapper;
 
 - (void)viewDidLoad {
+    // On iOS diveces you cann't use qr code scnner
+    // But you can handle invite with text input and button on home page
+    // For show input set this flag to false
+    BOOL const isHideInput = true;
+    
     [super viewDidLoad];
     self.tableView.dataSource = self;
     self.tableView.delegate = self;
     addConnConfigTextView.delegate = self;
     addConnConfigTextView.layer.cornerRadius = 5;
+    [addConnConfigTextView setHidden: isHideInput];
+    [newConnLabel setHidden: isHideInput];
+    [addConnectionButton setHidden:isHideInput];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -80,19 +90,19 @@ UIGestureRecognizer *tapper;
 
     QRCodeReader *reader = [QRCodeReader readerWithMetadataObjectTypes:@[AVMetadataObjectTypeQRCode]];
 
-    QRCodeReaderViewController *vc = [QRCodeReaderViewController readerWithCancelButtonTitle:@"Cancel" codeReader: reader startScanningAtLoad:YES showSwitchCameraButton:YES showTorchButton:YES];
+    QRCodeReaderViewController *vc = [QRCodeReaderViewController readerWithCancelButtonTitle:@""
+                                                                                  codeReader: reader startScanningAtLoad:YES showSwitchCameraButton:YES showTorchButton:YES];
     vc.modalPresentationStyle = UIModalPresentationFormSheet;
-
+    vc.delegate = self;
+    
     [self presentViewController: vc animated: YES completion:^{
         NSLog(@"QR code scanner presented");
     }];
-
-    [reader setCompletionWithBlock:^(NSString *scanResult) {
-        NSLog(@"%@", scanResult);
-        self.addConnConfigTextView.text = scanResult;
-        [self addNewConn: sender];
-        [self dismissViewControllerAnimated: vc completion:^{
-            NSLog(@"QR code scanner dissmised");
+    
+    [reader setCompletionWithBlock:^(NSString *resultAsString) {
+        NSLog(@"%@", resultAsString);
+        [vc dismissViewControllerAnimated:YES completion:^{
+            [self addNewConn: resultAsString];
         }];
     }];
 }
@@ -177,7 +187,36 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
     }];
 }
 
-- (IBAction)addNewConn: (id)sender {
+- (void)addNewConn:(NSString *) data {
+    NSDictionary *connectValues = [CMConnection parsedInvite: data];
+    NSString *label = [connectValues objectForKey: @"label"];
+    NSString *goal = @"";
+    if ([connectValues valueForKey:@"goal"] != nil) {
+        goal = [connectValues objectForKey: @"goal"];
+    } else {
+        goal = @"New connection";
+    }
+    NSString *profileUrl = [connectValues objectForKey: @"profileUrl"];
+    
+    NSMutableDictionary* requestsDict = [[LocalStorage getObjectForKey: @"requests" shouldCreate: true] mutableCopy];
+    NSString *uuid = [[NSUUID UUID] UUIDString];
+
+    NSDictionary* requestObj = @{
+        @"name": label,
+        @"profileUrl": profileUrl,
+        @"goal": goal,
+        @"uuid": uuid,
+        @"type": @"null",
+        @"data": [CMUtilities dictToJsonString:connectValues]
+    };
+    [requestsDict setValue: requestObj forKey: uuid];
+    [LocalStorage store: @"requests" andObject: requestsDict];
+    
+    requests = requestsDict;
+    [self.tableView reloadData];
+}
+
+- (IBAction)addNewConnBtnClick: (id)sender {
     if(addConnConfigTextView.text.length > 3 && ![addConnConfigTextView.text isEqual: @"enter code here"]) {
         NSDictionary *connectValues = [CMConnection parsedInvite: addConnConfigTextView.text];
         NSString *label = [connectValues objectForKey: @"label"];
@@ -341,7 +380,8 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
     NSString *goal = [requestDict objectForKey: @"goal"];
     NSString *uuid = [requestDict objectForKey: @"uuid"];
     NSString *data = [requestDict objectForKey: @"data"];
-
+    NSLog(@"typetype %@", requestDict);
+    
     if ([type isEqual:@"null"]) {
         NSString *logoUrl = [requestDict objectForKey: @"profileUrl"];
         [cell updateAttribute:name
@@ -356,7 +396,8 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
                         }];
                     }
                 rejectCallback:^() {
-                    [self switchActionToHistoryView: uuid];
+                        [self switchActionToHistoryView: uuid];
+                        [self addRejectAction: name];
                 }
          ];
         [cell.accept setTitle:@"Accept" forState:UIControlStateNormal];
@@ -396,7 +437,7 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
                         }];
                     }
                rejectCallback:^() {
-            [self switchActionToHistoryView: uuid];
+                        [self switchActionToHistoryView: uuid];
                }
          ];
         [cell.accept setTitle:@"Answer" forState:UIControlStateNormal];
@@ -440,6 +481,11 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
         self.requests = processedDict;
         [self.tableView reloadData];
     });
+}
+
+- (void) addRejectAction:(NSString *) name {
+    [LocalStorage addEventToHistory: [NSString stringWithFormat:@"%@ - Rejected", name]];
+    [self.tableView reloadData];
 }
 
 @end

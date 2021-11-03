@@ -274,7 +274,9 @@
                     <navigationItem key="navigationItem" id="OeJ-a0-qUr"/>
                     <connections>
                         <outlet property="addConnConfigTextView" destination="Rls-ZI-fmQ" id="kAa-4O-xna"/>
+                        <outlet property="addConnectionButton" destination="F3p-D3-NE9" id="ryO-Gt-1ro"/>
                         <outlet property="infoLbl" destination="RQJ-gn-HpF" id="bMz-rX-uYT"/>
+                        <outlet property="newConnLabel" destination="rF1-s3-6mX" id="u9Y-qu-iap"/>
                         <outlet property="tableView" destination="F1t-BN-5mf" id="rdT-AS-THG"/>
                     </connections>
                 </viewController>
