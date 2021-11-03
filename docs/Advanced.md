@@ -15,7 +15,7 @@ Internally this function does three things:
 3. Connects to a Pool Ledger Network
 
 Connection to a Pool Ledger Network may take several seconds that significantly slow down library initialization.
-In fact, Pool Ledger connectivity required only when you receive credentials and prove them for the first time ( if you don't use [Cache data for Proof generation](5.Credentials.md#cache-data-for-proof-generation---optional) technique).
+In fact, Pool Ledger connectivity required only when you receive credentials and prove them for the first time ( if you don't use [Cache data for Proof generation](6.Credentials.md#cache-data-for-proof-generation---optional) technique).
 Your application can make connections, answer questions and prove credentials without establishing a connection with Pool Ledger Network.
 
 SDK allows you to skip Pool Ledger Network connectivity on the Library initialization step and do it later by demand or right after initialization as a background task.
