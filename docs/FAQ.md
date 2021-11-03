@@ -47,7 +47,7 @@
 
 - **Q: How to send a message with custom action?**
 
-    Check this [guide](7.StructuredMessages.md)
+    Check this [guide](8.StructuredMessages.md)
 
 - **Q: Do connections and credentials are stored between wallet re-installations?**
 

@@ -37,16 +37,17 @@ Before starting, please read the [Base Concepts document](docs/0.BaseConcepts.md
 1. [Create a new App](docs/1.ProjectSetup.md)
 1. [Configure application storage](docs/2.Storage.md)
 1. [Initialize Wallet and Cloud Agent](docs/3.Initialization.md) on a specific Agency (web server)
-1. [Establish a connection](docs/4.Connections.md) with another user  
-1. [Accept offered credential](docs/5.Credentials.md)
-1. [Respond to a proof request](docs/6.Proofs.md)
-1. [Exchange secured structured messages](docs/7.StructuredMessages.md)
+1. [Receive messages](docs/4.MessagesFlow.md) from the Cloud Agent
+1. [Establish a connection](docs/5.Connections.md) with another user  
+1. [Accept offered credential](docs/6.Credentials.md)
+1. [Respond to a proof request](docs/7.Proofs.md)
+1. [Exchange secured structured messages](docs/8.StructuredMessages.md)
 
 ![Mobile SDK Flow](wiki-images/ConnectMeMobileSDK.png)
 
 #### Additional Sources:
 * [Configuration](docs/Configuration.md) &#8212; The list of all VCX library configuration options.
-* [New Messages Processing](docs/MessagesFlow.md)
+* [New Messages Processing](docs/4.MessagesFlow.md)
 * [Credentials With Attachments](docs/CredentialsWithAttachments.md)
 * [Push Notifications](docs/PushNotifications.md)
 * [Frequently asked questions](docs/FAQ.md)

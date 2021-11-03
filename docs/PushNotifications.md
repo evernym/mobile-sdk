@@ -116,4 +116,4 @@ We are working also on improving service related to push notifications, we shoul
 Once you (Sponsor) receive a message on your webhook. You can send push notification to your customer's app. 
 Inside the app you can use method ```downloadMessages``` in ObjC or ```UtilsApi.vcxGetMessages``` in Java, for pulling either all messages waiting on cloud agent, or a specific one matching to received notification.
 
-See [messages documentation](MessagesFlow.md) for message download information.
+See [messages documentation](4.MessagesFlow.md) for message download information.
