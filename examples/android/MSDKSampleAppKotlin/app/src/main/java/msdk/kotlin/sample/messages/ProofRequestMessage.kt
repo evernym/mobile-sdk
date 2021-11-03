@@ -9,7 +9,7 @@ import org.json.JSONObject
 class ProofRequestMessage(
     var threadId: String,
     var name: String,
-    var attributes: String,
+    var attributes: JSONObject,
     var proofReq: String?
 ) {
 
@@ -20,21 +20,11 @@ class ProofRequestMessage(
                 val data = json.getJSONObject("proof_request_data")
                 val threadId = json.getString("thread_id")
                 val name = data.getString("name")
-                val requestedAttrs = data.getJSONObject("requested_attributes")
-                val keys = requestedAttrs.keys()
-                val attributes = StringBuilder()
-                while (keys.hasNext()) {
-                    val key = keys.next()
-                    val value = requestedAttrs.getJSONObject(key).getString("name")
-                    attributes.append(value)
-                    if (keys.hasNext()) {
-                        attributes.append(", ")
-                    }
-                }
+                val attributes = data.getJSONObject("requested_attributes")
                 ProofRequestMessage(
                     threadId,
                     name,
-                    attributes.toString(),
+                    attributes,
                     msg.payload
                 )
             } catch (e: JSONException) {
@@ -68,9 +58,9 @@ class ProofRequestMessage(
             return null
         }
 
-        fun extractRequestedAttributesFromProofRequest(decodedProofAttach: JSONObject?): String? {
+        fun extractRequestedAttributesFromProofRequest(proofRequest: JSONObject?): JSONObject? {
             try {
-                return decodedProofAttach?.getJSONObject("requested_attributes")?.toString()
+                return proofRequest?.getJSONObject("requested_attributes")
             } catch (e: JSONException) {
                 e.printStackTrace()
             }

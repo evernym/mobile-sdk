@@ -42,14 +42,25 @@ import static msdk.java.utils.StorageUtils.configureStoragePermissions;
 
 public class Initialization {
 
-    private static final String SECURE_PREF_VCX_CONFIG = "me.connect.vcx.config";
+    private static final String SECURE_PREF_VCX_CONFIG = "msdk.config";
 
+    /*
+     * Check if Cloud Agent already provisioned
+     *
+     * @param context                       {@link Context}
+     * @return {@link CompletableFuture}
+     */
     public static boolean isCloudAgentProvisioned(Context context) {
         return SecurePreferencesHelper.containsLongStringValue(context, SECURE_PREF_VCX_CONFIG);
     }
 
-    /**
+    /*
      * Initialize library and provision Cloud Agent if it's not done yet
+     *
+     * @param context                       {@link Context}
+     * @param constants                     SDK settings
+     * @param genesisPool                   Genesis transactions
+     * @return {@link CompletableFuture}
      */
     public static @NonNull
     CompletableFuture<Void> initialize(
@@ -99,8 +110,12 @@ public class Initialization {
         return result;
     }
 
-    /**
+    /*
      * Provision Cloud Agent and store populated config
+     *
+     * @param context                       {@link Context}
+     * @param constants                     SDK settings
+     * @return {@link CompletableFuture}
      */
     public static CompletableFuture<Void> provisionCloudAgent(
             Context context,
@@ -156,8 +171,12 @@ public class Initialization {
         return result;
     }
 
-    /**
-     * Connect to Pool Ledger in a separate thread
+    /*
+     * Connect to Pool Ledger
+     *
+     * @param context                       {@link Context}
+     * @param genesisPool                   Genesis transactions
+     * @return {@link CompletableFuture}
      */
     private static void initializePool(Context context, @RawRes int genesisPool) {
         // 1. Run Pool initialization in a separate thread

@@ -10,11 +10,12 @@ import msdk.kotlin.sample.db.Database
 import msdk.kotlin.sample.db.entity.Action
 import msdk.kotlin.sample.db.entity.Connection
 import msdk.kotlin.sample.db.entity.ProofRequest
+import msdk.kotlin.sample.history.HistoryHandler
 import msdk.kotlin.sample.homepage.Results.*
 import msdk.kotlin.sample.utils.wrap
 import java.util.*
 
-object StateProofRequests {
+object ProofRequestsHandler {
     suspend fun createProofStateObject(
             db: Database,
             outOfBandInvite: OutOfBandInvitation,
@@ -83,7 +84,7 @@ object StateProofRequests {
                 proof.serialized = s
                 db.proofRequestDao().update(proof)
 
-                HomePageViewModel.HistoryActions.addToHistory(
+                HistoryHandler.addToHistory(
                     action.id,
                     "Proofs send",
                     db,
@@ -123,7 +124,7 @@ object StateProofRequests {
             proof.pwDid = pwDid
             db.proofRequestDao().update(proof)
 
-            HomePageViewModel.HistoryActions.addHistoryAction(
+            HistoryHandler.addHistoryAction(
                 db,
                 proof.attachConnectionName!!,
                 "Connection created",

@@ -1,18 +1,19 @@
 package msdk.kotlin.sample.homepage
 
 import kotlinx.coroutines.future.await
-import msdk.kotlin.sample.handlers.Connections
-import msdk.kotlin.sample.messages.ConnectionInvitation
-import msdk.kotlin.sample.messages.OutOfBandInvitation
-import msdk.kotlin.sample.types.MessageAttachment
 import msdk.kotlin.sample.SingleLiveData
 import msdk.kotlin.sample.db.Database
 import msdk.kotlin.sample.db.entity.Action
 import msdk.kotlin.sample.db.entity.Connection
+import msdk.kotlin.sample.handlers.Connections
+import msdk.kotlin.sample.history.HistoryHandler
 import msdk.kotlin.sample.homepage.Results.*
+import msdk.kotlin.sample.messages.ConnectionInvitation
+import msdk.kotlin.sample.messages.OutOfBandInvitation
+import msdk.kotlin.sample.types.MessageAttachment
 import msdk.kotlin.sample.utils.wrap
 
-object StateConnections {
+object ConnectionsHandler {
     suspend fun handleConnectionInvitation(action: Action, db: Database, liveData: SingleLiveData<Results>) {
         try {
             // 1. Get invitation data, type, and metadata to show on UI
@@ -33,6 +34,12 @@ object StateConnections {
                 if (existingConnection != null) {
                     // duplicates - nothing to do
                     liveData.postValue(CONNECTION_REDIRECT)
+                    HistoryHandler.addToHistory(
+                        action.id,
+                        "Connection reused",
+                        db,
+                        liveData
+                    )
                 } else {
                     // create a new connection
 
@@ -48,8 +55,14 @@ object StateConnections {
                 if (attachment == null) {
                     if (existingConnection != null) {
                         // reuse existing connection
-                        Connections.connectionRedirectAriesOutOfBand(invitation, existingConnection).wrap().await()
+                        Connections.redirectAriesOutOfBand(invitation, existingConnection).wrap().await()
                         liveData.postValue(CONNECTION_REDIRECT)
+                        HistoryHandler.addToHistory(
+                            action.id,
+                            "Connection reused",
+                            db,
+                            liveData
+                        )
                     } else {
                         // create a new connection
                         connectionCreate(action.id, invitation, invitationType, db, userMeta, liveData)
@@ -109,11 +122,11 @@ object StateConnections {
         action: Action
     ) {
         if (outOfBandInvite.existingConnection != null) {
-            Connections.connectionRedirectAriesOutOfBand(outOfBandInvite.invitation, outOfBandInvite.existingConnection).wrap().await()
+            Connections.redirectAriesOutOfBand(outOfBandInvite.invitation, outOfBandInvite.existingConnection).wrap().await()
             liveData.postValue(CONNECTION_REDIRECT)
-            StateCredentialOffers.createCredentialStateObject(db, outOfBandInvite, liveData, action)
+            CredentialOffersHandler.createCredentialStateObject(db, outOfBandInvite, liveData, action)
         } else {
-            StateCredentialOffers.createCredentialStateObject(db, outOfBandInvite, liveData, action)
+            CredentialOffersHandler.createCredentialStateObject(db, outOfBandInvite, liveData, action)
         }
     }
 
@@ -124,10 +137,10 @@ object StateConnections {
         action: Action
     ) {
         if (outOfBandInvite.existingConnection != null) {
-            StateProofRequests.createProofStateObject(db, outOfBandInvite, liveData, action)
+            ProofRequestsHandler.createProofStateObject(db, outOfBandInvite, liveData, action)
             liveData.postValue(CONNECTION_REDIRECT)
         } else{
-            StateProofRequests.createProofStateObject(db, outOfBandInvite, liveData, action)
+            ProofRequestsHandler.createProofStateObject(db, outOfBandInvite, liveData, action)
         }
     }
 
@@ -150,6 +163,14 @@ object StateConnections {
                 pwDid = pwDid
             )
             db.connectionDao().insertAll(c)
+
+            HistoryHandler.addToHistory(
+                actionId,
+                "Connection created",
+                db,
+                liveData
+            )
+
             liveData.postValue(SUCCESS)
         } catch (e: Exception) {
             e.printStackTrace()

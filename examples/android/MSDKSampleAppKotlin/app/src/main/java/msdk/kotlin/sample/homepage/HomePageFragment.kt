@@ -117,7 +117,7 @@ class HomePageFragment: Fragment() {
     private fun performNewConnection(invite: String) {
         binding.buttonQr.isEnabled = false
         binding.checkMessages.isEnabled = false
-        model.newAction(invite).observeOnce(
+        model.createActionWithInvitation(invite).observeOnce(
             viewLifecycleOwner,
             Observer { status: Results ->
                 when (status) {

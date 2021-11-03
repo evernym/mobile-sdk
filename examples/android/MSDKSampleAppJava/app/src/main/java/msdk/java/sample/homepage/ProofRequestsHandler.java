@@ -15,13 +15,15 @@ import msdk.java.sample.db.Database;
 import msdk.java.sample.db.entity.Action;
 import msdk.java.sample.db.entity.Connection;
 import msdk.java.sample.db.entity.ProofRequest;
+import msdk.java.sample.history.HistoryHandler;
+
 import static msdk.java.sample.homepage.Results.CONNECTION_FAILURE;
 import static msdk.java.sample.homepage.Results.CONNECTION_SUCCESS;
 import static msdk.java.sample.homepage.Results.PROOF_SUCCESS;
 import static msdk.java.sample.homepage.Results.PROOF_MISSED;
 import static msdk.java.sample.homepage.Results.PROOF_FAILURE;
 
-public class StateProofRequests {
+public class ProofRequestsHandler {
     public static void createProofStateObject(
             Database db,
             OutOfBandInvitation outOfBandInvite,
@@ -96,7 +98,7 @@ public class StateProofRequests {
                     proof.serialized = s;
                     db.proofRequestDao().update(proof);
                 }
-                HomePageViewModel.addToHistory(
+                HistoryHandler.addToHistory(
                         action.id,
                         "Proofs send",
                         db,
@@ -132,7 +134,7 @@ public class StateProofRequests {
                         proof.pwDid = pwDid;
                         db.proofRequestDao().update(proof);
 
-                        HomePageViewModel.addHistoryAction(
+                        HistoryHandler.addHistoryAction(
                                 db,
                                 proof.attachConnectionName,
                                 "Connection created",

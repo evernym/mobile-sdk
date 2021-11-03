@@ -30,7 +30,14 @@ import java.util.*
 import java.util.concurrent.Executors
 
 object Initialization {
-    private const val SECURE_PREF_VCX_CONFIG = "me.connect.vcx.config"
+    private const val SECURE_PREF_VCX_CONFIG = "msdk.config"
+
+    /*
+     * Check if Cloud Agent already provisioned
+     *
+     * @param context                       {@link Context}
+     * @return {@link CompletableFuture}
+     */
     fun isCloudAgentProvisioned(context: Context?): Boolean {
         return SecurePreferencesHelper.containsLongStringValue(
             context,
@@ -38,8 +45,13 @@ object Initialization {
         )
     }
 
-    /**
+    /*
      * Initialize library and provision Cloud Agent if it's not done yet
+     *
+     * @param context                       {@link Context}
+     * @param constants                     SDK settings
+     * @param genesisPool                   Genesis transactions
+     * @return {@link CompletableFuture}
      */
     fun initialize(
         context: Context,
@@ -89,8 +101,12 @@ object Initialization {
         return result
     }
 
-    /**
+    /*
      * Provision Cloud Agent and store populated config
+     *
+     * @param context                       {@link Context}
+     * @param constants                     SDK settings
+     * @return {@link CompletableFuture}
      */
     @Throws(JSONException::class)
     fun provisionCloudAgent(
@@ -145,8 +161,12 @@ object Initialization {
         return result
     }
 
-    /**
-     * Connect to Pool Ledger in a separate thread
+    /*
+     * Connect to Pool Ledger
+     *
+     * @param context                       {@link Context}
+     * @param genesisPool                   Genesis transactions
+     * @return {@link CompletableFuture}
      */
     private fun initializePool(
         context: Context,

@@ -4,7 +4,7 @@ import msdk.kotlin.sample.logger.Logger.Companion.instance
 import java.util.*
 
 enum class MessageType {
-    CREDENTIAL, CONNECTION_RESPONSE, ACK, HANDSHAKE, CREDENTIAL_OFFER, PROOF_REQUEST, QUESTION;
+    CONNECTION_INVITATION, CREDENTIAL, CONNECTION_RESPONSE, ACK, HANDSHAKE, CREDENTIAL_OFFER, PROOF_REQUEST, QUESTION;
 
     fun matches(type: String): Boolean {
         val listToCheck: List<String>

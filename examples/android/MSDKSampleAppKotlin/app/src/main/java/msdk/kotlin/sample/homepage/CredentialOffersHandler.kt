@@ -10,12 +10,13 @@ import msdk.kotlin.sample.db.Database
 import msdk.kotlin.sample.db.entity.Action
 import msdk.kotlin.sample.db.entity.Connection
 import msdk.kotlin.sample.db.entity.CredentialOffer
+import msdk.kotlin.sample.history.HistoryHandler
 import msdk.kotlin.sample.homepage.Results.*
 import msdk.kotlin.sample.utils.wrap
 import org.json.JSONException
 import java.util.*
 
-object StateCredentialOffers {
+object CredentialOffersHandler {
     suspend fun createCredentialStateObject(
             db: Database,
             outOfBandInvite: OutOfBandInvitation,
@@ -84,7 +85,7 @@ object StateCredentialOffers {
                 offer.serialized = Credentials.awaitCredentialReceived(s, offer.threadId, offer.pwDid)
                 db.credentialOffersDao().update(offer)
 
-                HomePageViewModel.HistoryActions.addToHistory(
+                HistoryHandler.addToHistory(
                     action.id,
                     "Credential accept",
                     db,
@@ -93,7 +94,7 @@ object StateCredentialOffers {
 
                 data.postValue(OFFER_SUCCESS)
             } else {
-                HomePageViewModel.HistoryActions.addToHistory(
+                HistoryHandler.addToHistory(
                     action.id,
                     "Credential accept failure",
                     db,
@@ -127,7 +128,7 @@ object StateCredentialOffers {
             data.postValue(CONNECTION_SUCCESS)
 
             offer.pwDid = pwDid
-            HomePageViewModel.HistoryActions.addHistoryAction(
+            HistoryHandler.addHistoryAction(
                 db,
                 offer.attachConnectionName!!,
                 "Connection created",

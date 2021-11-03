@@ -13,10 +13,10 @@ import msdk.java.utils.CommonUtils;
 public class ProofRequestMessage {
     public String threadId;
     public String name;
-    public String attributes;
+    public JSONObject attributes;
     public String proofReq;
 
-    public ProofRequestMessage(String threadId, String name, String attributes, String proofReq) {
+    public ProofRequestMessage(String threadId, String name, JSONObject attributes, String proofReq) {
         this.threadId = threadId;
         this.name = name;
         this.attributes = attributes;
@@ -30,17 +30,7 @@ public class ProofRequestMessage {
             String threadId = json.getString("thread_id");
             String name = data.getString("name");
             JSONObject requestedAttrs = data.getJSONObject("requested_attributes");
-            Iterator<String> keys = requestedAttrs.keys();
-            StringBuilder attributes = new StringBuilder();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                String value = requestedAttrs.getJSONObject(key).getString("name");
-                attributes.append(value);
-                if (keys.hasNext()) {
-                    attributes.append(", ");
-                }
-            }
-            return new ProofRequestMessage(threadId, name, attributes.toString(), msg.getPayload());
+            return new ProofRequestMessage(threadId, name, requestedAttrs, msg.getPayload());
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -65,10 +55,10 @@ public class ProofRequestMessage {
         return null;
     }
 
-    public static String extractRequestedAttributesFromProofRequest(JSONObject decodedProofAttach) {
+    public static JSONObject extractRequestedAttributesFromProofRequest(JSONObject proofRequest) {
         try {
-            if (decodedProofAttach != null) {
-                return decodedProofAttach.getJSONObject("requested_attributes").toString();
+            if (proofRequest != null) {
+                return proofRequest.getJSONObject("requested_attributes");
             }
             return null;
         } catch (JSONException e) {

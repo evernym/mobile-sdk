@@ -15,6 +15,8 @@ import msdk.java.sample.db.Database;
 import msdk.java.sample.db.entity.Action;
 import msdk.java.sample.db.entity.Connection;
 import msdk.java.sample.db.entity.CredentialOffer;
+import msdk.java.sample.history.HistoryHandler;
+import msdk.java.sample.history.HistoryViewModel;
 
 import static msdk.java.sample.homepage.Results.CONNECTION_FAILURE;
 import static msdk.java.sample.homepage.Results.CONNECTION_SUCCESS;
@@ -23,7 +25,7 @@ import static msdk.java.sample.homepage.Results.OFFER_SUCCESS;
 import static msdk.java.sample.homepage.Results.PROOF_FAILURE;
 import static msdk.java.sample.homepage.Results.PROOF_SUCCESS;
 
-public class StateCredentialOffers {
+public class CredentialOffersHandler {
     public static void createCredentialStateObject(
             Database db,
             OutOfBandInvitation outOfBandInvite,
@@ -93,14 +95,14 @@ public class StateCredentialOffers {
             if (s != null) {
                 offer.serialized = Credentials.awaitCredentialReceived(s, offer.threadId, offer.pwDid);
                 db.credentialOffersDao().update(offer);
-                HomePageViewModel.addToHistory(
+                HistoryHandler.addToHistory(
                         action.id,
                         "Credential accept",
                         db,
                         data
                 );
             } else {
-                HomePageViewModel.addToHistory(
+                HistoryHandler.addToHistory(
                         action.id,
                         "Credential accept failure",
                         db,
@@ -134,7 +136,7 @@ public class StateCredentialOffers {
                 offer.pwDid = pwDid;
                 db.credentialOffersDao().update(offer);
 
-                HomePageViewModel.addHistoryAction(
+                HistoryHandler.addHistoryAction(
                     db,
                     offer.attachConnectionName,
                     "Connection created",
