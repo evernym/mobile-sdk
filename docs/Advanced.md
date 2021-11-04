@@ -50,7 +50,37 @@ SDK allows you to skip Pool Ledger Network connectivity on the Library initializ
 
 ### Holder Present Proof
 
-In this scenario credential Holder (mobile app) initiate the Present Proof protocol in order to share credential information with another side (can be a mobile app as well). 
+In this scenario, we assume that the credential Holder (mobile app) wants to share/prove his credential to another side which can be a mobile app as well.
+
+#### Steps overview (without establishing a Connection between sides )
+
+1. Holder prepares `Out-of-Band Connection Invitation` containing `Presentation Proposal` attachment:\
+   1.1. Deserialize credential state object corresponding to the credential needs to be shared.\
+   1.2. Prepare `Presentation Proposal` message.\
+   1.3. Create Out-of-Band Connection state object and Pairwise Cloud Agent. In the steps below we are passing `handshake:false` to skip regular connection establishing process. It allows us to share proof faster as we skip exchange of `Connection Request/Connection Response` messages.\
+   1.4. Receive `Connection Invitation`.\
+   1.5. Serialize and store Connection state object.\
+   1.6. Share the `Connection Invitation` with a Verifier somehow.
+2. Verifier generates and sends `Presentation Request`:\
+   1.1. Create Connection state object using received `Out-of-Band Connection Invitation`.\
+   1.2. Accept `Out-of-Band Connection Invitation`.\
+   1.3. Extract `Presentation Proposal` from the invitation attachment.\
+   1.4. Create `Proof` state object using `Presentation Proposal` message.\
+   1.5. Send `Presentation Request` message to Holder.\
+   1.6. Serialize and store Connection state object.\
+   1.7. Get `Presentation Request` message from Proof state machine.\
+   1.8. Serialize and store Proof state object.\
+3. Holder generates and sends `Presentation`:\
+   1.1. Download `Presentation Request` message from the Cloud Agent.\
+   1.2. Create `Proof` state object using received `Presentation Request` message.\
+   1.3. Deserialize Connection state object.\
+   1.4. Generate and send `Proof` message.\
+   1.5. Update `Presentation Request` message status on the Cloud Agent as read.
+2. Verifier verifies `Presentation`:\
+   1.1. Download `Proof` message from the Cloud Agent.\
+   1.2. Deserialize Proof state object.\
+   1.3. Update Proof state object with received `Proof` message.\
+   1.4. Get result of proof verification.
 
 #### Steps
 
@@ -58,97 +88,196 @@ In this scenario credential Holder (mobile app) initiate the Present Proof proto
 
     Java pseudocode:
     ```
+        // 1.1. Deserialize credential state object corresponding to the credential needs to be shared
         Integer credentialHandle = CredentialApi.credentialDeserialize(serializedCredentialStateObject)
+        
+        // 1.2. Prepare `Presentation Proposal` message.
         String presentationProposal = CredentialApi.credentialGetPresentationProposal(credentialHandle)
+   
+        // 1.3. Create Out-of-Band Connection state object and Pairwise Cloud Agent.
+        // `false` means skipping regular connection establishing process.
         Integer connectionHandle = ConnectionApi.vcxConnectionCreateOutofband('sourceId', 'present-credential', 'Present Credential', false, presentationProposal)
         ConnectionApi.vcxConnectionConnect(connectionHandle, '{}')
+   
+        // 1.4. Receive `Connection Invitation`.
+        String invitation = ConnectionApi.getConnectionInvite(connectionHandle, false)
+   
+        // 1.5. Serialize and store Connection state object.
         String connectionSerialized = Connection.Api.connectionSerialize(connectionHandle)
+   
+        // 1.6. Share the `Connection Invitation` with a Verifier somehow.
     ```
     
     Objective-C pseudocode
     ```
+        // 1.1. Deserialize credential state object corresponding to the credential needs to be shared
         NSInteger credentialHandle = [[[ConnectMeVcx alloc] init] credentialDeserialize:serializedCredential...]
+
+        // 1.2. Prepare `Presentation Proposal` message.
         NSString *presentationProposal = [[[ConnectMeVcx alloc] init] credentialGetPresentationProposal:credential_handle...]
+        
+        // 1.3. Create Out-of-Band Connection state object and Pairwise Cloud Agent.
+        // `false` means skipping regular connection establishing process.
         NSInteger connectionHandle = [[[ConnectMeVcx alloc] init] connectionCreateOutofband:sourceId
                                                                                    goalCode:goalCode
                                                                                        goal:goal
-                                                                                  handshake:handshake
+                                                                                  handshake:FALSE
                                                                               requestAttach:requestAttach...]
         [[[ConnectMeVcx alloc] init] connectionConnect:connectionHandle
                                                     connectionType:@"{}"...]
+
+        // 1.4. Receive `Connection Invitation`.
+        NSString *invitation = [[[ConnectMeVcx alloc] init] getConnectionInviteDetails:connectionHandle
+                                                                                   abbreviated:FALSE...]
+        
+        // 1.5. Serialize and store Connection state object.
         NSString *connectionSerialized = [[[ConnectMeVcx alloc] init] connectionSerialize:connectionHandle...]
+   
+        // 1.6. Share the `Connection Invitation` with a Verifier somehow.
     ```
 
 2. Verifier App accept Out-Of-Band invitation, create Verifier state object and send Proof Request. App need to extract Presentation Proposal message from invitation `request~attach` field.
-    ```
-    String presentationProposal = base64decode(invitation['request~attach'][0]['data']['base64'])
-    ```
- 
     Java pseudocode:
     ```
+        // 1.1. Create Connection state object using received `Out-of-Band Connection Invitation`.
         Integer connectionHandle = ConnectionApi.createConnectionWithOutOfBandInvite('sourceId', invitation)
+   
+        // 1.2. Accept `Out-of-Band Connection Invitation`.
         ConnectionApi.vcxConnectionConnect(connectionHandle, '{}')
+   
+        // 1.3. Extract `Presentation Proposal` from the invitation attachment.
+        String presentationProposal = String presentationProposal = base64decode(invitation['request~attach'][0]['data']['base64'])
+   
+        // 1.4. Create `Proof` state object using `Presentation Proposal` message.
         Integer proofHandle = ProofApi.proofCreateWithProposal('sourceId', presentationProposal, 'name')
+        
+        // 1.5. Send `Presentation Request` message to Holder.
         ProofApi.proofSendRequest(proofHandle, connectionHandle)
+   
+        // 1.6. Serialize and store Connection state object.
+        String connectionSerialized = Connection.Api.connectionSerialize(connectionHandle)
+         
+        // 1.7. Get `Presentation Request` message from Proof state machine.
         String proofRequest = ProofApi.proofGetRequestMsg(proofHandle)
+   
+        // 1.8. Serialize and store Proof state object.
         String serializedProof = ProofApi.proofSerialize(proofHandle)
     ```
     
     Objective-C pseudocode
     ```
+        // 1.1. Create Connection state object using received `Out-of-Band Connection Invitation`.
         NSInteger connectionHandle = [[[ConnectMeVcx alloc] init] connectionCreateWithOutofbandInvite:@"sourceId"
                                                                                                  invite:invitation...]
+        
+        // 1.2. Accept `Out-of-Band Connection Invitation`.
         [[[ConnectMeVcx alloc] init] connectionConnect:connectionHandle
                                                     connectionType:@"{}"...]
+   
+        // 1.3. Extract `Presentation Proposal` from the invitation attachment.
+        String presentationProposal = String presentationProposal = base64decode(invitation['request~attach'][0]['data']['base64'])
+   
+        // 1.4. Create `Proof` state object using `Presentation Proposal` message.
         NSInteger proofHandle = [[[ConnectMeVcx alloc] init] createProofVerifierWithProposal:@"sourceId"
                                                                         presentationProposal:presentationProposal
                                                                                         name:@"name"...]
+        
+        // 1.5. Send `Presentation Request` message to Holder.
         [[[ConnectMeVcx alloc] init] proofVerifierSendRequest:proofHandle
                                                connectionHandle:connectionHandle...]
+   
+        // 1.6. Serialize and store Connection state object.
+        NSString *connectionSerialized = [[[ConnectMeVcx alloc] init] connectionSerialize:connectionHandle...]
+   
+        // 1.7. Get `Presentation Request` message from Proof state machine.
         NSString *proofRequest = [[[ConnectMeVcx alloc] init] proofVerifierGetProofRequestMessage:proofHandle...]
+        
+        // 1.8. Serialize and store Proof state object.
         NSString *serializedProof = [[[ConnectMeVcx alloc] init] proofVerifierSerialize:proofHandle...]
     ```
 
 3. Holder App accept Presentation Request, generates and sends Proof.
-   
+
    Java pseudocode:
     ```
+        // 1.1. Download `Presentation Request` message from the Cloud Agent
+        String proofRequest = getAllPendingMessages('Proof Request')
+   
+        // 1.2. Create `Proof` state object using received `Presentation Request` message.
         Integer proofHandle = DisclosedProofApi.proofCreateWithRequest('sourceId', proofRequest)
+         
+        // 1.3. Deserialize Connection state object.
+        Integer connectionHandle = ConnectionApi.connectionDeserialize(serializedConnection)
+
+        // 1.4. Generate and send `Proof` message.
         String credentials = DisclosedProofApi.proofRetrieveCredentials(proofHandle)
         // select credentials to use
         DisclosedProofApi.proofGenerate(proofHandle, selectedCredentials, selfAttestedAttributes)
-        Integer connectionHandle = ConnectionApi.connectionDeserialize(serializedConnection)
         DisclosedProofApi.proofSend(proofHandle, connectionHandle)
+   
+        // 1.5. Update `Presentation Request` message status on the Cloud Agent as read.
+        UtilsApi.vcxUpdateMessages(messageStatus, handledMessage).get()  
     ```
     
     Objective-C pseudocode
     ```
+        // 1.1. Download `Presentation Request` message from the Cloud Agent
+        String proofRequest = getAllPendingMessages('Proof Request')
+   
+        // 1.2. Create `Proof` state object using received `Presentation Request` message.
         NSInteger proofHandle = [[[ConnectMeVcx alloc] init] proofCreateWithRequest:sourceId
                                                                      withProofRequest:proofRequest...]
+   
+        // 1.3. Deserialize Connection state object.
+        NSInteger connectionHandle = [[[ConnectMeVcx alloc] init] connectionDeserialize:serializedConnection...]
+   
+        // 1.4. Generate and send `Proof` message.
         NSString *credentials = [[[ConnectMeVcx alloc] init] proofRetrieveCredentials:proofHandle...]
         // select credentials to use
         [[[ConnectMeVcx alloc] init] proofGenerate:proofHandle
                              withSelectedCredentials:selectedCredentials
                                withSelfAttestedAttrs:selfAttestedAttributes...]
-        NSInteger connectionHandle = [[[ConnectMeVcx alloc] init] connectionDeserialize:serializedConnection...]
         [[[ConnectMeVcx alloc] init] proofSend:proofHandle
                             withConnectionHandle:connectionHandle...]
+   
+        // 1.5. Update `Presentation Request` message status on the Cloud Agent as read.
+        [appDelegate.sdkApi updateMessages:messageStatus
+                               pwdidsJson:handledMessage
+                               completion:^(NSError *error) {
+                      // ...
+                  }];
     ```
     
 4. Verifier App handle received Proof message
-   
    Java pseudocode:
     ```
+        // 1.1. Download `Presentation` message from the Cloud Agent
+        String proofRequest = getAllPendingMessages('Presentation')
+   
+        // 1.2. Deserialize Proof state object.
         Integer proofHandle = ProofApi.proofDeserialize(serialized)
+   
+        // 1.3. Update Proof state object with received `Proof` message.
         ProofApi.proofUpdateStateWithMessage(proofHandle, proof)
+   
+        // 1.4. Get result of proof verification.
         vcx.proof.GetProofResult result = ProofApi.getProofMsg(proofHandle)
     ```
     
     Objective-C pseudocode
     ```
+        // 1.1. Download `Presentation Request` message from the Cloud Agent
+        String proof = getAllPendingMessages('Proof Request')
+   
+        // 1.2. Deserialize Proof state object.
         NSInteger proofHandle = [[[ConnectMeVcx alloc] init] proofDeserialize:serializedProof...]
+   
+        // 1.3. Update Proof state object with received `Proof` message.
         [[[ConnectMeVcx alloc] init] proofVerifierUpdateStateWithMessage:proofHandle
-        NSObject *result = [[[ConnectMeVcx alloc] init] proofVerifierGetProofMessage:proofHandle...]
+                                                                 message:proof...]
+   
+        // 1.4. Get result of proof verification.
+        NSString *result = [[[ConnectMeVcx alloc] init] proofVerifierGetProofMessage:proofHandle...]
     ```
  
 ### Preparation of Connection Agent in advance
