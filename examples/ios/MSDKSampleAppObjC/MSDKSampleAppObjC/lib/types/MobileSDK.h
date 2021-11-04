@@ -16,9 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) ConnectMeVcx* sdkApi;
 @property (nonatomic) BOOL sdkInited;
 
-
 + (instancetype)shared;
-- (NSString*)provisioningToken;
 
 @end
 

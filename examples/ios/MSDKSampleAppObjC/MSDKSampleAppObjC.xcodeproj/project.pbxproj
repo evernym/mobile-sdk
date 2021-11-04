@@ -7,9 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0437DBAEFED7B5D439DDCA5F /* Pods_MSDKSampleAppObjCUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C6E4FAB9BA117A61067618C8 /* Pods_MSDKSampleAppObjCUITests.framework */; };
-		54D6EE9E976DFB32B3CA6F2B /* Pods_MSDKSampleAppObjCTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 81196E0383653D9D67AF5E29 /* Pods_MSDKSampleAppObjCTests.framework */; };
-		8E13456322A040C800B6DE1F /* PoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E13456222A040C800B6DE1F /* PoolTxnGenesis.m */; };
+		7762DEC8ADFB793015FF25F3 /* Pods_MSDKSampleAppObjCTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B03011AE17F750032C28BF8A /* Pods_MSDKSampleAppObjCTests.framework */; };
 		8E509FE62281EFC60098812A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E509FE52281EFC60098812A /* AppDelegate.m */; };
 		8E509FE92281EFC60098812A /* HomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E509FE82281EFC60098812A /* HomeViewController.m */; };
 		8E509FEC2281EFC60098812A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E509FEA2281EFC60098812A /* Main.storyboard */; };
@@ -18,6 +16,7 @@
 		8E509FF42281EFC80098812A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E509FF32281EFC80098812A /* main.m */; };
 		8E509FFE2281EFC80098812A /* MSDKSampleAppObjCTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E509FFD2281EFC80098812A /* MSDKSampleAppObjCTests.m */; };
 		8E50A0092281EFC80098812A /* MSDKSampleAppObjCUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E50A0082281EFC80098812A /* MSDKSampleAppObjCUITests.m */; };
+		AFA4EDA34DFA0C455FAB18B4 /* Pods_MSDKSampleAppObjC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4E4159DF23CF2D92D9E4F54 /* Pods_MSDKSampleAppObjC.framework */; };
 		DD00E0C82685FED50050BC88 /* HistoryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E0C72685FED50050BC88 /* HistoryViewController.m */; };
 		DD00E107268D931D0050BC88 /* CustomTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E106268D931D0050BC88 /* CustomTableViewCell.m */; };
 		DD4E83A2273281B600797EA9 /* Message.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4E838F273281B600797EA9 /* Message.m */; };
@@ -29,8 +28,10 @@
 		DD4E83A8273281B600797EA9 /* Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4E839B273281B600797EA9 /* Connection.m */; };
 		DD4E83A9273281B600797EA9 /* ProductionPoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4E839E273281B600797EA9 /* ProductionPoolTxnGenesis.m */; };
 		DD4E83AA273281B600797EA9 /* Credential.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4E83A0273281B600797EA9 /* Credential.m */; };
-		DD4E83AB273281B600797EA9 /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4E83A1273281B600797EA9 /* Config.m */; };
-		DDFB74EE272C195600BCFD22 /* Pods_MSDKSampleAppObjC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 529CA7FBB8658A71991C110E /* Pods_MSDKSampleAppObjC.framework */; };
+		DD4E83AB273281B600797EA9 /* Initialization.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4E83A1273281B600797EA9 /* Initialization.m */; };
+		DD4E83B22732E38D00797EA9 /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4E83B12732E38D00797EA9 /* Config.m */; };
+		DD4E83B42733EB7900797EA9 /* ConnectionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4E83B32733EB7900797EA9 /* ConnectionHandler.m */; };
+		EBD3FF65B0E21240A51640D7 /* Pods_MSDKSampleAppObjCUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0213691038E68CE1AC0D9077 /* Pods_MSDKSampleAppObjCUITests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,12 +52,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		06702BEF7CBFBFECD93D4338 /* Pods-MSDKSampleAppObjCTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppObjCTests.release.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppObjCTests/Pods-MSDKSampleAppObjCTests.release.xcconfig"; sourceTree = "<group>"; };
-		29DE93C120B8E6BF0B5F3EA8 /* Pods-MSDKSampleAppObjC.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppObjC.debug.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppObjC/Pods-MSDKSampleAppObjC.debug.xcconfig"; sourceTree = "<group>"; };
-		529CA7FBB8658A71991C110E /* Pods_MSDKSampleAppObjC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MSDKSampleAppObjC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		81196E0383653D9D67AF5E29 /* Pods_MSDKSampleAppObjCTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MSDKSampleAppObjCTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		8E13456122A040C800B6DE1F /* PoolTxnGenesis.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PoolTxnGenesis.h; sourceTree = "<group>"; };
-		8E13456222A040C800B6DE1F /* PoolTxnGenesis.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PoolTxnGenesis.m; sourceTree = "<group>"; };
+		0213691038E68CE1AC0D9077 /* Pods_MSDKSampleAppObjCUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MSDKSampleAppObjCUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		48CC8CA327A2B771DF1E0A2C /* Pods-MSDKSampleAppObjC.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppObjC.debug.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppObjC/Pods-MSDKSampleAppObjC.debug.xcconfig"; sourceTree = "<group>"; };
+		5D0DD8E2E49A7FB07C05F0C2 /* Pods-MSDKSampleAppObjCTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppObjCTests.debug.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppObjCTests/Pods-MSDKSampleAppObjCTests.debug.xcconfig"; sourceTree = "<group>"; };
+		787318A769D0B657AB561E4E /* Pods-MSDKSampleAppObjCUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppObjCUITests.debug.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppObjCUITests/Pods-MSDKSampleAppObjCUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		8E509FE12281EFC60098812A /* MSDKSampleAppObjC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MSDKSampleAppObjC.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E509FE42281EFC60098812A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		8E509FE52281EFC60098812A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -74,38 +73,42 @@
 		8E50A0082281EFC80098812A /* MSDKSampleAppObjCUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSDKSampleAppObjCUITests.m; sourceTree = "<group>"; };
 		8E50A00A2281EFC80098812A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8EDE89A82281F26300B7300F /* MSDKSampleAppObjC.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MSDKSampleAppObjC.entitlements; sourceTree = "<group>"; };
-		A118AE6529F82245E8D9D43F /* Pods-MSDKSampleAppObjCUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppObjCUITests.debug.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppObjCUITests/Pods-MSDKSampleAppObjCUITests.debug.xcconfig"; sourceTree = "<group>"; };
-		BD5846B4D8D1926326397A8E /* Pods-MSDKSampleAppObjC.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppObjC.release.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppObjC/Pods-MSDKSampleAppObjC.release.xcconfig"; sourceTree = "<group>"; };
-		C6E4FAB9BA117A61067618C8 /* Pods_MSDKSampleAppObjCUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MSDKSampleAppObjCUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9CC0ED1065395C6A8CA98DAC /* Pods-MSDKSampleAppObjCUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppObjCUITests.release.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppObjCUITests/Pods-MSDKSampleAppObjCUITests.release.xcconfig"; sourceTree = "<group>"; };
+		B03011AE17F750032C28BF8A /* Pods_MSDKSampleAppObjCTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MSDKSampleAppObjCTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0477D88AC766E4EAF44B9CD /* Pods-MSDKSampleAppObjCTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppObjCTests.release.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppObjCTests/Pods-MSDKSampleAppObjCTests.release.xcconfig"; sourceTree = "<group>"; };
+		CD2994F9963D99849F56658E /* Pods-MSDKSampleAppObjC.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppObjC.release.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppObjC/Pods-MSDKSampleAppObjC.release.xcconfig"; sourceTree = "<group>"; };
 		DD00E0C72685FED50050BC88 /* HistoryViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HistoryViewController.m; sourceTree = "<group>"; };
 		DD00E0C92685FF090050BC88 /* HistoryViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryViewController.h; sourceTree = "<group>"; };
 		DD00E105268D931D0050BC88 /* CustomTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomTableViewCell.h; sourceTree = "<group>"; };
 		DD00E106268D931D0050BC88 /* CustomTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomTableViewCell.m; sourceTree = "<group>"; };
 		DD00E114269457560050BC88 /* MSDKSampleAppObjC-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSDKSampleAppObjC-Prefix.pch"; sourceTree = "<group>"; };
 		DD1EEF42272C224F000EC21D /* XcodeKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XcodeKit.framework; path = Library/Frameworks/XcodeKit.framework; sourceTree = DEVELOPER_DIR; };
-		DD4E838E273281B600797EA9 /* Message.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Message.h; path = ../../../lib/Message.h; sourceTree = "<group>"; };
-		DD4E838F273281B600797EA9 /* Message.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Message.m; path = ../../../lib/Message.m; sourceTree = "<group>"; };
-		DD4E8390273281B600797EA9 /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Connection.h; path = ../../../lib/Connection.h; sourceTree = "<group>"; };
-		DD4E8391273281B600797EA9 /* MobileSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MobileSDK.h; path = ../../../lib/MobileSDK.h; sourceTree = "<group>"; };
-		DD4E8392273281B600797EA9 /* ProductionPoolTxnGenesis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProductionPoolTxnGenesis.h; path = ../../../lib/ProductionPoolTxnGenesis.h; sourceTree = "<group>"; };
-		DD4E8393273281B600797EA9 /* ProofRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ProofRequest.m; path = ../../../lib/ProofRequest.m; sourceTree = "<group>"; };
-		DD4E8394273281B600797EA9 /* LocalStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LocalStorage.h; path = ../../../lib/LocalStorage.h; sourceTree = "<group>"; };
-		DD4E8395273281B600797EA9 /* ProofRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProofRequest.h; path = ../../../lib/ProofRequest.h; sourceTree = "<group>"; };
-		DD4E8396273281B600797EA9 /* MobileSDK.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MobileSDK.m; path = ../../../lib/MobileSDK.m; sourceTree = "<group>"; };
-		DD4E8397273281B600797EA9 /* LocalStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LocalStorage.m; path = ../../../lib/LocalStorage.m; sourceTree = "<group>"; };
-		DD4E8398273281B600797EA9 /* Log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Log.h; path = ../../../lib/Log.h; sourceTree = "<group>"; };
-		DD4E8399273281B600797EA9 /* Utilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Utilities.m; path = ../../../lib/Utilities.m; sourceTree = "<group>"; };
-		DD4E839A273281B600797EA9 /* Log.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Log.m; path = ../../../lib/Log.m; sourceTree = "<group>"; };
-		DD4E839B273281B600797EA9 /* Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Connection.m; path = ../../../lib/Connection.m; sourceTree = "<group>"; };
-		DD4E839C273281B600797EA9 /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Utilities.h; path = ../../../lib/Utilities.h; sourceTree = "<group>"; };
-		DD4E839D273281B600797EA9 /* Credential.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Credential.h; path = ../../../lib/Credential.h; sourceTree = "<group>"; };
-		DD4E839E273281B600797EA9 /* ProductionPoolTxnGenesis.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ProductionPoolTxnGenesis.m; path = ../../../lib/ProductionPoolTxnGenesis.m; sourceTree = "<group>"; };
-		DD4E839F273281B600797EA9 /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Config.h; path = ../../../lib/Config.h; sourceTree = "<group>"; };
-		DD4E83A0273281B600797EA9 /* Credential.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Credential.m; path = ../../../lib/Credential.m; sourceTree = "<group>"; };
-		DD4E83A1273281B600797EA9 /* Config.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Config.m; path = ../../../lib/Config.m; sourceTree = "<group>"; };
+		DD4E838E273281B600797EA9 /* Message.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Message.h; sourceTree = "<group>"; };
+		DD4E838F273281B600797EA9 /* Message.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Message.m; sourceTree = "<group>"; };
+		DD4E8390273281B600797EA9 /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
+		DD4E8391273281B600797EA9 /* MobileSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MobileSDK.h; sourceTree = "<group>"; };
+		DD4E8392273281B600797EA9 /* ProductionPoolTxnGenesis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProductionPoolTxnGenesis.h; sourceTree = "<group>"; };
+		DD4E8393273281B600797EA9 /* ProofRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProofRequest.m; sourceTree = "<group>"; };
+		DD4E8394273281B600797EA9 /* LocalStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalStorage.h; sourceTree = "<group>"; };
+		DD4E8395273281B600797EA9 /* ProofRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProofRequest.h; sourceTree = "<group>"; };
+		DD4E8396273281B600797EA9 /* MobileSDK.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MobileSDK.m; sourceTree = "<group>"; };
+		DD4E8397273281B600797EA9 /* LocalStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocalStorage.m; sourceTree = "<group>"; };
+		DD4E8398273281B600797EA9 /* Log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Log.h; sourceTree = "<group>"; };
+		DD4E8399273281B600797EA9 /* Utilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utilities.m; sourceTree = "<group>"; };
+		DD4E839A273281B600797EA9 /* Log.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Log.m; sourceTree = "<group>"; };
+		DD4E839B273281B600797EA9 /* Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Connection.m; sourceTree = "<group>"; };
+		DD4E839C273281B600797EA9 /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
+		DD4E839D273281B600797EA9 /* Credential.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Credential.h; sourceTree = "<group>"; };
+		DD4E839E273281B600797EA9 /* ProductionPoolTxnGenesis.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProductionPoolTxnGenesis.m; sourceTree = "<group>"; };
+		DD4E839F273281B600797EA9 /* Initialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Initialization.h; sourceTree = "<group>"; };
+		DD4E83A0273281B600797EA9 /* Credential.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Credential.m; sourceTree = "<group>"; };
+		DD4E83A1273281B600797EA9 /* Initialization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Initialization.m; sourceTree = "<group>"; };
+		DD4E83B02732E37800797EA9 /* Config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
+		DD4E83B12732E38D00797EA9 /* Config.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Config.m; sourceTree = "<group>"; };
+		DD4E83B32733EB7900797EA9 /* ConnectionHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ConnectionHandler.m; sourceTree = "<group>"; };
+		DD4E83B52733EBC400797EA9 /* ConnectionHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConnectionHandler.h; sourceTree = "<group>"; };
 		DDFB74F1272C1F9A00BCFD22 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
-		E2A5D790AD88AF152D60C96F /* Pods-MSDKSampleAppObjCTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppObjCTests.debug.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppObjCTests/Pods-MSDKSampleAppObjCTests.debug.xcconfig"; sourceTree = "<group>"; };
-		FF964D27C83E7E0010D00CA6 /* Pods-MSDKSampleAppObjCUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppObjCUITests.release.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppObjCUITests/Pods-MSDKSampleAppObjCUITests.release.xcconfig"; sourceTree = "<group>"; };
+		F4E4159DF23CF2D92D9E4F54 /* Pods_MSDKSampleAppObjC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MSDKSampleAppObjC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,7 +116,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DDFB74EE272C195600BCFD22 /* Pods_MSDKSampleAppObjC.framework in Frameworks */,
+				AFA4EDA34DFA0C455FAB18B4 /* Pods_MSDKSampleAppObjC.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,7 +124,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				54D6EE9E976DFB32B3CA6F2B /* Pods_MSDKSampleAppObjCTests.framework in Frameworks */,
+				7762DEC8ADFB793015FF25F3 /* Pods_MSDKSampleAppObjCTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -129,7 +132,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0437DBAEFED7B5D439DDCA5F /* Pods_MSDKSampleAppObjCUITests.framework in Frameworks */,
+				EBD3FF65B0E21240A51640D7 /* Pods_MSDKSampleAppObjCUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,9 +144,9 @@
 			children = (
 				DD1EEF42272C224F000EC21D /* XcodeKit.framework */,
 				DDFB74F1272C1F9A00BCFD22 /* AVKit.framework */,
-				529CA7FBB8658A71991C110E /* Pods_MSDKSampleAppObjC.framework */,
-				81196E0383653D9D67AF5E29 /* Pods_MSDKSampleAppObjCTests.framework */,
-				C6E4FAB9BA117A61067618C8 /* Pods_MSDKSampleAppObjCUITests.framework */,
+				F4E4159DF23CF2D92D9E4F54 /* Pods_MSDKSampleAppObjC.framework */,
+				B03011AE17F750032C28BF8A /* Pods_MSDKSampleAppObjCTests.framework */,
+				0213691038E68CE1AC0D9077 /* Pods_MSDKSampleAppObjCUITests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -151,12 +154,12 @@
 		25FF0FB079ED3BEF643EA72D /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				29DE93C120B8E6BF0B5F3EA8 /* Pods-MSDKSampleAppObjC.debug.xcconfig */,
-				BD5846B4D8D1926326397A8E /* Pods-MSDKSampleAppObjC.release.xcconfig */,
-				E2A5D790AD88AF152D60C96F /* Pods-MSDKSampleAppObjCTests.debug.xcconfig */,
-				06702BEF7CBFBFECD93D4338 /* Pods-MSDKSampleAppObjCTests.release.xcconfig */,
-				A118AE6529F82245E8D9D43F /* Pods-MSDKSampleAppObjCUITests.debug.xcconfig */,
-				FF964D27C83E7E0010D00CA6 /* Pods-MSDKSampleAppObjCUITests.release.xcconfig */,
+				48CC8CA327A2B771DF1E0A2C /* Pods-MSDKSampleAppObjC.debug.xcconfig */,
+				CD2994F9963D99849F56658E /* Pods-MSDKSampleAppObjC.release.xcconfig */,
+				5D0DD8E2E49A7FB07C05F0C2 /* Pods-MSDKSampleAppObjCTests.debug.xcconfig */,
+				C0477D88AC766E4EAF44B9CD /* Pods-MSDKSampleAppObjCTests.release.xcconfig */,
+				787318A769D0B657AB561E4E /* Pods-MSDKSampleAppObjCUITests.debug.xcconfig */,
+				9CC0ED1065395C6A8CA98DAC /* Pods-MSDKSampleAppObjCUITests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -186,24 +189,22 @@
 		8E509FE32281EFC60098812A /* MSDKSampleAppObjC */ = {
 			isa = PBXGroup;
 			children = (
-				DD4E838D2732818400797EA9 /* lib */,
-				8EDE89A82281F26300B7300F /* MSDKSampleAppObjC.entitlements */,
 				8E509FE42281EFC60098812A /* AppDelegate.h */,
 				8E509FE52281EFC60098812A /* AppDelegate.m */,
-				8E509FE72281EFC60098812A /* HomeViewController.h */,
-				8E509FE82281EFC60098812A /* HomeViewController.m */,
-				8E509FEA2281EFC60098812A /* Main.storyboard */,
 				8E509FED2281EFC80098812A /* Assets.xcassets */,
-				8E509FEF2281EFC80098812A /* LaunchScreen.storyboard */,
-				8E509FF22281EFC80098812A /* Info.plist */,
-				8E509FF32281EFC80098812A /* main.m */,
-				8E13456122A040C800B6DE1F /* PoolTxnGenesis.h */,
-				8E13456222A040C800B6DE1F /* PoolTxnGenesis.m */,
-				DD00E0C72685FED50050BC88 /* HistoryViewController.m */,
-				DD00E0C92685FF090050BC88 /* HistoryViewController.h */,
 				DD00E105268D931D0050BC88 /* CustomTableViewCell.h */,
 				DD00E106268D931D0050BC88 /* CustomTableViewCell.m */,
+				DD00E0C92685FF090050BC88 /* HistoryViewController.h */,
+				DD00E0C72685FED50050BC88 /* HistoryViewController.m */,
+				8E509FE72281EFC60098812A /* HomeViewController.h */,
+				8E509FE82281EFC60098812A /* HomeViewController.m */,
+				8E509FF22281EFC80098812A /* Info.plist */,
+				8E509FEF2281EFC80098812A /* LaunchScreen.storyboard */,
+				DD4E838D2732818400797EA9 /* lib */,
+				8E509FF32281EFC80098812A /* main.m */,
+				8E509FEA2281EFC60098812A /* Main.storyboard */,
 				DD00E114269457560050BC88 /* MSDKSampleAppObjC-Prefix.pch */,
+				8EDE89A82281F26300B7300F /* MSDKSampleAppObjC.entitlements */,
 			);
 			path = MSDKSampleAppObjC;
 			sourceTree = "<group>";
@@ -229,28 +230,64 @@
 		DD4E838D2732818400797EA9 /* lib */ = {
 			isa = PBXGroup;
 			children = (
-				DD4E839F273281B600797EA9 /* Config.h */,
-				DD4E83A1273281B600797EA9 /* Config.m */,
+				DD4E83B52733EBC400797EA9 /* ConnectionHandler.h */,
+				DD4E83B32733EB7900797EA9 /* ConnectionHandler.m */,
+				DD4E83AC2732DE4300797EA9 /* handlers */,
+				DD4E83AD2732DF9900797EA9 /* messages */,
+				DD4E83AF2732DFDD00797EA9 /* types */,
+				DD4E83AE2732DFBC00797EA9 /* utils */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+		DD4E83AC2732DE4300797EA9 /* handlers */ = {
+			isa = PBXGroup;
+			children = (
 				DD4E8390273281B600797EA9 /* Connection.h */,
 				DD4E839B273281B600797EA9 /* Connection.m */,
 				DD4E839D273281B600797EA9 /* Credential.h */,
 				DD4E83A0273281B600797EA9 /* Credential.m */,
+				DD4E839F273281B600797EA9 /* Initialization.h */,
+				DD4E83A1273281B600797EA9 /* Initialization.m */,
+				DD4E8395273281B600797EA9 /* ProofRequest.h */,
+				DD4E8393273281B600797EA9 /* ProofRequest.m */,
+			);
+			path = handlers;
+			sourceTree = "<group>";
+		};
+		DD4E83AD2732DF9900797EA9 /* messages */ = {
+			isa = PBXGroup;
+			children = (
+				DD4E838E273281B600797EA9 /* Message.h */,
+				DD4E838F273281B600797EA9 /* Message.m */,
+			);
+			path = messages;
+			sourceTree = "<group>";
+		};
+		DD4E83AE2732DFBC00797EA9 /* utils */ = {
+			isa = PBXGroup;
+			children = (
 				DD4E8394273281B600797EA9 /* LocalStorage.h */,
 				DD4E8397273281B600797EA9 /* LocalStorage.m */,
 				DD4E8398273281B600797EA9 /* Log.h */,
 				DD4E839A273281B600797EA9 /* Log.m */,
-				DD4E838E273281B600797EA9 /* Message.h */,
-				DD4E838F273281B600797EA9 /* Message.m */,
+				DD4E839C273281B600797EA9 /* Utilities.h */,
+				DD4E8399273281B600797EA9 /* Utilities.m */,
+			);
+			path = utils;
+			sourceTree = "<group>";
+		};
+		DD4E83AF2732DFDD00797EA9 /* types */ = {
+			isa = PBXGroup;
+			children = (
+				DD4E83B02732E37800797EA9 /* Config.h */,
+				DD4E83B12732E38D00797EA9 /* Config.m */,
 				DD4E8391273281B600797EA9 /* MobileSDK.h */,
 				DD4E8396273281B600797EA9 /* MobileSDK.m */,
 				DD4E8392273281B600797EA9 /* ProductionPoolTxnGenesis.h */,
 				DD4E839E273281B600797EA9 /* ProductionPoolTxnGenesis.m */,
-				DD4E8395273281B600797EA9 /* ProofRequest.h */,
-				DD4E8393273281B600797EA9 /* ProofRequest.m */,
-				DD4E839C273281B600797EA9 /* Utilities.h */,
-				DD4E8399273281B600797EA9 /* Utilities.m */,
 			);
-			path = lib;
+			path = types;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -260,11 +297,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8E50A00D2281EFC80098812A /* Build configuration list for PBXNativeTarget "MSDKSampleAppObjC" */;
 			buildPhases = (
-				EF14E1944AA7640CC6C3E9EF /* [CP] Check Pods Manifest.lock */,
+				96230F300046A7E4313768D1 /* [CP] Check Pods Manifest.lock */,
 				8E509FDD2281EFC60098812A /* Sources */,
 				8E509FDE2281EFC60098812A /* Frameworks */,
 				8E509FDF2281EFC60098812A /* Resources */,
-				8EE915493D87797F3ED393FB /* [CP] Embed Pods Frameworks */,
+				F4A99CB55365E4A291C5096F /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -279,7 +316,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8E50A0102281EFC80098812A /* Build configuration list for PBXNativeTarget "MSDKSampleAppObjCTests" */;
 			buildPhases = (
-				9A44E13B1B6A49CCB9AC4BE3 /* [CP] Check Pods Manifest.lock */,
+				F6A0FA241FF9803DC94703C4 /* [CP] Check Pods Manifest.lock */,
 				8E509FF52281EFC80098812A /* Sources */,
 				8E509FF62281EFC80098812A /* Frameworks */,
 				8E509FF72281EFC80098812A /* Resources */,
@@ -298,7 +335,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8E50A0132281EFC80098812A /* Build configuration list for PBXNativeTarget "MSDKSampleAppObjCUITests" */;
 			buildPhases = (
-				E61E7C37385E9F7FBD00EF05 /* [CP] Check Pods Manifest.lock */,
+				4DC637A0106573AC2DEBE30C /* [CP] Check Pods Manifest.lock */,
 				8E50A0002281EFC80098812A /* Sources */,
 				8E50A0012281EFC80098812A /* Frameworks */,
 				8E50A0022281EFC80098812A /* Resources */,
@@ -388,46 +425,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		8EE915493D87797F3ED393FB /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MSDKSampleAppObjC/Pods-MSDKSampleAppObjC-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MSDKSampleAppObjC/Pods-MSDKSampleAppObjC-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MSDKSampleAppObjC/Pods-MSDKSampleAppObjC-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		9A44E13B1B6A49CCB9AC4BE3 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-MSDKSampleAppObjCTests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E61E7C37385E9F7FBD00EF05 /* [CP] Check Pods Manifest.lock */ = {
+		4DC637A0106573AC2DEBE30C /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -449,7 +447,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		EF14E1944AA7640CC6C3E9EF /* [CP] Check Pods Manifest.lock */ = {
+		96230F300046A7E4313768D1 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -471,6 +469,45 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		F4A99CB55365E4A291C5096F /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MSDKSampleAppObjC/Pods-MSDKSampleAppObjC-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MSDKSampleAppObjC/Pods-MSDKSampleAppObjC-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MSDKSampleAppObjC/Pods-MSDKSampleAppObjC-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		F6A0FA241FF9803DC94703C4 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MSDKSampleAppObjCTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -483,15 +520,16 @@
 				DD4E83A4273281B600797EA9 /* MobileSDK.m in Sources */,
 				DD4E83A5273281B600797EA9 /* LocalStorage.m in Sources */,
 				DD00E0C82685FED50050BC88 /* HistoryViewController.m in Sources */,
-				8E13456322A040C800B6DE1F /* PoolTxnGenesis.m in Sources */,
 				DD4E83A7273281B600797EA9 /* Log.m in Sources */,
 				DD4E83A6273281B600797EA9 /* Utilities.m in Sources */,
 				DD4E83A9273281B600797EA9 /* ProductionPoolTxnGenesis.m in Sources */,
-				DD4E83AB273281B600797EA9 /* Config.m in Sources */,
+				DD4E83AB273281B600797EA9 /* Initialization.m in Sources */,
+				DD4E83B22732E38D00797EA9 /* Config.m in Sources */,
 				DD4E83A2273281B600797EA9 /* Message.m in Sources */,
 				DD4E83A8273281B600797EA9 /* Connection.m in Sources */,
 				8E509FF42281EFC80098812A /* main.m in Sources */,
 				DD00E107268D931D0050BC88 /* CustomTableViewCell.m in Sources */,
+				DD4E83B42733EB7900797EA9 /* ConnectionHandler.m in Sources */,
 				8E509FE62281EFC60098812A /* AppDelegate.m in Sources */,
 				DD4E83AA273281B600797EA9 /* Credential.m in Sources */,
 			);
@@ -668,7 +706,7 @@
 		};
 		8E50A00E2281EFC80098812A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 29DE93C120B8E6BF0B5F3EA8 /* Pods-MSDKSampleAppObjC.debug.xcconfig */;
+			baseConfigurationReference = 48CC8CA327A2B771DF1E0A2C /* Pods-MSDKSampleAppObjC.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = MSDKSampleAppObjC/MSDKSampleAppObjC.entitlements;
@@ -708,7 +746,7 @@
 		};
 		8E50A00F2281EFC80098812A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BD5846B4D8D1926326397A8E /* Pods-MSDKSampleAppObjC.release.xcconfig */;
+			baseConfigurationReference = CD2994F9963D99849F56658E /* Pods-MSDKSampleAppObjC.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = MSDKSampleAppObjC/MSDKSampleAppObjC.entitlements;
@@ -747,7 +785,7 @@
 		};
 		8E50A0112281EFC80098812A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E2A5D790AD88AF152D60C96F /* Pods-MSDKSampleAppObjCTests.debug.xcconfig */;
+			baseConfigurationReference = 5D0DD8E2E49A7FB07C05F0C2 /* Pods-MSDKSampleAppObjCTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -767,7 +805,7 @@
 		};
 		8E50A0122281EFC80098812A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 06702BEF7CBFBFECD93D4338 /* Pods-MSDKSampleAppObjCTests.release.xcconfig */;
+			baseConfigurationReference = C0477D88AC766E4EAF44B9CD /* Pods-MSDKSampleAppObjCTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -787,7 +825,7 @@
 		};
 		8E50A0142281EFC80098812A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A118AE6529F82245E8D9D43F /* Pods-MSDKSampleAppObjCUITests.debug.xcconfig */;
+			baseConfigurationReference = 787318A769D0B657AB561E4E /* Pods-MSDKSampleAppObjCUITests.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ES8QU3D2A4;
@@ -806,7 +844,7 @@
 		};
 		8E50A0152281EFC80098812A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FF964D27C83E7E0010D00CA6 /* Pods-MSDKSampleAppObjCUITests.release.xcconfig */;
+			baseConfigurationReference = 9CC0ED1065395C6A8CA98DAC /* Pods-MSDKSampleAppObjCUITests.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ES8QU3D2A4;

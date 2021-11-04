@@ -100,13 +100,13 @@ PODS:
   - nanopb/encode (2.30908.0)
   - PromisesObjC (1.2.12)
   - QRCodeReaderViewController (4.0.2)
-  - vcx (0.0.215)
+  - vcx (0.0.212)
 
 DEPENDENCIES:
   - Firebase/Analytics
   - Firebase/Messaging
   - QRCodeReaderViewController
-  - vcx (= 0.0.215)
+  - vcx (= 0.0.212)
 
 SPEC REPOS:
   "git@gitlab.com:evernym/mobile/mobile-sdk.git":
@@ -138,8 +138,8 @@ SPEC CHECKSUMS:
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
   QRCodeReaderViewController: e8f27d035b3e72b1d4b1c61ff66458287e3be0ff
-  vcx: b832b8c0c9350fe2a3424803121568ee60306f16
+  vcx: 87c401b118ca5f1044ccc9926edd780913ae9c31
 
-PODFILE CHECKSUM: d2d2d9b0799deef779d71b6db91047382acdf222
+PODFILE CHECKSUM: b0a347424b97c0e192f6116eea7b683e587e34ec
 
 COCOAPODS: 1.11.2

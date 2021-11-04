@@ -31,6 +31,11 @@
 @implementation HomeViewController
 @synthesize addConnLabel, addConnConfigTextView, requests, newConnLabel, addConnectionButton;
 
+NSString *CREDENTIAL_OFFER = @"credential-offer";
+NSString *PRESENTATION_REQUEST = @"presentation-request";
+NSString *COMMITTED_QUESTION = @"committed-question";
+NSString *OOB = @"OOB";
+
 UIGestureRecognizer *tapper;
 
 - (void)viewDidLoad {
@@ -57,15 +62,22 @@ UIGestureRecognizer *tapper;
     _isInitialized = [[MobileSDK shared] sdkInited];
 }
 
+- (BOOL) textViewShouldBeginEditing:(UITextView *)textView {
+    if([textView.text isEqual: @"enter code here"]) {
+        addConnConfigTextView.text = @"";
+    }
+    return true;
+}
+
 - (void) viewWillDisappear:(BOOL)animated {
     [[NSNotificationCenter defaultCenter] removeObserver: self];
 }
 
-- (void)handleSingleTap:(UITapGestureRecognizer *) sender {
+- (void) handleSingleTap:(UITapGestureRecognizer *) sender {
     [self.view endEditing: YES];
 }
 
-- (void)vcxInitialized {
+- (void) vcxInitialized {
     self.infoLbl.text = @"VCX initialized!";
     _isInitialized = true;
     double delayInSeconds = 10.0;
@@ -75,11 +87,52 @@ UIGestureRecognizer *tapper;
     });
 }
 
-- (BOOL)textViewShouldBeginEditing:(UITextView *)textView {
-    if([textView.text isEqual: @"enter code here"]) {
-        addConnConfigTextView.text = @"";
+- (void) createActionWithInvitation:(NSString *) data {
+    NSDictionary *connectValues = [Connection parsedInvite: data];
+    NSString *label = [connectValues objectForKey: @"label"];
+    NSString *goal = @"";
+    if ([connectValues valueForKey:@"goal"] != nil) {
+        goal = [connectValues objectForKey: @"goal"];
+    } else {
+        goal = @"New connection";
     }
-    return true;
+    NSString *profileUrl = [connectValues objectForKey: @"profileUrl"];
+    
+    [self createAction:label
+            profileUrl:profileUrl
+                  goal:goal
+                  type:OOB
+                  data:[Utilities dictToJsonString:connectValues]];
+}
+
+- (void) createAction:(NSString *) label
+           profileUrl:(NSString *) profileUrl
+                 goal:(NSString *) goal
+                 type:(NSString *) type
+                 data:(NSString *) data
+{
+    NSMutableDictionary* allRequests = [[LocalStorage getObjectForKey: @"requests" shouldCreate: true] mutableCopy];
+    NSString *uuid = [[NSUUID UUID] UUIDString];
+
+    NSDictionary* request = @{
+        @"name": label,
+        @"profileUrl": profileUrl,
+        @"goal": goal,
+        @"uuid": uuid,
+        @"type": type,
+        @"data": data
+    };
+    
+    [allRequests setValue: request forKey: uuid];
+    [LocalStorage store: @"requests" andObject: allRequests];
+    requests = allRequests;
+    [self.tableView reloadData];
+}
+
+- (IBAction)addNewConnBtnClick: (id)sender {
+    if(addConnConfigTextView.text.length > 3 && ![addConnConfigTextView.text isEqual: @"enter code here"]) {
+        [self createActionWithInvitation: addConnConfigTextView.text];
+    }
 }
 
 - (IBAction)scanQR: (UIButton*) sender {
@@ -87,29 +140,166 @@ UIGestureRecognizer *tapper;
         NSLog(@"Please wait for VCX to initialize!");
         return;
     }
-
     QRCodeReader *reader = [QRCodeReader readerWithMetadataObjectTypes:@[AVMetadataObjectTypeQRCode]];
-
     QRCodeReaderViewController *vc = [QRCodeReaderViewController readerWithCancelButtonTitle:@""
-                                                                                  codeReader: reader startScanningAtLoad:YES showSwitchCameraButton:YES showTorchButton:YES];
+                                                                                  codeReader:reader
+                                                                         startScanningAtLoad:YES
+                                                                      showSwitchCameraButton:YES
+                                                                             showTorchButton:YES];
     vc.modalPresentationStyle = UIModalPresentationFormSheet;
     vc.delegate = self;
-    
     [self presentViewController: vc animated: YES completion:^{
         NSLog(@"QR code scanner presented");
     }];
-    
     [reader setCompletionWithBlock:^(NSString *resultAsString) {
         NSLog(@"%@", resultAsString);
         [vc dismissViewControllerAnimated:YES completion:^{
-            [self addNewConn: resultAsString];
+            [self createActionWithInvitation: resultAsString];
         }];
+    }];
+}
+
+- (IBAction)checkMessages:(id)sender {
+    [Message downloadAllMessages:^(NSArray *responseArray, NSError *error) {
+        for (NSInteger i = 0; i < responseArray.count; i++) {
+            NSDictionary *message = responseArray[i];
+
+            NSString *type = [message objectForKey:@"type"];
+            if ([type isEqual:CREDENTIAL_OFFER]) {
+                [self handleReceivedCredentialOffer:message];
+            }
+            if ([type isEqual:PRESENTATION_REQUEST]) {
+                [self handleReceivedProofRequest:message];
+            }
+            if ([type isEqual:COMMITTED_QUESTION]) {
+                [self handleReceivedQuestion:message];
+            }
+        }
+    }];
+}
+
+- (void) handleReceivedCredentialOffer:(NSDictionary *) message {
+    [self messageStatusUpdate: message];
+    NSString *payloadJson = [message objectForKey:@"payload"];
+    NSArray *payloadArray = [Utilities jsonToArray:payloadJson];
+    NSDictionary *payloadDict = payloadArray[0];
+    
+    [self createAction:[payloadDict objectForKey:@"claim_name"]
+            profileUrl:@""
+                  goal:@"Credential offer"
+                  type:CREDENTIAL_OFFER
+                  data:[Utilities dictToJsonString:message]];
+}
+
+- (void) handleReceivedProofRequest:(NSDictionary *) message {
+    [self messageStatusUpdate: message];
+    NSDictionary *payload = [Utilities jsonToDictionary:[message objectForKey:@"payload"]];
+
+    [self createAction:[payload objectForKey:@"comment"]
+            profileUrl:@""
+                  goal:@"Proof Request"
+                  type:PRESENTATION_REQUEST
+                  data:[Utilities dictToJsonString:message]];
+}
+
+- (void) handleReceivedQuestion:(NSDictionary *) message {
+    [self messageStatusUpdate: message];
+    
+    NSString *payload = [message objectForKey:@"payload"];
+    NSDictionary *payloadDict = [Utilities jsonToDictionary:payload];
+    
+    [self createAction:[payloadDict objectForKey:@"question_text"]
+            profileUrl:@""
+                  goal:@"Question"
+                  type:COMMITTED_QUESTION
+                  data:[Utilities dictToJsonString:message]];
+}
+
+- (void) handleAcceptAction:(NSString *) data
+                    forType:(NSString *) forType
+        withCompletionBlock:(ResponseWithBoolean) completionBlock {
+    if (forType == OOB) {
+        [self newConnection:data
+        withCompletionBlock:^(BOOL result, NSError *error) {
+            return completionBlock(result, error);
+        }];
+    }
+    if (forType == CREDENTIAL_OFFER) {
+        [self acceptCredential:data
+           withCompletionBlock:^(BOOL result, NSError *error) {
+            return completionBlock(result, error);
+        }];
+    }
+    if (forType == PRESENTATION_REQUEST) {
+        [self sendProof:data
+    withCompletionBlock:^(BOOL result, NSError *error) {
+            return completionBlock(result, error);
+        }];
+    }
+    if (forType == COMMITTED_QUESTION) {
+        [self answer:data
+ withCompletionBlock:^(BOOL result, NSError *error) {
+            return completionBlock(result, error);
+        }];
+    }
+}
+
+- (void) handleRejectAction:(NSString *) data
+                    forType:(NSString *) forType
+        withCompletionBlock:(ResponseWithBoolean) completionBlock  {
+    if (forType == OOB) {
+        return completionBlock(true, nil);
+    }
+    if (forType == CREDENTIAL_OFFER) {
+        [self rejectCredential:data
+           withCompletionBlock:^(BOOL result, NSError *error) {
+            return completionBlock(result, error);
+        }];
+    }
+    if (forType == PRESENTATION_REQUEST) {
+        [self rejectProof:data
+    withCompletionBlock:^(BOOL result, NSError *error) {
+            return completionBlock(result, error);
+        }];
+    }
+    if (forType == COMMITTED_QUESTION) {
+        return completionBlock(true, nil);
+    }
+}
+
+- (void)acceptCredential:(NSString *) data
+     withCompletionBlock:(ResponseWithBoolean) completionBlock {
+    [Credential acceptCredentilaFromMessage:data withCompletionBlock:^(BOOL result, NSError *error) {
+        return completionBlock(result, error);
+    }];
+}
+
+- (void)rejectCredential:(NSString *) data
+     withCompletionBlock:(ResponseWithBoolean) completionBlock {
+    [Credential rejectCredentilaFromMessage:data
+                          withCompletionBlock:^(BOOL result, NSError *error) {
+        return completionBlock(result, error);
+    }];
+}
+
+- (void)sendProof:(NSString *) data
+withCompletionBlock:(ResponseWithBoolean) completionBlock {
+    [ProofRequest sendProofRequestFromMessage:data
+                          withCompletionHandler:^(BOOL result, NSError *error) {
+        return completionBlock(result, error);
+    }];
+}
+
+- (void)rejectProof:(NSString *) data
+withCompletionBlock:(ResponseWithBoolean) completionBlock {
+    [ProofRequest rejectProofRequestFromMessage:data
+                          withCompletionHandler:^(BOOL result, NSError *error) {
+        return completionBlock(result, error);
     }];
 }
 
 - (void)newConnection:(NSString *) data
   withCompletionBlock:(ResponseWithBoolean) completionBlock {
-    NSLog(@"newConnection %@", data);
     [Connection handleConnection:data
                     connectionType:QR
                        phoneNumber:@""
@@ -156,207 +346,16 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
     [self presentViewController:alert animated:YES completion:nil];
 }
 
-- (void)acceptCredential:(NSString *) data
-     withCompletionBlock:(ResponseWithBoolean) completionBlock {
-    [Credential acceptCredentilaFromMessage:data withCompletionBlock:^(BOOL result, NSError *error) {
-        return completionBlock(result, error);
-    }];
-}
-
-- (void)rejectCredential:(NSString *) data
-     withCompletionBlock:(ResponseWithBoolean) completionBlock {
-    [Credential rejectCredentilaFromMessage:data
-                          withCompletionBlock:^(BOOL result, NSError *error) {
-        return completionBlock(result, error);
-    }];
-}
-
-- (void)sendProof:(NSString *) data
-withCompletionBlock:(ResponseWithBoolean) completionBlock {
-    [ProofRequest sendProofRequestFromMessage:data
-                          withCompletionHandler:^(BOOL result, NSError *error) {
-        return completionBlock(result, error);
-    }];
-}
-
-- (void)rejectProof:(NSString *) data
-withCompletionBlock:(ResponseWithBoolean) completionBlock {
-    [ProofRequest rejectProofRequestFromMessage:data
-                          withCompletionHandler:^(BOOL result, NSError *error) {
-        return completionBlock(result, error);
-    }];
-}
-
-- (void)addNewConn:(NSString *) data {
-    NSDictionary *connectValues = [Connection parsedInvite: data];
-    NSString *label = [connectValues objectForKey: @"label"];
-    NSString *goal = @"";
-    if ([connectValues valueForKey:@"goal"] != nil) {
-        goal = [connectValues objectForKey: @"goal"];
-    } else {
-        goal = @"New connection";
-    }
-    NSString *profileUrl = [connectValues objectForKey: @"profileUrl"];
-    
-    NSMutableDictionary* requestsDict = [[LocalStorage getObjectForKey: @"requests" shouldCreate: true] mutableCopy];
-    NSString *uuid = [[NSUUID UUID] UUIDString];
-
-    NSDictionary* requestObj = @{
-        @"name": label,
-        @"profileUrl": profileUrl,
-        @"goal": goal,
-        @"uuid": uuid,
-        @"type": @"null",
-        @"data": [Utilities dictToJsonString:connectValues]
-    };
-    [requestsDict setValue: requestObj forKey: uuid];
-    [LocalStorage store: @"requests" andObject: requestsDict];
-    
-    requests = requestsDict;
-    [self.tableView reloadData];
-}
-
-- (IBAction)addNewConnBtnClick: (id)sender {
-    if(addConnConfigTextView.text.length > 3 && ![addConnConfigTextView.text isEqual: @"enter code here"]) {
-        NSDictionary *connectValues = [Connection parsedInvite: addConnConfigTextView.text];
-        NSString *label = [connectValues objectForKey: @"label"];
-        NSString *goal = @"";
-        if ([connectValues valueForKey:@"goal"] != nil) {
-            goal = [connectValues objectForKey: @"goal"];
-        } else {
-            goal = @"New connection";
-        }
-        NSString *profileUrl = [connectValues objectForKey: @"profileUrl"];
-        
-        NSMutableDictionary* requestsDict = [[LocalStorage getObjectForKey: @"requests" shouldCreate: true] mutableCopy];
-        NSString *uuid = [[NSUUID UUID] UUIDString];
-
-        NSDictionary* requestObj = @{
-            @"name": label,
-            @"profileUrl": profileUrl,
-            @"goal": goal,
-            @"uuid": uuid,
-            @"type": @"null",
-            @"data": [Utilities dictToJsonString:connectValues]
-        };
-        [requestsDict setValue: requestObj forKey: uuid];
-        [LocalStorage store: @"requests" andObject: requestsDict];
-        
-        requests = requestsDict;
-        [self.tableView reloadData];
-    }
-}
-
-- (IBAction)checkMessages:(id)sender {
-    [Message downloadAllMessages:^(NSArray *responseArray, NSError *error) {
-        NSLog(@"downloadAllMessages %@", responseArray);
-        for (NSInteger i = 0; i < responseArray.count; i++) {
-            NSDictionary *message = responseArray[i];
-
-            NSString *type = [message objectForKey:@"type"];
-            NSLog(@"typetypetype %@", type);
-            if ([type isEqual:@"credential-offer"]) {
-                NSString *payload = [message objectForKey:@"payload"];
-                NSArray *payloadArr = [Utilities jsonToArray:payload];
-                NSDictionary *payloadDict = payloadArr[0];
-                
-                NSMutableDictionary* requestsDict = [[LocalStorage getObjectForKey: @"requests" shouldCreate: true] mutableCopy];
-                NSString *uuid = [[NSUUID UUID] UUIDString];
-
-                NSDictionary* requestObj = @{
-                    @"name": [payloadDict objectForKey:@"claim_name"],
-                    @"goal": @"Credential offer",
-                    @"uuid": [message objectForKey:@"uid"],
-                    @"type": type,
-                    @"data": [Utilities dictToJsonString:message]
-                };
-                [requestsDict setValue: requestObj forKey: uuid];
-                [LocalStorage store: @"requests" andObject: requestsDict];
-
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [Message updateMessageStatus:[message objectForKey:@"pwDid"]
-                                         messageId:[message objectForKey:@"uid"]
-                               withCompletionBlock:^(BOOL result, NSError *error) {
-                        if (error) {
-                            NSLog(@"%@", error);
-                        }
-                    }];
-                });
-
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    self.requests = requestsDict;
-                    [self.tableView reloadData];
-                });
+- (void) messageStatusUpdate:(NSDictionary *) message {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [Message updateMessageStatus:[message objectForKey:@"pwDid"]
+                             messageId:[message objectForKey:@"uid"]
+                   withCompletionBlock:^(BOOL result, NSError *error) {
+            if (error) {
+                [Utilities printError:error];
             }
-            if ([type isEqual:@"committed-question"]) {
-                NSString *payload = [message objectForKey:@"payload"];
-                NSDictionary *payloadDict = [Utilities jsonToDictionary:payload];
-                
-                NSLog(@"payloadDict oofer %@", payloadDict);
-                
-                NSMutableDictionary* requestsDict = [[LocalStorage getObjectForKey: @"requests" shouldCreate: true] mutableCopy];
-                NSString *uuid = [[NSUUID UUID] UUIDString];
-
-                NSDictionary* requestObj = @{
-                    @"name": [payloadDict objectForKey:@"question_text"],
-                    @"goal": @"Question",
-                    @"uuid": [message objectForKey:@"uid"],
-                    @"type": type,
-                    @"data": [Utilities dictToJsonString:message]
-                };
-                [requestsDict setValue: requestObj forKey: uuid];
-                [LocalStorage store: @"requests" andObject: requestsDict];
-
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [Message updateMessageStatus:[message objectForKey:@"pwDid"]
-                                         messageId:[message objectForKey:@"uid"]
-                               withCompletionBlock:^(BOOL result, NSError *error) {
-                        if (error) {
-                            NSLog(@"%@", error);
-                        }
-                    }];
-                });
-
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    self.requests = requestsDict;
-                    [self.tableView reloadData];
-                });
-            }
-            if ([type isEqual:@"presentation-request"]) {
-                NSDictionary *payload = [Utilities jsonToDictionary:[message objectForKey:@"payload"]];
-
-                NSLog(@"payloadDict oofer %@", payload);
-                
-                NSMutableDictionary* requestsDict = [[LocalStorage getObjectForKey: @"requests" shouldCreate: true] mutableCopy];
-                NSString *uuid = [[NSUUID UUID] UUIDString];
-
-                NSDictionary* requestObj = @{
-                    @"name": [payload objectForKey:@"comment"],
-                    @"goal": @"Proof Request",
-                    @"uuid": [message objectForKey:@"uid"],
-                    @"type": type,
-                    @"data": [Utilities dictToJsonString:message]
-                };
-                [requestsDict setValue: requestObj forKey: uuid];
-                [LocalStorage store: @"requests" andObject: requestsDict];
-
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [Message updateMessageStatus:[message objectForKey:@"pwDid"]
-                                         messageId:[message objectForKey:@"uid"]
-                               withCompletionBlock:^(BOOL result, NSError *error) {
-                        if (error) {
-                            NSLog(@"%@", error);
-                        }
-                    }];
-                });
-
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    self.requests = requestsDict;
-                    [self.tableView reloadData];
-                });
-            }
-        }
-    }];
+        }];
+    });
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -380,90 +379,30 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
     NSString *goal = [requestDict objectForKey: @"goal"];
     NSString *uuid = [requestDict objectForKey: @"uuid"];
     NSString *data = [requestDict objectForKey: @"data"];
-    NSLog(@"typetype %@", requestDict);
-    
-    if ([type isEqual:@"null"]) {
-        NSString *logoUrl = [requestDict objectForKey: @"profileUrl"];
-        [cell updateAttribute:name
-                     subtitle:goal
-                      logoUrl:logoUrl
-               acceptCallback:^() {
-                        [self newConnection:data
-                        withCompletionBlock:^(BOOL result, NSError *error) {
-                            if (result) {
-                                [self switchActionToHistoryView: uuid];
-                            }
-                        }];
-                    }
-                rejectCallback:^() {
+    NSString *logoUrl = [requestDict objectForKey: @"profileUrl"];
+
+    [cell updateAttribute:name
+                 subtitle:goal
+                  logoUrl:logoUrl
+           acceptCallback:^() {
+                    [self handleAcceptAction:data
+                                     forType:type
+                         withCompletionBlock:^(BOOL result, NSError *error) {
                         [self switchActionToHistoryView: uuid];
-                        [self addRejectAction: name];
-                }
-         ];
-        [cell.accept setTitle:@"Accept" forState:UIControlStateNormal];
-    } else if ([type isEqual:@"credential-offer"]) {
-        [cell updateAttribute:name
-                     subtitle:goal
-                      logoUrl:@""
-               acceptCallback:^() {
-                         [self acceptCredential:data
-                            withCompletionBlock:^(BOOL result, NSError *error) {
-                            if (result) {
-                                [self switchActionToHistoryView: uuid];
-                            };
-                        }];
-                    }
-               rejectCallback:^() {
-                        [self rejectCredential:data
-                            withCompletionBlock:^(BOOL result, NSError *error) {
-                            if (result) {
-                                [self switchActionToHistoryView: uuid];
-                            };
-                        }];
-                    }
-         ];
-        [cell.accept setTitle:@"Accept" forState:UIControlStateNormal];
-        [cell.reject setHidden:NO];
-    } else if ([type isEqual:@"committed-question"]) {
-        [cell updateAttribute:name
-                     subtitle:goal
-                      logoUrl:@""
-               acceptCallback:^() {
-                        [self answer:data
-                 withCompletionBlock:^(BOOL result, NSError *error) {
-                            if (result) {
-                                [self switchActionToHistoryView: uuid];
-                            };
-                        }];
-                    }
-               rejectCallback:^() {
-                        [self switchActionToHistoryView: uuid];
-               }
-         ];
-        [cell.accept setTitle:@"Answer" forState:UIControlStateNormal];
-    } else if ([type isEqual:@"presentation-request"]) {
-        [cell updateAttribute:name
-                     subtitle:goal
-                      logoUrl:@""
-               acceptCallback:^() {
-                        [self sendProof:data
-                 withCompletionBlock:^(BOOL result, NSError *error) {
-                            if (result) {
-                                [self switchActionToHistoryView: uuid];
-                            };
-                        }];
-                    }
-               rejectCallback:^() {
-                    [self rejectProof:data
-             withCompletionBlock:^(BOOL result, NSError *error) {
-                        if (result) {
-                            [self switchActionToHistoryView: uuid];
-                        };
                     }];
                 }
-         ];
-        [cell.accept setTitle:@"Accept" forState:UIControlStateNormal];
-    }
+            rejectCallback:^() {
+                    [self handleRejectAction:data
+                                     forType:type
+                         withCompletionBlock:^(BOOL result, NSError *error) {
+                        [self switchActionToHistoryView: uuid];
+                        if (type == OOB || type == COMMITTED_QUESTION) {
+                            [self addRejectAction: name];
+                        }
+                    }];
+            }
+     ];
+    [cell.accept setTitle:@"Handle" forState:UIControlStateNormal];
     return cell;
 }
 

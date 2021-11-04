@@ -8,7 +8,7 @@
 
 #import "AppDelegate.h"
 #import <Security/Security.h>
-#import "Config.h"
+#import "Initialization.h"
 #import "MobileSDK.h"
 #import "LocalStorage.h"
 #import "Message.h"
@@ -36,7 +36,7 @@ didFinishLaunchingWithOptions:(NSDictionary *) launchOptions {
     [self.window makeKeyWindow];
     
     [[MobileSDK shared] setSdkApi: [[ConnectMeVcx alloc] init]];
-    [Config initVCX];
+    [Initialization initVCX];
     
     return YES;
 }

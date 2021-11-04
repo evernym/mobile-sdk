@@ -42,7 +42,7 @@
     }
     NSError* error;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject: json options: 0 error: &error];
-    if (! jsonData) {
+    if (!jsonData) {
         NSLog(@"%s: error", __func__);
         return @"[]";
     }
@@ -53,15 +53,15 @@
     if(!json) {
         return nil;
     }
-    NSError* error;
-    NSDictionary* object = [NSJSONSerialization JSONObjectWithData: [json dataUsingEncoding: NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
     
-//    if(error != nil) {
-//        NSLog(@"Error deserialization");
-//        return @{};
-//    }
-
-    return object;
+    @try {
+        NSError* error;
+        NSDictionary* object = [NSJSONSerialization JSONObjectWithData: [json dataUsingEncoding: NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
+        
+        return object;
+    } @catch(NSException* ex) {
+        return nil;
+    }
 }
 
 +(NSArray*)jsonToArray: (NSString*)json {
@@ -75,7 +75,7 @@
 
         return array;
     } @catch(NSException* ex) {
-        return @[];
+        return nil;
     }
 }
 

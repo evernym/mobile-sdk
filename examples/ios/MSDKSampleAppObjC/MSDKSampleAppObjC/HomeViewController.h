@@ -12,7 +12,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *addConnLabel;
 @property (weak, nonatomic) IBOutlet UITextView *addConnConfigTextView;
 
-- (IBAction)addNewConn:(id)sender;
+- (IBAction)addNewConnBtnClick:(id)sender;
 - (IBAction)scanQR: (UIButton*) sender;
 - (IBAction)checkMessages: (UIButton*) sender;
 

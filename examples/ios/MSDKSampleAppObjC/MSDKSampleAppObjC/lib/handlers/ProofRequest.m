@@ -129,7 +129,7 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
     
     NSLog(@"Received Proof Req to process - %@", proofObject);
     NSString *messageId = proofObject[@"uid"];
-    NSError *error;
+    NSError *error = nil;
 
     NSMutableDictionary *decryptedPayload = [[Utilities jsonToDictionary: proofObject[@"decryptedPayload"]] mutableCopy];
     if (!decryptedPayload) {

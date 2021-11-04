@@ -23,8 +23,4 @@
     return instance;
 }
 
--(NSString*)provisioningToken {
-    return [LocalStorage getValueForKey: @"provisioningToken"];
-}
-
 @end
