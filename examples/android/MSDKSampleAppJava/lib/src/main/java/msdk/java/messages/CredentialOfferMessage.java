@@ -9,11 +9,11 @@ import java.util.Iterator;
 public class CredentialOfferMessage {
     public String id;
     public String name;
-    public String attributes;
+    public JSONObject attributes;
     public String offer;
     public String threadId;
 
-    public CredentialOfferMessage(String id, String name, String attributes, String offer, String threadId) {
+    public CredentialOfferMessage(String id, String name, JSONObject attributes, String offer, String threadId) {
         this.id = id;
         this.name = name;
         this.attributes = attributes;
@@ -27,18 +27,11 @@ public class CredentialOfferMessage {
             String id = data.getString("claim_id");
             String thread_id = data.getString("thread_id");
             String name = data.getString("claim_name");
-            JSONObject attributesJson = data.getJSONObject("credential_attrs");
-            StringBuilder attributes = new StringBuilder();
-            Iterator<String> keys = attributesJson.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                String value = attributesJson.getString(key);
-                attributes.append(String.format("%s: %s\n", key, value));
-            }
+            JSONObject attributes = data.getJSONObject("credential_attrs");
             return new CredentialOfferMessage(
                     id,
                     name,
-                    attributes.toString(),
+                    attributes,
                     msg.getPayload(),
                     thread_id
             );
@@ -46,5 +39,20 @@ public class CredentialOfferMessage {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static JSONObject extractAttributesFromCredentialOffer(JSONObject offer) {
+        JSONObject attributes = new JSONObject();
+        try {
+            JSONArray previewAttributes = offer.getJSONObject("credential_preview").getJSONArray("attributes");
+
+            for (int i = 0; i < previewAttributes.length(); i++) {
+                JSONObject attribute = previewAttributes.getJSONObject(i);
+                attributes.put(attribute.getString("name"), attribute.getString("value"));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return attributes;
     }
 }

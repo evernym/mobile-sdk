@@ -14,6 +14,7 @@ import msdk.kotlin.sample.R
 import msdk.kotlin.sample.db.entity.Action
 import org.json.JSONObject
 
+
 class HomePageAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<HomePageAdapter.HomePageViewHolder>() {
     private var data = mutableListOf<Action>()
 
@@ -24,41 +25,43 @@ class HomePageAdapter(private val itemClickListener: ItemClickListener) : Recycl
     }
 
     override fun onBindViewHolder(holder: HomePageViewHolder, position: Int) {
-        val action: Action = data[position]
-        holder.name.text = action.name
-        holder.description.text = action.description
-        holder.details.text = action.details
-        Glide.with(holder.image.context).load(action.icon).into(holder.image)
+        val (id, name, _, description, details, icon, _, _, _, _, _, entryId, selectedAnswer, messageAnswers) = data[position]
+        holder.name.text = name
+        holder.description.text = description
+        holder.details.text = details
+        Glide.with(holder.image.context).load(icon)
+            .into(holder.image)
 
         holder.buttonAccept.visibility = View.INVISIBLE
         holder.buttonReject.visibility = View.INVISIBLE
         holder.selectedAnswer.visibility = View.INVISIBLE
         holder.buttonHolder.visibility = View.INVISIBLE
 
-        if (action.entryId == null || action.messageAnswers == null) {
-            holder.buttonHolder.removeAllViews();
+        if (entryId == null && (messageAnswers == null || messageAnswers.isEmpty())) {
+            holder.buttonHolder.removeAllViews()
             holder.buttonAccept.visibility = View.VISIBLE
             holder.buttonReject.visibility = View.VISIBLE
             holder.buttonAccept.isEnabled = true
             holder.buttonReject.isEnabled = true
-            holder.buttonAccept.setOnClickListener {
+            holder.buttonAccept.setOnClickListener { v ->
                 holder.buttonAccept.isEnabled = false
                 holder.buttonReject.isEnabled = false
-                itemClickListener.onAcceptClick(action.id)
+                itemClickListener.onAcceptClick(id)
             }
-            holder.buttonReject.setOnClickListener {
+            holder.buttonReject.setOnClickListener { v ->
                 holder.buttonAccept.isEnabled = false
                 holder.buttonReject.isEnabled = false
-                itemClickListener.onRejectClick(action.id)
+                itemClickListener.onRejectClick(id)
             }
         } else {
             holder.buttonHolder.removeAllViews()
-            if (action.selectedAnswer != null) {
+            holder.buttonHolder.visibility = View.VISIBLE
+            if (selectedAnswer != null) {
                 holder.selectedAnswer.visibility = View.VISIBLE
-                holder.selectedAnswer.text = "Selected answer: " + action.selectedAnswer
+                holder.selectedAnswer.text = "Selected answer: $selectedAnswer"
             } else {
                 holder.selectedAnswer.visibility = View.GONE
-                for (response in action.messageAnswers!!) {
+                for (response in messageAnswers!!) {
                     val btn: Button = AppCompatButton(holder.itemView.context)
                     btn.text = response.text
                     holder.buttonHolder.addView(btn)
@@ -67,7 +70,7 @@ class HomePageAdapter(private val itemClickListener: ItemClickListener) : Recycl
                             val view = holder.buttonHolder.getChildAt(i)
                             view.isEnabled = false
                         }
-                        itemClickListener.onAnswerClick(action.id, response.response!!)
+                        itemClickListener.onAnswerClick(id, response.response!!)
                     }
                 }
             }
