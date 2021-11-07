@@ -16,6 +16,11 @@
 +(void) createWithOffer: (NSString*)offer
   withCompletionHandler: (ResponseWithObject) completionBlock;
 
++(void) handleCredentialOffer:(NSDictionary *) attachment
+         serializedConnection:(NSString *) serializedConnection
+                         name:(NSString *) name
+        withCompletionHandler:(ResponseWithObject) completionBlock;
+
 +(void) acceptCredentialOffer: (NSString*) serializedConnection
          serializedCredential: (NSString*) serializedCredential
                         offer: (NSString*) offer

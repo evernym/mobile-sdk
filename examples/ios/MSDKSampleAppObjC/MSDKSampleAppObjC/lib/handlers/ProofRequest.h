@@ -18,6 +18,11 @@ NS_ASSUME_NONNULL_BEGIN
     autofilledAttributes: attributes retreived from existing credentials (most of the attributes will be this type)
     selfAttestedAttributes: attributes which user will need to fill in UI form
  */
++(void) handleProofRequest:(NSDictionary *) attachment
+      serializedConnection:(NSString *) serializedConnection
+                      name:(NSString *) name
+     withCompletionHandler:(ResponseWithObject) completionBlock;
+
 + (void) sendProofRequest: (NSDictionary*) proofObject
           proofAttributes: (NSDictionary*) proofAttributes
             andConnection: (NSDictionary*) connection

@@ -39,6 +39,37 @@
     }
 }
 
++(void) handleProofRequest:(NSDictionary *) attachment
+      serializedConnection:(NSString *) serializedConnection
+                      name:(NSString *) name
+     withCompletionHandler:(ResponseWithObject) completionBlock {
+    [self createWithRequest:[Utilities dictToJsonString:attachment]
+                withCompletionHandler:^(NSDictionary *proofRequest, NSError *error) {
+        if (error && error.code > 0) {
+            return completionBlock(nil, error);
+        }
+        [self retrieveAvailableCredentials:[Utilities dictToJsonString:proofRequest]
+                               withCompletionHandler:^(NSDictionary *creds, NSError *error) {
+            if (error && error.code > 0) {
+                return completionBlock(nil, error);
+            };
+            NSString *attr = [creds objectForKey: @"autofilledAttributes"];
+
+            [self send:serializedConnection
+       serializedProof:[Utilities dictToJsonString:proofRequest]
+         selectedCreds:attr
+      selfAttestedAttr:@"{}"
+ withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+                if (error && error.code > 0) {
+                    return completionBlock(nil, error);
+                }
+                [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Proof request send", name]];
+                return completionBlock(responseObject, nil);
+            }];
+        }];
+    }];
+}
+
 +(void) retrieveAvailableCredentials:(NSString *) serializedProof
                withCompletionHandler:(ResponseWithObject) completionBlock {
     NSError* error;

@@ -38,11 +38,6 @@ typedef enum {
 
 + (void)waitHandshakeReuse: (ResponseWithBoolean) completionBlock;
 
-+ (void)downloadMessages: (NSDictionary*) connection
-                 andType: (MessageStatusType) type
-            andMessageID: (nullable NSString*) messageID
-   withCompletionHandler: (ResponseWithArray) completionBlock;
-
 + (void)downloadAllMessages:(ResponseWithArray) completionBlock;
 
 + (void)updateMessageStatus:(NSString *) pwDid
@@ -57,6 +52,7 @@ typedef enum {
                message:(NSString *)message
                 answer:(NSString *)answer
    withCompletionBlock:(ResponseWithBoolean) completionBlock;
+
 @end
 
 NS_ASSUME_NONNULL_END

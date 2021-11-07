@@ -7,3 +7,175 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "ConnectionHandler.h"
+#import "Utilities.h"
+#import "Connection.h"
+#import "ConnectionInvitation.h"
+#import "LocalStorage.h"
+#import "Credential.h"
+#import "ProofRequest.h"
+
+@implementation ConnectionHandler
+
++(void) handleConnectionInvitation: (NSString *)invite
+             withCompletionHandler: (ResponseWithObject) completionBlock {
+    NSDictionary *parsedInvite = [Connection parsedInvite:invite];
+    NSString *name = [parsedInvite objectForKey:@"label"];
+    NSString *type = [ConnectionInvitation getInvitationType:parsedInvite];
+    
+    [Connection verityConnectionExist:invite
+                 withCompletion:^(NSString *existingConnection, NSError *error) {
+        if (error && error.code > 0) {
+            return completionBlock(nil, error);
+        }
+        
+        if ([ConnectionInvitation isAriesInvitation:type]) {
+            if (existingConnection != nil) {
+                [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
+            } else {
+                [Connection createConnection:invite
+                                        name:name
+                       withCompletionHandler:^(NSDictionary *responseConnection, NSError *error) {
+                    if (error && error.code > 0) {
+                        [Utilities printError:error];
+                    }
+                    return completionBlock(responseConnection, error);
+                }];
+            }
+        }
+        
+        if ([ConnectionInvitation isOutOfBandInvitation:type]) {
+            NSDictionary *attachment = [Connection extractRequestAttach: [Utilities jsonToDictionary:invite]];
+
+            if (attachment) {
+                [self handleOutOfBandConnectionInvitationWithAttachment: invite
+                                                             attachment:attachment
+                                                     existingConnection:existingConnection
+                                                                   name:name
+                                                  withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+                    if (error && error.code > 0) {
+                        [Utilities printError:error];
+                    }
+                    return completionBlock(responseObject, error);
+                }];
+            } else {
+                if (existingConnection != nil) {
+                    [Connection connectionRedirectAriesOutOfBand:invite
+                                            serializedConnection:existingConnection
+                                           withCompletionHandler:^(BOOL result, NSError *error) {
+                        [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
+                        if (error && error.code > 0) {
+                            [Utilities printError:error];
+                        }
+                        return completionBlock(nil, error);
+                    }];
+                } else {
+                    [Connection createConnection:invite
+                                            name:name
+                           withCompletionHandler:^(NSDictionary *responseConnection, NSError *error) {
+                        if (error && error.code > 0) {
+                            [Utilities printError:error];
+                        }
+                        return completionBlock(responseConnection, error);
+                    }];
+                }
+            }
+        }
+    }];
+}
+
++(void) handleOutOfBandConnectionInvitationWithAttachment:(NSString *) invite
+                                               attachment:(NSDictionary *) attachment
+                                       existingConnection:(NSString *) existingConnection
+                                                     name:(NSString *) name
+                                    withCompletionHandler:(ResponseWithObject) completionBlock {
+    NSString *attachType = [ConnectionInvitation getAttachmentType:attachment];
+    
+    if ([ConnectionInvitation isCredentialAttachment:attachType]) {
+        [self processInvitationWithCredentialAttachment:invite
+                                             attachment:attachment
+                                     existingConnection:existingConnection
+                                                   name:name
+                                  withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+            return completionBlock(responseObject, error);
+        }];
+    }
+    if ([ConnectionInvitation isProofAttachment:attachType]) {
+        [self processInvitationWithProffAttachment:invite
+                                        attachment:attachment
+                                existingConnection:existingConnection
+                                              name:name
+                             withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+            return completionBlock(responseObject, error);
+        }];
+    }
+    return completionBlock(nil, nil);
+}
+
++(void) processInvitationWithCredentialAttachment:(NSString *) invite
+                                       attachment:(NSDictionary *) attachment
+                               existingConnection:(NSString *) existingConnection
+                                             name:(NSString *) name
+                            withCompletionHandler:(ResponseWithObject) completionBlock {
+    if (existingConnection != nil) {
+        [Connection connectionRedirectAriesOutOfBand:invite
+                                serializedConnection:existingConnection
+                               withCompletionHandler:^(BOOL result, NSError *error) {
+            [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
+            
+            [Credential handleCredentialOffer:attachment
+                         serializedConnection:existingConnection
+                                         name:name
+                        withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+                return completionBlock(responseObject, error);
+            }];
+        }];
+    } else {
+        [Connection createConnection:invite
+                                name:name
+               withCompletionHandler:^(NSDictionary *responseConnection, NSError *error) {
+            
+            [Credential handleCredentialOffer:attachment
+                         serializedConnection:[Utilities dictToJsonString:responseConnection]
+                                         name:name
+                        withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+                return completionBlock(responseObject, error);
+            }];
+        }];
+    }
+}
+
++(void) processInvitationWithProffAttachment:(NSString *) invite
+                                  attachment:(NSDictionary *) attachment
+                          existingConnection:(NSString *) existingConnection
+                                        name:(NSString *) name
+                       withCompletionHandler:(ResponseWithObject) completionBlock {
+    if (existingConnection != nil) {
+        [Connection connectionRedirectAriesOutOfBand:invite
+                                serializedConnection:existingConnection
+                               withCompletionHandler:^(BOOL result, NSError *error) {
+            [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
+            
+            [ProofRequest handleProofRequest:attachment
+                        serializedConnection:existingConnection
+                                        name:name
+                       withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+                return completionBlock(responseObject, error);
+            }];
+        }];
+    } else {
+        [Connection createConnection:invite
+                                name:name
+               withCompletionHandler:^(NSDictionary *responseConnection, NSError *error) {
+            
+            [ProofRequest handleProofRequest:attachment
+                        serializedConnection:[Utilities dictToJsonString:responseConnection]
+                                        name:name
+                       withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+                return completionBlock(responseObject, error);
+            }];
+        }];
+    }
+}
+
+@end

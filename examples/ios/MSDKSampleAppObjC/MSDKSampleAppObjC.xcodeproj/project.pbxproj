@@ -31,6 +31,8 @@
 		DD4E83AB273281B600797EA9 /* Initialization.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4E83A1273281B600797EA9 /* Initialization.m */; };
 		DD4E83B22732E38D00797EA9 /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4E83B12732E38D00797EA9 /* Config.m */; };
 		DD4E83B42733EB7900797EA9 /* ConnectionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4E83B32733EB7900797EA9 /* ConnectionHandler.m */; };
+		DD725BC9273869EB0040CCD6 /* CredentialOffer.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725BC8273869EB0040CCD6 /* CredentialOffer.m */; };
+		DD79590B2734256E0014A80D /* ConnectionInvitation.m in Sources */ = {isa = PBXBuildFile; fileRef = DD79590A2734256E0014A80D /* ConnectionInvitation.m */; };
 		EBD3FF65B0E21240A51640D7 /* Pods_MSDKSampleAppObjCUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0213691038E68CE1AC0D9077 /* Pods_MSDKSampleAppObjCUITests.framework */; };
 /* End PBXBuildFile section */
 
@@ -107,6 +109,10 @@
 		DD4E83B12732E38D00797EA9 /* Config.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Config.m; sourceTree = "<group>"; };
 		DD4E83B32733EB7900797EA9 /* ConnectionHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ConnectionHandler.m; sourceTree = "<group>"; };
 		DD4E83B52733EBC400797EA9 /* ConnectionHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConnectionHandler.h; sourceTree = "<group>"; };
+		DD725BC7273869D30040CCD6 /* CredentialOffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CredentialOffer.h; sourceTree = "<group>"; };
+		DD725BC8273869EB0040CCD6 /* CredentialOffer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CredentialOffer.m; sourceTree = "<group>"; };
+		DD79590A2734256E0014A80D /* ConnectionInvitation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ConnectionInvitation.m; sourceTree = "<group>"; };
+		DD79590C2734257C0014A80D /* ConnectionInvitation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConnectionInvitation.h; sourceTree = "<group>"; };
 		DDFB74F1272C1F9A00BCFD22 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		F4E4159DF23CF2D92D9E4F54 /* Pods_MSDKSampleAppObjC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MSDKSampleAppObjC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -233,7 +239,7 @@
 				DD4E83B52733EBC400797EA9 /* ConnectionHandler.h */,
 				DD4E83B32733EB7900797EA9 /* ConnectionHandler.m */,
 				DD4E83AC2732DE4300797EA9 /* handlers */,
-				DD4E83AD2732DF9900797EA9 /* messages */,
+				DD4E83AD2732DF9900797EA9 /* helpers */,
 				DD4E83AF2732DFDD00797EA9 /* types */,
 				DD4E83AE2732DFBC00797EA9 /* utils */,
 			);
@@ -243,6 +249,8 @@
 		DD4E83AC2732DE4300797EA9 /* handlers */ = {
 			isa = PBXGroup;
 			children = (
+				DD4E838E273281B600797EA9 /* Message.h */,
+				DD4E838F273281B600797EA9 /* Message.m */,
 				DD4E8390273281B600797EA9 /* Connection.h */,
 				DD4E839B273281B600797EA9 /* Connection.m */,
 				DD4E839D273281B600797EA9 /* Credential.h */,
@@ -255,13 +263,15 @@
 			path = handlers;
 			sourceTree = "<group>";
 		};
-		DD4E83AD2732DF9900797EA9 /* messages */ = {
+		DD4E83AD2732DF9900797EA9 /* helpers */ = {
 			isa = PBXGroup;
 			children = (
-				DD4E838E273281B600797EA9 /* Message.h */,
-				DD4E838F273281B600797EA9 /* Message.m */,
+				DD79590C2734257C0014A80D /* ConnectionInvitation.h */,
+				DD79590A2734256E0014A80D /* ConnectionInvitation.m */,
+				DD725BC7273869D30040CCD6 /* CredentialOffer.h */,
+				DD725BC8273869EB0040CCD6 /* CredentialOffer.m */,
 			);
-			path = messages;
+			path = helpers;
 			sourceTree = "<group>";
 		};
 		DD4E83AE2732DFBC00797EA9 /* utils */ = {
@@ -518,6 +528,7 @@
 				DD4E83A3273281B600797EA9 /* ProofRequest.m in Sources */,
 				8E509FE92281EFC60098812A /* HomeViewController.m in Sources */,
 				DD4E83A4273281B600797EA9 /* MobileSDK.m in Sources */,
+				DD725BC9273869EB0040CCD6 /* CredentialOffer.m in Sources */,
 				DD4E83A5273281B600797EA9 /* LocalStorage.m in Sources */,
 				DD00E0C82685FED50050BC88 /* HistoryViewController.m in Sources */,
 				DD4E83A7273281B600797EA9 /* Log.m in Sources */,
@@ -529,6 +540,7 @@
 				DD4E83A8273281B600797EA9 /* Connection.m in Sources */,
 				8E509FF42281EFC80098812A /* main.m in Sources */,
 				DD00E107268D931D0050BC88 /* CustomTableViewCell.m in Sources */,
+				DD79590B2734256E0014A80D /* ConnectionInvitation.m in Sources */,
 				DD4E83B42733EB7900797EA9 /* ConnectionHandler.m in Sources */,
 				8E509FE62281EFC60098812A /* AppDelegate.m in Sources */,
 				DD4E83AA273281B600797EA9 /* Credential.m in Sources */,

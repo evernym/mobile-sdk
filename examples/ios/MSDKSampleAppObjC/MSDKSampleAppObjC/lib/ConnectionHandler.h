@@ -9,13 +9,13 @@
 #ifndef ConnectionHandler_h
 #define ConnectionHandler_h
 
+#import <Foundation/Foundation.h>
+#import "Utilities.h"
+
 @interface ConnectionHandler : NSObject
 
-+(void) handleConnectionInvitation;
-+(void) handleOutOfBandConnectionInvitationWithAttachment;
-+(void) processInvitationWithCredentialAttachment;
-+(void) processInvitationWithProffAttachment;
-+(void) connectionCreate;
++(void) handleConnectionInvitation:(NSString *) invite
+             withCompletionHandler:(ResponseWithObject) completionBlock;
 
 @end
 

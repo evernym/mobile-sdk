@@ -12,18 +12,40 @@
 #import "Message.h"
 #import "Connection.h"
 #import "LocalStorage.h"
+#import "CredentialOffer.h"
 
 @implementation Credential
 
-+(NSString *)getThid:(NSString *) credential {
-    NSError *error;
-    NSMutableDictionary *credValues = [NSJSONSerialization JSONObjectWithData: [credential dataUsingEncoding: NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
-    NSLog(@"credValuescredValues %@", credValues);
-    
-    if (credValues[@"thread_id"]) {
-        return credValues[@"thread_id"];
-    }
-    return credValues[@"~thread"][@"thid"];
++(void) handleCredentialOffer:(NSDictionary *) attachment
+         serializedConnection:(NSString *) serializedConnection
+                         name:(NSString *) name
+        withCompletionHandler:(ResponseWithObject) completionBlock {
+    [self createWithOffer:[Utilities dictToJsonString:attachment]
+            withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+        if (error && error.code > 0) {
+            return completionBlock(nil, error);
+        }
+
+        [self acceptCredentialOffer:serializedConnection
+                       serializedCredential:[Utilities dictToJsonString:responseObject]
+                                      offer:[Utilities dictToJsonString:attachment]
+                      withCompletionHandler:^(NSString *responseObject, NSError *error) {
+            if (error && error.code > 0) {
+                return completionBlock(nil, error);
+            }
+            [self awaitCredentialReceived:responseObject
+                                    offer:[Utilities dictToJsonString:attachment]
+                      withCompletionBlock:^(NSString *successMessage, NSError *error) {
+                if (error && error.code > 0) {
+                    return completionBlock(nil, error);
+                }
+                [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Credential offer accept", name]];
+
+                return completionBlock([Utilities jsonToDictionary:successMessage], nil);
+            }];
+            
+        }];
+    }];
 }
 
 +(void) createWithOffer: (NSString*)offer
@@ -182,7 +204,7 @@
                          offer:(NSString *) offer
             withCompletionBlock:(ResponseBlock) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
-    NSString *thid = [self getThid:offer];
+    NSString *thid = [CredentialOffer getThid:offer];
     __block NSString *serialized = @"";
 
     [sdkApi credentialDeserialize:serializedCredential

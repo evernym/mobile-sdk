@@ -15,6 +15,8 @@
 #import "QRCodeReaderViewController.h"
 #import "Message.h"
 #import "ProofRequest.h"
+#import "ConnectionInvitation.h"
+#import "ConnectionHandler.h"
 
 @interface HomeViewController ()
 
@@ -88,7 +90,7 @@ UIGestureRecognizer *tapper;
 }
 
 - (void) createActionWithInvitation:(NSString *) data {
-    NSDictionary *connectValues = [Connection parsedInvite: data];
+    NSDictionary *connectValues = [ConnectionInvitation parsedInvite: data];
     NSString *label = [connectValues objectForKey: @"label"];
     NSString *goal = @"";
     if ([connectValues valueForKey:@"goal"] != nil) {
@@ -219,8 +221,8 @@ UIGestureRecognizer *tapper;
                     forType:(NSString *) forType
         withCompletionBlock:(ResponseWithBoolean) completionBlock {
     if (forType == OOB) {
-        [self newConnection:data
-        withCompletionBlock:^(BOOL result, NSError *error) {
+        [ConnectionHandler handleConnectionInvitation:data
+                                withCompletionHandler:^(NSDictionary *result, NSError *error) {
             return completionBlock(result, error);
         }];
     }
@@ -298,19 +300,6 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
     }];
 }
 
-- (void)newConnection:(NSString *) data
-  withCompletionBlock:(ResponseWithBoolean) completionBlock {
-    [Connection handleConnection:data
-                    connectionType:QR
-                       phoneNumber:@""
-             withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
-        if (error && error.code > 0) {
-            return completionBlock(NO, error);
-        }
-        return completionBlock(YES, error);
-    }];
-}
-
 - (void)answer:(NSString *) data
 withCompletionBlock:(ResponseWithBoolean) completionBlock {
     NSDictionary *message = [Utilities jsonToDictionary:data];
@@ -319,7 +308,7 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
     NSArray *responses = [payloadDict objectForKey:@"valid_responses"];
 
     NSString *pwDidMes = [message objectForKey:@"pwDid"];
-    NSString *questionsConnection = [Connection getConnectionByPwDid:pwDidMes];
+    NSString *questionsConnection = [ConnectionInvitation getConnectionByPwDid:pwDidMes];
 
     UIAlertController * alert = [UIAlertController
                                      alertControllerWithTitle:[payloadDict objectForKey:@"question_text"]
