@@ -1,0 +1,12 @@
+
+//
+//  MSDKSampleAppSwift.pch
+//  MSDKSampleAppSwift
+//
+//  Created by Evernym on 06.07.2021.
+//  Copyright © 2021 Norman Jarvis. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+//#import "Log.h"

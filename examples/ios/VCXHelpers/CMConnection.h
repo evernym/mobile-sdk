@@ -1,6 +1,6 @@
 //
 //  Connection.h
-//  CMeSdkObjc
+//  MSDKSampleAppObjC
 //
 //  Created by Predrag Jevtic on 5/28/20.
 //  Copyright © 2020 Evernym Inc. All rights reserved.

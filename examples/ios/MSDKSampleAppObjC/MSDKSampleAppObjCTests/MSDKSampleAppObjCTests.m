@@ -1,6 +1,6 @@
 //
-//  CMeSdkObjcTests.m
-//  CMeSdkObjcTests
+//  MSDKSampleAppObjCTests.m
+//  MSDKSampleAppObjCTests
 //
 //  Created by Norman Jarvis on 5/7/19.
 //  Copyright © 2019 Evernym Inc. All rights reserved.

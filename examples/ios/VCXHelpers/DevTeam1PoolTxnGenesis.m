@@ -1,6 +1,6 @@
 //
 //  DevTeam1PoolTxnGenesis.m
-//  CMeSdkObjc
+//  MSDKSampleAppObjC
 //
 
 #import <Foundation/Foundation.h>

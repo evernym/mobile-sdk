@@ -1,6 +1,6 @@
 //
 //  HomeViewController.h
-//  CMeSdkObjc
+//  MSDKSampleAppObjC
 //
 //  Created by Norman Jarvis on 5/3/19.
 //  Copyright © 2019 Evernym Inc. All rights reserved.
