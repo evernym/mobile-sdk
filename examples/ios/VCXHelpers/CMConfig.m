@@ -1,6 +1,6 @@
 //
 //  CMConfig.m
-//  CMeSdkObjc
+//  MSDKSampleAppObjC
 //
 //  Created by Predrag Jevtic on 28/05/2020.
 //  Copyright © 2020 Evernym Inc. All rights reserved.
@@ -19,7 +19,7 @@
 
 // Define your wallet name constant here
 NSString* walletName = @"Lor6Ohwaichool"; //@"PleaseSetYourConnectMeWalletName";
-NSString* sponsorServerURL = @"https://ee26c19aacdd.ngrok.io";
+NSString* sponsorServerURL = @"https://3341-83-139-159-140.ngrok.io";
 
 // Below settings will depend on your choosen environment
 // Selected here is Production Enviroment

@@ -1,6 +1,6 @@
 //
 //  CMProofRequest.h
-//  CMeSdkObjc
+//  MSDKSampleAppObjC
 //
 //  Created by Predrag Jevtic on 6/18/20.
 //  Copyright © 2020 Evernym Inc. All rights reserved.

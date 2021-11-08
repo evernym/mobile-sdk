@@ -1,6 +1,6 @@
 //
 //  CMCredential.m
-//  CMeSdkObjc
+//  MSDKSampleAppObjC
 //
 //  Created by Predrag Jevtic on 6/11/20.
 //  Copyright © 2020 Evernym Inc. All rights reserved.

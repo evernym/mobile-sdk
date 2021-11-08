@@ -1,0 +1,49 @@
+# Uncomment the next line to define a global platform for your project
+platform :ios, '11.0'
+
+source 'https://cdn.cocoapods.org/'
+source 'git@gitlab.com:evernym/mobile/mobile-sdk.git'
+ 
+pre_install do |installer|
+  Pod::Installer::Xcode::TargetValidator.send(:define_method, :verify_no_static_framework_transitive_dependencies) {}
+end
+
+post_install do |installer|
+  installer.pods_project.build_configurations.each do |config|
+    config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
+  end
+  installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+          config.build_settings["ONLY_ACTIVE_ARCH"] = "YES"
+      end
+      if target.name == "vcx"
+          target.build_configurations.each do |config|
+              config.build_settings['ENABLE_BITCODE'] = 'NO'
+          end
+      end
+  end
+end
+
+target 'MSDKSampleAppSwift' do
+  # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
+  use_frameworks!
+
+  # Below line will be enabled when we go public with our cocoapod
+  # pod 'vcx', '0.0.198'
+  # Below line will be removed when we go public with our cocoapod
+  pod 'vcx', '0.0.212'
+  #  pod 'vcx', '0.0.214'
+  pod 'QRCodeReaderViewController'
+  pod 'QRCodeReader.swift', '~> 10.1.0'
+
+  target 'MSDKSampleAppSwiftTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+  target 'MSDKSampleAppSwiftUITests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+end
