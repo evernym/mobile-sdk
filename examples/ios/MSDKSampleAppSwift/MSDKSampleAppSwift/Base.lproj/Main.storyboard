@@ -108,7 +108,7 @@
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="enter code here" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="Rls-ZI-fmQ">
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" keyboardDismissMode="onDrag" text="enter code here" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="Rls-ZI-fmQ">
                                         <rect key="frame" x="0.0" y="26" width="219" height="80"/>
                                         <color key="backgroundColor" red="0.90325453369999997" green="0.90325453369999997" blue="0.90325453369999997" alpha="0.95813160210000003" colorSpace="custom" customColorSpace="displayP3"/>
                                         <constraints>

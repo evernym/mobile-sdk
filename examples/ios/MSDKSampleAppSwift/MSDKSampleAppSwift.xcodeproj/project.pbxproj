@@ -3,10 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00FAFBAFBC92D7A578389FDB /* Pods_MSDKSampleAppSwiftTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FF8C2B4BEE379168B4A3A8E /* Pods_MSDKSampleAppSwiftTests.framework */; };
+		4F12E162ED77F7B634ADA794 /* Pods_MSDKSampleAppSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4231F416F15AC9ACA880DA75 /* Pods_MSDKSampleAppSwift.framework */; };
+		50224080ABD85DA93687E4B9 /* Pods_MSDKSampleAppSwiftUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 880693014646A32C9FCC8B48 /* Pods_MSDKSampleAppSwiftUITests.framework */; };
 		8EAE24B02282058F00F49443 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EAE24AF2282058F00F49443 /* AppDelegate.swift */; };
 		8EAE24B52282058F00F49443 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8EAE24B32282058F00F49443 /* Main.storyboard */; };
 		8EAE24B72282059000F49443 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8EAE24B62282059000F49443 /* Assets.xcassets */; };
@@ -19,20 +22,20 @@
 		DD00E1F5269482120050BC88 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00E1F4269482120050BC88 /* HomeViewController.swift */; };
 		DD00E1F72694822C0050BC88 /* HistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00E1F62694822C0050BC88 /* HistoryViewController.swift */; };
 		DD00E1FB2695F7C00050BC88 /* CustomTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00E1FA2695F7C00050BC88 /* CustomTableViewCell.swift */; };
-		DD725C7B273870D40040CCD6 /* ProductionPoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725C5B273870D40040CCD6 /* ProductionPoolTxnGenesis.m */; };
-		DD725C7C273870D40040CCD6 /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725C5F273870D40040CCD6 /* Config.m */; };
-		DD725C7D273870D40040CCD6 /* MobileSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725C60273870D40040CCD6 /* MobileSDK.m */; };
-		DD725C7E273870D40040CCD6 /* ConnectionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725C61273870D40040CCD6 /* ConnectionHandler.m */; };
-		DD725C7F273870D40040CCD6 /* Log.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725C63273870D40040CCD6 /* Log.m */; };
-		DD725C80273870D40040CCD6 /* LocalStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725C64273870D40040CCD6 /* LocalStorage.m */; };
-		DD725C81273870D40040CCD6 /* Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725C68273870D40040CCD6 /* Utilities.m */; };
-		DD725C82273870D40040CCD6 /* Initialization.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725C6D273870D40040CCD6 /* Initialization.m */; };
-		DD725C83273870D40040CCD6 /* Credential.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725C6E273870D40040CCD6 /* Credential.m */; };
-		DD725C84273870D40040CCD6 /* ProofRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725C6F273870D40040CCD6 /* ProofRequest.m */; };
-		DD725C85273870D40040CCD6 /* Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725C72273870D40040CCD6 /* Connection.m */; };
-		DD725C86273870D40040CCD6 /* Message.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725C75273870D40040CCD6 /* Message.m */; };
-		DD725C87273870D40040CCD6 /* ConnectionInvitation.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725C78273870D40040CCD6 /* ConnectionInvitation.m */; };
-		DD725C88273870D40040CCD6 /* CredentialOffer.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725C79273870D40040CCD6 /* CredentialOffer.m */; };
+		DD725D07273936E80040CCD6 /* ProductionPoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CE8273936E80040CCD6 /* ProductionPoolTxnGenesis.m */; };
+		DD725D08273936E80040CCD6 /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CEC273936E80040CCD6 /* Config.m */; };
+		DD725D09273936E80040CCD6 /* MobileSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CED273936E80040CCD6 /* MobileSDK.m */; };
+		DD725D0A273936E80040CCD6 /* ConnectionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CEE273936E80040CCD6 /* ConnectionHandler.m */; };
+		DD725D0B273936E80040CCD6 /* Log.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CF0273936E80040CCD6 /* Log.m */; };
+		DD725D0C273936E80040CCD6 /* LocalStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CF1273936E80040CCD6 /* LocalStorage.m */; };
+		DD725D0D273936E80040CCD6 /* Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CF5273936E80040CCD6 /* Utilities.m */; };
+		DD725D0E273936E80040CCD6 /* Initialization.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CF9273936E80040CCD6 /* Initialization.m */; };
+		DD725D0F273936E80040CCD6 /* Credential.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CFA273936E80040CCD6 /* Credential.m */; };
+		DD725D10273936E80040CCD6 /* ProofRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CFB273936E80040CCD6 /* ProofRequest.m */; };
+		DD725D11273936E80040CCD6 /* Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CFE273936E80040CCD6 /* Connection.m */; };
+		DD725D12273936E80040CCD6 /* Message.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D01273936E80040CCD6 /* Message.m */; };
+		DD725D13273936E80040CCD6 /* ConnectionInvitation.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D04273936E80040CCD6 /* ConnectionInvitation.m */; };
+		DD725D14273936E80040CCD6 /* CredentialOffer.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D05273936E80040CCD6 /* CredentialOffer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +56,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		077AD23CEE20054FBCE5A977 /* Pods-MSDKSampleAppSwiftUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppSwiftUITests.debug.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppSwiftUITests/Pods-MSDKSampleAppSwiftUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		28C767F284CAABC834A5D21E /* Pods-MSDKSampleAppSwift.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppSwift.release.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppSwift/Pods-MSDKSampleAppSwift.release.xcconfig"; sourceTree = "<group>"; };
+		2FF8C2B4BEE379168B4A3A8E /* Pods_MSDKSampleAppSwiftTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MSDKSampleAppSwiftTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4231F416F15AC9ACA880DA75 /* Pods_MSDKSampleAppSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MSDKSampleAppSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		75E70FD9C3E8538D55C39541 /* Pods-MSDKSampleAppSwift.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppSwift.debug.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppSwift/Pods-MSDKSampleAppSwift.debug.xcconfig"; sourceTree = "<group>"; };
+		880693014646A32C9FCC8B48 /* Pods_MSDKSampleAppSwiftUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MSDKSampleAppSwiftUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8EAE24AC2282058F00F49443 /* MSDKSampleAppSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MSDKSampleAppSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8EAE24AF2282058F00F49443 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8EAE24B42282058F00F49443 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -65,6 +74,7 @@
 		8EAE24CB2282059000F49443 /* MSDKSampleAppSwiftUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MSDKSampleAppSwiftUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8EAE24CF2282059000F49443 /* MSDKSampleAppSwiftUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSDKSampleAppSwiftUITests.swift; sourceTree = "<group>"; };
 		8EAE24D12282059000F49443 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A56F9944637F7CF37863D21E /* Pods-MSDKSampleAppSwiftTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppSwiftTests.release.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppSwiftTests/Pods-MSDKSampleAppSwiftTests.release.xcconfig"; sourceTree = "<group>"; };
 		AAD4B57C25CB69710009588A /* CustomTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CustomTableViewCell.xib; sourceTree = "<group>"; };
 		AAD4B58925CB70480009588A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		AAD4B58A25CB70480009588A /* GoogleService-InfoTemplate.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-InfoTemplate.plist"; sourceTree = "<group>"; };
@@ -73,35 +83,37 @@
 		DD00E1F62694822C0050BC88 /* HistoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViewController.swift; sourceTree = "<group>"; };
 		DD00E1F8269482600050BC88 /* MSDKSampleAppSwift-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSDKSampleAppSwift-Prefix.pch"; sourceTree = "<group>"; };
 		DD00E1FA2695F7C00050BC88 /* CustomTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTableViewCell.swift; sourceTree = "<group>"; };
-		DD725C5B273870D40040CCD6 /* ProductionPoolTxnGenesis.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProductionPoolTxnGenesis.m; sourceTree = "<group>"; };
-		DD725C5C273870D40040CCD6 /* MobileSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MobileSDK.h; sourceTree = "<group>"; };
-		DD725C5D273870D40040CCD6 /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
-		DD725C5E273870D40040CCD6 /* ProductionPoolTxnGenesis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProductionPoolTxnGenesis.h; sourceTree = "<group>"; };
-		DD725C5F273870D40040CCD6 /* Config.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Config.m; sourceTree = "<group>"; };
-		DD725C60273870D40040CCD6 /* MobileSDK.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MobileSDK.m; sourceTree = "<group>"; };
-		DD725C61273870D40040CCD6 /* ConnectionHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionHandler.m; sourceTree = "<group>"; };
-		DD725C63273870D40040CCD6 /* Log.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Log.m; sourceTree = "<group>"; };
-		DD725C64273870D40040CCD6 /* LocalStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocalStorage.m; sourceTree = "<group>"; };
-		DD725C65273870D40040CCD6 /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
-		DD725C66273870D40040CCD6 /* Log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Log.h; sourceTree = "<group>"; };
-		DD725C67273870D40040CCD6 /* LocalStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalStorage.h; sourceTree = "<group>"; };
-		DD725C68273870D40040CCD6 /* Utilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utilities.m; sourceTree = "<group>"; };
-		DD725C69273870D40040CCD6 /* ConnectionHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionHandler.h; sourceTree = "<group>"; };
-		DD725C6A273870D40040CCD6 /* MSDKSampleAppSwift-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSDKSampleAppSwift-Bridging-Header.h"; sourceTree = "<group>"; };
-		DD725C6C273870D40040CCD6 /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
-		DD725C6D273870D40040CCD6 /* Initialization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Initialization.m; sourceTree = "<group>"; };
-		DD725C6E273870D40040CCD6 /* Credential.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Credential.m; sourceTree = "<group>"; };
-		DD725C6F273870D40040CCD6 /* ProofRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProofRequest.m; sourceTree = "<group>"; };
-		DD725C70273870D40040CCD6 /* Message.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Message.h; sourceTree = "<group>"; };
-		DD725C71273870D40040CCD6 /* Initialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Initialization.h; sourceTree = "<group>"; };
-		DD725C72273870D40040CCD6 /* Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Connection.m; sourceTree = "<group>"; };
-		DD725C73273870D40040CCD6 /* ProofRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProofRequest.h; sourceTree = "<group>"; };
-		DD725C74273870D40040CCD6 /* Credential.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Credential.h; sourceTree = "<group>"; };
-		DD725C75273870D40040CCD6 /* Message.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Message.m; sourceTree = "<group>"; };
-		DD725C77273870D40040CCD6 /* CredentialOffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CredentialOffer.h; sourceTree = "<group>"; };
-		DD725C78273870D40040CCD6 /* ConnectionInvitation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionInvitation.m; sourceTree = "<group>"; };
-		DD725C79273870D40040CCD6 /* CredentialOffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CredentialOffer.m; sourceTree = "<group>"; };
-		DD725C7A273870D40040CCD6 /* ConnectionInvitation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionInvitation.h; sourceTree = "<group>"; };
+		DD725CE8273936E80040CCD6 /* ProductionPoolTxnGenesis.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProductionPoolTxnGenesis.m; sourceTree = "<group>"; };
+		DD725CE9273936E80040CCD6 /* MobileSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MobileSDK.h; sourceTree = "<group>"; };
+		DD725CEA273936E80040CCD6 /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
+		DD725CEB273936E80040CCD6 /* ProductionPoolTxnGenesis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProductionPoolTxnGenesis.h; sourceTree = "<group>"; };
+		DD725CEC273936E80040CCD6 /* Config.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Config.m; sourceTree = "<group>"; };
+		DD725CED273936E80040CCD6 /* MobileSDK.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MobileSDK.m; sourceTree = "<group>"; };
+		DD725CEE273936E80040CCD6 /* ConnectionHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionHandler.m; sourceTree = "<group>"; };
+		DD725CF0273936E80040CCD6 /* Log.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Log.m; sourceTree = "<group>"; };
+		DD725CF1273936E80040CCD6 /* LocalStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocalStorage.m; sourceTree = "<group>"; };
+		DD725CF2273936E80040CCD6 /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
+		DD725CF3273936E80040CCD6 /* Log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Log.h; sourceTree = "<group>"; };
+		DD725CF4273936E80040CCD6 /* LocalStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalStorage.h; sourceTree = "<group>"; };
+		DD725CF5273936E80040CCD6 /* Utilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utilities.m; sourceTree = "<group>"; };
+		DD725CF6273936E80040CCD6 /* ConnectionHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionHandler.h; sourceTree = "<group>"; };
+		DD725CF8273936E80040CCD6 /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
+		DD725CF9273936E80040CCD6 /* Initialization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Initialization.m; sourceTree = "<group>"; };
+		DD725CFA273936E80040CCD6 /* Credential.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Credential.m; sourceTree = "<group>"; };
+		DD725CFB273936E80040CCD6 /* ProofRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProofRequest.m; sourceTree = "<group>"; };
+		DD725CFC273936E80040CCD6 /* Message.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Message.h; sourceTree = "<group>"; };
+		DD725CFD273936E80040CCD6 /* Initialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Initialization.h; sourceTree = "<group>"; };
+		DD725CFE273936E80040CCD6 /* Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Connection.m; sourceTree = "<group>"; };
+		DD725CFF273936E80040CCD6 /* ProofRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProofRequest.h; sourceTree = "<group>"; };
+		DD725D00273936E80040CCD6 /* Credential.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Credential.h; sourceTree = "<group>"; };
+		DD725D01273936E80040CCD6 /* Message.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Message.m; sourceTree = "<group>"; };
+		DD725D03273936E80040CCD6 /* CredentialOffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CredentialOffer.h; sourceTree = "<group>"; };
+		DD725D04273936E80040CCD6 /* ConnectionInvitation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionInvitation.m; sourceTree = "<group>"; };
+		DD725D05273936E80040CCD6 /* CredentialOffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CredentialOffer.m; sourceTree = "<group>"; };
+		DD725D06273936E80040CCD6 /* ConnectionInvitation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionInvitation.h; sourceTree = "<group>"; };
+		DD725D1727393B640040CCD6 /* MSDKSampleAppSwift-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "MSDKSampleAppSwift-Bridging-Header.h"; path = "MSDKSampleAppSwift/MSDKSampleAppSwift-Bridging-Header.h"; sourceTree = SOURCE_ROOT; };
+		E2E027B1F39922FE55905A76 /* Pods-MSDKSampleAppSwiftUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppSwiftUITests.release.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppSwiftUITests/Pods-MSDKSampleAppSwiftUITests.release.xcconfig"; sourceTree = "<group>"; };
+		E47FA4B282C459FF67844AB1 /* Pods-MSDKSampleAppSwiftTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppSwiftTests.debug.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppSwiftTests/Pods-MSDKSampleAppSwiftTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +121,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F12E162ED77F7B634ADA794 /* Pods_MSDKSampleAppSwift.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -116,6 +129,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				00FAFBAFBC92D7A578389FDB /* Pods_MSDKSampleAppSwiftTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -123,12 +137,23 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				50224080ABD85DA93687E4B9 /* Pods_MSDKSampleAppSwiftUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6F8585DD50A09D863FC51361 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4231F416F15AC9ACA880DA75 /* Pods_MSDKSampleAppSwift.framework */,
+				2FF8C2B4BEE379168B4A3A8E /* Pods_MSDKSampleAppSwiftTests.framework */,
+				880693014646A32C9FCC8B48 /* Pods_MSDKSampleAppSwiftUITests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		8EAE24A32282058F00F49443 = {
 			isa = PBXGroup;
 			children = (
@@ -137,6 +162,7 @@
 				8EAE24CE2282059000F49443 /* MSDKSampleAppSwiftUITests */,
 				8EAE24AD2282058F00F49443 /* Products */,
 				96704C6E39D9F08E964671BA /* Pods */,
+				6F8585DD50A09D863FC51361 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -155,6 +181,7 @@
 			children = (
 				8EAE24AF2282058F00F49443 /* AppDelegate.swift */,
 				8EAE24B62282059000F49443 /* Assets.xcassets */,
+				DD725CE6273936E80040CCD6 /* common */,
 				DD00E1FA2695F7C00050BC88 /* CustomTableViewCell.swift */,
 				AAD4B57C25CB69710009588A /* CustomTableViewCell.xib */,
 				AAD4B58925CB70480009588A /* GoogleService-Info.plist */,
@@ -163,7 +190,6 @@
 				DD00E1F4269482120050BC88 /* HomeViewController.swift */,
 				8EAE24BB2282059000F49443 /* Info.plist */,
 				8EAE24B82282059000F49443 /* LaunchScreen.storyboard */,
-				DD725C59273870D40040CCD6 /* lib */,
 				8EAE24B32282058F00F49443 /* Main.storyboard */,
 				DD00E1F8269482600050BC88 /* MSDKSampleAppSwift-Prefix.pch */,
 				AAD4B59025CB70600009588A /* MSDKSampleAppSwift.entitlements */,
@@ -192,74 +218,81 @@
 		96704C6E39D9F08E964671BA /* Pods */ = {
 			isa = PBXGroup;
 			children = (
+				75E70FD9C3E8538D55C39541 /* Pods-MSDKSampleAppSwift.debug.xcconfig */,
+				28C767F284CAABC834A5D21E /* Pods-MSDKSampleAppSwift.release.xcconfig */,
+				E47FA4B282C459FF67844AB1 /* Pods-MSDKSampleAppSwiftTests.debug.xcconfig */,
+				A56F9944637F7CF37863D21E /* Pods-MSDKSampleAppSwiftTests.release.xcconfig */,
+				077AD23CEE20054FBCE5A977 /* Pods-MSDKSampleAppSwiftUITests.debug.xcconfig */,
+				E2E027B1F39922FE55905A76 /* Pods-MSDKSampleAppSwiftUITests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
 		};
-		DD725C59273870D40040CCD6 /* lib */ = {
+		DD725CE6273936E80040CCD6 /* common */ = {
 			isa = PBXGroup;
 			children = (
-				DD725C69273870D40040CCD6 /* ConnectionHandler.h */,
-				DD725C61273870D40040CCD6 /* ConnectionHandler.m */,
-				DD725C6B273870D40040CCD6 /* handlers */,
-				DD725C76273870D40040CCD6 /* helpers */,
-				DD725C6A273870D40040CCD6 /* MSDKSampleAppSwift-Bridging-Header.h */,
-				DD725C5A273870D40040CCD6 /* types */,
-				DD725C62273870D40040CCD6 /* utils */,
+				DD725D1727393B640040CCD6 /* MSDKSampleAppSwift-Bridging-Header.h */,
+				DD725CF6273936E80040CCD6 /* ConnectionHandler.h */,
+				DD725CEE273936E80040CCD6 /* ConnectionHandler.m */,
+				DD725CF7273936E80040CCD6 /* handlers */,
+				DD725D02273936E80040CCD6 /* helpers */,
+				DD725CE7273936E80040CCD6 /* types */,
+				DD725CEF273936E80040CCD6 /* utils */,
 			);
-			path = lib;
+			name = common;
+			path = ../../common;
 			sourceTree = "<group>";
 		};
-		DD725C5A273870D40040CCD6 /* types */ = {
+		DD725CE7273936E80040CCD6 /* types */ = {
 			isa = PBXGroup;
 			children = (
-				DD725C5B273870D40040CCD6 /* ProductionPoolTxnGenesis.m */,
-				DD725C5C273870D40040CCD6 /* MobileSDK.h */,
-				DD725C5D273870D40040CCD6 /* Config.h */,
-				DD725C5E273870D40040CCD6 /* ProductionPoolTxnGenesis.h */,
-				DD725C5F273870D40040CCD6 /* Config.m */,
-				DD725C60273870D40040CCD6 /* MobileSDK.m */,
+				DD725CEA273936E80040CCD6 /* Config.h */,
+				DD725CEC273936E80040CCD6 /* Config.m */,
+				DD725CE9273936E80040CCD6 /* MobileSDK.h */,
+				DD725CED273936E80040CCD6 /* MobileSDK.m */,
+				DD725CEB273936E80040CCD6 /* ProductionPoolTxnGenesis.h */,
+				DD725CE8273936E80040CCD6 /* ProductionPoolTxnGenesis.m */,
 			);
 			path = types;
 			sourceTree = "<group>";
 		};
-		DD725C62273870D40040CCD6 /* utils */ = {
+		DD725CEF273936E80040CCD6 /* utils */ = {
 			isa = PBXGroup;
 			children = (
-				DD725C63273870D40040CCD6 /* Log.m */,
-				DD725C64273870D40040CCD6 /* LocalStorage.m */,
-				DD725C65273870D40040CCD6 /* Utilities.h */,
-				DD725C66273870D40040CCD6 /* Log.h */,
-				DD725C67273870D40040CCD6 /* LocalStorage.h */,
-				DD725C68273870D40040CCD6 /* Utilities.m */,
+				DD725CF4273936E80040CCD6 /* LocalStorage.h */,
+				DD725CF1273936E80040CCD6 /* LocalStorage.m */,
+				DD725CF3273936E80040CCD6 /* Log.h */,
+				DD725CF0273936E80040CCD6 /* Log.m */,
+				DD725CF2273936E80040CCD6 /* Utilities.h */,
+				DD725CF5273936E80040CCD6 /* Utilities.m */,
 			);
 			path = utils;
 			sourceTree = "<group>";
 		};
-		DD725C6B273870D40040CCD6 /* handlers */ = {
+		DD725CF7273936E80040CCD6 /* handlers */ = {
 			isa = PBXGroup;
 			children = (
-				DD725C6C273870D40040CCD6 /* Connection.h */,
-				DD725C6D273870D40040CCD6 /* Initialization.m */,
-				DD725C6E273870D40040CCD6 /* Credential.m */,
-				DD725C6F273870D40040CCD6 /* ProofRequest.m */,
-				DD725C70273870D40040CCD6 /* Message.h */,
-				DD725C71273870D40040CCD6 /* Initialization.h */,
-				DD725C72273870D40040CCD6 /* Connection.m */,
-				DD725C73273870D40040CCD6 /* ProofRequest.h */,
-				DD725C74273870D40040CCD6 /* Credential.h */,
-				DD725C75273870D40040CCD6 /* Message.m */,
+				DD725CF8273936E80040CCD6 /* Connection.h */,
+				DD725CFE273936E80040CCD6 /* Connection.m */,
+				DD725D00273936E80040CCD6 /* Credential.h */,
+				DD725CFA273936E80040CCD6 /* Credential.m */,
+				DD725CFD273936E80040CCD6 /* Initialization.h */,
+				DD725CF9273936E80040CCD6 /* Initialization.m */,
+				DD725CFC273936E80040CCD6 /* Message.h */,
+				DD725D01273936E80040CCD6 /* Message.m */,
+				DD725CFF273936E80040CCD6 /* ProofRequest.h */,
+				DD725CFB273936E80040CCD6 /* ProofRequest.m */,
 			);
 			path = handlers;
 			sourceTree = "<group>";
 		};
-		DD725C76273870D40040CCD6 /* helpers */ = {
+		DD725D02273936E80040CCD6 /* helpers */ = {
 			isa = PBXGroup;
 			children = (
-				DD725C77273870D40040CCD6 /* CredentialOffer.h */,
-				DD725C78273870D40040CCD6 /* ConnectionInvitation.m */,
-				DD725C79273870D40040CCD6 /* CredentialOffer.m */,
-				DD725C7A273870D40040CCD6 /* ConnectionInvitation.h */,
+				DD725D06273936E80040CCD6 /* ConnectionInvitation.h */,
+				DD725D04273936E80040CCD6 /* ConnectionInvitation.m */,
+				DD725D03273936E80040CCD6 /* CredentialOffer.h */,
+				DD725D05273936E80040CCD6 /* CredentialOffer.m */,
 			);
 			path = helpers;
 			sourceTree = "<group>";
@@ -271,9 +304,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8EAE24D42282059000F49443 /* Build configuration list for PBXNativeTarget "MSDKSampleAppSwift" */;
 			buildPhases = (
+				0E2F1EDDC979B824220142CB /* [CP] Check Pods Manifest.lock */,
 				8EAE24A82282058F00F49443 /* Sources */,
 				8EAE24A92282058F00F49443 /* Frameworks */,
 				8EAE24AA2282058F00F49443 /* Resources */,
+				3CAAADD9544CC6592379F97C /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -288,6 +323,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8EAE24D72282059000F49443 /* Build configuration list for PBXNativeTarget "MSDKSampleAppSwiftTests" */;
 			buildPhases = (
+				A114FB948A1D10921F571916 /* [CP] Check Pods Manifest.lock */,
 				8EAE24BC2282059000F49443 /* Sources */,
 				8EAE24BD2282059000F49443 /* Frameworks */,
 				8EAE24BE2282059000F49443 /* Resources */,
@@ -306,6 +342,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8EAE24DA2282059000F49443 /* Build configuration list for PBXNativeTarget "MSDKSampleAppSwiftUITests" */;
 			buildPhases = (
+				A5317CDECAB1F993B1A98671 /* [CP] Check Pods Manifest.lock */,
 				8EAE24C72282059000F49443 /* Sources */,
 				8EAE24C82282059000F49443 /* Frameworks */,
 				8EAE24C92282059000F49443 /* Resources */,
@@ -394,29 +431,115 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		0E2F1EDDC979B824220142CB /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MSDKSampleAppSwift-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		3CAAADD9544CC6592379F97C /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MSDKSampleAppSwift/Pods-MSDKSampleAppSwift-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MSDKSampleAppSwift/Pods-MSDKSampleAppSwift-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MSDKSampleAppSwift/Pods-MSDKSampleAppSwift-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A114FB948A1D10921F571916 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MSDKSampleAppSwiftTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A5317CDECAB1F993B1A98671 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MSDKSampleAppSwiftUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		8EAE24A82282058F00F49443 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				DD00E1FB2695F7C00050BC88 /* CustomTableViewCell.swift in Sources */,
-				DD725C88273870D40040CCD6 /* CredentialOffer.m in Sources */,
-				DD725C7C273870D40040CCD6 /* Config.m in Sources */,
+				DD725D14273936E80040CCD6 /* CredentialOffer.m in Sources */,
+				DD725D08273936E80040CCD6 /* Config.m in Sources */,
 				DD00E1F72694822C0050BC88 /* HistoryViewController.swift in Sources */,
-				DD725C82273870D40040CCD6 /* Initialization.m in Sources */,
-				DD725C87273870D40040CCD6 /* ConnectionInvitation.m in Sources */,
-				DD725C80273870D40040CCD6 /* LocalStorage.m in Sources */,
-				DD725C7F273870D40040CCD6 /* Log.m in Sources */,
+				DD725D0E273936E80040CCD6 /* Initialization.m in Sources */,
+				DD725D13273936E80040CCD6 /* ConnectionInvitation.m in Sources */,
+				DD725D0C273936E80040CCD6 /* LocalStorage.m in Sources */,
+				DD725D0B273936E80040CCD6 /* Log.m in Sources */,
 				8EAE24B02282058F00F49443 /* AppDelegate.swift in Sources */,
-				DD725C83273870D40040CCD6 /* Credential.m in Sources */,
-				DD725C81273870D40040CCD6 /* Utilities.m in Sources */,
-				DD725C86273870D40040CCD6 /* Message.m in Sources */,
-				DD725C7E273870D40040CCD6 /* ConnectionHandler.m in Sources */,
-				DD725C84273870D40040CCD6 /* ProofRequest.m in Sources */,
-				DD725C7B273870D40040CCD6 /* ProductionPoolTxnGenesis.m in Sources */,
+				DD725D0F273936E80040CCD6 /* Credential.m in Sources */,
+				DD725D0D273936E80040CCD6 /* Utilities.m in Sources */,
+				DD725D12273936E80040CCD6 /* Message.m in Sources */,
+				DD725D0A273936E80040CCD6 /* ConnectionHandler.m in Sources */,
+				DD725D10273936E80040CCD6 /* ProofRequest.m in Sources */,
+				DD725D07273936E80040CCD6 /* ProductionPoolTxnGenesis.m in Sources */,
 				DD00E1F5269482120050BC88 /* HomeViewController.swift in Sources */,
-				DD725C7D273870D40040CCD6 /* MobileSDK.m in Sources */,
-				DD725C85273870D40040CCD6 /* Connection.m in Sources */,
+				DD725D09273936E80040CCD6 /* MobileSDK.m in Sources */,
+				DD725D11273936E80040CCD6 /* Connection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -589,6 +712,7 @@
 		};
 		8EAE24D52282059000F49443 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 75E70FD9C3E8538D55C39541 /* Pods-MSDKSampleAppSwift.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -624,7 +748,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = me.connect.sdk.swift.CMeSdkSwift;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "MSDKSampleAppSwift/lib/MSDKSampleAppSwift-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "MSDKSampleAppSwift/MSDKSampleAppSwift-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -633,6 +757,7 @@
 		};
 		8EAE24D62282059000F49443 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 28C767F284CAABC834A5D21E /* Pods-MSDKSampleAppSwift.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -650,7 +775,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = me.connect.sdk.swift.CMeSdkSwift;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "MSDKSampleAppSwift/lib/MSDKSampleAppSwift-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "MSDKSampleAppSwift/MSDKSampleAppSwift-Bridging-Header.h";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -658,6 +783,7 @@
 		};
 		8EAE24D82282059000F49443 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E47FA4B282C459FF67844AB1 /* Pods-MSDKSampleAppSwiftTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -679,6 +805,7 @@
 		};
 		8EAE24D92282059000F49443 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A56F9944637F7CF37863D21E /* Pods-MSDKSampleAppSwiftTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -700,6 +827,7 @@
 		};
 		8EAE24DB2282059000F49443 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 077AD23CEE20054FBCE5A977 /* Pods-MSDKSampleAppSwiftUITests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -720,6 +848,7 @@
 		};
 		8EAE24DC2282059000F49443 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E2E027B1F39922FE55905A76 /* Pods-MSDKSampleAppSwiftUITests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
