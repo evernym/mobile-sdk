@@ -10,14 +10,14 @@ import AVFoundation
 import UIKit
 import QRCodeReader
 
-class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
+class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, UITextDropDelegate {
     lazy var readerVC: QRCodeReaderViewController = {
         let builder = QRCodeReaderViewControllerBuilder {
             $0.reader = QRCodeReader(metadataObjectTypes: [.qr], captureDevicePosition: .back)
             
             $0.showTorchButton        = true
             $0.showSwitchCameraButton = true
-            $0.showCancelButton       = true
+            $0.showCancelButton       = false
             $0.showOverlayView        = true
             $0.rectOfInterest         = CGRect(x: 0.2, y: 0.2, width: 0.6, height: 0.6)
         }
@@ -50,6 +50,11 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
     var requests: [String: Any] = [:]
     var isInitialized = false;
     
+    let CREDENTIAL_OFFER = "credential-offer"
+    let PRESENTATION_REQUEST = "presentation-request"
+    let COMMITTED_QUESTION = "committed-question"
+    let OOB = "OOB"
+    
     typealias CompletionHandler = (_ result:Bool, _ error:Error?) -> Void
 
     override func viewDidLoad() {
@@ -67,6 +72,11 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
         self.addConnConfigTextView.isHidden = isHideInput;
         self.addConnectionButton.isHidden = isHideInput;
         self.newConnLabel.isHidden = isHideInput;
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        self.addConnConfigTextView.endEditing(true)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -88,49 +98,6 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
         self.view.endEditing(true)
     }
     
-    @IBAction func scanQR(_ sender: UIButton) {
-        if(!isInitialized) {
-            print("Please wait for VCX to initialize!")
-            return;
-        }
-        readerVC.delegate = self
-        readerVC.completionBlock = { (result: QRCodeReaderResult?) in
-            let invite = result?.value as String?
-            print(invite ?? "")
-            self.addNewConnectionFromQRCode(invite ?? "")
-        }
-        readerVC.modalPresentationStyle = .formSheet
-        present(readerVC, animated: true, completion: nil)
-    }
-    
-    private func addNewConnectionFromQRCode(_ data: String) {
-        let connectValues = ConnectionInvitation.parsedInvite(data);
-
-        if var storageRequests = LocalStorage.getObjectForKey("requests", shouldCreate: false) as? [String: Any] {
-            let label = connectValues["label"];
-            let goal = connectValues["goal"] ?? "New connection";
-            let profileUrl = connectValues["profileUrl"];
-            let uuid = UUID().uuidString
-            
-            let newRequest:[String:Any] = [
-                "name": label as? String ?? "",
-                "goal": goal as? String ?? "",
-                "profileUrl": profileUrl as? String ?? "",
-                "uuid": uuid,
-                "type": "null",
-                "data": Utilities.toJsonString(connectValues)
-            ];
-            
-            storageRequests[uuid] = newRequest;
-            LocalStorage.store("requests", andObject: storageRequests);
-            
-            self.requests = storageRequests;
-            self.tableView.reloadData();
-        }
-        return
-    }
-    
-    
     @objc func vcxInitialized() {
         self.infoLbl.text = "VCX initialized!"
         isInitialized = true;
@@ -140,42 +107,62 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
         })
     }
     
+    @objc private func createActionWithInvitation(_ data:String) {
+        let connectValues = ConnectionInvitation.parsedInvite(data)
+        let label = (connectValues["label"] ?? "New connection") as! String
+        let goal = (connectValues["goal"] ?? "New connection") as! String
+        let profileUrl = (connectValues["profileUrl"] ?? "") as! String
+        
+        self.createAction(
+            label,
+            profileUrl: profileUrl,
+            goal: goal,
+            type: OOB,
+            data: Utilities.toJsonString(connectValues)
+        )
+    }
+    
+    private func createAction(_ label: String, profileUrl: String, goal: String, type: String, data: String) {
+        if var storageRequests = LocalStorage.getObjectForKey("requests", shouldCreate: false) as? [String: Any] {
+            let uuid = UUID().uuidString
+            
+            let newRequest:[String:Any] = [
+                "name": label,
+                "goal": goal,
+                "profileUrl": profileUrl,
+                "uuid": uuid,
+                "type": type,
+                "data": data
+            ];
+            
+            storageRequests[uuid] = newRequest
+            LocalStorage.store("requests", andObject: storageRequests)
+            
+            self.requests = storageRequests
+            self.tableView.reloadData()
+        }
+    }
+    
     @IBAction func addNewConnection(_ sender: Any) {
-        do {
         let connectionText = addConnConfigTextView.text ?? ""
         if connectionText.count > 3 && connectionText != "enter code here" {
-            let connectValues = ConnectionInvitation.parsedInvite(connectionText);
-
-            if var storageRequests = LocalStorage.getObjectForKey("requests", shouldCreate: false) as? [String: Any] {
-                let label = connectValues["label"];
-                let goal = connectValues["goal"] ?? "New connection";
-                let profileUrl = connectValues["profileUrl"];
-                let uuid = UUID().uuidString
-//                let data = Utilities.dict(toJsonString: connectValues) ?? "";
-                
-                let messageDictionary = connectValues;
-                let jsonData = try JSONSerialization.data(withJSONObject: messageDictionary as Any, options: [])
-                let jsonString = String(data: jsonData, encoding: String.Encoding.ascii)!
-                
-                let newRequest:[String:Any] = [
-                    "name": label as? String ?? "",
-                    "goal": goal as? String ?? "",
-                    "profileUrl": profileUrl as? String ?? "",
-                    "uuid": uuid,
-                    "type": "null",
-                    "data": Utilities.toJsonString(connectValues)
-                ];
-                
-                storageRequests[uuid] = newRequest;
-                LocalStorage.store("requests", andObject: storageRequests);
-                
-                self.requests = storageRequests;
-                self.tableView.reloadData();
-            }
+            self.createActionWithInvitation(connectionText)
         }
-        } catch {
-            print(error)
+    }
+    
+    @IBAction func scanQR(_ sender: UIButton) {
+        if(!isInitialized) {
+            print("Please wait for VCX to initialize!")
+            return;
         }
+        readerVC.delegate = self
+        readerVC.completionBlock = { (result: QRCodeReaderResult?) in
+            let invite = (result?.value ?? "") as String
+            print(invite)
+            self.createActionWithInvitation(invite)
+        }
+        readerVC.modalPresentationStyle = .formSheet
+        present(readerVC, animated: true, completion: nil)
     }
     
     @IBAction func checkMessages(_ sender: Any) {
@@ -184,103 +171,106 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
                 let msg = message as! [String : String];
                 let type = msg["type"];
                 
-                if type == "credential-offer" {
-                    let name = msg["claim_name"]
-                    let uid = msg["uid"]
-                    
-                    if var storageRequests = LocalStorage.getObjectForKey("requests", shouldCreate: false) as? [String: Any] {
-                        let uuid = UUID().uuidString;
-                        
-                        let newRequest = [
-                            "name": name ?? "",
-                            "goal": "Credential Offer",
-                            "uuid": uuid,
-                            "type": type ?? "",
-                            "data": Utilities.dict(toJsonString: message as? [AnyHashable : Any]) ?? ""
-                        ] as [String:String?]?;
-                        
-                        storageRequests[uuid] = newRequest;
-                        LocalStorage.store("requests", andObject: storageRequests);
-                        
-                        if (msg["pwDid"] != nil) && (msg["uid"] != nil) {
-                            Message.updateStatus(msg["pwDid"]!, messageId: msg["uid"]!) { _,_ in  }
-                        }
-                        
-                        self.requests = storageRequests;
-                        self.tableView.reloadData();
-                    }
+                if type == self.CREDENTIAL_OFFER {
+                    self.handleReceivedCredentialOffer(msg)
                 }
+                
+                if type == self.PRESENTATION_REQUEST {
+                    self.handleReceivedProofrequest(msg)
+                }
+                
                 if type == "committed-question" {
-                    let payload = msg["payload"];
-                    let payloadDict = Utilities.json(toDictionary: payload);
-
-                    if var storageRequests = LocalStorage.getObjectForKey("requests", shouldCreate: false) as? [String: Any] {
-                        let uuid = UUID().uuidString
-                        
-                        let newRequest:[String:String] = [
-                            "name": payloadDict?["question_text"] as? String ?? "",
-                            "goal": "Question",
-                            "uuid": uuid,
-                            "type": type ?? "",
-                            "data": Utilities.dict(toJsonString: message as? [AnyHashable : Any]) ?? ""
-                        ];
-                        
-                        storageRequests[uuid] = newRequest;
-                        LocalStorage.store("requests", andObject: storageRequests);
-                        
-                        if (msg["pwDid"] != nil) && (msg["uid"] != nil) {
-                            Message.updateStatus(msg["pwDid"]!, messageId: msg["uid"]!) { _,_ in  }
-                        }
-                        
-                        self.requests = storageRequests;
-                        self.tableView.reloadData();
-                    }
-                }
-                if type == "presentation-request" {
-                    let payload = msg["payload"];
-                    let payloadDict = Utilities.json(toDictionary: payload);
-
-                    if var storageRequests = LocalStorage.getObjectForKey("requests", shouldCreate: false) as? [String: Any] {
-                        let uuid = UUID().uuidString
-                        
-                        let newRequest:[String:String] = [
-                            "name": payloadDict?["comment"] as? String ?? "",
-                            "goal": "Proof Request",
-                            "uuid": uuid,
-                            "type": type ?? "",
-                            "data": Utilities.dict(toJsonString: message as? [AnyHashable : Any]) ?? ""
-                        ];
-                        
-                        storageRequests[uuid] = newRequest;
-                        LocalStorage.store("requests", andObject: storageRequests);
-                        
-                        if (msg["pwDid"] != nil) && (msg["uid"] != nil) {
-                            Message.updateStatus(msg["pwDid"]!, messageId: msg["uid"]!) { _,_ in  }
-                        }
-                        
-                        self.requests = storageRequests;
-                        self.tableView.reloadData();
-                    }
+                    self.handleReceivedQuestion(msg)
                 }
             }
         }
     }
     
-    @objc private func newConnection(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
-//        Connection.handle(_:data, connectionType:ConnectionType.QR.rawValue, phoneNumber:"") { result, error in
-//            if error != nil {
-//                return completionHandler(false, error);
-//            }
-//            return completionHandler(true, nil);
-//        }
-        
-//        Connection.handle(data, connectionType:ConnectionType.QR.rawValue, phoneNumber:"") { result, error in
-//            if error != nil {
-//                return completionHandler(false, error);
-//            }
-//            return completionHandler(true, nil);
-//        };
-        return completionHandler(false, nil);
+    private func handleReceivedCredentialOffer(_ message: [String : String]) {
+        self.messageStatusUpdate(message)
+        let payload = message["payload"] ?? ""
+        let payloadArr = convertToArray(text:payload)
+        let payloadDict = payloadArr?.first
+        let name = (payloadDict?["claim_name"] ?? "Offer") as! String
+        self.createAction(
+            name,
+            profileUrl: "",
+            goal: "Credential Offer",
+            type: self.CREDENTIAL_OFFER,
+            data: Utilities.toJsonString(message)
+        )
+    }
+    
+    private func handleReceivedProofrequest(_ message: [String : String]) {
+        self.messageStatusUpdate(message)
+        let payload = message["payload"] ?? ""
+        let payloadDict = convertToDictionary(text:payload)
+        let name = payloadDict?["comment"] as? String ?? ""
+        self.createAction(
+            name,
+            profileUrl: "",
+            goal: "Proof Request",
+            type: self.PRESENTATION_REQUEST,
+            data: Utilities.toJsonString(message)
+        )
+    }
+    
+    private func handleReceivedQuestion(_ message: [String : String]) {
+        self.messageStatusUpdate(message)
+        let payload = message["payload"] ?? ""
+        let payloadDict = convertToDictionary(text:payload)
+        let name = payloadDict?["question_text"] as? String ?? ""
+        self.createAction(
+            name,
+            profileUrl: "",
+            goal: "Question",
+            type: self.COMMITTED_QUESTION,
+            data: Utilities.toJsonString(message)
+        )
+    }
+    
+    @objc private func handleAcceptAction (_ data: String, forType: String, completionHandler: @escaping CompletionHandler) -> Any? {
+        if forType == self.OOB {
+            ConnectionHandler.handleConnectionInvitation(data) { result, error in
+                return completionHandler(true, nil)
+            }
+        }
+        if forType == self.CREDENTIAL_OFFER {
+            _ = self.acceptCredential(data) { result, error in
+                return completionHandler(result, nil)
+            }
+        }
+        if forType == self.PRESENTATION_REQUEST {
+            _ = self.sendProof(data) { result, error in
+                return completionHandler(result, nil)
+            }
+        }
+        if forType == self.COMMITTED_QUESTION {
+            _ = self.answer(data) { result, error in
+                return completionHandler(result, nil)
+            }
+        }
+        return completionHandler(false, nil)
+    }
+    
+    @objc private func handleRejectAction (_ data: String, forType: String, completionHandler: @escaping CompletionHandler) -> Any? {
+        if forType == self.OOB {
+            return completionHandler(true, nil)
+        }
+        if forType == self.CREDENTIAL_OFFER {
+            _ = self.rejectCredential(data) { result, error in
+                return completionHandler(result, nil)
+            }
+        }
+        if forType == self.PRESENTATION_REQUEST {
+            _ = self.rejectProof(data) { result, error in
+                return completionHandler(result, nil)
+            }
+        }
+        if forType == self.COMMITTED_QUESTION {
+            return completionHandler(true, nil)
+        }
+        return completionHandler(false, nil)
     }
     
     private func acceptCredential(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
@@ -319,18 +309,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
         }
     }
     
-    func convertToDictionary(text: String) -> [String: Any]? {
-        if let data = text.data(using: .utf8) {
-            do {
-                return try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-            } catch {
-                print(error.localizedDescription)
-            }
-        }
-        return nil
-    }
-    
-    private func answer(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
+    @objc private func answer(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
         let msg = convertToDictionary(text: data)
         let payload = msg?["payload"];
         let payloadDict = convertToDictionary(text: payload as! String)
@@ -359,6 +338,32 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
         }
         self.present(alert, animated: true)
         return completionHandler(false, nil);
+    }
+    
+    @objc private func messageStatusUpdate(_ message: [String : String]) {
+        Message.updateStatus(message["pwDid"]!, messageId: message["uid"]!) { _,_ in  }
+    }
+    
+    private func convertToDictionary(text: String) -> [String: Any]? {
+        if let data = text.data(using: .utf8) {
+            do {
+                return try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
+        return nil
+    }
+    
+    private func convertToArray(text: String) -> [[String: Any]]? {
+        if let data = text.data(using: .utf8) {
+            do {
+                return try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]]
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
+        return nil
     }
     
     private func requestByIndex(_ index: Int) -> Any? {
@@ -413,80 +418,25 @@ extension HomeViewController: UITextViewDelegate, UITableViewDelegate, UITableVi
         let goal = request["goal"] as? String ?? "";
         let uuid = request["uuid"] as? String ?? "";
         let data = request["data"] as? String ?? "";
+        let logoPath = request["logoUrl"] as? String ?? "";
 
-        if (type == "null") {
-            let logoPath = request["logoUrl"] as? String ?? "";
-            cell.updateCellAttributes(
-                title: name,
-                subtitle: goal,
-                logoUrl: logoPath);
-            cell.addAceptCallback(acceptCallback: { () -> () in
-                _ = self.newConnection(data) { result, _ in
-                    if (result) {
-                        _ = self.switchRequestToHistoryView(uuid) { _, _ in }
-                    }
-                }
-            });
-            cell.addRejectCallback(rejectCallback: { () -> () in
+        cell.updateCellAttributes(title: name, subtitle: goal, logoUrl: logoPath)
+        cell.addAceptCallback(acceptCallback: { () -> () in
+            _ = self.handleAcceptAction(data,
+                                    forType: type) { _, _ in
                 _ = self.switchRequestToHistoryView(uuid) { _, _ in }
-                _ = self.addRejectAction(uuid)
-            });
-        }
-        if (type == "credential-offer") {
-            cell.updateCellAttributes(
-                title: name,
-                subtitle: goal,
-                logoUrl: "");
-            cell.addAceptCallback(acceptCallback: { () -> () in
-//                _ = self.switchRequestToHistoryView(uuid) { _, _ in };
-                _ = self.acceptCredential(data) { result, error in
-                    _ = self.switchRequestToHistoryView(uuid) { _, _ in };
-                }
-            });
-            cell.addRejectCallback(rejectCallback: { () -> () in
-                _ = self.rejectCredential(data) { result, error in
-                    if (result) {
-                        _ = self.switchRequestToHistoryView(uuid) { _, _ in }
-                    }
-                }
-            });
-        }
-        if (type == "committed-question") {
-            cell.updateCellAttributes(
-                title: name,
-                subtitle: goal,
-                logoUrl: "");
-            cell.addAceptCallback(acceptCallback: { () -> () in
-                _ = self.answer(data) { result, error in
-                    if (result) {
-                        _ = self.switchRequestToHistoryView(uuid) { _, _ in };
-                    }
-                }
-            });
-            cell.addRejectCallback(rejectCallback: { () -> () in
+            }
+        })
+        cell.addRejectCallback(rejectCallback: { () -> () in
+            _ = self.handleRejectAction(data, forType: type) { _, _ in
                 _ = self.switchRequestToHistoryView(uuid) { _, _ in }
-            });
-        }
-        if (type == "presentation-request") {
-            cell.updateCellAttributes(
-                title: name,
-                subtitle: goal,
-                logoUrl: "");
-            cell.addAceptCallback(acceptCallback: { () -> () in
-                _ = self.sendProof(data) { result, error in
-                    if (result) {
-                        _ = self.switchRequestToHistoryView(uuid) { _, _ in };
-                    }
+                if type == self.OOB || type == self.COMMITTED_QUESTION {
+                    self.addRejectAction(name)
                 }
-            });
-            cell.addRejectCallback(rejectCallback: { () -> () in
-                _ = self.rejectProof(data) { result, error in
-                    if (result) {
-                        _ = self.switchRequestToHistoryView(uuid) { _, _ in }
-                    }
-                }
-            });
-        }
+            }
+            
+        });
+        
         return cell;
     }
 }

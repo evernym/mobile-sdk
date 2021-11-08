@@ -44,7 +44,7 @@ UIGestureRecognizer *tapper;
     // On iOS diveces you cann't use qr code scnner
     // But you can handle invite with text input and button on home page
     // For show input set this flag to false
-    BOOL const isHideInput = true;
+    BOOL const isHideInput = false;
     
     [super viewDidLoad];
     self.tableView.dataSource = self;
@@ -54,6 +54,11 @@ UIGestureRecognizer *tapper;
     [addConnConfigTextView setHidden: isHideInput];
     [newConnLabel setHidden: isHideInput];
     [addConnectionButton setHidden:isHideInput];
+}
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    [super touchesBegan:touches withEvent:event];
+    [addConnConfigTextView endEditing:true];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
