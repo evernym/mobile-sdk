@@ -277,15 +277,15 @@
 			isa = PBXGroup;
 			children = (
 				DD725CC9273936560040CCD6 /* Connection.h */,
-				DD725CCA273936560040CCD6 /* Initialization.m */,
-				DD725CCB273936560040CCD6 /* Credential.m */,
-				DD725CCC273936560040CCD6 /* ProofRequest.m */,
-				DD725CCD273936560040CCD6 /* Message.h */,
-				DD725CCE273936560040CCD6 /* Initialization.h */,
 				DD725CCF273936560040CCD6 /* Connection.m */,
-				DD725CD0273936560040CCD6 /* ProofRequest.h */,
 				DD725CD1273936560040CCD6 /* Credential.h */,
+				DD725CCB273936560040CCD6 /* Credential.m */,
+				DD725CCE273936560040CCD6 /* Initialization.h */,
+				DD725CCA273936560040CCD6 /* Initialization.m */,
+				DD725CCD273936560040CCD6 /* Message.h */,
 				DD725CD2273936560040CCD6 /* Message.m */,
+				DD725CD0273936560040CCD6 /* ProofRequest.h */,
+				DD725CCC273936560040CCD6 /* ProofRequest.m */,
 			);
 			path = handlers;
 			sourceTree = "<group>";
