@@ -21,17 +21,11 @@ import msdk.java.types.StateMachineState;
 import msdk.java.types.MessageType;
 
 /**
- * Class containig methods to work with credentials
+ * Class containing methods to work with credentials
  */
 public class Credentials {
-
-    private Credentials() {
-
-    }
-
     /**
-     * Get credential offers
-     * Deprecated. Use {@link Messages} Messages.getPendingMessages(String, MessageType) instead.
+     * Get the list of received credential offers
      *
      * @param connection serialized connection
      * @return {@link CompletableFuture} containing list of credential offers as JSON strings.
@@ -79,7 +73,7 @@ public class Credentials {
     }
 
     /**
-     * Create credential offer
+     * Create credential offer state object
      *
      * @param sourceId             custom string for this cred offer
      * @param message              credential offer string

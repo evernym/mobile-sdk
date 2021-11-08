@@ -12,6 +12,7 @@ public enum MessageType {
     ACK,
     HANDSHAKE,
 
+    CONNECTION_INVITATION,
     CREDENTIAL_OFFER,
     PROOF_REQUEST,
     QUESTION;

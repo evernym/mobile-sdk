@@ -1,6 +1,6 @@
 //
 //  MobileSDK.h
-//  CMeSdkObjc
+//  MSDKSampleAppObjC
 //
 //  Created by Predrag Jevtic on 02/02/2021.
 //  Copyright © 2021 Norman Jarvis. All rights reserved.

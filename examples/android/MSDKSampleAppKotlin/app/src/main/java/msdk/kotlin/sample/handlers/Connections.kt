@@ -15,6 +15,13 @@ import java.util.concurrent.ExecutionException
  * Class containing methods to work with connections
  */
 object Connections {
+    /*
+     * Check if a connection already exists for passed invitation
+     *
+     * @param invitationDetails             String containing JSON with invitation details.
+     * @param serializedConnections         List of existing connections
+     * @return {@link CompletableFuture}    Found connection
+     */
     fun verifyConnectionExists(
         invitationDetails: String,
         serializedConnections: List<String?>
@@ -38,9 +45,83 @@ object Connections {
     }
 
     /**
-     * Redirect aries and out-of-band connections if needed
+     * Creates new connection state object from invitation.
+     *
+     * @param invitationDetails String containing JSON with invitation details.
+     * @param invitationType    Type of the invitation
+     * @return {@link CompletableFuture} with serialized connection handle.
      */
-    fun connectionRedirectAriesOutOfBand(
+    fun create(
+        invitationDetails: String,
+        invitationType: InvitationType
+    ): CompletableFuture<String> {
+        Logger.instance.i("Starting connection creation")
+        val result =
+            CompletableFuture<String>()
+        try {
+            val json = JSONObject(invitationDetails)
+            val invitationId = json.getString("@id")
+            val creationStep: CompletableFuture<Int>
+            creationStep =
+                if (ConnectionInvitation.isAriesOutOfBandConnectionInvitation(invitationType)) {
+                    ConnectionApi.vcxCreateConnectionWithOutofbandInvite(
+                        invitationId,
+                        invitationDetails
+                    )
+                } else {
+                    ConnectionApi.vcxCreateConnectionWithInvite(invitationId, invitationDetails)
+                }
+            creationStep.whenComplete { handle: Int, err: Throwable? ->
+                if (err != null) {
+                    Logger.instance
+                        .e("Failed to create connection with invite: ", err)
+                    result.completeExceptionally(err)
+                }
+                Logger.instance.i("Received handle: $handle")
+                try {
+                    ConnectionApi.vcxConnectionConnect(handle, "{}")
+                        .whenComplete { invite: String, t: Throwable? ->
+                            if (t != null) {
+                                Logger.instance
+                                    .e("Failed to accept invitation: ", t)
+                                result.completeExceptionally(t)
+                                return@whenComplete
+                            }
+                            Logger.instance
+                                .i("Received invite: $invite")
+                            try {
+                                ConnectionApi.connectionSerialize(handle)
+                                    .whenComplete { serialized: String, e: Throwable? ->
+                                        if (e != null) {
+                                            Logger.instance
+                                                .e("Failed to serialize connection", e)
+                                            result.completeExceptionally(e)
+                                        } else {
+                                            result.complete(serialized)
+                                        }
+                                    }
+                            } catch (ex: VcxException) {
+                                result.completeExceptionally(ex)
+                            }
+                        }
+                } catch (ex: VcxException) {
+                    result.completeExceptionally(ex)
+                }
+            }
+        } catch (ex: Exception) {
+            result.completeExceptionally(ex)
+        }
+        return result
+    }
+
+    /**
+     * Redirect aries and out-of-band connections if needed
+     *
+     * @param invitation                    String containing JSON with invitation details.
+     * @param serializedConnection          Existing connection
+     * @return {@link CompletableFuture}    with no value
+     */
+    fun redirectAriesOutOfBand(
         invitation: String?,
         serializedConnection: String?
     ): CompletableFuture<Boolean> {
@@ -121,75 +202,11 @@ object Connections {
     }
 
     /**
-     * Creates new connection from invitation.
+     * Get connection pairwise DID
      *
-     * @param invitationDetails String containing JSON with invitation details.
-     * @param invitationType    Type of the invitation
-     * @return [CompletableFuture] with serialized connection handle.
+     * @param serializedConnection          Connection
+     * @return {@link CompletableFuture}    Pairwise DID
      */
-    fun create(
-        invitationDetails: String,
-        invitationType: InvitationType
-    ): CompletableFuture<String> {
-        Logger.instance.i("Starting connection creation")
-        val result =
-            CompletableFuture<String>()
-        try {
-            val json = JSONObject(invitationDetails)
-            val invitationId = json.getString("@id")
-            val creationStep: CompletableFuture<Int>
-            creationStep =
-                if (ConnectionInvitation.isAriesOutOfBandConnectionInvitation(invitationType)) {
-                    ConnectionApi.vcxCreateConnectionWithOutofbandInvite(
-                        invitationId,
-                        invitationDetails
-                    )
-                } else {
-                    ConnectionApi.vcxCreateConnectionWithInvite(invitationId, invitationDetails)
-                }
-            creationStep.whenComplete { handle: Int, err: Throwable? ->
-                if (err != null) {
-                    Logger.instance
-                        .e("Failed to create connection with invite: ", err)
-                    result.completeExceptionally(err)
-                }
-                Logger.instance.i("Received handle: $handle")
-                try {
-                    ConnectionApi.vcxConnectionConnect(handle, "{}")
-                        .whenComplete { invite: String, t: Throwable? ->
-                            if (t != null) {
-                                Logger.instance
-                                    .e("Failed to accept invitation: ", t)
-                                result.completeExceptionally(t)
-                                return@whenComplete
-                            }
-                            Logger.instance
-                                .i("Received invite: $invite")
-                            try {
-                                ConnectionApi.connectionSerialize(handle)
-                                    .whenComplete { serialized: String, e: Throwable? ->
-                                        if (e != null) {
-                                            Logger.instance
-                                                .e("Failed to serialize connection", e)
-                                            result.completeExceptionally(e)
-                                        } else {
-                                            result.complete(serialized)
-                                        }
-                                    }
-                            } catch (ex: VcxException) {
-                                result.completeExceptionally(ex)
-                            }
-                        }
-                } catch (ex: VcxException) {
-                    result.completeExceptionally(ex)
-                }
-            }
-        } catch (ex: Exception) {
-            result.completeExceptionally(ex)
-        }
-        return result
-    }
-
     fun getPwDid(serializedConnection: String): String {
         var pwDid: String? = null
         try {

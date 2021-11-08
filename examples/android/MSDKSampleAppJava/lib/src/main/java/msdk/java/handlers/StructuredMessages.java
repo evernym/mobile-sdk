@@ -13,12 +13,8 @@ import msdk.java.logger.Logger;
  * Class containing methods to work with structured messages;
  */
 public class StructuredMessages {
-    private StructuredMessages() {
-
-    }
-
     /**
-     * answer structured message
+     * Answer structured message
      *
      * @param serializedConnection JSON string containing serialized connection
      * @param structuredMessage    structured message

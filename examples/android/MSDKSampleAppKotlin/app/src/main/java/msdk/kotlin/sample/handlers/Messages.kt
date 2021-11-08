@@ -103,6 +103,7 @@ object Messages {
                         val type = msgPayload.getString("@type")
                         val thread = msgPayload.getJSONObject("~thread")
                         val thid = thread.getString("thid")
+                        val pthid = thread.optString("pthid")
 
                         if (messageType == MessageType.CREDENTIAL && messageType.matchesValue(type) && thid == id) {
                             foundMessage = message
@@ -116,7 +117,7 @@ object Messages {
                             foundMessage = message
                             break
                         }
-                        if (messageType == MessageType.HANDSHAKE && messageType.matchesValue(type) && thid == id) {
+                        if (messageType == MessageType.HANDSHAKE && messageType.matchesValue(type) && pthid == id) {
                             foundMessage = message
                             break
                         }

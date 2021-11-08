@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 import msdk.java.messages.ConnectionInvitation;
@@ -21,7 +22,9 @@ import msdk.java.messages.ProofRequestMessage;
 import msdk.java.handlers.Proofs;
 import msdk.java.handlers.StructuredMessages;
 import msdk.java.messages.Message;
+import msdk.java.sample.db.entity.ProofRequest;
 import msdk.java.sample.db.entity.StructuredMessage;
+import msdk.java.sample.history.HistoryHandler;
 import msdk.java.types.MessageAttachment;
 import msdk.java.types.MessageType;
 import msdk.java.messages.QuestionMessage;
@@ -31,10 +34,8 @@ import msdk.java.sample.db.entity.Action;
 import msdk.java.sample.db.entity.Connection;
 import msdk.java.sample.db.entity.CredentialOffer;
 
-import static msdk.java.sample.db.ActionStatus.HISTORIZED;
 import static msdk.java.sample.homepage.Results.ACTION_FAILURE;
 import static msdk.java.sample.homepage.Results.ACTION_SUCCESS;
-import static msdk.java.sample.homepage.Results.REJECT;
 import static msdk.java.sample.homepage.Results.FAILURE;
 import static msdk.java.sample.db.ActionStatus.PENDING;
 import static msdk.java.sample.homepage.Results.SUCCESS;
@@ -69,9 +70,9 @@ public class HomePageViewModel extends AndroidViewModel {
         return data;
     }
 
-    public SingleLiveData<Results> newAction(String invite) {
+    public SingleLiveData<Results> createActionWithInvitation(String invite) {
         SingleLiveData<Results> data = new SingleLiveData<>();
-        createAction(invite, data);
+        createActionWithInvitation(invite, data);
         return data;
     }
 
@@ -94,16 +95,22 @@ public class HomePageViewModel extends AndroidViewModel {
                     throwable.printStackTrace();
                 }
                 liveData.postValue(SUCCESS);
-                for (Message message : messages) {
-                    if (MessageType.CREDENTIAL_OFFER.matches(message.getType())) {
-                        handleReceivedCredentialOffer(message, liveData);
+                try {
+                    for (Message message : messages) {
+                        if (MessageType.CREDENTIAL_OFFER.matches(message.getType())) {
+                            handleReceivedCredentialOffer(message, liveData);
+                        }
+                        if (MessageType.PROOF_REQUEST.matches(message.getType())) {
+                            handleReceivedProofRequest(message, liveData);
+                        }
+                        if (MessageType.QUESTION.matches(message.getType())) {
+                            handleReceivedQuestion(message, liveData);
+                        }
+                        Messages.updateMessageStatus(message.getPwDid(), message.getUid()).get();
                     }
-                    if (MessageType.PROOF_REQUEST.matches(message.getType())) {
-                        handleReceivedProofRequest(message, liveData);
-                    }
-                    if (MessageType.QUESTION.matches(message.getType())) {
-                        handleReceivedQuestion(message, liveData);
-                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    liveData.postValue(FAILURE);
                 }
                 return null;
             });
@@ -111,94 +118,100 @@ public class HomePageViewModel extends AndroidViewModel {
     }
 
     private void handleReceivedCredentialOffer(Message message, SingleLiveData<Results> liveData) {
-        CredentialOfferMessage credentialOffer = CredentialOfferMessage.parse(message);
-        String pwDid = message.getPwDid();
-        Connection connection = db.connectionDao().getByPwDid(pwDid);
         try {
-            Credentials.createWithOffer(UUID.randomUUID().toString(), credentialOffer.offer).handle((co, err) -> {
+            Connection connection = db.connectionDao().getByPwDid(message.getPwDid());
+            CredentialOfferMessage credentialOffer = CredentialOfferMessage.parse(message);
+            Credentials.createWithOffer(UUID.randomUUID().toString(), credentialOffer.offer).handle((serialized, err) -> {
                 if (err != null) {
                     err.printStackTrace();
+                    liveData.postValue(FAILURE);
                 } else {
                     CredentialOffer offer = new CredentialOffer();
                     offer.threadId = credentialOffer.threadId;
                     offer.claimId = credentialOffer.id;
-                    offer.pwDid = pwDid;
-                    offer.serialized = co;
+                    offer.pwDid = message.getPwDid();
+                    offer.serialized = serialized;
                     db.credentialOffersDao().insertAll(offer);
 
-                    Messages.updateMessageStatus(pwDid, message.getUid());
-                    createActionWithOffer(
+                    Action action = Actions.createActionWithOffer(
                             MessageType.CREDENTIAL_OFFER.toString(),
                             credentialOffer.name,
                             connection.icon,
                             credentialOffer.attributes,
                             credentialOffer.id,
                             connection.pwDid,
-                            liveData
+                            null
                     );
+                    db.actionDao().insertAll(action);
+                    liveData.postValue(SUCCESS);
                 }
                 return null;
             });
         } catch (Exception e) {
             e.printStackTrace();
+            liveData.postValue(FAILURE);
         }
     }
 
     private void handleReceivedProofRequest(Message message, SingleLiveData<Results> liveData) {
-        ProofRequestMessage proofRequest = ProofRequestMessage.parse(message);
-        String pwDid = message.getPwDid();
-        Connection connection = db.connectionDao().getByPwDid(pwDid);
         try {
+            Connection connection = db.connectionDao().getByPwDid(message.getPwDid());
+            ProofRequestMessage proofRequest = ProofRequestMessage.parse(message);
             Proofs.createWithRequest(UUID.randomUUID().toString(), proofRequest.proofReq).handle((pr, err) -> {
                 if (err != null) {
                     err.printStackTrace();
+                    liveData.postValue(FAILURE);
                 } else {
-                    msdk.java.sample.db.entity.ProofRequest proof = new msdk.java.sample.db.entity.ProofRequest();
+                    ProofRequest proof = new ProofRequest();
                     proof.serialized = pr;
-                    proof.pwDid = pwDid;
+                    proof.pwDid = message.getPwDid();
                     proof.threadId = proofRequest.threadId;
                     db.proofRequestDao().insertAll(proof);
 
-                    Messages.updateMessageStatus(pwDid, message.getUid());
-                    createActionWithProof(
+                    Action action = Actions.createActionWithProof(
                             MessageType.CREDENTIAL_OFFER.toString(),
                             proofRequest.name,
                             connection.icon,
                             proofRequest.threadId,
-                            liveData
+                            proofRequest.attributes,
+                            null
                     );
+                    db.actionDao().insertAll(action);
+                    liveData.postValue(SUCCESS);
                 }
                 return null;
             });
         } catch (Exception e) {
             e.printStackTrace();
+            liveData.postValue(FAILURE);
         }
     }
 
     private void handleReceivedQuestion(Message message, SingleLiveData<Results> liveData) {
-        QuestionMessage question = QuestionMessage.parse(message);
-        String pwDid = message.getPwDid();
         try {
+            QuestionMessage question = QuestionMessage.parse(message);
+
             StructuredMessage sm = new StructuredMessage();
-            sm.pwDid = pwDid;
+            sm.pwDid = message.getPwDid();
             sm.entryId = question.getId();
             sm.type = question.getType();
             sm.serialized = message.getPayload();
             sm.answers = question.getResponses();
             db.structuredMessageDao().insertAll(sm);
 
-            Messages.updateMessageStatus(pwDid, message.getUid());
-            createActionWithQuestion(
+            Action action = Actions.createActionWithQuestion(
                     MessageType.QUESTION.toString(),
                     question.getQuestionText(),
                     question.getQuestionDetail(),
-                    pwDid,
+                    message.getPwDid(),
                     question.getId(),
-                    question.getResponses(),
-                    liveData
+                    question.getResponses()
             );
+            db.actionDao().insertAll(action);
+            liveData.postValue(SUCCESS);
         } catch (Exception e) {
             e.printStackTrace();
+            liveData.postValue(FAILURE);
         }
     }
 
@@ -206,18 +219,18 @@ public class HomePageViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
                 Action action = db.actionDao().getActionsById(actionId);
-                if (action.type == null) {
-                    StateConnections.handleConnectionInvitation(action, db, liveData);
+                if (action.type.equals(MessageType.CONNECTION_INVITATION.toString())) {
+                    ConnectionsHandler.handleConnectionInvitation(action, db, liveData);
                     return;
                 }
                 if (action.type.equals(MessageType.CREDENTIAL_OFFER.toString())) {
                     CredentialOffer offer = db.credentialOffersDao().getByPwDidAndClaimId(action.claimId, action.pwDid);
-                    StateCredentialOffers.acceptCredentialOffer(offer, db, liveData, action);
+                    CredentialOffersHandler.acceptCredentialOffer(offer, db, liveData, action);
                     return;
                 }
                 if (action.type.equals(MessageType.PROOF_REQUEST.toString())) {
-                    msdk.java.sample.db.entity.ProofRequest proof = db.proofRequestDao().getByThreadId(action.threadId);
-                    StateProofRequests.acceptProofRequest(proof, db, liveData, action);
+                    ProofRequest proof = db.proofRequestDao().getByThreadId(action.threadId);
+                    ProofRequestsHandler.acceptProofRequest(proof, db, liveData, action);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -230,18 +243,18 @@ public class HomePageViewModel extends AndroidViewModel {
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
                 Action action = db.actionDao().getActionsById(actionId);
-                if (action.type == null) {
-                    addToHistory(actionId, "Rejected", db, liveData);
+                if (action.type.equals(MessageType.CONNECTION_INVITATION.toString())) {
+                    HistoryHandler.addToHistory(actionId, "Connection Rejected", db, liveData);
                     return;
                 }
                 if (action.type.equals(MessageType.CREDENTIAL_OFFER.toString())) {
                     CredentialOffer offer = db.credentialOffersDao().getByPwDidAndClaimId(action.claimId, action.pwDid);
-                    StateCredentialOffers.rejectCredentialOffer(offer, db, liveData);
+                    CredentialOffersHandler.rejectCredentialOffer(offer, db, liveData);
                     return;
                 }
                 if (action.type.equals(MessageType.PROOF_REQUEST.toString())) {
-                    msdk.java.sample.db.entity.ProofRequest proof = db.proofRequestDao().getByThreadId(action.threadId);
-                    StateProofRequests.rejectProofReq(proof, db, liveData);
+                    ProofRequest proof = db.proofRequestDao().getByThreadId(action.threadId);
+                    ProofRequestsHandler.rejectProofReq(proof, db, liveData);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -270,11 +283,11 @@ public class HomePageViewModel extends AndroidViewModel {
                 }
                 return null;
             });
-            addToHistory(actionId, "Ask to question", db, liveData);
+            HistoryHandler.addToHistory(actionId, "Ask to question", db, liveData);
         });
     }
 
-    private void createAction(String invite, SingleLiveData<Results> liveData) {
+    private void createActionWithInvitation(String invite, SingleLiveData<Results> liveData) {
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
                 String parsedInvite = ConnectionInvitation.getConnectionInvitationFromData(invite);
@@ -282,164 +295,48 @@ public class HomePageViewModel extends AndroidViewModel {
                 ConnectionInvitation.InvitationType invitationType = ConnectionInvitation.getInvitationType(parsedInvite);
                 MessageAttachment attachment = MessageAttachment.parse(parsedInvite);
 
+                Action action = null;
+
                 if (ConnectionInvitation.isAriesOutOfBandConnectionInvitation(invitationType) && attachment != null) {
                     if (attachment.isCredentialAttachment()) {
-                        JSONObject preview = attachment.data.getJSONObject("credential_preview");
-
-                        Action action = new Action();
-                        action.invite = invite;
-                        action.name = attachment.data.getString("comment");
-                        action.description = inviteObject.getString("goal");
-                        action.details = preview.getJSONArray("attributes").getString(0);
-                        action.icon = inviteObject.getString("profileUrl");
-                        action.status = PENDING.toString();
-                        db.actionDao().insertAll(action);
+                        JSONObject attributes = CredentialOfferMessage.extractAttributesFromCredentialOffer(attachment.data);
+                        action = Actions.createActionWithOffer(
+                                MessageType.CONNECTION_INVITATION.toString(),
+                                attachment.data.getString("comment"),
+                                inviteObject.getString("profileUrl"),
+                                attributes,
+                                null,
+                                null,
+                                invite
+                        );
                     }
                     if (attachment.isProofAttachment()) {
                         JSONObject decodedProofAttach = ProofRequestMessage.decodeProofRequestAttach(attachment.data);
-
-                        Action action = new Action();
-                        action.invite = invite;
-                        action.name = ProofRequestMessage.extractRequestedNameFromProofRequest(decodedProofAttach);
-                        action.description = inviteObject.getString("goal");
-                        action.details = ProofRequestMessage.extractRequestedAttributesFromProofRequest(decodedProofAttach);
-                        action.icon = inviteObject.getString("profileUrl");
-                        action.status = PENDING.toString();
-                        db.actionDao().insertAll(action);
+                        JSONObject requestedAttributes = ProofRequestMessage.extractRequestedAttributesFromProofRequest(decodedProofAttach);
+                        action = Actions.createActionWithProof(
+                                MessageType.CONNECTION_INVITATION.toString(),
+                                ProofRequestMessage.extractRequestedNameFromProofRequest(decodedProofAttach),
+                                inviteObject.getString("profileUrl"),
+                                null,
+                                requestedAttributes,
+                                invite
+                        );
                     }
                 } else {
-                    Action action = new Action();
-                    action.invite = invite;
-                    action.name = inviteObject.getString("label");
-                    action.description = inviteObject.getString("goal");
-                    action.icon = inviteObject.getString("profileUrl");
-                    action.status = PENDING.toString();
-                    db.actionDao().insertAll(action);
+                    action = Actions.createActionWithConnectionInvitation(
+                            MessageType.CONNECTION_INVITATION.toString(),
+                            inviteObject.getString("label"),
+                            inviteObject.getString("goal"),
+                            inviteObject.getString("profileUrl"),
+                            invite
+                    );
                 }
                 liveData.postValue(ACTION_SUCCESS);
+                db.actionDao().insertAll(action);
             } catch (JSONException e) {
                 e.printStackTrace();
                 liveData.postValue(ACTION_FAILURE);
             }
         });
-    }
-
-    private void createActionWithOffer(
-            String type,
-            String name,
-            String icon,
-            String details,
-            String offerId,
-            String pwDid,
-            SingleLiveData<Results> liveData
-    ) {
-        try {
-            Action action = new Action();
-            action.type = type;
-            action.name = name;
-            action.description = "To issue the credential";
-            action.icon = icon;
-            action.details = details;
-            action.claimId = offerId;
-            action.pwDid = pwDid;
-            action.status = PENDING.toString();
-            db.actionDao().insertAll(action);
-
-            liveData.postValue(SUCCESS);
-        } catch (Exception e) {
-            e.printStackTrace();
-            liveData.postValue(FAILURE);
-        }
-    }
-
-    private void createActionWithProof(
-            String type,
-            String name,
-            String icon,
-            String threadId,
-            SingleLiveData<Results> liveData
-    ) {
-        try {
-            Action action = new Action();
-            action.type = type;
-            action.name = name;
-            action.description = "Share the proof";
-            action.icon = icon;
-            action.threadId = threadId;
-            action.status = PENDING.toString();
-            db.actionDao().insertAll(action);
-
-            liveData.postValue(SUCCESS);
-        } catch (Exception e) {
-            e.printStackTrace();
-            liveData.postValue(FAILURE);
-        }
-    }
-
-    private void createActionWithQuestion(
-            String type,
-            String name,
-            String details,
-            String pwDid,
-            String entryId,
-            List<QuestionMessage.Response> messageAnswers,
-            SingleLiveData<Results> liveData
-    ) {
-        try {
-            Action action = new Action();
-            action.invite = null;
-            action.type = type;
-            action.name = name;
-            action.description = "Answer the questions";
-            action.details = details;
-            action.pwDid = pwDid;
-            action.entryId = entryId;
-            action.messageAnswers = messageAnswers;
-            action.status = PENDING.toString();
-            db.actionDao().insertAll(action);
-
-            liveData.postValue(SUCCESS);
-        } catch (Exception e) {
-            e.printStackTrace();
-            liveData.postValue(FAILURE);
-        }
-    }
-
-    public static void addHistoryAction(
-            Database db,
-            String name,
-            String description,
-            String icon,
-            SingleLiveData<Results> liveData
-    ) {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            try {
-                Action action = new Action();
-                action.invite = null;
-                action.name = name;
-                action.description = description;
-                action.icon = icon;
-                action.status = HISTORIZED.toString();
-                db.actionDao().insertAll(action);
-
-                liveData.postValue(ACTION_SUCCESS);
-            } catch (Exception e) {
-                e.printStackTrace();
-                liveData.postValue(ACTION_FAILURE);
-            }
-        });
-    }
-
-    public static void addToHistory(int actionId, String description, Database db, SingleLiveData<Results> liveData) {
-        try {
-            Action action = db.actionDao().getActionsById(actionId);
-            action.status = HISTORIZED.toString();
-            action.description = description;
-            db.actionDao().update(action);
-            liveData.postValue(REJECT);
-        } catch (Exception e) {
-            e.printStackTrace();
-            liveData.postValue(FAILURE);
-        }
     }
 }

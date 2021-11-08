@@ -1,6 +1,6 @@
 //
 //  DevTeam1PoolTxnGenesis.h
-//  CMeSdkObjc
+//  MSDKSampleAppObjC
 //
 //  Created by evernym on 17/03/21.
 //  Copyright © 2021 Norman Jarvis. All rights reserved.

@@ -157,7 +157,7 @@ public class HomePageFragment extends Fragment {
     private void performNewConnection(String invite) {
         binding.buttonQr.setEnabled(false);
         binding.checkMessages.setEnabled(false);
-        model.newAction(invite).observeOnce(getViewLifecycleOwner(), status -> {
+        model.createActionWithInvitation(invite).observeOnce(getViewLifecycleOwner(), status -> {
             switch (status) {
                 case ACTION_SUCCESS:
                     Toast.makeText(getActivity(), "QR code is handled", Toast.LENGTH_SHORT).show();

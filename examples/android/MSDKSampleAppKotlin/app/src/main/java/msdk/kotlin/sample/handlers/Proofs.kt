@@ -16,10 +16,9 @@ import java.util.*
 object Proofs {
     /**
      * Get proof requests
-     * Deprecated. Use [Messages].getPendingMessages(String, MessageType) instead.
      *
      * @param connection serialized connection
-     * @return [CompletableFuture] containing list of proof requests as JSON strings.
+     * @return {@link CompletableFuture} containing list of proof requests as JSON strings.
      */
     @Deprecated("")
     fun getRequests(connection: String): CompletableFuture<List<String>> {
@@ -72,11 +71,11 @@ object Proofs {
     }
 
     /**
-     * Creates proof request
+     * Creates proof state object
      *
      * @param sourceId custom string for this cred offer
      * @param message  proof request string
-     * @return [CompletableFuture] containing serialized proof request
+     * @return {@link CompletableFuture} containing serialized proof request
      */
     fun createWithRequest(
         sourceId: String,
@@ -119,7 +118,7 @@ object Proofs {
      * Retrieves available credentials for proof request
      *
      * @param serializedProof proof request string
-     * @return [CompletableFuture] containing string with available credentials
+     * @return {@link CompletableFuture} containing string with available credentials
      */
     fun retrieveAvailableCredentials(serializedProof: String): CompletableFuture<String> {
         Logger.instance.i("Retrieving credentials for proof request")

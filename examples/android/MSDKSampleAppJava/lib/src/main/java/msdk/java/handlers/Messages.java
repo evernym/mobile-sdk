@@ -24,11 +24,6 @@ import msdk.java.types.UpdateMessageStatusBody;
  * Class containing methods to work with messages.
  */
 public class Messages {
-    public static final String TAG = "ConnectMeVcx";
-
-    private Messages() {
-    }
-
     /**
      * Retrieve all pending messages.
      *
@@ -79,6 +74,8 @@ public class Messages {
 
     /*
     * Download and find message from the specific thread
+    *
+    * @return {@link Message}
     * */
     public static CompletableFuture<Message> downloadNextMessageFromTheThread(
             MessageType messageType,
@@ -99,6 +96,7 @@ public class Messages {
                     String type = msgPayload.getString("@type");
                     JSONObject thread = msgPayload.getJSONObject("~thread");
                     String thid = thread.getString("thid");
+                    String pthid = thread.optString("pthid");
 
                     if (messageType.equals(MessageType.CREDENTIAL) && messageType.matchesValue(type) && thid.equals(threadId)) {
                         foundMessage = message;
@@ -112,7 +110,7 @@ public class Messages {
                         foundMessage = message;
                         break;
                     }
-                    if (messageType.equals(MessageType.HANDSHAKE) && messageType.matchesValue(type) && thid.equals(threadId)) {
+                    if (messageType.equals(MessageType.HANDSHAKE) && messageType.matchesValue(type) && pthid.equals(threadId)) {
                         foundMessage = message;
                         break;
                     }
@@ -129,7 +127,7 @@ public class Messages {
     /*
     * Update status of the message as reviewed
     * */
-    public static void updateMessageStatus(String pwDid, String messageId) {
+    public static CompletableFuture<String> updateMessageStatus(String pwDid, String messageId) {
         CompletableFuture<String> result = new CompletableFuture<>();
         try {
             String messagesToUpdate =
@@ -147,5 +145,6 @@ public class Messages {
         } catch (Exception ex) {
             result.completeExceptionally(ex);
         }
+        return result;
     }
 }
