@@ -30,7 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.makeKeyAndVisible();
         
         MobileSDK.shared().sdkApi = ConnectMeVcx.init();
-        CMConfig.initVCX();
+        Config.initVCX();
 
         return true;
     }

@@ -104,12 +104,12 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
     }
     
     private func addNewConnectionFromQRCode(_ data: String) {
-        let connectValues = CMConnection.parsedInvite(data);
+        let connectValues = ConnectionInvitation.parsedInvite(data);
 
         if var storageRequests = LocalStorage.getObjectForKey("requests", shouldCreate: false) as? [String: Any] {
-            let label = connectValues?["label"];
-            let goal = connectValues?["goal"] ?? "New connection";
-            let profileUrl = connectValues?["profileUrl"];
+            let label = connectValues["label"];
+            let goal = connectValues["goal"] ?? "New connection";
+            let profileUrl = connectValues["profileUrl"];
             let uuid = UUID().uuidString
             
             let newRequest:[String:Any] = [
@@ -118,7 +118,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
                 "profileUrl": profileUrl as? String ?? "",
                 "uuid": uuid,
                 "type": "null",
-                "data": CMUtilities.toJsonString(connectValues)
+                "data": Utilities.toJsonString(connectValues)
             ];
             
             storageRequests[uuid] = newRequest;
@@ -144,14 +144,14 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
         do {
         let connectionText = addConnConfigTextView.text ?? ""
         if connectionText.count > 3 && connectionText != "enter code here" {
-            let connectValues = CMConnection.parsedInvite(connectionText);
+            let connectValues = ConnectionInvitation.parsedInvite(connectionText);
 
             if var storageRequests = LocalStorage.getObjectForKey("requests", shouldCreate: false) as? [String: Any] {
-                let label = connectValues?["label"];
-                let goal = connectValues?["goal"] ?? "New connection";
-                let profileUrl = connectValues?["profileUrl"];
+                let label = connectValues["label"];
+                let goal = connectValues["goal"] ?? "New connection";
+                let profileUrl = connectValues["profileUrl"];
                 let uuid = UUID().uuidString
-//                let data = CMUtilities.dict(toJsonString: connectValues) ?? "";
+//                let data = Utilities.dict(toJsonString: connectValues) ?? "";
                 
                 let messageDictionary = connectValues;
                 let jsonData = try JSONSerialization.data(withJSONObject: messageDictionary as Any, options: [])
@@ -163,7 +163,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
                     "profileUrl": profileUrl as? String ?? "",
                     "uuid": uuid,
                     "type": "null",
-                    "data": CMUtilities.toJsonString(connectValues)
+                    "data": Utilities.toJsonString(connectValues)
                 ];
                 
                 storageRequests[uuid] = newRequest;
@@ -179,7 +179,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
     }
     
     @IBAction func checkMessages(_ sender: Any) {
-        CMMessage.downloadAllMessages { messages, error in
+        Message.downloadAllMessages { messages, error in
             for message in messages ?? [] {
                 let msg = message as! [String : String];
                 let type = msg["type"];
@@ -196,14 +196,14 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
                             "goal": "Credential Offer",
                             "uuid": uuid,
                             "type": type ?? "",
-                            "data": CMUtilities.dict(toJsonString: message as? [AnyHashable : Any]) ?? ""
+                            "data": Utilities.dict(toJsonString: message as? [AnyHashable : Any]) ?? ""
                         ] as [String:String?]?;
                         
                         storageRequests[uuid] = newRequest;
                         LocalStorage.store("requests", andObject: storageRequests);
                         
                         if (msg["pwDid"] != nil) && (msg["uid"] != nil) {
-                            CMMessage.updateStatus(msg["pwDid"]!, messageId: msg["uid"]!) { _,_ in  }
+                            Message.updateStatus(msg["pwDid"]!, messageId: msg["uid"]!) { _,_ in  }
                         }
                         
                         self.requests = storageRequests;
@@ -212,7 +212,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
                 }
                 if type == "committed-question" {
                     let payload = msg["payload"];
-                    let payloadDict = CMUtilities.json(toDictionary: payload);
+                    let payloadDict = Utilities.json(toDictionary: payload);
 
                     if var storageRequests = LocalStorage.getObjectForKey("requests", shouldCreate: false) as? [String: Any] {
                         let uuid = UUID().uuidString
@@ -222,14 +222,14 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
                             "goal": "Question",
                             "uuid": uuid,
                             "type": type ?? "",
-                            "data": CMUtilities.dict(toJsonString: message as? [AnyHashable : Any]) ?? ""
+                            "data": Utilities.dict(toJsonString: message as? [AnyHashable : Any]) ?? ""
                         ];
                         
                         storageRequests[uuid] = newRequest;
                         LocalStorage.store("requests", andObject: storageRequests);
                         
                         if (msg["pwDid"] != nil) && (msg["uid"] != nil) {
-                            CMMessage.updateStatus(msg["pwDid"]!, messageId: msg["uid"]!) { _,_ in  }
+                            Message.updateStatus(msg["pwDid"]!, messageId: msg["uid"]!) { _,_ in  }
                         }
                         
                         self.requests = storageRequests;
@@ -238,7 +238,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
                 }
                 if type == "presentation-request" {
                     let payload = msg["payload"];
-                    let payloadDict = CMUtilities.json(toDictionary: payload);
+                    let payloadDict = Utilities.json(toDictionary: payload);
 
                     if var storageRequests = LocalStorage.getObjectForKey("requests", shouldCreate: false) as? [String: Any] {
                         let uuid = UUID().uuidString
@@ -248,14 +248,14 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
                             "goal": "Proof Request",
                             "uuid": uuid,
                             "type": type ?? "",
-                            "data": CMUtilities.dict(toJsonString: message as? [AnyHashable : Any]) ?? ""
+                            "data": Utilities.dict(toJsonString: message as? [AnyHashable : Any]) ?? ""
                         ];
                         
                         storageRequests[uuid] = newRequest;
                         LocalStorage.store("requests", andObject: storageRequests);
                         
                         if (msg["pwDid"] != nil) && (msg["uid"] != nil) {
-                            CMMessage.updateStatus(msg["pwDid"]!, messageId: msg["uid"]!) { _,_ in  }
+                            Message.updateStatus(msg["pwDid"]!, messageId: msg["uid"]!) { _,_ in  }
                         }
                         
                         self.requests = storageRequests;
@@ -267,24 +267,24 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
     }
     
     @objc private func newConnection(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
-//        CMConnection.handle(_:data, connectionType:ConnectionType.QR.rawValue, phoneNumber:"") { result, error in
+//        Connection.handle(_:data, connectionType:ConnectionType.QR.rawValue, phoneNumber:"") { result, error in
 //            if error != nil {
 //                return completionHandler(false, error);
 //            }
 //            return completionHandler(true, nil);
 //        }
         
-        CMConnection.handle(data, connectionType:ConnectionType.QR.rawValue, phoneNumber:"") { result, error in
-            if error != nil {
-                return completionHandler(false, error);
-            }
-            return completionHandler(true, nil);
-        };
+//        Connection.handle(data, connectionType:ConnectionType.QR.rawValue, phoneNumber:"") { result, error in
+//            if error != nil {
+//                return completionHandler(false, error);
+//            }
+//            return completionHandler(true, nil);
+//        };
         return completionHandler(false, nil);
     }
     
     private func acceptCredential(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
-        CMCredential.acceptCredentila(fromMessage:data) { result, error in
+        Credential.acceptCredentila(fromMessage:data) { result, error in
             if error != nil {
                 return completionHandler(false, error);
             }
@@ -293,7 +293,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
     }
     
     private func rejectCredential(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
-        CMCredential.rejectCredentila(fromMessage:data) { result, error in
+        Credential.rejectCredentila(fromMessage:data) { result, error in
             if error != nil {
                 return completionHandler(false, error);
             }
@@ -302,7 +302,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
     }
     
     private func sendProof(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
-        CMProofRequest.send(fromMessage:data) { result, error in
+        ProofRequest.send(fromMessage:data) { result, error in
             if error != nil {
                 return completionHandler(false, error);
             }
@@ -311,7 +311,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
     }
     
     private func rejectProof(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
-        CMProofRequest.reject(fromMessage:data) { result, error in
+        ProofRequest.reject(fromMessage:data) { result, error in
             if error != nil {
                 return completionHandler(false, error);
             }
@@ -337,8 +337,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
         let responses = payloadDict?["valid_responses"] as? [[String : String]];
         
         let pwDidMes = msg?["pwDid"];
-        let questionConnection = CMConnection.getByPwDid(pwDidMes as? String);
-        
+        let questionConnection = ConnectionInvitation.getConnectionByPwDid(pwDidMes as? String ?? "");
         let alert = UIAlertController(
             title: payloadDict?["question_text"] as? String,
             message: payloadDict?["question_detail"] as? String,
@@ -351,7 +350,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate {
                     title: response["text"],
                     style: UIAlertAction.Style.default
                 ) {_ in
-                    CMMessage.answerQuestion(questionConnection!, message: payload as! String, answer: CMUtilities.dict(toJsonString: response)) { result, error in
+                    Message.answerQuestion(questionConnection, message: payload as! String, answer: Utilities.dict(toJsonString: response)) { result, error in
                         LocalStorage.addEvent(toHistory: NSString.localizedStringWithFormat("%@ - Answer question", payloadDict?["question_text"] as! CVarArg) as String);
                         return completionHandler(result, error);
                     }

@@ -198,6 +198,7 @@
 				8E509FE42281EFC60098812A /* AppDelegate.h */,
 				8E509FE52281EFC60098812A /* AppDelegate.m */,
 				8E509FED2281EFC80098812A /* Assets.xcassets */,
+				DD725CB7273936560040CCD6 /* common */,
 				DD00E105268D931D0050BC88 /* CustomTableViewCell.h */,
 				DD00E106268D931D0050BC88 /* CustomTableViewCell.m */,
 				DD00E0C92685FF090050BC88 /* HistoryViewController.h */,
@@ -206,7 +207,6 @@
 				8E509FE82281EFC60098812A /* HomeViewController.m */,
 				8E509FF22281EFC80098812A /* Info.plist */,
 				8E509FEF2281EFC80098812A /* LaunchScreen.storyboard */,
-				DD725CB7273936560040CCD6 /* lib */,
 				8E509FF32281EFC80098812A /* main.m */,
 				8E509FEA2281EFC60098812A /* Main.storyboard */,
 				DD00E114269457560050BC88 /* MSDKSampleAppObjC-Prefix.pch */,
@@ -233,7 +233,7 @@
 			path = MSDKSampleAppObjCUITests;
 			sourceTree = "<group>";
 		};
-		DD725CB7273936560040CCD6 /* lib */ = {
+		DD725CB7273936560040CCD6 /* common */ = {
 			isa = PBXGroup;
 			children = (
 				DD725CC7273936560040CCD6 /* ConnectionHandler.h */,
@@ -243,8 +243,8 @@
 				DD725CB8273936560040CCD6 /* types */,
 				DD725CC0273936560040CCD6 /* utils */,
 			);
-			name = lib;
-			path = ../../lib;
+			name = common;
+			path = ../../common;
 			sourceTree = "<group>";
 		};
 		DD725CB8273936560040CCD6 /* types */ = {
@@ -741,7 +741,7 @@
 					"\"${PODS_ROOT}/Headers/Public/nanopb\"",
 					"$(inherited)",
 					"${PODS_ROOT}/Firebase/CoreOnly/Sources",
-					"\"../../lib\"",
+					"\"../../common\"",
 				);
 				INFOPLIST_FILE = MSDKSampleAppObjC/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
@@ -781,7 +781,7 @@
 					"\"${PODS_ROOT}/Headers/Public/nanopb\"",
 					"$(inherited)",
 					"${PODS_ROOT}/Firebase/CoreOnly/Sources",
-					"\"../../lib\"",
+					"\"../../common\"",
 				);
 				INFOPLIST_FILE = MSDKSampleAppObjC/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
