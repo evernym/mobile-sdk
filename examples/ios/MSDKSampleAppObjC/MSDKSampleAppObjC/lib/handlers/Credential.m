@@ -13,6 +13,7 @@
 #import "Connection.h"
 #import "LocalStorage.h"
 #import "CredentialOffer.h"
+#import "ConnectionInvitation.h"
 
 @implementation Credential
 
@@ -242,7 +243,7 @@
     NSString *pwDidMes = [message objectForKey:@"pwDid"];
     NSString *payload = [message objectForKey:@"payload"];
     NSArray *payloadArr = [Utilities jsonToArray:payload];
-    NSString *offerConnection = [Connection getConnectionByPwDid:pwDidMes];
+    NSString *offerConnection = [ConnectionInvitation getConnectionByPwDid:pwDidMes];
     NSDictionary *payloadDict = payloadArr[0];
     
     [Credential createWithOffer:payload
@@ -274,7 +275,7 @@
     NSString *pwDidMes = [message objectForKey:@"pwDid"];
     NSString *payload = [message objectForKey:@"payload"];
     NSArray *payloadArr = [Utilities jsonToArray:payload];
-    NSString *offerConnection = [Connection getConnectionByPwDid:pwDidMes];
+    NSString *offerConnection = [ConnectionInvitation getConnectionByPwDid:pwDidMes];
     NSDictionary *payloadDict = payloadArr[0];
     
     [self createWithOffer:payload

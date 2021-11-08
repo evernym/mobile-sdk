@@ -14,8 +14,8 @@
 
 @interface ConnectionHandler : NSObject
 
-+(void) handleConnectionInvitation:(NSString *) invite
-             withCompletionHandler:(ResponseWithObject) completionBlock;
++(void) handleConnectionInvitation: (NSString *)invite
+             withCompletionHandler: (ResponseBlock) completionBlock;
 
 @end
 

@@ -31,6 +31,7 @@ typedef enum {
 +(NSString*) connectionID: connectValues;
 +(NSString*) getConnectionByPwDid: (NSString *) pwDidMes;
 +(NSDictionary*) parsedInvite: (NSString *)invite;
++(NSDictionary*) extractRequestAttach: (NSDictionary*)invite;
 
 +(BOOL) isAriesInvitation:(NSString *) type;
 +(BOOL) isOutOfBandInvitation:(NSString *) type;

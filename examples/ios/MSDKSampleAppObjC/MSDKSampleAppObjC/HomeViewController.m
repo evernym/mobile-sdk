@@ -220,25 +220,25 @@ UIGestureRecognizer *tapper;
 - (void) handleAcceptAction:(NSString *) data
                     forType:(NSString *) forType
         withCompletionBlock:(ResponseWithBoolean) completionBlock {
-    if (forType == OOB) {
+    if ([forType isEqual:OOB]) {
         [ConnectionHandler handleConnectionInvitation:data
-                                withCompletionHandler:^(NSDictionary *result, NSError *error) {
+                                withCompletionHandler:^(NSString *result, NSError *error) {
             return completionBlock(result, error);
         }];
     }
-    if (forType == CREDENTIAL_OFFER) {
+    if ([forType isEqual:CREDENTIAL_OFFER]) {
         [self acceptCredential:data
            withCompletionBlock:^(BOOL result, NSError *error) {
             return completionBlock(result, error);
         }];
     }
-    if (forType == PRESENTATION_REQUEST) {
+    if ([forType isEqual:PRESENTATION_REQUEST]) {
         [self sendProof:data
     withCompletionBlock:^(BOOL result, NSError *error) {
             return completionBlock(result, error);
         }];
     }
-    if (forType == COMMITTED_QUESTION) {
+    if ([forType isEqual:COMMITTED_QUESTION]) {
         [self answer:data
  withCompletionBlock:^(BOOL result, NSError *error) {
             return completionBlock(result, error);
@@ -249,22 +249,22 @@ UIGestureRecognizer *tapper;
 - (void) handleRejectAction:(NSString *) data
                     forType:(NSString *) forType
         withCompletionBlock:(ResponseWithBoolean) completionBlock  {
-    if (forType == OOB) {
+    if ([forType isEqual:OOB]) {
         return completionBlock(true, nil);
     }
-    if (forType == CREDENTIAL_OFFER) {
+    if ([forType isEqual:CREDENTIAL_OFFER]) {
         [self rejectCredential:data
            withCompletionBlock:^(BOOL result, NSError *error) {
             return completionBlock(result, error);
         }];
     }
-    if (forType == PRESENTATION_REQUEST) {
+    if ([forType isEqual:PRESENTATION_REQUEST]) {
         [self rejectProof:data
     withCompletionBlock:^(BOOL result, NSError *error) {
             return completionBlock(result, error);
         }];
     }
-    if (forType == COMMITTED_QUESTION) {
+    if ([forType isEqual:COMMITTED_QUESTION]) {
         return completionBlock(true, nil);
     }
 }
