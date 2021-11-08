@@ -88,12 +88,12 @@
 
 +(void)createConnection:(NSString *) invitation
                    name:(NSString*) name
-  withCompletionHandler:(ResponseWithObject) completionBlock {
+  withCompletionHandler:(ResponseBlock) completionBlock {
     NSString *type = [ConnectionInvitation getInvitationType:[Utilities jsonToDictionary:invitation]];
     
     if ([ConnectionInvitation isOutOfBandInvitation:type]) {
         [self connectWithOutofbandInvite:invitation
-                   withCompletionHandler:^(NSDictionary *responseConnection, NSError *error) {
+                   withCompletionHandler:^(NSString *responseConnection, NSError *error) {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
@@ -104,7 +104,7 @@
         }];
     } else {
         [self connectWithInvite:invitation
-          withCompletionHandler:^(NSDictionary *responseConnection, NSError *error) {
+          withCompletionHandler:^(NSString *responseConnection, NSError *error) {
             [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection connect", name]];
             return completionBlock(responseConnection, error);
         }];
@@ -112,7 +112,7 @@
 }
 
 +(void)connectWithInvite:(NSString *)invitation
-withCompletionHandler: (ResponseWithObject) completionBlock {
+withCompletionHandler: (ResponseBlock) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
     
     [sdkApi connectionCreateWithInvite:[ConnectionInvitation connectionID: [Utilities jsonToDictionary:invitation]]
@@ -168,7 +168,7 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
                     [connections setValue: connectionObj forKey: [ConnectionInvitation connectionID: connectionObj]];
                     [LocalStorage store: @"connections" andObject: connections];
                     
-                    return completionBlock(connectionObj, nil);
+                    return completionBlock(successMessage, nil);
                 }];
                 
             }];
@@ -177,7 +177,7 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
 }
 
 +(void)connectWithOutofbandInvite: (NSString*)invitation
-            withCompletionHandler: (ResponseWithObject) completionBlock {
+            withCompletionHandler: (ResponseBlock) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
     
     [sdkApi connectionCreateWithOutofbandInvite: [ConnectionInvitation connectionID: [Utilities jsonToDictionary:invitation]]
@@ -229,7 +229,7 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
                     [connections setValue: connectionObj forKey: [ConnectionInvitation connectionID: connectionObj]];
                     [LocalStorage store: @"connections" andObject: connections];
 
-                    return completionBlock(connectionObj, nil);
+                    return completionBlock(successMessage, nil);
                 }];
                 
             }];

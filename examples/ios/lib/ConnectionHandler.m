@@ -18,8 +18,8 @@
 @implementation ConnectionHandler
 
 +(void) handleConnectionInvitation: (NSString *)invite
-             withCompletionHandler: (ResponseWithObject) completionBlock {
-    NSDictionary *parsedInvite = [Connection parsedInvite:invite];
+             withCompletionHandler: (ResponseBlock) completionBlock {
+    NSDictionary *parsedInvite = [Utilities jsonToDictionary:invite];
     NSString *name = [parsedInvite objectForKey:@"label"];
     NSString *type = [ConnectionInvitation getInvitationType:parsedInvite];
     
@@ -35,7 +35,7 @@
             } else {
                 [Connection createConnection:invite
                                         name:name
-                       withCompletionHandler:^(NSDictionary *responseConnection, NSError *error) {
+                       withCompletionHandler:^(NSString *responseConnection, NSError *error) {
                     if (error && error.code > 0) {
                         [Utilities printError:error];
                     }
@@ -45,7 +45,7 @@
         }
         
         if ([ConnectionInvitation isOutOfBandInvitation:type]) {
-            NSDictionary *attachment = [Connection extractRequestAttach: [Utilities jsonToDictionary:invite]];
+            NSDictionary *attachment = [ConnectionInvitation extractRequestAttach: [Utilities jsonToDictionary:invite]];
 
             if (attachment) {
                 [self handleOutOfBandConnectionInvitationWithAttachment: invite
@@ -56,7 +56,7 @@
                     if (error && error.code > 0) {
                         [Utilities printError:error];
                     }
-                    return completionBlock(responseObject, error);
+                    return completionBlock([Utilities dictToJsonString: responseObject], error);
                 }];
             } else {
                 if (existingConnection != nil) {
@@ -72,7 +72,7 @@
                 } else {
                     [Connection createConnection:invite
                                             name:name
-                           withCompletionHandler:^(NSDictionary *responseConnection, NSError *error) {
+                           withCompletionHandler:^(NSString *responseConnection, NSError *error) {
                         if (error && error.code > 0) {
                             [Utilities printError:error];
                         }
@@ -133,10 +133,10 @@
     } else {
         [Connection createConnection:invite
                                 name:name
-               withCompletionHandler:^(NSDictionary *responseConnection, NSError *error) {
+               withCompletionHandler:^(NSString *responseConnection, NSError *error) {
             
             [Credential handleCredentialOffer:attachment
-                         serializedConnection:[Utilities dictToJsonString:responseConnection]
+                         serializedConnection:responseConnection
                                          name:name
                         withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
                 return completionBlock(responseObject, error);
@@ -166,10 +166,10 @@
     } else {
         [Connection createConnection:invite
                                 name:name
-               withCompletionHandler:^(NSDictionary *responseConnection, NSError *error) {
+               withCompletionHandler:^(NSString *responseConnection, NSError *error) {
             
             [ProofRequest handleProofRequest:attachment
-                        serializedConnection:[Utilities dictToJsonString:responseConnection]
+                        serializedConnection:responseConnection
                                         name:name
                        withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
                 return completionBlock(responseObject, error);

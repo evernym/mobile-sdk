@@ -10,6 +10,7 @@
 #import "MobileSDK.h"
 #import "Connection.h"
 #import "LocalStorage.h"
+#import "ConnectionInvitation.h"
 
 @implementation ProofRequest
 
@@ -336,7 +337,7 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
     NSDictionary *message = [Utilities jsonToDictionary:data];
     NSString *pwDidMes = [message objectForKey:@"pwDid"];
     NSString *payload = [message objectForKey:@"payload"];
-    NSString *offerConnection = [Connection getConnectionByPwDid:pwDidMes];
+    NSString *offerConnection = [ConnectionInvitation getConnectionByPwDid:pwDidMes];
     NSDictionary *payloadDict = [Utilities jsonToDictionary:payload];
     
     [ProofRequest createWithRequest:payload
@@ -376,7 +377,7 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
     NSDictionary *message = [Utilities jsonToDictionary:data];
     NSString *pwDidMes = [message objectForKey:@"pwDid"];
     NSString *payload = [message objectForKey:@"payload"];
-    NSString *offerConnection = [Connection getConnectionByPwDid:pwDidMes];
+    NSString *offerConnection = [ConnectionInvitation getConnectionByPwDid:pwDidMes];
     NSDictionary *payloadDict = [Utilities jsonToDictionary:payload];
 
     [self createWithRequest:payload

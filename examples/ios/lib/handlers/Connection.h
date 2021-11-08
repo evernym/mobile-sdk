@@ -18,7 +18,7 @@ typedef NS_ENUM(int, ConnectionType) {
 
 +(void)createConnection:(NSString *) invitation
                    name:(NSString*) name
-  withCompletionHandler:(ResponseWithObject) completionBlock;
+  withCompletionHandler:(ResponseBlock) completionBlock;
 
 +(void)verityConnectionExist: (NSString *)invite
               withCompletion: (ResponseBlock) completionBlock;
