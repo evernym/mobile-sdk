@@ -20,11 +20,12 @@ typedef NS_ENUM(int, ConnectionType) {
                    name:(NSString*) name
   withCompletionHandler:(ResponseBlock) completionBlock;
 
-+(void)verityConnectionExist: (NSString *)invite
-              withCompletion: (ResponseBlock) completionBlock;
++(void)verityConnectionExist:(NSString *) invite
+       serializedConnections:(NSArray *) serializedConnections
+              withCompletion:(ResponseBlock) completionBlock ;
 
-+(void)connectionRedirectAriesOutOfBand: (NSString*)invitation
-                   serializedConnection: (NSString*)serializedConnection
-                  withCompletionHandler: (ResponseWithBoolean) completionBlock;
++(void)connectionRedirectAriesOutOfBand:(NSString*) invitation
+                   serializedConnection:(NSString*) serializedConnection
+                  withCompletionHandler:(ResponseWithBoolean) completionBlock;
 
 @end

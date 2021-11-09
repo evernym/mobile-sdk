@@ -23,7 +23,9 @@
     NSString *name = [parsedInvite objectForKey:@"label"];
     NSString *type = [ConnectionInvitation getInvitationType:parsedInvite];
     
+    NSArray *serializedConnections = [ConnectionInvitation getAllSerializedConnections];
     [Connection verityConnectionExist:invite
+                serializedConnections:serializedConnections
                  withCompletion:^(NSString *existingConnection, NSError *error) {
         if (error && error.code > 0) {
             return completionBlock(nil, error);

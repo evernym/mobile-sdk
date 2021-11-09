@@ -250,12 +250,12 @@
 		DD725CB8273936560040CCD6 /* types */ = {
 			isa = PBXGroup;
 			children = (
-				DD725CB9273936560040CCD6 /* ProductionPoolTxnGenesis.m */,
-				DD725CBA273936560040CCD6 /* MobileSDK.h */,
 				DD725CBB273936560040CCD6 /* Config.h */,
-				DD725CBC273936560040CCD6 /* ProductionPoolTxnGenesis.h */,
 				DD725CBD273936560040CCD6 /* Config.m */,
+				DD725CBA273936560040CCD6 /* MobileSDK.h */,
 				DD725CBE273936560040CCD6 /* MobileSDK.m */,
+				DD725CBC273936560040CCD6 /* ProductionPoolTxnGenesis.h */,
+				DD725CB9273936560040CCD6 /* ProductionPoolTxnGenesis.m */,
 			);
 			path = types;
 			sourceTree = "<group>";
@@ -293,10 +293,10 @@
 		DD725CD3273936560040CCD6 /* helpers */ = {
 			isa = PBXGroup;
 			children = (
-				DD725CD4273936560040CCD6 /* CredentialOffer.h */,
-				DD725CD5273936560040CCD6 /* ConnectionInvitation.m */,
-				DD725CD6273936560040CCD6 /* CredentialOffer.m */,
 				DD725CD7273936560040CCD6 /* ConnectionInvitation.h */,
+				DD725CD5273936560040CCD6 /* ConnectionInvitation.m */,
+				DD725CD4273936560040CCD6 /* CredentialOffer.h */,
+				DD725CD6273936560040CCD6 /* CredentialOffer.m */,
 			);
 			path = helpers;
 			sourceTree = "<group>";

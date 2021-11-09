@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "ConnectionInvitation.h"
 #import "LocalStorage.h"
+#import "MobileSDK.h"
 
 @implementation ConnectionInvitation
 
@@ -65,10 +66,9 @@
     for (NSInteger i = 0; i < connections.allKeys.count; i++) {
         NSString *key = connections.allKeys[i];
         NSDictionary *connection = [connections objectForKey:key];
-        NSString *serializedConnection = [connection objectForKey:@"serializedConnection"];
-        NSString *pwDid = [self getPwDid:serializedConnection];
+        NSString *pwDid = [connection objectForKey:@"pwDid"];
         if ([pwDidMes isEqual:pwDid]) {
-            resultConnection = serializedConnection;
+            resultConnection = [connection objectForKey:@"serialized"];
             break;
         }
     }
@@ -153,7 +153,7 @@
     }
 
     if(!connectionID) {
-        NSDictionary* connectionData = [Utilities jsonToDictionary: connectValues[@"serializedConnection"]];
+        NSDictionary* connectionData = [Utilities jsonToDictionary: connectValues[@"serialized"]];
         connectionID = connectionData[@"data"][@"pw_did"];
     }
 
@@ -164,13 +164,33 @@
     return connectionID;
 }
 
-+(NSString*) connectionName: (NSDictionary*)connection {
-    NSString* connectionName = connection[@"invitation"][@"s"][@"n"];
-    if(!connectionName) {
-        connectionName = connection[@"invitation"][@"label"];
++(NSArray*) getAllSerializedConnections {
+    NSMutableArray *serializedConnectionsArray = [[NSMutableArray alloc] init];
+    NSDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
+    for (NSInteger i = 0; i < connections.allKeys.count; i++) {
+        NSString *key = connections.allKeys[i];
+        NSDictionary *connection = [connections objectForKey:key];
+        NSString *serializedConnection = [connection objectForKey:@"serialized"];
+        [serializedConnectionsArray addObject: serializedConnection];
     }
+    return serializedConnectionsArray;
+}
 
-    return connectionName;
++(BOOL)compareInvites:(NSString *)newInvite
+         storedInvite:(NSString *)storedInvite {
+    NSDictionary *newObject = [Utilities jsonToDictionary:newInvite];
+    NSDictionary *storedObject = [Utilities jsonToDictionary:storedInvite];
+    
+    NSString *newPublicDid = [newObject valueForKey: @"public_did"];
+    NSString *storedPublicDid = [storedObject valueForKey: @"public_did"];
+    
+    if ([storedPublicDid isEqual:@""] != true) {
+        return [newPublicDid isEqual:storedPublicDid];
+    } else {
+        NSString *newDid = [Utilities jsonToArray: [newObject valueForKey: @"recipientKeys"]][0];
+        NSString *storedDid = [Utilities jsonToArray: [storedObject valueForKey: @"recipientKeys"]][0];
+        return [newDid isEqual:storedDid];
+    }
 }
 
 @end
