@@ -56,7 +56,7 @@ Here is the list of available protocol types:
         * use pack/unpack cryptography functions for messages encoding
         * use aries protocols for communication with other Users.
         * all functions return resulting values in the format defined in `1.0/2.0` protocols.
-    * "4.0" - is not supported (the work is in progress)
+    * "4.0" - is not supported (recommended)
         * use aries cross domain message format for communication with Agent, 
         * use pack/unpack cryptography functions for messages encoding
         * use aries protocols for communication with other Users.
