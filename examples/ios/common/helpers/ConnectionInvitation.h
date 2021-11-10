@@ -32,10 +32,15 @@ typedef enum {
 +(NSString*) getConnectionByPwDid: (NSString *) pwDidMes;
 +(NSDictionary*) parsedInvite: (NSString *)invite;
 +(NSDictionary*) extractRequestAttach: (NSDictionary*)invite;
++(NSArray*) getAllSerializedConnections;
++(BOOL) compareInvites:(NSString *)newInvite
+         storedInvite:(NSString *)storedInvite;
++(NSString *)getConnectionName:(NSString *) invite;
++(NSString*)getInvitationByPwDid: (NSString *) pwDidMes;
 
 +(BOOL) isAriesInvitation:(NSString *) type;
 +(BOOL) isOutOfBandInvitation:(NSString *) type;
-+(NSString *) getInvitationType:(NSDictionary *) invite;
++(NSString *) getInvitationType:(NSString *) invite;
 
 +(BOOL) isCredentialAttachment:(NSString *) type;
 +(BOOL) isProofAttachment:(NSString *) type;

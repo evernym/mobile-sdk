@@ -36,6 +36,9 @@
 		DD725D12273936E80040CCD6 /* Message.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D01273936E80040CCD6 /* Message.m */; };
 		DD725D13273936E80040CCD6 /* ConnectionInvitation.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D04273936E80040CCD6 /* ConnectionInvitation.m */; };
 		DD725D14273936E80040CCD6 /* CredentialOffer.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D05273936E80040CCD6 /* CredentialOffer.m */; };
+		DD725D2A273BE9530040CCD6 /* ProofRequestsHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D26273BE9520040CCD6 /* ProofRequestsHandler.m */; };
+		DD725D2B273BE9530040CCD6 /* CredentialOffersHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D27273BE9520040CCD6 /* CredentialOffersHandler.m */; };
+		DD725D2E273BE9620040CCD6 /* Proof.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D2D273BE9620040CCD6 /* Proof.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -112,6 +115,12 @@
 		DD725D05273936E80040CCD6 /* CredentialOffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CredentialOffer.m; sourceTree = "<group>"; };
 		DD725D06273936E80040CCD6 /* ConnectionInvitation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionInvitation.h; sourceTree = "<group>"; };
 		DD725D1727393B640040CCD6 /* MSDKSampleAppSwift-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "MSDKSampleAppSwift-Bridging-Header.h"; path = "MSDKSampleAppSwift/MSDKSampleAppSwift-Bridging-Header.h"; sourceTree = SOURCE_ROOT; };
+		DD725D26273BE9520040CCD6 /* ProofRequestsHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProofRequestsHandler.m; sourceTree = "<group>"; };
+		DD725D27273BE9520040CCD6 /* CredentialOffersHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CredentialOffersHandler.m; sourceTree = "<group>"; };
+		DD725D28273BE9530040CCD6 /* CredentialOffersHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CredentialOffersHandler.h; sourceTree = "<group>"; };
+		DD725D29273BE9530040CCD6 /* ProofRequestsHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProofRequestsHandler.h; sourceTree = "<group>"; };
+		DD725D2C273BE9620040CCD6 /* Proof.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Proof.h; sourceTree = "<group>"; };
+		DD725D2D273BE9620040CCD6 /* Proof.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Proof.m; sourceTree = "<group>"; };
 		E2E027B1F39922FE55905A76 /* Pods-MSDKSampleAppSwiftUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppSwiftUITests.release.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppSwiftUITests/Pods-MSDKSampleAppSwiftUITests.release.xcconfig"; sourceTree = "<group>"; };
 		E47FA4B282C459FF67844AB1 /* Pods-MSDKSampleAppSwiftTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppSwiftTests.debug.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppSwiftTests/Pods-MSDKSampleAppSwiftTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -231,6 +240,10 @@
 		DD725CE6273936E80040CCD6 /* common */ = {
 			isa = PBXGroup;
 			children = (
+				DD725D28273BE9530040CCD6 /* CredentialOffersHandler.h */,
+				DD725D27273BE9520040CCD6 /* CredentialOffersHandler.m */,
+				DD725D29273BE9530040CCD6 /* ProofRequestsHandler.h */,
+				DD725D26273BE9520040CCD6 /* ProofRequestsHandler.m */,
 				DD725D1727393B640040CCD6 /* MSDKSampleAppSwift-Bridging-Header.h */,
 				DD725CF6273936E80040CCD6 /* ConnectionHandler.h */,
 				DD725CEE273936E80040CCD6 /* ConnectionHandler.m */,
@@ -289,6 +302,8 @@
 		DD725D02273936E80040CCD6 /* helpers */ = {
 			isa = PBXGroup;
 			children = (
+				DD725D2C273BE9620040CCD6 /* Proof.h */,
+				DD725D2D273BE9620040CCD6 /* Proof.m */,
 				DD725D06273936E80040CCD6 /* ConnectionInvitation.h */,
 				DD725D04273936E80040CCD6 /* ConnectionInvitation.m */,
 				DD725D03273936E80040CCD6 /* CredentialOffer.h */,
@@ -532,12 +547,15 @@
 				DD725D0B273936E80040CCD6 /* Log.m in Sources */,
 				8EAE24B02282058F00F49443 /* AppDelegate.swift in Sources */,
 				DD725D0F273936E80040CCD6 /* Credential.m in Sources */,
+				DD725D2B273BE9530040CCD6 /* CredentialOffersHandler.m in Sources */,
 				DD725D0D273936E80040CCD6 /* Utilities.m in Sources */,
 				DD725D12273936E80040CCD6 /* Message.m in Sources */,
+				DD725D2A273BE9530040CCD6 /* ProofRequestsHandler.m in Sources */,
 				DD725D0A273936E80040CCD6 /* ConnectionHandler.m in Sources */,
 				DD725D10273936E80040CCD6 /* ProofRequest.m in Sources */,
 				DD725D07273936E80040CCD6 /* ProductionPoolTxnGenesis.m in Sources */,
 				DD00E1F5269482120050BC88 /* HomeViewController.swift in Sources */,
+				DD725D2E273BE9620040CCD6 /* Proof.m in Sources */,
 				DD725D09273936E80040CCD6 /* MobileSDK.m in Sources */,
 				DD725D11273936E80040CCD6 /* Connection.m in Sources */,
 			);

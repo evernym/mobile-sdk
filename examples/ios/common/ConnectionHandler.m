@@ -14,16 +14,19 @@
 #import "LocalStorage.h"
 #import "Credential.h"
 #import "ProofRequest.h"
+#import "CredentialOffersHandler.h"
+#import "ProofRequestsHandler.h"
 
 @implementation ConnectionHandler
 
 +(void) handleConnectionInvitation: (NSString *)invite
              withCompletionHandler: (ResponseBlock) completionBlock {
-    NSDictionary *parsedInvite = [Utilities jsonToDictionary:invite];
-    NSString *name = [parsedInvite objectForKey:@"label"];
-    NSString *type = [ConnectionInvitation getInvitationType:parsedInvite];
+    NSString *name = [ConnectionInvitation getConnectionName:invite];
+    NSString *type = [ConnectionInvitation getInvitationType:invite];
     
+    NSArray *serializedConnections = [ConnectionInvitation getAllSerializedConnections];
     [Connection verityConnectionExist:invite
+                serializedConnections:serializedConnections
                  withCompletion:^(NSString *existingConnection, NSError *error) {
         if (error && error.code > 0) {
             return completionBlock(nil, error);
@@ -34,7 +37,6 @@
                 [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
             } else {
                 [Connection createConnection:invite
-                                        name:name
                        withCompletionHandler:^(NSString *responseConnection, NSError *error) {
                     if (error && error.code > 0) {
                         [Utilities printError:error];
@@ -63,15 +65,15 @@
                     [Connection connectionRedirectAriesOutOfBand:invite
                                             serializedConnection:existingConnection
                                            withCompletionHandler:^(BOOL result, NSError *error) {
-                        [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
                         if (error && error.code > 0) {
                             [Utilities printError:error];
                         }
+                        
+                        [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
                         return completionBlock(nil, error);
                     }];
                 } else {
                     [Connection createConnection:invite
-                                            name:name
                            withCompletionHandler:^(NSString *responseConnection, NSError *error) {
                         if (error && error.code > 0) {
                             [Utilities printError:error];
@@ -123,24 +125,19 @@
                                withCompletionHandler:^(BOOL result, NSError *error) {
             [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
             
-            [Credential handleCredentialOffer:attachment
-                         serializedConnection:existingConnection
-                                         name:name
-                        withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
-                return completionBlock(responseObject, error);
+            [CredentialOffersHandler createCredentialStateObject:invite
+                                                      attachment:attachment
+                                              existingConnection:existingConnection
+                                           withCompletionHandler:^(NSString *successMessage, NSError *error) {
+                return completionBlock([Utilities jsonToDictionary:successMessage], error);
             }];
         }];
     } else {
-        [Connection createConnection:invite
-                                name:name
-               withCompletionHandler:^(NSString *responseConnection, NSError *error) {
-            
-            [Credential handleCredentialOffer:attachment
-                         serializedConnection:responseConnection
-                                         name:name
-                        withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
-                return completionBlock(responseObject, error);
-            }];
+        [CredentialOffersHandler createCredentialStateObject:invite
+                                                  attachment:attachment
+                                          existingConnection:existingConnection
+                                       withCompletionHandler:^(NSString *successMessage, NSError *error) {
+            return completionBlock([Utilities jsonToDictionary:successMessage], error);
         }];
     }
 }
@@ -156,24 +153,17 @@
                                withCompletionHandler:^(BOOL result, NSError *error) {
             [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
             
-            [ProofRequest handleProofRequest:attachment
-                        serializedConnection:existingConnection
-                                        name:name
-                       withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
-                return completionBlock(responseObject, error);
+            [ProofRequestsHandler createProofStateObject:invite
+                                              attachment:attachment
+                                      existingConnection:existingConnection withCompletionHandler:^(NSString *successMessage, NSError *error) {
+                return completionBlock([Utilities jsonToDictionary:successMessage], error);
             }];
         }];
     } else {
-        [Connection createConnection:invite
-                                name:name
-               withCompletionHandler:^(NSString *responseConnection, NSError *error) {
-            
-            [ProofRequest handleProofRequest:attachment
-                        serializedConnection:responseConnection
-                                        name:name
-                       withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
-                return completionBlock(responseObject, error);
-            }];
+        [ProofRequestsHandler createProofStateObject:invite
+                                          attachment:attachment
+                                  existingConnection:existingConnection withCompletionHandler:^(NSString *successMessage, NSError *error) {
+            return completionBlock([Utilities jsonToDictionary:successMessage], error);
         }];
     }
 }

@@ -118,11 +118,20 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
             profileUrl: profileUrl,
             goal: goal,
             type: OOB,
-            data: Utilities.toJsonString(connectValues)
+            data: Utilities.toJsonString(connectValues),
+            additionalData: "",
+            pwDid: ""
         )
     }
     
-    private func createAction(_ label: String, profileUrl: String, goal: String, type: String, data: String) {
+    private func createAction(_ label: String,
+                              profileUrl: String,
+                              goal: String,
+                              type: String,
+                              data: String,
+                              additionalData: String,
+                              pwDid: String
+                              ) {
         if var storageRequests = LocalStorage.getObjectForKey("requests", shouldCreate: false) as? [String: Any] {
             let uuid = UUID().uuidString
             
@@ -132,7 +141,9 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
                 "profileUrl": profileUrl,
                 "uuid": uuid,
                 "type": type,
-                "data": data
+                "data": data,
+                "additionalData": additionalData,
+                "pwDid": pwDid
             ];
             
             storageRequests[uuid] = newRequest
@@ -172,11 +183,11 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
                 let type = msg["type"];
                 
                 if type == self.CREDENTIAL_OFFER {
-                    self.handleReceivedCredentialOffer(msg)
+                    _ = self.handleReceivedCredentialOffer(msg, completionHandler: { _, _ in })
                 }
                 
                 if type == self.PRESENTATION_REQUEST {
-                    self.handleReceivedProofrequest(msg)
+                    _ = self.handleReceivedProofrequest(msg, completionHandler: { _, _ in })
                 }
                 
                 if type == "committed-question" {
@@ -186,37 +197,54 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
         }
     }
     
-    private func handleReceivedCredentialOffer(_ message: [String : String]) {
+    private func handleReceivedCredentialOffer(_ message: [String : String], completionHandler: @escaping CompletionHandler) {
         self.messageStatusUpdate(message)
+        let pwDid = message["pwDid"]  ?? ""
         let payload = message["payload"] ?? ""
         let payloadArr = convertToArray(text:payload)
         let payloadDict = payloadArr?.first
         let name = (payloadDict?["claim_name"] ?? "Offer") as! String
-        self.createAction(
-            name,
-            profileUrl: "",
-            goal: "Credential Offer",
-            type: self.CREDENTIAL_OFFER,
-            data: Utilities.toJsonString(message)
-        )
+        
+        Credential.create(withOffer: payload) { createdOffer, _ in
+            self.createAction(
+                name,
+                profileUrl: "",
+                goal: "Credential Offer",
+                type: self.CREDENTIAL_OFFER,
+                data: Utilities.toJsonString(message),
+                additionalData: Utilities.dict(toJsonString: createdOffer),
+                pwDid: pwDid
+            )
+            
+            return completionHandler(true, nil)
+        }
     }
     
-    private func handleReceivedProofrequest(_ message: [String : String]) {
+    private func handleReceivedProofrequest(_ message: [String : String], completionHandler: @escaping CompletionHandler) {
         self.messageStatusUpdate(message)
+        let pwDid = message["pwDid"]  ?? ""
         let payload = message["payload"] ?? ""
         let payloadDict = convertToDictionary(text:payload)
         let name = payloadDict?["comment"] as? String ?? ""
-        self.createAction(
-            name,
-            profileUrl: "",
-            goal: "Proof Request",
-            type: self.PRESENTATION_REQUEST,
-            data: Utilities.toJsonString(message)
-        )
+        
+        ProofRequest.create(withRequest: payload) { request, _ in
+            self.createAction(
+                name,
+                profileUrl: "",
+                goal: "Proof Request",
+                type: self.PRESENTATION_REQUEST,
+                data: Utilities.toJsonString(message),
+                additionalData: Utilities.dict(toJsonString: request),
+                pwDid: pwDid
+            )
+            
+            return completionHandler(true, nil)
+        }
     }
     
     private func handleReceivedQuestion(_ message: [String : String]) {
         self.messageStatusUpdate(message)
+        let pwDid = message["pwDid"]  ?? ""
         let payload = message["payload"] ?? ""
         let payloadDict = convertToDictionary(text:payload)
         let name = payloadDict?["question_text"] as? String ?? ""
@@ -225,24 +253,39 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
             profileUrl: "",
             goal: "Question",
             type: self.COMMITTED_QUESTION,
-            data: Utilities.toJsonString(message)
+            data: Utilities.toJsonString(message),
+            additionalData: payload,
+            pwDid: pwDid
         )
     }
     
-    @objc private func handleAcceptAction (_ data: String, forType: String, completionHandler: @escaping CompletionHandler) -> Any? {
+    @objc private func handleAcceptAction (_ data: String,
+                                           forType: String,
+                                           pwDid: String,
+                                           additionalData: String,
+                                           name: String,
+                                           completionHandler: @escaping CompletionHandler) -> Any? {
         if forType == self.OOB {
             ConnectionHandler.handleConnectionInvitation(data) { result, error in
                 return completionHandler(true, nil)
             }
         }
         if forType == self.CREDENTIAL_OFFER {
-            _ = self.acceptCredential(data) { result, error in
-                return completionHandler(result, nil)
+            CredentialOffersHandler.acceptCredentialOffer(pwDid,
+                                                          attachment: Utilities.json(toDictionary: data),
+                                                          createdOffer: Utilities.json(toDictionary: additionalData),
+                                                          fromMessage: true
+            ) { _, _ in
+                return completionHandler(true, nil)
             }
         }
         if forType == self.PRESENTATION_REQUEST {
-            _ = self.sendProof(data) { result, error in
-                return completionHandler(result, nil)
+            ProofRequestsHandler.acceptProofRequest(pwDid,
+                                                    attachment: Utilities.json(toDictionary: data),
+                                                    request: Utilities.json(toDictionary: additionalData),
+                                                    name: name
+            ) { _, _ in
+                return completionHandler(true, nil)
             }
         }
         if forType == self.COMMITTED_QUESTION {
@@ -253,60 +296,35 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
         return completionHandler(false, nil)
     }
     
-    @objc private func handleRejectAction (_ data: String, forType: String, completionHandler: @escaping CompletionHandler) -> Any? {
+    @objc private func handleRejectAction (_ data: String,
+                                           forType: String,
+                                           pwDid: String,
+                                           additionalData: String,
+                                           name: String,
+                                           completionHandler: @escaping CompletionHandler) -> Any? {
         if forType == self.OOB {
             return completionHandler(true, nil)
         }
         if forType == self.CREDENTIAL_OFFER {
-            _ = self.rejectCredential(data) { result, error in
-                return completionHandler(result, nil)
+            CredentialOffersHandler.rejectCredentialOffer(pwDid,
+                                                          attachment: Utilities.json(toDictionary: data),
+                                                          createdOffer: Utilities.json(toDictionary: additionalData)
+            ) { _, _ in
+                return completionHandler(true, nil)
             }
         }
         if forType == self.PRESENTATION_REQUEST {
-            _ = self.rejectProof(data) { result, error in
-                return completionHandler(result, nil)
+            ProofRequestsHandler.rejectProofRequest(pwDid,
+                                                    request: additionalData,
+                                                    name: name
+            ) { _, _ in
+                return completionHandler(true, nil)
             }
         }
         if forType == self.COMMITTED_QUESTION {
             return completionHandler(true, nil)
         }
         return completionHandler(false, nil)
-    }
-    
-    private func acceptCredential(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
-        Credential.acceptCredentila(fromMessage:data) { result, error in
-            if error != nil {
-                return completionHandler(false, error);
-            }
-            return completionHandler(true, nil);
-        }
-    }
-    
-    private func rejectCredential(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
-        Credential.rejectCredentila(fromMessage:data) { result, error in
-            if error != nil {
-                return completionHandler(false, error);
-            }
-            return completionHandler(true, nil);
-        }
-    }
-    
-    private func sendProof(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
-        ProofRequest.send(fromMessage:data) { result, error in
-            if error != nil {
-                return completionHandler(false, error);
-            }
-            return completionHandler(true, nil);
-        }
-    }
-    
-    private func rejectProof(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
-        ProofRequest.reject(fromMessage:data) { result, error in
-            if error != nil {
-                return completionHandler(false, error);
-            }
-            return completionHandler(true, nil);
-        }
     }
     
     @objc private func answer(_ data: String, completionHandler: @escaping CompletionHandler) -> Any? {
@@ -419,16 +437,27 @@ extension HomeViewController: UITextViewDelegate, UITableViewDelegate, UITableVi
         let uuid = request["uuid"] as? String ?? "";
         let data = request["data"] as? String ?? "";
         let logoPath = request["logoUrl"] as? String ?? "";
+        let pwDid = request["pwDid"] as? String ?? "";
+        let additionalData = request["additionalData"] as? String ?? "";
 
         cell.updateCellAttributes(title: name, subtitle: goal, logoUrl: logoPath)
         cell.addAceptCallback(acceptCallback: { () -> () in
             _ = self.handleAcceptAction(data,
-                                    forType: type) { _, _ in
+                                        forType: type,
+                                        pwDid: pwDid,
+                                        additionalData: additionalData,
+                                        name: name
+            ) { _, _ in
                 _ = self.switchRequestToHistoryView(uuid) { _, _ in }
             }
         })
         cell.addRejectCallback(rejectCallback: { () -> () in
-            _ = self.handleRejectAction(data, forType: type) { _, _ in
+            _ = self.handleRejectAction(data,
+                                        forType: type,
+                                        pwDid: pwDid,
+                                        additionalData: additionalData,
+                                        name: name
+            ) { _, _ in
                 _ = self.switchRequestToHistoryView(uuid) { _, _ in }
                 if type == self.OOB || type == self.COMMITTED_QUESTION {
                     self.addRejectAction(name)

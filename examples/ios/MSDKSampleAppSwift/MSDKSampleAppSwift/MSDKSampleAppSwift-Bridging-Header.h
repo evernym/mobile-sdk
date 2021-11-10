@@ -5,6 +5,8 @@
 #import "vcx/vcx.h"
 
 #import "ConnectionHandler.h"
+#import "CredentialOffersHandler.h"
+#import "ProofRequestsHandler.h"
 
 #import "Connection.h"
 #import "Credential.h"

@@ -9,22 +9,17 @@
 #import <Foundation/Foundation.h>
 #import "Utilities.h"
 
-typedef NS_ENUM(int, ConnectionType) {
-    QR = 0,
-    SMS = 1,
-};
-
 @interface Connection: NSObject
 
 +(void)createConnection:(NSString *) invitation
-                   name:(NSString*) name
   withCompletionHandler:(ResponseBlock) completionBlock;
 
-+(void)verityConnectionExist: (NSString *)invite
-              withCompletion: (ResponseBlock) completionBlock;
++(void)verityConnectionExist:(NSString *) invite
+       serializedConnections:(NSArray *) serializedConnections
+              withCompletion:(ResponseBlock) completionBlock ;
 
-+(void)connectionRedirectAriesOutOfBand: (NSString*)invitation
-                   serializedConnection: (NSString*)serializedConnection
-                  withCompletionHandler: (ResponseWithBoolean) completionBlock;
++(void)connectionRedirectAriesOutOfBand:(NSString*) invitation
+                   serializedConnection:(NSString*) serializedConnection
+                  withCompletionHandler:(ResponseWithBoolean) completionBlock;
 
 @end

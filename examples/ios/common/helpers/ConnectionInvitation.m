@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "ConnectionInvitation.h"
 #import "LocalStorage.h"
+#import "MobileSDK.h"
 
 @implementation ConnectionInvitation
 
@@ -20,8 +21,9 @@
     return type == InvitationType(OutOfBandType);
 }
 
-+(NSString *) getInvitationType:(NSDictionary *) invite {
-    NSString *type = [invite objectForKey:@"@type"];
++(NSString *) getInvitationType:(NSString *) invite {
+    NSDictionary *parsedInvite = [Utilities jsonToDictionary:invite];
+    NSString *type = [parsedInvite objectForKey:@"@type"];
 
     if ([type rangeOfString:@"out-of-band"].location != NSNotFound) {
         return InvitationType(OutOfBandType);
@@ -55,7 +57,7 @@
 +(NSString*)getPwDid: (NSString*) serializedConnection {
     NSError *error;
     NSMutableDictionary *connValues = [NSJSONSerialization JSONObjectWithData: [serializedConnection dataUsingEncoding: NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
-
+    
     return connValues[@"data"][@"pw_did"];
 }
 
@@ -65,10 +67,24 @@
     for (NSInteger i = 0; i < connections.allKeys.count; i++) {
         NSString *key = connections.allKeys[i];
         NSDictionary *connection = [connections objectForKey:key];
-        NSString *serializedConnection = [connection objectForKey:@"serializedConnection"];
-        NSString *pwDid = [self getPwDid:serializedConnection];
+        NSString *pwDid = [connection objectForKey:@"pwDid"];
         if ([pwDidMes isEqual:pwDid]) {
-            resultConnection = serializedConnection;
+            resultConnection = [connection objectForKey:@"serialized"];
+            break;
+        }
+    }
+    return resultConnection;
+}
+
++(NSString*)getInvitationByPwDid: (NSString *) pwDidMes {
+    NSDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
+    NSString *resultConnection = @"";
+    for (NSInteger i = 0; i < connections.allKeys.count; i++) {
+        NSString *key = connections.allKeys[i];
+        NSDictionary *connection = [connections objectForKey:key];
+        NSString *pwDid = [connection objectForKey:@"pwDid"];
+        if ([pwDidMes isEqual:pwDid]) {
+            resultConnection = [connection objectForKey:@"invitation"];
             break;
         }
     }
@@ -153,7 +169,7 @@
     }
 
     if(!connectionID) {
-        NSDictionary* connectionData = [Utilities jsonToDictionary: connectValues[@"serializedConnection"]];
+        NSDictionary* connectionData = [Utilities jsonToDictionary: connectValues[@"serialized"]];
         connectionID = connectionData[@"data"][@"pw_did"];
     }
 
@@ -164,13 +180,39 @@
     return connectionID;
 }
 
-+(NSString*) connectionName: (NSDictionary*)connection {
-    NSString* connectionName = connection[@"invitation"][@"s"][@"n"];
-    if(!connectionName) {
-        connectionName = connection[@"invitation"][@"label"];
-    }
++(NSString *)getConnectionName:(NSString *) invite {
+    NSDictionary *parsedInvite = [Utilities jsonToDictionary:invite];
+    NSString *name = [parsedInvite objectForKey:@"label"];
+    return name;
+}
 
-    return connectionName;
++(NSArray*) getAllSerializedConnections {
+    NSMutableArray *serializedConnectionsArray = [[NSMutableArray alloc] init];
+    NSDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
+    for (NSInteger i = 0; i < connections.allKeys.count; i++) {
+        NSString *key = connections.allKeys[i];
+        NSDictionary *connection = [connections objectForKey:key];
+        NSString *serializedConnection = [connection objectForKey:@"serialized"];
+        [serializedConnectionsArray addObject: serializedConnection];
+    }
+    return serializedConnectionsArray;
+}
+
++(BOOL)compareInvites:(NSString *)newInvite
+         storedInvite:(NSString *)storedInvite {
+    NSDictionary *newObject = [Utilities jsonToDictionary:newInvite];
+    NSDictionary *storedObject = [Utilities jsonToDictionary:storedInvite];
+    
+    NSString *newPublicDid = [newObject valueForKey: @"public_did"];
+    NSString *storedPublicDid = [storedObject valueForKey: @"public_did"];
+    
+    if ([storedPublicDid isEqual:@""] != true) {
+        return [newPublicDid isEqual:storedPublicDid];
+    } else {
+        NSString *newDid = [Utilities jsonToArray: [newObject valueForKey: @"recipientKeys"]][0];
+        NSString *storedDid = [Utilities jsonToArray: [storedObject valueForKey: @"recipientKeys"]][0];
+        return [newDid isEqual:storedDid];
+    }
 }
 
 @end

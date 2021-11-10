@@ -130,7 +130,8 @@
 
     [Message downloadAllMessages:^(NSArray *responseArray, NSError *error) {
         NSLog(@"state CDMSG message22 %@", responseArray);
-
+        NSDictionary *result = nil;
+        
         for (NSInteger i = 0; i < responseArray.count; i++) {
             NSDictionary *message = responseArray[i];
             NSString *payload = [message objectForKey:@"payload"];
@@ -141,9 +142,11 @@
             if ([messageType isEqual:CREDENTIAL] && [type rangeOfString:@"issue-credential/1.0/issue-credential"].location != NSNotFound) {
                 NSDictionary *thread = [payloadDict objectForKey:@"~thread"];
                 NSString *thid = [thread objectForKey:@"thid"];
+                
+                NSLog(@"state CDMSG message22 %@, %@", soughtId, thid);
 
                 if ([thid isEqual:soughtId]) {
-                    return completionBlock(message, nil);
+                    result = message;
                     break;
                 }
             }
@@ -151,12 +154,12 @@
                 NSString *pwDid = [message objectForKey:@"pwDid"];
 
                 if ([pwDid isEqual:soughtId]) {
-                    return completionBlock(message, nil);
+                    result = message;
                     break;
                 }
             }
             if ([messageType isEqual:ACK] && [type rangeOfString:@"ack"].location != NSNotFound) {
-                return completionBlock(message, nil);
+                result = message;
                 break;
             }
             if ([messageType isEqual:HANDSHAKE] && [type rangeOfString:@"handshake-reuse-accepted"].location != NSNotFound) {
@@ -164,12 +167,12 @@
                 NSString *thid = [thread objectForKey:@"thid"];
                 
                 if ([thid isEqual:soughtId]) {
-                    return completionBlock(message, nil);
+                    result = message;
                     break;
                 }
             }
         }
-        return completionBlock(nil, nil);
+        return completionBlock(result, nil);
     }];
 }
 

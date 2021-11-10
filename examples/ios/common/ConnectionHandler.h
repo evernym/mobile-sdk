@@ -17,6 +17,24 @@
 +(void) handleConnectionInvitation: (NSString *)invite
              withCompletionHandler: (ResponseBlock) completionBlock;
 
++(void) handleOutOfBandConnectionInvitationWithAttachment:(NSString *) invite
+                                               attachment:(NSDictionary *) attachment
+                                       existingConnection:(NSString *) existingConnection
+                                                     name:(NSString *) name
+                                    withCompletionHandler:(ResponseWithObject) completionBlock;
+
++(void) processInvitationWithCredentialAttachment:(NSString *) invite
+                                       attachment:(NSDictionary *) attachment
+                               existingConnection:(NSString *) existingConnection
+                                             name:(NSString *) name
+                            withCompletionHandler:(ResponseWithObject) completionBlock;
+
++(void) processInvitationWithProffAttachment:(NSString *) invite
+                                  attachment:(NSDictionary *) attachment
+                          existingConnection:(NSString *) existingConnection
+                                        name:(NSString *) name
+                       withCompletionHandler:(ResponseWithObject) completionBlock;
+
 @end
 
 #endif /* ConnectionHandler_h */

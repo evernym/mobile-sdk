@@ -17,34 +17,27 @@
 
 @implementation Credential
 
-+(void) handleCredentialOffer:(NSDictionary *) attachment
-         serializedConnection:(NSString *) serializedConnection
-                         name:(NSString *) name
-        withCompletionHandler:(ResponseWithObject) completionBlock {
-    [self createWithOffer:[Utilities dictToJsonString:attachment]
-            withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
++(void) acceptCredential:(NSString *) attachment
+    serializedCredential:(NSString *) serializedCredential
+    serializedConnection:(NSString *) serializedConnection
+             fromMessage:(BOOL) fromMessage
+   withCompletionHandler:(ResponseBlock) completionBlock {
+    [self acceptCredentialOffer:serializedConnection
+                   serializedCredential:serializedCredential
+                                  offer:attachment
+                  withCompletionHandler:^(NSString *responseObject, NSError *error) {
         if (error && error.code > 0) {
             return completionBlock(nil, error);
         }
-
-        [self acceptCredentialOffer:serializedConnection
-                       serializedCredential:[Utilities dictToJsonString:responseObject]
-                                      offer:[Utilities dictToJsonString:attachment]
-                      withCompletionHandler:^(NSString *responseObject, NSError *error) {
+        [self awaitCredentialReceived:responseObject
+                                offer:attachment
+                          fromMessage:fromMessage
+                  withCompletionBlock:^(NSString *successMessage, NSError *error) {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
-            [self awaitCredentialReceived:responseObject
-                                    offer:[Utilities dictToJsonString:attachment]
-                      withCompletionBlock:^(NSString *successMessage, NSError *error) {
-                if (error && error.code > 0) {
-                    return completionBlock(nil, error);
-                }
-                [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Credential offer accept", name]];
 
-                return completionBlock([Utilities jsonToDictionary:successMessage], nil);
-            }];
-            
+            return completionBlock(successMessage, nil);
         }];
     }];
 }
@@ -89,13 +82,13 @@
         if (error && error.code > 0) {
             return completionBlock(nil, error);
         }
-        NSLog(@"Created offer connectionDeserialize %d");
+
         [sdkApi credentialDeserialize:serializedCredential
                            completion:^(NSError *error, NSInteger credentialHandle) {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
-            NSLog(@"Created offer credentialDeserialize %d");
+
             [sdkApi credentialSendRequest:credentialHandle
                          connectionHandle:(int)connectionHandle
                             paymentHandle:0
@@ -103,7 +96,7 @@
                 if (error && error.code > 0) {
                     return completionBlock(nil, error);
                 }
-                NSLog(@"Created offer credentialSendRequest %@");
+
                 [sdkApi credentialSerialize:credentialHandle
                                  completion:^(NSError *error, NSString *handle) {
                     if (error && error.code > 0) {
@@ -119,49 +112,6 @@
         return completionBlock(nil, error);
     }
 }
-
-+(void) rejectCredentialOffer: (NSString*) serializedConnection
-         serializedCredential: (NSString*) serializedCredential
-        withCompletionHandler: (ResponseWithObject) completionBlock {
-    NSError* error;
-    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
-    
-    @try {
-        [sdkApi connectionDeserialize:serializedConnection
-                           completion:^(NSError *error, NSInteger connectionHandle) {
-            if (error && error.code > 0) {
-                return completionBlock(nil, error);
-            }
-            
-            [sdkApi credentialDeserialize:serializedCredential completion:^(NSError *error, NSInteger credentialHandle) {
-                if (error && error.code > 0) {
-                    return completionBlock(nil, error);
-                }
-                
-                [sdkApi credentialReject:credentialHandle
-                        connectionHandle:(int)connectionHandle
-                                 comment:@""
-                              completion:^(NSError *error) {
-                    if (error && error.code > 0) {
-                        return completionBlock(nil, error);
-                    }
-                    
-                    [sdkApi credentialSerialize:credentialHandle
-                                     completion:^(NSError *error, NSString *state) {
-                        if (error && error.code > 0) {
-                            return completionBlock(nil, error);
-                        }
-                        
-                        return completionBlock([Utilities jsonToDictionary:state], nil);
-                    }];
-                }];
-            }];
-        }];
-    } @catch (NSException *exception) {
-        return completionBlock(nil, error);
-    }
-}
-
 
 +(void)updateCredentialStatus:(NSInteger) credentialHandle
                          thid:(NSString *) thid
@@ -203,9 +153,10 @@
 
 +(void)awaitCredentialReceived:(NSString *) serializedCredential
                          offer:(NSString *) offer
-            withCompletionBlock:(ResponseBlock) completionBlock {
+                   fromMessage:(BOOL) fromMessage
+           withCompletionBlock:(ResponseBlock) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
-    NSString *thid = [CredentialOffer getThid:offer];
+    NSString *thid = [CredentialOffer getThid:offer fromMessage:fromMessage];
     __block NSString *serialized = @"";
 
     [sdkApi credentialDeserialize:serializedCredential
@@ -237,67 +188,46 @@
     }];
 }
 
-+(void)acceptCredentilaFromMessage:(NSString *) data
-               withCompletionBlock:(ResponseWithBoolean) completionBlock {
-    NSDictionary *message = [Utilities jsonToDictionary:data];
-    NSString *pwDidMes = [message objectForKey:@"pwDid"];
-    NSString *payload = [message objectForKey:@"payload"];
-    NSArray *payloadArr = [Utilities jsonToArray:payload];
-    NSString *offerConnection = [ConnectionInvitation getConnectionByPwDid:pwDidMes];
-    NSDictionary *payloadDict = payloadArr[0];
++(void) rejectCredentialOffer:(NSString*) serializedConnection
+         serializedCredential:(NSString*) serializedCredential
+        withCompletionHandler:(ResponseBlock) completionBlock {
+    NSError* error;
+    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
     
-    [Credential createWithOffer:payload
-            withCompletionHandler:^(NSDictionary *serOffer, NSError *error) {
-        if (error && error.code > 0) {
-            NSLog(@"offer error %@", error);
-            return completionBlock(nil, error);
-        }
-        NSLog(@"offer created %@", serOffer);
-        [Credential acceptCredentialOffer:offerConnection
-                       serializedCredential:[Utilities dictToJsonString:serOffer]
-                                      offer:[Utilities dictToJsonString:payloadDict]
-                      withCompletionHandler:^(NSString *responseObject, NSError *error) {
+    @try {
+        [sdkApi connectionDeserialize:serializedConnection
+                           completion:^(NSError *error, NSInteger connectionHandle) {
             if (error && error.code > 0) {
-                NSLog(@"offer accept error %@", error);
-
                 return completionBlock(nil, error);
             }
-            [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Credential offer accept", [payloadDict objectForKey:@"claim_name"]]];
-            NSLog(@"Accept credential offer success");
-            return completionBlock(YES, error);
+            
+            [sdkApi credentialDeserialize:serializedCredential completion:^(NSError *error, NSInteger credentialHandle) {
+                if (error && error.code > 0) {
+                    return completionBlock(nil, error);
+                }
+                
+                [sdkApi credentialReject:credentialHandle
+                        connectionHandle:(int)connectionHandle
+                                 comment:@""
+                              completion:^(NSError *error) {
+                    if (error && error.code > 0) {
+                        return completionBlock(nil, error);
+                    }
+                    
+                    [sdkApi credentialSerialize:credentialHandle
+                                     completion:^(NSError *error, NSString *credentialSerialized) {
+                        if (error && error.code > 0) {
+                            return completionBlock(nil, error);
+                        }
+                        
+                        return completionBlock(credentialSerialized, nil);
+                    }];
+                }];
+            }];
         }];
-    }];
-}
-
-+(void)rejectCredentilaFromMessage:(NSString *) data
-               withCompletionBlock:(ResponseWithBoolean) completionBlock {
-    NSDictionary *message = [Utilities jsonToDictionary:data];
-    NSString *pwDidMes = [message objectForKey:@"pwDid"];
-    NSString *payload = [message objectForKey:@"payload"];
-    NSArray *payloadArr = [Utilities jsonToArray:payload];
-    NSString *offerConnection = [ConnectionInvitation getConnectionByPwDid:pwDidMes];
-    NSDictionary *payloadDict = payloadArr[0];
-    
-    [self createWithOffer:payload
-            withCompletionHandler:^(NSDictionary *serOffer, NSError *error) {
-        if (error && error.code > 0) {
-            NSLog(@"offer error %@", error);
-            return completionBlock(nil, error);
-        }
-        NSLog(@"offer created %@", serOffer);
-        [self rejectCredentialOffer:offerConnection
-               serializedCredential:[Utilities dictToJsonString:serOffer]
-              withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
-            if (error && error.code > 0) {
-                NSLog(@"offer accept error %@", error);
-
-                return completionBlock(nil, error);
-            }
-            [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Credential offer reject", [payloadDict objectForKey:@"claim_name"]]];
-            NSLog(@"Reject credential offer success");
-            return completionBlock(YES, error);
-        }];
-    }];
+    } @catch (NSException *exception) {
+        return completionBlock(nil, error);
+    }
 }
 
 @end
