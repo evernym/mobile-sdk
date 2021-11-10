@@ -20,11 +20,22 @@
                 existingConnection:(NSString *) existingConnection
              withCompletionHandler:(ResponseBlock) completionBlock;
 
++(void)handleCredentialOffer:(NSString *) invite
+                  attachment:(NSDictionary *) attachment
+          existingConnection:(NSString *) existingConnection
+                createdOffer:(NSDictionary *) createdOffer
+       withCompletionHandler:(ResponseBlock) completionBlock;
+
 +(void)acceptCredentialOffer:(NSString *) pwDid
                   attachment:(NSDictionary *) attachment
                 createdOffer:(NSDictionary *) createdOffer
                  fromMessage:(BOOL) fromMessage
        withCompletionHandler:(ResponseBlock) completionBlock;
+
++(void)acceptCredentialOfferAndCreateConnection:(NSString *) invite
+                                     attachment:(NSDictionary *) attachment
+                                   createdOffer:(NSDictionary *) createdOffer
+                          withCompletionHandler:(ResponseBlock) completionBlock;
 
 +(void)rejectCredentialOffer:(NSString *) pwDid
                   attachment:(NSDictionary *) attachment

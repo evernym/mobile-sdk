@@ -158,12 +158,6 @@
                                       existingConnection:existingConnection withCompletionHandler:^(NSString *successMessage, NSError *error) {
                 return completionBlock([Utilities jsonToDictionary:successMessage], error);
             }];
-//            [ProofRequest handleProofRequest:attachment
-//                        serializedConnection:existingConnection
-//                                        name:name
-//                       withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
-//                return completionBlock(responseObject, error);
-//            }];
         }];
     } else {
         [ProofRequestsHandler createProofStateObject:invite
@@ -171,15 +165,6 @@
                                   existingConnection:existingConnection withCompletionHandler:^(NSString *successMessage, NSError *error) {
             return completionBlock([Utilities jsonToDictionary:successMessage], error);
         }];
-//        [Connection createConnection:invite
-//               withCompletionHandler:^(NSString *responseConnection, NSError *error) {
-//            [ProofRequest handleProofRequest:attachment
-//                        serializedConnection:responseConnection
-//                                        name:name
-//                       withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
-//                return completionBlock(responseObject, error);
-//            }];
-//        }];
     }
 }
 

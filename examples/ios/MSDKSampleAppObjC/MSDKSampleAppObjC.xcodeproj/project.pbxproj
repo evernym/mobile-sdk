@@ -36,6 +36,7 @@
 		DD725CE5273936570040CCD6 /* CredentialOffer.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CD6273936560040CCD6 /* CredentialOffer.m */; };
 		DD725D19273A8FB40040CCD6 /* CredentialOffersHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D18273A8FB30040CCD6 /* CredentialOffersHandler.m */; };
 		DD725D1D273BAF3F0040CCD6 /* ProofRequestsHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D1C273BAF3F0040CCD6 /* ProofRequestsHandler.m */; };
+		DD725D25273BE58A0040CCD6 /* Proof.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D24273BE58A0040CCD6 /* Proof.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -118,6 +119,8 @@
 		DD725D1A273A8FCA0040CCD6 /* CredentialOffersHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CredentialOffersHandler.h; sourceTree = "<group>"; };
 		DD725D1B273BAEE50040CCD6 /* ProofRequestsHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProofRequestsHandler.h; sourceTree = "<group>"; };
 		DD725D1C273BAF3F0040CCD6 /* ProofRequestsHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ProofRequestsHandler.m; sourceTree = "<group>"; };
+		DD725D23273BE5810040CCD6 /* Proof.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Proof.h; sourceTree = "<group>"; };
+		DD725D24273BE58A0040CCD6 /* Proof.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Proof.m; sourceTree = "<group>"; };
 		DDFB74F1272C1F9A00BCFD22 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		EB53DCBB3B3EC5F195AB8601 /* Pods-MSDKSampleAppObjCUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppObjCUITests.release.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppObjCUITests/Pods-MSDKSampleAppObjCUITests.release.xcconfig"; sourceTree = "<group>"; };
 		F7D6220A83D5C10909C33036 /* Pods-MSDKSampleAppObjCUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppObjCUITests.debug.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppObjCUITests/Pods-MSDKSampleAppObjCUITests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -307,6 +310,8 @@
 				DD725CD5273936560040CCD6 /* ConnectionInvitation.m */,
 				DD725CD4273936560040CCD6 /* CredentialOffer.h */,
 				DD725CD6273936560040CCD6 /* CredentialOffer.m */,
+				DD725D23273BE5810040CCD6 /* Proof.h */,
+				DD725D24273BE58A0040CCD6 /* Proof.m */,
 			);
 			path = helpers;
 			sourceTree = "<group>";
@@ -542,6 +547,7 @@
 				DD725CE4273936570040CCD6 /* ConnectionInvitation.m in Sources */,
 				DD00E0C82685FED50050BC88 /* HistoryViewController.m in Sources */,
 				DD725CD9273936570040CCD6 /* Config.m in Sources */,
+				DD725D25273BE58A0040CCD6 /* Proof.m in Sources */,
 				DD725CDF273936570040CCD6 /* Initialization.m in Sources */,
 				DD725CE1273936570040CCD6 /* ProofRequest.m in Sources */,
 				DD725CDB273936570040CCD6 /* ConnectionHandler.m in Sources */,

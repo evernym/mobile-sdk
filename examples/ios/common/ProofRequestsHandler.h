@@ -19,11 +19,24 @@
             existingConnection:(NSString *) existingConnection
          withCompletionHandler:(ResponseBlock) completionBlock;
 
++(void)handleProofRequest:(NSString *) invite
+               attachment:(NSDictionary *) attachment
+       existingConnection:(NSString *) existingConnection
+                  request:(NSDictionary *) request
+                     name:(NSString *) name
+    withCompletionHandler:(ResponseBlock) completionBlock;
+
 +(void)acceptProofRequest:(NSString *) pwDid
                attachment:(NSDictionary *) attachment
                   request:(NSDictionary *) request
                      name:(NSString *) name
     withCompletionHandler:(ResponseBlock) completionBlock;
+
++(void)acceptProofRequestAndCreateConnection:(NSString *) invite
+                                  attachment:(NSDictionary *) attachment
+                                     request:(NSDictionary *) request
+                                        name:(NSString *) name
+                       withCompletionHandler:(ResponseBlock) completionBlock;
 
 +(void)rejectProofRequest:(NSString *) pwDid
                   request:(NSString *) request

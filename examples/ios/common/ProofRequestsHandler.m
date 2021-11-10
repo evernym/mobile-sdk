@@ -14,6 +14,7 @@
 #import "MobileSDK.h"
 #import "Connection.h"
 #import "ConnectionInvitation.h"
+#import "Proof.h"
 
 @implementation ProofRequestsHandler
 
@@ -89,7 +90,7 @@ NSString *PROOF_COMPLETED_STATUS = @"completed";
                      name:(NSString *) name
     withCompletionHandler:(ResponseBlock) completionBlock {
     NSString *serializedConnection = [ConnectionInvitation getConnectionByPwDid:pwDid];
-
+    
     [ProofRequest sendProofRequest:request
               serializedConnection:serializedConnection
              withCompletionHandler:^(NSDictionary *proofRequest, NSError *error) {
@@ -100,17 +101,9 @@ NSString *PROOF_COMPLETED_STATUS = @"completed";
         // Store the serialized proof
         NSMutableDictionary* proofs = [[LocalStorage getObjectForKey: @"proofs" shouldCreate: true] mutableCopy];
         
-        NSString *threadId = [attachment valueForKey:@"~thread"][@"thid"];
-        if (threadId == nil) {
-            threadId = [attachment valueForKey:@"thread_id"];
-        }
-        NSDictionary *proofRequestData = [attachment valueForKey:@"proof_request_data"];
-        NSString *requested_attributes = nil;
-        NSString *requested_predicates = nil;
-        if (proofRequestData) {
-            requested_attributes = [Utilities dictToJsonString:[proofRequestData valueForKey:@"requested_attributes"]];
-            requested_predicates = [Utilities dictToJsonString:[proofRequestData valueForKey:@"requested_predicates"]];
-        }
+        NSString *threadId = [Proof getThid:attachment];
+        NSString *requested_attributes = [Proof getAttributes:attachment];
+        NSString *requested_predicates = [Proof getPredicates:attachment];
         
         NSTimeInterval timeStamp = [[NSDate date] timeIntervalSinceNow];
         NSString *timestamp = [NSString stringWithFormat:@"%@", [NSNumber numberWithDouble: timeStamp]];
