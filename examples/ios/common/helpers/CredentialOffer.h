@@ -11,7 +11,14 @@
 
 @interface CredentialOffer : NSObject
 
-+(NSString *)getThid:(NSString *) credential;
++(NSString *)getThid:(NSString *) credential
+         fromMessage:(BOOL) fromMessage;
+
++(NSString *)getAttributes:(NSString *) credential
+               fromMessage:(BOOL) fromMessage;
+
++(NSString *)getOfferName:(NSString *) credential
+              fromMessage:(BOOL) fromMessage;
 
 @end
 

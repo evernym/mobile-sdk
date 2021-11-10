@@ -21,8 +21,9 @@
     return type == InvitationType(OutOfBandType);
 }
 
-+(NSString *) getInvitationType:(NSDictionary *) invite {
-    NSString *type = [invite objectForKey:@"@type"];
++(NSString *) getInvitationType:(NSString *) invite {
+    NSDictionary *parsedInvite = [Utilities jsonToDictionary:invite];
+    NSString *type = [parsedInvite objectForKey:@"@type"];
 
     if ([type rangeOfString:@"out-of-band"].location != NSNotFound) {
         return InvitationType(OutOfBandType);
@@ -56,7 +57,7 @@
 +(NSString*)getPwDid: (NSString*) serializedConnection {
     NSError *error;
     NSMutableDictionary *connValues = [NSJSONSerialization JSONObjectWithData: [serializedConnection dataUsingEncoding: NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
-
+    
     return connValues[@"data"][@"pw_did"];
 }
 
@@ -69,6 +70,21 @@
         NSString *pwDid = [connection objectForKey:@"pwDid"];
         if ([pwDidMes isEqual:pwDid]) {
             resultConnection = [connection objectForKey:@"serialized"];
+            break;
+        }
+    }
+    return resultConnection;
+}
+
++(NSString*)getInvitationByPwDid: (NSString *) pwDidMes {
+    NSDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
+    NSString *resultConnection = @"";
+    for (NSInteger i = 0; i < connections.allKeys.count; i++) {
+        NSString *key = connections.allKeys[i];
+        NSDictionary *connection = [connections objectForKey:key];
+        NSString *pwDid = [connection objectForKey:@"pwDid"];
+        if ([pwDidMes isEqual:pwDid]) {
+            resultConnection = [connection objectForKey:@"invitation"];
             break;
         }
     }
@@ -162,6 +178,12 @@
     }
 
     return connectionID;
+}
+
++(NSString *)getConnectionName:(NSString *) invite {
+    NSDictionary *parsedInvite = [Utilities jsonToDictionary:invite];
+    NSString *name = [parsedInvite objectForKey:@"label"];
+    return name;
 }
 
 +(NSArray*) getAllSerializedConnections {

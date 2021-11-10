@@ -25,14 +25,14 @@ NSString *CONNECT_TYPE = @"{\"connection_type\":\"QR\",\"phone\":\"\"}";
 +(void)connectionRedirectAriesOutOfBand: (NSString*)invitation
                    serializedConnection: (NSString*)serializedConnection
                   withCompletionHandler: (ResponseWithBoolean) completionBlock {
-    NSError* error;
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
+    
     NSDictionary *inviteDict = [Utilities jsonToDictionary:invitation];
     NSArray* handshakeProtocols = [inviteDict objectForKey: @"handshake_protocols"];
     NSString* handshakeProtocolsValue = handshakeProtocols[0];
 
     if ([handshakeProtocolsValue  isEqual: @""] || handshakeProtocolsValue == nil) {
-        return completionBlock(false, error);
+        return completionBlock(false, nil);
     }
     
     [sdkApi connectionDeserialize:serializedConnection
@@ -90,9 +90,9 @@ NSString *CONNECT_TYPE = @"{\"connection_type\":\"QR\",\"phone\":\"\"}";
 }
 
 +(void)createConnection:(NSString *) invitation
-                   name:(NSString*) name
   withCompletionHandler:(ResponseBlock) completionBlock {
-    NSString *type = [ConnectionInvitation getInvitationType:[Utilities jsonToDictionary:invitation]];
+    NSString* name = [ConnectionInvitation getConnectionName:invitation];
+    NSString *type = [ConnectionInvitation getInvitationType:invitation];
     
     if ([ConnectionInvitation isOutOfBandInvitation:type]) {
         [self connectWithOutofbandInvite:invitation
@@ -121,7 +121,7 @@ NSString *CONNECT_TYPE = @"{\"connection_type\":\"QR\",\"phone\":\"\"}";
 +(void)connectWithInvite:(NSString *)invitation
 withCompletionHandler: (ResponseBlock) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
-    
+
     [sdkApi connectionCreateWithInvite:[ConnectionInvitation connectionID: [Utilities jsonToDictionary:invitation]]
                          inviteDetails:invitation
                             completion:^(NSError *error, NSInteger connectionHandle) {

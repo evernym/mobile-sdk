@@ -13,32 +13,18 @@
 
 @interface Credential: NSObject
 
-+(void) createWithOffer: (NSString*)offer
-  withCompletionHandler: (ResponseWithObject) completionBlock;
++(void) createWithOffer:(NSString*)offer
+  withCompletionHandler:(ResponseWithObject) completionBlock;
 
-+(void) handleCredentialOffer:(NSDictionary *) attachment
-         serializedConnection:(NSString *) serializedConnection
-                         name:(NSString *) name
-        withCompletionHandler:(ResponseWithObject) completionBlock;
++(void) acceptCredential:(NSString *) attachment
+    serializedCredential:(NSString *) serializedCredential
+    serializedConnection:(NSString *) serializedConnection
+             fromMessage:(BOOL) fromMessage
+   withCompletionHandler:(ResponseBlock) completionBlock;
 
-+(void) acceptCredentialOffer: (NSString*) serializedConnection
-         serializedCredential: (NSString*) serializedCredential
-                        offer: (NSString*) offer
-        withCompletionHandler: (ResponseBlock) completionBlock;
-
-+(void) rejectCredentialOffer: (NSString*) serializedConnection
-         serializedCredential: (NSString*) serializedCredential
-        withCompletionHandler: (ResponseWithObject) completionBlock;
-
-+(void)acceptCredentilaFromMessage:(NSString *) data
-               withCompletionBlock:(ResponseWithBoolean) completionBlock;
-
-+(void)rejectCredentilaFromMessage:(NSString *) data
-               withCompletionBlock:(ResponseWithBoolean) completionBlock;
-
-+(void)awaitCredentialReceived:(NSString *) serializedCredential
-                         offer:(NSString *) offer
-           withCompletionBlock:(ResponseBlock) completionBlock;
++(void) rejectCredentialOffer:(NSString*) serializedConnection
+         serializedCredential:(NSString*) serializedCredential
+        withCompletionHandler:(ResponseBlock) completionBlock;
 @end
 
 #endif /* Credential_h */

@@ -14,14 +14,14 @@
 #import "LocalStorage.h"
 #import "Credential.h"
 #import "ProofRequest.h"
+#import "CredentialOffersHandler.h"
 
 @implementation ConnectionHandler
 
 +(void) handleConnectionInvitation: (NSString *)invite
              withCompletionHandler: (ResponseBlock) completionBlock {
-    NSDictionary *parsedInvite = [Utilities jsonToDictionary:invite];
-    NSString *name = [parsedInvite objectForKey:@"label"];
-    NSString *type = [ConnectionInvitation getInvitationType:parsedInvite];
+    NSString *name = [ConnectionInvitation getConnectionName:invite];
+    NSString *type = [ConnectionInvitation getInvitationType:invite];
     
     NSArray *serializedConnections = [ConnectionInvitation getAllSerializedConnections];
     [Connection verityConnectionExist:invite
@@ -73,7 +73,6 @@
                     }];
                 } else {
                     [Connection createConnection:invite
-                                            name:name
                            withCompletionHandler:^(NSString *responseConnection, NSError *error) {
                         if (error && error.code > 0) {
                             [Utilities printError:error];
@@ -125,25 +124,38 @@
                                withCompletionHandler:^(BOOL result, NSError *error) {
             [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
             
-            [Credential handleCredentialOffer:attachment
-                         serializedConnection:existingConnection
-                                         name:name
-                        withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
-                return completionBlock(responseObject, error);
+            [CredentialOffersHandler createCredentialStateObject:invite
+                                                      attachment:attachment
+                                              existingConnection:existingConnection
+                                           withCompletionHandler:^(NSString *successMessage, NSError *error) {
+                return completionBlock([Utilities jsonToDictionary:successMessage], error);
             }];
+            
+//            [Credential handleCredentialOffer:attachment
+//                         serializedConnection:existingConnection
+//                                         name:name
+//                        withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+//                return completionBlock(responseObject, error);
+//            }];
         }];
     } else {
-        [Connection createConnection:invite
-                                name:name
-               withCompletionHandler:^(NSString *responseConnection, NSError *error) {
-            
-            [Credential handleCredentialOffer:attachment
-                         serializedConnection:responseConnection
-                                         name:name
-                        withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
-                return completionBlock(responseObject, error);
-            }];
+        [CredentialOffersHandler createCredentialStateObject:invite
+                                                  attachment:attachment
+                                          existingConnection:existingConnection
+                                       withCompletionHandler:^(NSString *successMessage, NSError *error) {
+            return completionBlock([Utilities jsonToDictionary:successMessage], error);
         }];
+//        [Connection createConnection:invite
+//                                name:name
+//               withCompletionHandler:^(NSString *responseConnection, NSError *error) {
+//
+//            [Credential handleCredentialOffer:attachment
+//                         serializedConnection:responseConnection
+//                                         name:name
+//                        withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
+//                return completionBlock(responseObject, error);
+//            }];
+//        }];
     }
 }
 
@@ -167,9 +179,7 @@
         }];
     } else {
         [Connection createConnection:invite
-                                name:name
                withCompletionHandler:^(NSString *responseConnection, NSError *error) {
-            
             [ProofRequest handleProofRequest:attachment
                         serializedConnection:responseConnection
                                         name:name

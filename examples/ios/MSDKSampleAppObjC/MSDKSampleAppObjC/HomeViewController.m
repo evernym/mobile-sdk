@@ -13,10 +13,12 @@
 #import "Utilities.h"
 #import "LocalStorage.h"
 #import "QRCodeReaderViewController.h"
+#import "QRCodeReader.h"
 #import "Message.h"
 #import "ProofRequest.h"
 #import "ConnectionInvitation.h"
 #import "ConnectionHandler.h"
+#import "CredentialOffersHandler.h"
 
 @interface HomeViewController ()
 
@@ -37,6 +39,8 @@ NSString *CREDENTIAL_OFFER = @"credential-offer";
 NSString *PRESENTATION_REQUEST = @"presentation-request";
 NSString *COMMITTED_QUESTION = @"committed-question";
 NSString *OOB = @"OOB";
+
+static QRCodeReaderViewController *vc;
 
 UIGestureRecognizer *tapper;
 
@@ -109,7 +113,9 @@ UIGestureRecognizer *tapper;
             profileUrl:profileUrl
                   goal:goal
                   type:OOB
-                  data:[Utilities dictToJsonString:connectValues]];
+                  data:[Utilities dictToJsonString:connectValues]
+        additionalData:@""
+                 pwDid:@""];
 }
 
 - (void) createAction:(NSString *) label
@@ -117,7 +123,8 @@ UIGestureRecognizer *tapper;
                  goal:(NSString *) goal
                  type:(NSString *) type
                  data:(NSString *) data
-{
+       additionalData:(NSString *) additionalData
+                pwDid:(NSString *) pwDid {
     NSMutableDictionary* allRequests = [[LocalStorage getObjectForKey: @"requests" shouldCreate: true] mutableCopy];
     NSString *uuid = [[NSUUID UUID] UUIDString];
 
@@ -127,7 +134,9 @@ UIGestureRecognizer *tapper;
         @"goal": goal,
         @"uuid": uuid,
         @"type": type,
-        @"data": data
+        @"data": data,
+        @"additionalData": additionalData,
+        @"pwDid": pwDid
     };
     
     [allRequests setValue: request forKey: uuid];
@@ -155,14 +164,16 @@ UIGestureRecognizer *tapper;
                                                                              showTorchButton:YES];
     vc.modalPresentationStyle = UIModalPresentationFormSheet;
     vc.delegate = self;
-    [self presentViewController: vc animated: YES completion:^{
-        NSLog(@"QR code scanner presented");
-    }];
+
     [reader setCompletionWithBlock:^(NSString *resultAsString) {
         NSLog(@"%@", resultAsString);
         [vc dismissViewControllerAnimated:YES completion:^{
             [self createActionWithInvitation: resultAsString];
         }];
+    }];
+    
+    [self presentViewController: vc animated: YES completion:^{
+        NSLog(@"QR code scanner presented");
     }];
 }
 
@@ -173,7 +184,11 @@ UIGestureRecognizer *tapper;
 
             NSString *type = [message objectForKey:@"type"];
             if ([type isEqual:CREDENTIAL_OFFER]) {
-                [self handleReceivedCredentialOffer:message];
+                [self handleReceivedCredentialOffer:message withCompletionBlock:^(BOOL result, NSError *error) {
+                    if (error && error.code > 0) {
+                        [Utilities printError:error];
+                    }
+                }];
             }
             if ([type isEqual:PRESENTATION_REQUEST]) {
                 [self handleReceivedProofRequest:message];
@@ -185,33 +200,48 @@ UIGestureRecognizer *tapper;
     }];
 }
 
-- (void) handleReceivedCredentialOffer:(NSDictionary *) message {
+- (void) handleReceivedCredentialOffer:(NSDictionary *) message
+                   withCompletionBlock:(ResponseWithBoolean) completionBlock {
     [self messageStatusUpdate: message];
+    NSString *pwDid = [message objectForKey:@"pwDid"];
     NSString *payloadJson = [message objectForKey:@"payload"];
     NSArray *payloadArray = [Utilities jsonToArray:payloadJson];
     NSDictionary *payloadDict = payloadArray[0];
     
-    [self createAction:[payloadDict objectForKey:@"claim_name"]
-            profileUrl:@""
-                  goal:@"Credential offer"
-                  type:CREDENTIAL_OFFER
-                  data:[Utilities dictToJsonString:message]];
+    [Credential createWithOffer:payloadJson
+          withCompletionHandler:^(NSDictionary *createdOffer, NSError *error) {
+        if (error && error.code > 0) {
+            return completionBlock(nil, error);
+        }
+        
+        [self createAction:[payloadDict objectForKey:@"claim_name"]
+                profileUrl:@""
+                      goal:@"Credential offer"
+                      type:CREDENTIAL_OFFER
+                      data:payloadJson
+            additionalData:[Utilities dictToJsonString:createdOffer]
+                     pwDid:pwDid];
+    }];
 }
 
 - (void) handleReceivedProofRequest:(NSDictionary *) message {
     [self messageStatusUpdate: message];
-    NSDictionary *payload = [Utilities jsonToDictionary:[message objectForKey:@"payload"]];
+    NSString *pwDid = [message objectForKey:@"pwDid"];
+    NSString *payload = [message objectForKey:@"payload"];
+    NSDictionary *payloadDict = [message objectForKey:@"payload"];
 
-    [self createAction:[payload objectForKey:@"comment"]
+    [self createAction:[payloadDict objectForKey:@"comment"]
             profileUrl:@""
                   goal:@"Proof Request"
                   type:PRESENTATION_REQUEST
-                  data:[Utilities dictToJsonString:message]];
+                  data:[Utilities dictToJsonString:message]
+        additionalData:payload
+                 pwDid:pwDid];
 }
 
 - (void) handleReceivedQuestion:(NSDictionary *) message {
     [self messageStatusUpdate: message];
-    
+    NSString *pwDid = [message objectForKey:@"pwDid"];
     NSString *payload = [message objectForKey:@"payload"];
     NSDictionary *payloadDict = [Utilities jsonToDictionary:payload];
     
@@ -219,11 +249,15 @@ UIGestureRecognizer *tapper;
             profileUrl:@""
                   goal:@"Question"
                   type:COMMITTED_QUESTION
-                  data:[Utilities dictToJsonString:message]];
+                  data:[Utilities dictToJsonString:message]
+        additionalData:payload
+                 pwDid:pwDid];
 }
 
 - (void) handleAcceptAction:(NSString *) data
                     forType:(NSString *) forType
+                      pwDid:(NSString *) pwDid
+             additionalData:(NSString *) additionalData
         withCompletionBlock:(ResponseWithBoolean) completionBlock {
     if ([forType isEqual:OOB]) {
         [ConnectionHandler handleConnectionInvitation:data
@@ -232,8 +266,11 @@ UIGestureRecognizer *tapper;
         }];
     }
     if ([forType isEqual:CREDENTIAL_OFFER]) {
-        [self acceptCredential:data
-           withCompletionBlock:^(BOOL result, NSError *error) {
+        [CredentialOffersHandler acceptCredentialOffer:pwDid
+                                            attachment:[Utilities jsonToDictionary:data]
+                                          createdOffer:[Utilities jsonToDictionary:additionalData]
+                                           fromMessage:true
+                                 withCompletionHandler:^(NSString *result, NSError *error) {
             return completionBlock(result, error);
         }];
     }
@@ -253,13 +290,16 @@ UIGestureRecognizer *tapper;
 
 - (void) handleRejectAction:(NSString *) data
                     forType:(NSString *) forType
+                      pwDid:(NSString *) pwDid
+             additionalData:(NSString *) additionalData
         withCompletionBlock:(ResponseWithBoolean) completionBlock  {
     if ([forType isEqual:OOB]) {
         return completionBlock(true, nil);
     }
     if ([forType isEqual:CREDENTIAL_OFFER]) {
-        [self rejectCredential:data
-           withCompletionBlock:^(BOOL result, NSError *error) {
+        [CredentialOffersHandler rejectCredentialOffer:pwDid
+                                            attachment:[Utilities jsonToDictionary:data]
+                                          createdOffer:[Utilities jsonToDictionary:additionalData] withCompletionHandler:^(NSString *result, NSError *error) {
             return completionBlock(result, error);
         }];
     }
@@ -272,21 +312,6 @@ UIGestureRecognizer *tapper;
     if ([forType isEqual:COMMITTED_QUESTION]) {
         return completionBlock(true, nil);
     }
-}
-
-- (void)acceptCredential:(NSString *) data
-     withCompletionBlock:(ResponseWithBoolean) completionBlock {
-    [Credential acceptCredentilaFromMessage:data withCompletionBlock:^(BOOL result, NSError *error) {
-        return completionBlock(result, error);
-    }];
-}
-
-- (void)rejectCredential:(NSString *) data
-     withCompletionBlock:(ResponseWithBoolean) completionBlock {
-    [Credential rejectCredentilaFromMessage:data
-                          withCompletionBlock:^(BOOL result, NSError *error) {
-        return completionBlock(result, error);
-    }];
 }
 
 - (void)sendProof:(NSString *) data
@@ -374,6 +399,8 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
     NSString *uuid = [requestDict objectForKey: @"uuid"];
     NSString *data = [requestDict objectForKey: @"data"];
     NSString *logoUrl = [requestDict objectForKey: @"profileUrl"];
+    NSString *pwDid = [requestDict objectForKey: @"pwDid"];
+    NSString *additionalData = [requestDict objectForKey: @"additionalData"];
 
     [cell updateAttribute:name
                  subtitle:goal
@@ -381,6 +408,8 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
            acceptCallback:^() {
                     [self handleAcceptAction:data
                                      forType:type
+                                       pwDid:pwDid
+                              additionalData:additionalData
                          withCompletionBlock:^(BOOL result, NSError *error) {
                         [self switchActionToHistoryView: uuid];
                     }];
@@ -388,6 +417,8 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
             rejectCallback:^() {
                     [self handleRejectAction:data
                                      forType:type
+                                       pwDid:pwDid
+                              additionalData:additionalData
                          withCompletionBlock:^(BOOL result, NSError *error) {
                         [self switchActionToHistoryView: uuid];
                         if (type == OOB || type == COMMITTED_QUESTION) {

@@ -9,15 +9,9 @@
 #import <Foundation/Foundation.h>
 #import "Utilities.h"
 
-typedef NS_ENUM(int, ConnectionType) {
-    QR = 0,
-    SMS = 1,
-};
-
 @interface Connection: NSObject
 
 +(void)createConnection:(NSString *) invitation
-                   name:(NSString*) name
   withCompletionHandler:(ResponseBlock) completionBlock;
 
 +(void)verityConnectionExist:(NSString *) invite
