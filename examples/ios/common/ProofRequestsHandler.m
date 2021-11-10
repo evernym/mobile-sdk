@@ -125,7 +125,7 @@ NSString *PROOF_COMPLETED_STATUS = @"completed";
         [proofs setValue: proofObj forKey: uuid];
         [LocalStorage store: @"proofs" andObject: proofs];
         
-        [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Proof request send", @""]];
+        [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Proof request send", name]];
         
         return completionBlock([Utilities dictToJsonString:proofRequest], error);
     }];
