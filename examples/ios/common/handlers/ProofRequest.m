@@ -40,33 +40,26 @@
     }
 }
 
-+(void) handleProofRequest:(NSDictionary *) attachment
-      serializedConnection:(NSString *) serializedConnection
-                      name:(NSString *) name
-     withCompletionHandler:(ResponseWithObject) completionBlock {
-    [self createWithRequest:[Utilities dictToJsonString:attachment]
-                withCompletionHandler:^(NSDictionary *proofRequest, NSError *error) {
++(void) sendProofRequest:(NSDictionary *) proofRequest
+    serializedConnection:(NSString *) serializedConnection
+   withCompletionHandler:(ResponseWithObject) completionBlock {
+    [self retrieveAvailableCredentials:[Utilities dictToJsonString:proofRequest]
+                           withCompletionHandler:^(NSDictionary *creds, NSError *error) {
         if (error && error.code > 0) {
             return completionBlock(nil, error);
-        }
-        [self retrieveAvailableCredentials:[Utilities dictToJsonString:proofRequest]
-                               withCompletionHandler:^(NSDictionary *creds, NSError *error) {
+        };
+        NSString *attr = [creds objectForKey: @"autofilledAttributes"];
+
+        [self send:serializedConnection
+   serializedProof:[Utilities dictToJsonString:proofRequest]
+     selectedCreds:attr
+  selfAttestedAttr:@"{}"
+withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
-            };
-            NSString *attr = [creds objectForKey: @"autofilledAttributes"];
+            }
 
-            [self send:serializedConnection
-       serializedProof:[Utilities dictToJsonString:proofRequest]
-         selectedCreds:attr
-      selfAttestedAttr:@"{}"
- withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
-                if (error && error.code > 0) {
-                    return completionBlock(nil, error);
-                }
-                [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Proof request send", name]];
-                return completionBlock(responseObject, nil);
-            }];
+            return completionBlock(responseObject, nil);
         }];
     }];
 }
@@ -153,64 +146,6 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
     }
 }
 
-+ (void) sendProofRequest: (NSDictionary*)proofObject
-          proofAttributes: (NSDictionary*) proofAttributes
-            andConnection: (NSDictionary*) connection
-    withCompletionHandler: (ResponseBlock) completionBlock {
-    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
-    
-    NSLog(@"Received Proof Req to process - %@", proofObject);
-    NSString *messageId = proofObject[@"uid"];
-    NSError *error = nil;
-
-    NSMutableDictionary *decryptedPayload = [[Utilities jsonToDictionary: proofObject[@"decryptedPayload"]] mutableCopy];
-    if (!decryptedPayload) {
-        NSLog(@"Error parsing messages JSON: %@", error);
-    } else {
-        [sdkApi connectionDeserialize: [Utilities dictToJsonString: connection] completion:^(NSError *error, NSInteger connectionHandle) {
-            if (error != nil && error.code != 0) {
-                NSLog(@"Error occurred while deserializing connection - %@ :: %ld", error, (long)error.code);
-                return;
-            }
-
-            [sdkApi proofCreateWithMsgId: messageId withConnectionHandle: (unsigned int)connectionHandle withMsgId: messageId withCompletion: ^(NSError *error, vcx_proof_handle_t proofHandle, NSString *proofRequest) {
-
-                if (error != nil && error.code != 0) {
-                    NSLog(@"Error occurred while proof create with msg proof - %@ :: %ld", error, (long)error.code);
-                    return;
-                }
-
-                [sdkApi proofRetrieveCredentials: proofHandle withCompletion: ^(NSError *error, NSString *matchingCredentials) {
-                    if (error != nil && error.code != 0) {
-                        NSLog(@"Error occurred while retrieving proof credentials - %@ :: %ld", error, (long)error.code);
-                        return;
-                    }
-
-                    [sdkApi proofGenerate: proofHandle withSelectedCredentials: proofAttributes[@"autofilledAttributes"] withSelfAttestedAttrs: proofAttributes[@"selfAttestedAttributes"] withCompletion: ^(NSError *error) {
-
-                        if (error != nil && error.code != 0) {
-                            NSLog(@"Error occurred while generating proof - %@ :: %ld", error, (long)error.code);
-                            return;
-                        }
-
-                        [sdkApi proofSend:proofHandle withConnectionHandle: (unsigned int)connectionHandle withCompletion:^(NSError *error) {
-                            if (error != nil && error.code != 0) {
-                                NSLog(@"Error occurred while sending proof - %@ :: %ld", error, (long)error.code);
-                                return;
-                            }
-                            NSLog(@"Sent proof for proofReq %@", messageId);
-
-                        }];
-                    }];
-
-                }];
-
-            }];
-
-        }];
-    };
-}
-
 + (NSDictionary*)vcxMatchingCredentials: (NSString*) matchingCredentials {
     NSError *error;
     
@@ -293,9 +228,9 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
     }];
 }
 
-+(void) reject:(NSString *) serializedConnection
-serializedProof:(NSString *) serializedProof
-withCompletionHandler: (ResponseWithObject) completionBlock {
++(void) rejectProofRequest:(NSString *) serializedConnection
+           serializedProof:(NSString *) serializedProof
+     withCompletionHandler: (ResponseWithObject) completionBlock {
     NSError* error;
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
     
@@ -330,73 +265,6 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
     } @catch (NSException *exception) {
         return completionBlock(nil, error);
     }
-}
-
-+(void)sendProofRequestFromMessage:(NSString *) data
-             withCompletionHandler:(ResponseWithBoolean) completionBlock {
-    NSDictionary *message = [Utilities jsonToDictionary:data];
-    NSString *pwDidMes = [message objectForKey:@"pwDid"];
-    NSString *payload = [message objectForKey:@"payload"];
-    NSString *offerConnection = [ConnectionInvitation getConnectionByPwDid:pwDidMes];
-    NSDictionary *payloadDict = [Utilities jsonToDictionary:payload];
-    
-    [ProofRequest createWithRequest:payload
-                withCompletionHandler:^(NSDictionary *offer, NSError *error) {
-        if (error && error.code > 0) {
-            return completionBlock(nil, error);
-        }
-        NSLog(@"Proof Request created %@", error);
-
-        [ProofRequest retrieveAvailableCredentials:[Utilities dictToJsonString:offer]
-                               withCompletionHandler:^(NSDictionary *creds, NSError *error) {
-            if (error && error.code > 0) {
-                return completionBlock(nil, error);
-            };
-
-            NSLog(@"Proof Request retrieved %@", creds);
-            NSString *attr = [creds objectForKey: @"autofilledAttributes"];
-            
-            [ProofRequest send:offerConnection
-                 serializedProof:[Utilities dictToJsonString:offer]
-                   selectedCreds:attr
-                selfAttestedAttr:@"{}"
-           withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
-                if (error && error.code > 0) {
-                    return completionBlock(nil, error);
-                }
-                [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Proof request send", [payloadDict objectForKey:@"comment"]]];
-                NSLog(@"Proof Request send %@", error);
-                return completionBlock(responseObject, nil);
-            }];
-        }];
-    }];
-}
-
-+(void)rejectProofRequestFromMessage:(NSString *) data
-             withCompletionHandler:(ResponseWithBoolean) completionBlock {
-    NSDictionary *message = [Utilities jsonToDictionary:data];
-    NSString *pwDidMes = [message objectForKey:@"pwDid"];
-    NSString *payload = [message objectForKey:@"payload"];
-    NSString *offerConnection = [ConnectionInvitation getConnectionByPwDid:pwDidMes];
-    NSDictionary *payloadDict = [Utilities jsonToDictionary:payload];
-
-    [self createWithRequest:payload
-                withCompletionHandler:^(NSDictionary *request, NSError *error) {
-        if (error && error.code > 0) {
-            return completionBlock(nil, error);
-        }
-        NSLog(@"Proof Request created %@", error);
-        
-        [self reject:offerConnection serializedProof:[Utilities dictToJsonString:request]
-                               withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
-            if (error && error.code > 0) {
-                return completionBlock(nil, error);
-            }
-            [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Proof request reject", [payloadDict objectForKey:@"comment"]]];
-            NSLog(@"Proof Request reject %@", error);
-            return completionBlock(responseObject, nil);
-        }];
-    }];
 }
 
 @end

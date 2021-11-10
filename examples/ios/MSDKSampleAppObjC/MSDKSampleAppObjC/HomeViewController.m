@@ -19,6 +19,7 @@
 #import "ConnectionInvitation.h"
 #import "ConnectionHandler.h"
 #import "CredentialOffersHandler.h"
+#import "ProofRequestsHandler.h"
 
 @interface HomeViewController ()
 
@@ -39,8 +40,6 @@ NSString *CREDENTIAL_OFFER = @"credential-offer";
 NSString *PRESENTATION_REQUEST = @"presentation-request";
 NSString *COMMITTED_QUESTION = @"committed-question";
 NSString *OOB = @"OOB";
-
-static QRCodeReaderViewController *vc;
 
 UIGestureRecognizer *tapper;
 
@@ -191,7 +190,12 @@ UIGestureRecognizer *tapper;
                 }];
             }
             if ([type isEqual:PRESENTATION_REQUEST]) {
-                [self handleReceivedProofRequest:message];
+                [self handleReceivedProofRequest:message
+                             withCompletionBlock:^(BOOL result, NSError *error) {
+                    if (error && error.code > 0) {
+                        [Utilities printError:error];
+                    }
+                }];
             }
             if ([type isEqual:COMMITTED_QUESTION]) {
                 [self handleReceivedQuestion:message];
@@ -224,19 +228,27 @@ UIGestureRecognizer *tapper;
     }];
 }
 
-- (void) handleReceivedProofRequest:(NSDictionary *) message {
+- (void) handleReceivedProofRequest:(NSDictionary *) message
+                withCompletionBlock:(ResponseWithBoolean) completionBlock{
     [self messageStatusUpdate: message];
     NSString *pwDid = [message objectForKey:@"pwDid"];
     NSString *payload = [message objectForKey:@"payload"];
-    NSDictionary *payloadDict = [message objectForKey:@"payload"];
+    NSDictionary *payloadDict = [Utilities jsonToDictionary:payload];
 
-    [self createAction:[payloadDict objectForKey:@"comment"]
-            profileUrl:@""
-                  goal:@"Proof Request"
-                  type:PRESENTATION_REQUEST
-                  data:[Utilities dictToJsonString:message]
-        additionalData:payload
-                 pwDid:pwDid];
+    [ProofRequest createWithRequest:payload
+              withCompletionHandler:^(NSDictionary *request, NSError *error) {
+        if (error && error.code > 0) {
+            return completionBlock(nil, error);
+        }
+        
+        [self createAction:[payloadDict objectForKey:@"comment"]
+                profileUrl:@""
+                      goal:@"Proof Request"
+                      type:PRESENTATION_REQUEST
+                      data:payload
+            additionalData:[Utilities dictToJsonString:request]
+                     pwDid:pwDid];
+    }];
 }
 
 - (void) handleReceivedQuestion:(NSDictionary *) message {
@@ -258,6 +270,7 @@ UIGestureRecognizer *tapper;
                     forType:(NSString *) forType
                       pwDid:(NSString *) pwDid
              additionalData:(NSString *) additionalData
+                       name:(NSString *) name
         withCompletionBlock:(ResponseWithBoolean) completionBlock {
     if ([forType isEqual:OOB]) {
         [ConnectionHandler handleConnectionInvitation:data
@@ -275,8 +288,11 @@ UIGestureRecognizer *tapper;
         }];
     }
     if ([forType isEqual:PRESENTATION_REQUEST]) {
-        [self sendProof:data
-    withCompletionBlock:^(BOOL result, NSError *error) {
+        [ProofRequestsHandler acceptProofRequest:pwDid
+                                      attachment:[Utilities jsonToDictionary:data]
+                                         request:[Utilities jsonToDictionary:additionalData]
+                                            name:name
+                           withCompletionHandler:^(NSString *result, NSError *error) {
             return completionBlock(result, error);
         }];
     }
@@ -292,6 +308,7 @@ UIGestureRecognizer *tapper;
                     forType:(NSString *) forType
                       pwDid:(NSString *) pwDid
              additionalData:(NSString *) additionalData
+                       name:(NSString *) name
         withCompletionBlock:(ResponseWithBoolean) completionBlock  {
     if ([forType isEqual:OOB]) {
         return completionBlock(true, nil);
@@ -304,30 +321,16 @@ UIGestureRecognizer *tapper;
         }];
     }
     if ([forType isEqual:PRESENTATION_REQUEST]) {
-        [self rejectProof:data
-    withCompletionBlock:^(BOOL result, NSError *error) {
+        [ProofRequestsHandler rejectProofRequest:pwDid
+                                         request:additionalData
+                                            name:name
+                           withCompletionHandler:^(NSString *result, NSError *error) {
             return completionBlock(result, error);
         }];
     }
     if ([forType isEqual:COMMITTED_QUESTION]) {
         return completionBlock(true, nil);
     }
-}
-
-- (void)sendProof:(NSString *) data
-withCompletionBlock:(ResponseWithBoolean) completionBlock {
-    [ProofRequest sendProofRequestFromMessage:data
-                          withCompletionHandler:^(BOOL result, NSError *error) {
-        return completionBlock(result, error);
-    }];
-}
-
-- (void)rejectProof:(NSString *) data
-withCompletionBlock:(ResponseWithBoolean) completionBlock {
-    [ProofRequest rejectProofRequestFromMessage:data
-                          withCompletionHandler:^(BOOL result, NSError *error) {
-        return completionBlock(result, error);
-    }];
 }
 
 - (void)answer:(NSString *) data
@@ -406,25 +409,27 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
                  subtitle:goal
                   logoUrl:logoUrl
            acceptCallback:^() {
-                    [self handleAcceptAction:data
-                                     forType:type
-                                       pwDid:pwDid
-                              additionalData:additionalData
-                         withCompletionBlock:^(BOOL result, NSError *error) {
-                        [self switchActionToHistoryView: uuid];
-                    }];
+        [self handleAcceptAction:data
+                         forType:type
+                           pwDid:pwDid
+                  additionalData:additionalData
+                            name:name
+             withCompletionBlock:^(BOOL result, NSError *error) {
+            [self switchActionToHistoryView: uuid];
+        }];
                 }
             rejectCallback:^() {
-                    [self handleRejectAction:data
-                                     forType:type
-                                       pwDid:pwDid
-                              additionalData:additionalData
-                         withCompletionBlock:^(BOOL result, NSError *error) {
-                        [self switchActionToHistoryView: uuid];
-                        if (type == OOB || type == COMMITTED_QUESTION) {
-                            [self addRejectAction: name];
-                        }
-                    }];
+        [self handleRejectAction:data
+                         forType:type
+                           pwDid:pwDid
+                  additionalData:additionalData
+                            name:name
+             withCompletionBlock:^(BOOL result, NSError *error) {
+            [self switchActionToHistoryView: uuid];
+            if (type == OOB || type == COMMITTED_QUESTION) {
+                [self addRejectAction: name];
+            }
+        }];
             }
      ];
     [cell.accept setTitle:@"Handle" forState:UIControlStateNormal];

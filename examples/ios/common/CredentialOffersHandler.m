@@ -64,10 +64,12 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
             return completionBlock(successMessage, error);
         }];
     } else {
-        [Credential acceptCredential:[Utilities dictToJsonString: attachment]
-                serializedCredential:[Utilities dictToJsonString: createdOffer]
-                serializedConnection:existingConnection
-               withCompletionHandler:^(NSString *successCredential, NSError *error) {
+        NSString *pwDid = [ConnectionInvitation getPwDid:existingConnection];
+        [self acceptCredentialOffer:pwDid
+                         attachment:attachment
+                       createdOffer:createdOffer
+                        fromMessage:false
+              withCompletionHandler:^(NSString *successCredential, NSError *error) {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
@@ -160,37 +162,12 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
     [Credential rejectCredentialOffer:serializedConnection
                  serializedCredential:[Utilities dictToJsonString: createdOffer]
                 withCompletionHandler:^(NSString *rejectedCredential, NSError *error) {
-        // Store the serialized credential
-        NSMutableDictionary* credentials = [[LocalStorage getObjectForKey: @"credentials" shouldCreate: true] mutableCopy];
-        
-        NSString *threadId = [CredentialOffer getThid:[Utilities dictToJsonString:attachment] fromMessage:true];
         NSString *name = [CredentialOffer getOfferName:[Utilities dictToJsonString:attachment] fromMessage:true];
-        NSString *attr = [CredentialOffer getAttributes:[Utilities dictToJsonString:attachment] fromMessage:true];
-        
-        NSTimeInterval timeStamp = [[NSDate date] timeIntervalSinceNow];
-        NSString *timestamp = [NSString stringWithFormat:@"%@", [NSNumber numberWithDouble: timeStamp]];
-        NSString *uuid = [[NSUUID UUID] UUIDString];
-
-        NSDictionary* credentialObj = @{
-            @"pwDid": pwDid,
-            @"serialized": rejectedCredential,
-            @"threadId": threadId,
-            
-            @"name": name,
-            @"attributes": attr,
-            @"timestamp": timestamp,
-            
-            @"status": CREDENTIAL_COMPLETED_STATUS,
-        };
-        
-        [credentials setValue: credentialObj forKey: uuid];
-        [LocalStorage store: @"credentials" andObject: credentials];
         
         [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Credential offer rejected", name]];
 
         return completionBlock(rejectedCredential, error);
     }];
 }
-
 
 @end
