@@ -211,7 +211,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
                 profileUrl: "",
                 goal: "Credential Offer",
                 type: self.CREDENTIAL_OFFER,
-                data: Utilities.toJsonString(message),
+                data: payload,
                 additionalData: Utilities.dict(toJsonString: createdOffer),
                 pwDid: pwDid
             )
@@ -233,7 +233,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
                 profileUrl: "",
                 goal: "Proof Request",
                 type: self.PRESENTATION_REQUEST,
-                data: Utilities.toJsonString(message),
+                data: payload,
                 additionalData: Utilities.dict(toJsonString: request),
                 pwDid: pwDid
             )
@@ -272,7 +272,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
         }
         if forType == self.CREDENTIAL_OFFER {
             CredentialOffersHandler.acceptCredentialOffer(pwDid,
-                                                          attachment: Utilities.json(toDictionary: data),
+                                                          attachment: data,
                                                           createdOffer: Utilities.json(toDictionary: additionalData),
                                                           fromMessage: true
             ) { _, _ in
@@ -307,7 +307,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
         }
         if forType == self.CREDENTIAL_OFFER {
             CredentialOffersHandler.rejectCredentialOffer(pwDid,
-                                                          attachment: Utilities.json(toDictionary: data),
+                                                          attachment: data,
                                                           createdOffer: Utilities.json(toDictionary: additionalData)
             ) { _, _ in
                 return completionHandler(true, nil)

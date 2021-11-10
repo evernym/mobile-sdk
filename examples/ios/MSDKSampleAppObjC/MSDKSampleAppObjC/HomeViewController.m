@@ -280,7 +280,7 @@ UIGestureRecognizer *tapper;
     }
     if ([forType isEqual:CREDENTIAL_OFFER]) {
         [CredentialOffersHandler acceptCredentialOffer:pwDid
-                                            attachment:[Utilities jsonToDictionary:data]
+                                            attachment:data
                                           createdOffer:[Utilities jsonToDictionary:additionalData]
                                            fromMessage:true
                                  withCompletionHandler:^(NSString *result, NSError *error) {
@@ -315,7 +315,7 @@ UIGestureRecognizer *tapper;
     }
     if ([forType isEqual:CREDENTIAL_OFFER]) {
         [CredentialOffersHandler rejectCredentialOffer:pwDid
-                                            attachment:[Utilities jsonToDictionary:data]
+                                            attachment:data
                                           createdOffer:[Utilities jsonToDictionary:additionalData] withCompletionHandler:^(NSString *result, NSError *error) {
             return completionBlock(result, error);
         }];
