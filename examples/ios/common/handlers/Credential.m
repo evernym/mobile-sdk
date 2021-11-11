@@ -75,7 +75,7 @@
         withCompletionHandler: (ResponseBlock) completionBlock {
     NSError* error;
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
-    
+        
     @try {
     [sdkApi connectionDeserialize:serializedConnection
                        completion:^(NSError *error, NSInteger connectionHandle) {

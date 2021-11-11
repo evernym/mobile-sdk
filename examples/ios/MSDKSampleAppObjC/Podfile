@@ -32,8 +32,8 @@ target 'MSDKSampleAppObjC' do
   # Below line will be enabled when we go public with our cocoapod
   # pod 'vcx', '0.0.198'
   # Below line will be removed when we go public with our cocoapod
-#  pod 'vcx', '0.0.212'
- pod 'vcx', '0.0.213'
+  pod 'vcx', '0.0.219'
+#  pod 'vcx', '0.0.220'
   pod 'Firebase/Analytics'
   pod 'Firebase/Messaging'
   pod 'QRCodeReaderViewController'

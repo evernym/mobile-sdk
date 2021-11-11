@@ -54,11 +54,25 @@
     return nil;
 }
 
-+(NSString*)getPwDid: (NSString*) serializedConnection {
-    NSError *error;
-    NSMutableDictionary *connValues = [NSJSONSerialization JSONObjectWithData: [serializedConnection dataUsingEncoding: NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
++(void)getPwDid: (NSString*) serializedConnection
+withCompletionHandler: (ResponseBlock) completionBlock {
+    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
     
-    return connValues[@"data"][@"pw_did"];
+    [sdkApi connectionDeserialize:serializedConnection
+                       completion:^(NSError *error, NSInteger connectionHandle) {
+        if (error && error.code > 0) {
+            return completionBlock(nil, error);
+        }
+        
+        [sdkApi connectionGetPwDid:(int)connectionHandle
+                    withCompletion:^(NSError *error, NSString *pwDid) {
+            if (error && error.code > 0) {
+                return completionBlock(nil, error);
+            }
+            
+            return completionBlock(pwDid, error);
+        }];
+    }];
 }
 
 +(NSString*)getConnectionByPwDid: (NSString *) pwDidMes {

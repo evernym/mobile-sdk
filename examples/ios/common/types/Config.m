@@ -15,7 +15,7 @@
 
 // Define your wallet name constant here
 NSString* walletName = @"Lor6Ohwaichool";
-NSString* sponsorServerURL = @"https://3341-83-139-159-140.ngrok.io";
+NSString* sponsorServerURL = @"https://3ff8-83-139-159-140.ngrok.io";
 
 +(NSString*) getSponsorServerURL {
     return sponsorServerURL;
