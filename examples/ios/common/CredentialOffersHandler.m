@@ -64,17 +64,23 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
             return completionBlock(successMessage, error);
         }];
     } else {
-        NSString *pwDid = [ConnectionInvitation getPwDid:existingConnection];
-        [self acceptCredentialOffer:pwDid
-                         attachment:attachment
-                       createdOffer:createdOffer
-                        fromMessage:false
-              withCompletionHandler:^(NSString *successCredential, NSError *error) {
+        [ConnectionInvitation getPwDid:existingConnection
+                 withCompletionHandler:^(NSString *pwDid, NSError *error) {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
             
-            return completionBlock(successCredential, error);
+            [self acceptCredentialOffer:pwDid
+                             attachment:attachment
+                           createdOffer:createdOffer
+                            fromMessage:false
+                  withCompletionHandler:^(NSString *successCredential, NSError *error) {
+                if (error && error.code > 0) {
+                    return completionBlock(nil, error);
+                }
+                
+                return completionBlock(successCredential, error);
+            }];
         }];
     }
 }
@@ -136,19 +142,24 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
         if (error && error.code > 0) {
             return completionBlock(nil, error);
         }
-        
-        NSString *pwDid = [ConnectionInvitation getPwDid:responseConnection];
-        
-        [self acceptCredentialOffer:pwDid
-                         attachment:attachment
-                       createdOffer:createdOffer
-                        fromMessage:false
-              withCompletionHandler:^(NSString *successMessage, NSError *error) {
+       
+        [ConnectionInvitation getPwDid:responseConnection
+                 withCompletionHandler:^(NSString *pwDid, NSError *error) {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
             
-            return completionBlock(successMessage, error);
+            [self acceptCredentialOffer:pwDid
+                             attachment:attachment
+                           createdOffer:createdOffer
+                            fromMessage:false
+                  withCompletionHandler:^(NSString *successMessage, NSError *error) {
+                if (error && error.code > 0) {
+                    return completionBlock(nil, error);
+                }
+                
+                return completionBlock(successMessage, error);
+            }];
         }];
     }];
 }

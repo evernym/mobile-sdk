@@ -194,33 +194,38 @@ withCompletionHandler: (ResponseBlock) completionBlock {
                 // Store the serialized connection
                 NSMutableDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
                 
-                NSString *pwDid = [ConnectionInvitation getPwDid:successConnection];
-                NSString *name = [[Utilities jsonToDictionary: invitation] objectForKey: @"label"];
-                NSString *profileUrl = [[Utilities jsonToDictionary: invitation] objectForKey: @"profileUrl"];
-                
-                NSTimeInterval timeStamp = [[NSDate date] timeIntervalSinceNow];
-                NSString *timestamp = [NSString stringWithFormat:@"%@", [NSNumber numberWithDouble: timeStamp]];
-                NSString *uuid = [[NSUUID UUID] UUIDString];
-
-                NSDictionary* connectionObj = @{
-                    @"pwDid": pwDid,
-                    @"serialized": successConnection,
+                [ConnectionInvitation getPwDid:successConnection
+                         withCompletionHandler:^(NSString *pwDid, NSError *error) {
+                    if (error && error.code > 0) {
+                        return completionBlock(nil, error);
+                    }
                     
-                    @"name": name,
-                    @"profileUrl": profileUrl,
-                    @"timestamp": timestamp,
+                    NSString *name = [[Utilities jsonToDictionary: invitation] objectForKey: @"label"];
+                    NSString *profileUrl = [[Utilities jsonToDictionary: invitation] objectForKey: @"profileUrl"];
                     
-                    @"status": CONNECTION_COMPLETED_STATUS,
-                    
-                    @"invitation": invitation
-                };
+                    NSTimeInterval timeStamp = [[NSDate date] timeIntervalSinceNow];
+                    NSString *timestamp = [NSString stringWithFormat:@"%@", [NSNumber numberWithDouble: timeStamp]];
+                    NSString *uuid = [[NSUUID UUID] UUIDString];
 
-                [connections setValue: connectionObj forKey: uuid];
-                [LocalStorage store: @"connections" andObject: connections];
+                    NSDictionary* connectionObj = @{
+                        @"pwDid": pwDid,
+                        @"serialized": successConnection,
+                        
+                        @"name": name,
+                        @"profileUrl": profileUrl,
+                        @"timestamp": timestamp,
+                        
+                        @"status": CONNECTION_COMPLETED_STATUS,
+                        
+                        @"invitation": invitation
+                    };
 
-                return completionBlock(successConnection, nil);
+                    [connections setValue: connectionObj forKey: uuid];
+                    [LocalStorage store: @"connections" andObject: connections];
+
+                    return completionBlock(successConnection, nil);
+                }];
             }];
-            
         }];
     }];
 }
@@ -260,34 +265,41 @@ withCompletionHandler: (ResponseBlock) completionBlock {
 +(void)awaitConnectionCompleted:(NSString *) serializedConnection
             withCompletionBlock:(ResponseBlock) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
-    NSString *pwDid = [ConnectionInvitation getPwDid:serializedConnection];
-    __block NSString *serialized = @"";
-    
-    [sdkApi connectionDeserialize: serializedConnection
-                       completion:^(NSError *error, NSInteger connectionHandle) {
+
+    [ConnectionInvitation getPwDid:serializedConnection
+             withCompletionHandler:^(NSString *pwDid, NSError *error) {
         if (error && error.code > 0) {
             return completionBlock(nil, error);
         }
         
-        __block BOOL COMPLETE = NO;
-
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            while (1) {
-                dispatch_semaphore_t acceptedWaitSemaphore = dispatch_semaphore_create(0);
-                [self updateConnectionStatus:connectionHandle
-                                       pwDid:pwDid
-                         withCompletionBlock:^(NSString *successMessage, NSError *error) {
-                    if (successMessage) {
-                        COMPLETE = YES;
-                        serialized = successMessage;
-                        completionBlock(successMessage, error);
-                    }
-                    dispatch_semaphore_signal(acceptedWaitSemaphore);
-                }];
-                dispatch_semaphore_wait(acceptedWaitSemaphore, DISPATCH_TIME_FOREVER);
-                if (COMPLETE) break;
+        __block NSString *serialized = @"";
+        
+        [sdkApi connectionDeserialize: serializedConnection
+                           completion:^(NSError *error, NSInteger connectionHandle) {
+            if (error && error.code > 0) {
+                return completionBlock(nil, error);
             }
-        });
+            
+            __block BOOL COMPLETE = NO;
+
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                while (1) {
+                    dispatch_semaphore_t acceptedWaitSemaphore = dispatch_semaphore_create(0);
+                    [self updateConnectionStatus:connectionHandle
+                                           pwDid:pwDid
+                             withCompletionBlock:^(NSString *successMessage, NSError *error) {
+                        if (successMessage) {
+                            COMPLETE = YES;
+                            serialized = successMessage;
+                            completionBlock(successMessage, error);
+                        }
+                        dispatch_semaphore_signal(acceptedWaitSemaphore);
+                    }];
+                    dispatch_semaphore_wait(acceptedWaitSemaphore, DISPATCH_TIME_FOREVER);
+                    if (COMPLETE) break;
+                }
+            });
+        }];
     }];
 }
 

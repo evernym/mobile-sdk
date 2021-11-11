@@ -68,18 +68,23 @@ NSString *PROOF_COMPLETED_STATUS = @"completed";
             return completionBlock(successMessage, error);
         }];
     } else {
-        NSString *pwDid = [ConnectionInvitation getPwDid:existingConnection];
-
-        [self acceptProofRequest:pwDid
-                      attachment:attachment
-                         request:request
-                            name:name
-           withCompletionHandler:^(NSString *successMessage, NSError *error) {
+        [ConnectionInvitation getPwDid:existingConnection
+                 withCompletionHandler:^(NSString *pwDid, NSError *error) {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
             
-            return completionBlock(successMessage, error);
+            [self acceptProofRequest:pwDid
+                          attachment:attachment
+                             request:request
+                                name:name
+               withCompletionHandler:^(NSString *successMessage, NSError *error) {
+                if (error && error.code > 0) {
+                    return completionBlock(nil, error);
+                }
+                
+                return completionBlock(successMessage, error);
+            }];
         }];
     }
 }
@@ -142,18 +147,23 @@ NSString *PROOF_COMPLETED_STATUS = @"completed";
             return completionBlock(nil, error);
         }
         
-        NSString *pwDid = [ConnectionInvitation getPwDid:responseConnection];
-        
-        [self acceptProofRequest:pwDid
-                         attachment:attachment
-                         request:request
-                            name:name
-              withCompletionHandler:^(NSString *successMessage, NSError *error) {
+        [ConnectionInvitation getPwDid:responseConnection
+                 withCompletionHandler:^(NSString *pwDid, NSError *error) {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
             
-            return completionBlock(successMessage, error);
+            [self acceptProofRequest:pwDid
+                          attachment:attachment
+                             request:request
+                                name:name
+                  withCompletionHandler:^(NSString *successMessage, NSError *error) {
+                if (error && error.code > 0) {
+                    return completionBlock(nil, error);
+                }
+                
+                return completionBlock(successMessage, error);
+            }];
         }];
     }];
 }

@@ -79,7 +79,7 @@
                 NSArray* msgArray = [Utilities jsonToArray: messages];
                 if(msgArray && msgArray.count > 0) {
                     msgList = msgArray[0][@"msgs"];
-                    for (int i = 0; i < msgArray.count; i++) {
+                    for (int i = 0; i < msgList.count; i++) {
                         NSDictionary* message = msgList[i];
                         NSDictionary* payload = [Utilities jsonToDictionary:[message objectForKey: @"decryptedPayload"]];
                         NSDictionary *typeObj = [payload objectForKey:@"@type"];
