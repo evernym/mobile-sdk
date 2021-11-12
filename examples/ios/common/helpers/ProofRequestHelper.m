@@ -12,9 +12,11 @@
 
 @implementation ProofRequestHelper
 
+// Is it used???
+
 +(NSString *)getThid:(NSDictionary *) requests {
     NSString *thread_id = [requests valueForKey:@"~thread"];
-    
+
     return thread_id;
 }
 

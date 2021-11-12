@@ -15,7 +15,7 @@
 
 // Define your wallet name constant here
 NSString* walletName = @"Lor6Ohwaichool";
-NSString* sponsorServerURL = @"https://3ff8-83-139-159-140.ngrok.io";
+NSString* sponsorServerURL = @"";
 
 +(NSString*) getSponsorServerURL {
     return sponsorServerURL;
@@ -25,16 +25,16 @@ NSString* sponsorServerURL = @"https://3ff8-83-139-159-140.ngrok.io";
     return walletName;
 }
 
-+(NSString*) getAgencyConfig {
++(NSString*) getSDKConfig {
     NSString* walletKey = [self getWalletKey];
-    NSString* agencyUrl = @"https://agency.pstg.evernym.com";
-    NSString* agencyDid = @"LqnB96M6wBALqRZsrTTwda";
-    NSString* agencyVerKey = @"BpDPZHLbJFu67sWujecoreojiWZbi2dgf4xnYemUzFvB";
+    NSString* agencyUrl = @"https://agency.evernym.com";
+    NSString* agencyDid = @"DwXzE7GdE5DNfsrRXJChSD";
+    NSString* agencyVerKey = @"844sJfb2snyeEugKvpY7Y4jZJk9LT6BnS6bnuKoiqbip";
     NSString* protocolType = @"3.0";
-    NSString* institutionLogoUrl = @"https://robothash.com/logo.png";
-    NSString* institutionName = @"real institution name";
-    
-    return [NSString stringWithFormat: @"{\"agency_url\":\"%@\",\"agency_did\":\"%@\",\"agency_verkey\":\"%@\",\"wallet_name\":\"%@\",\"wallet_key\":\"%@\",\"agent_seed\":null,\"enterprise_seed\":null,\"protocol_type\":\"%@\",\"institution_logo_url\":\"%@\",\"institution_name\":\"%@\"}", agencyUrl, agencyDid, agencyVerKey, walletName, walletKey, protocolType, institutionLogoUrl, institutionName];
+    NSString* logo = @"https://robothash.com/logo.png";
+    NSString* name = @"real institution name";
+
+    return [NSString stringWithFormat: @"{\"agency_url\":\"%@\",\"agency_did\":\"%@\",\"agency_verkey\":\"%@\",\"wallet_name\":\"%@\",\"wallet_key\":\"%@\",\"protocol_type\":\"%@\",\"logo\":\"%@\",\"name\":\"%@\"}", agencyUrl, agencyDid, agencyVerKey, walletName, walletKey, protocolType, logo, name];
 }
 
 
