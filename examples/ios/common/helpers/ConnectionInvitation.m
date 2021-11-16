@@ -108,7 +108,7 @@ withCompletionHandler: (ResponseBlock) completionBlock {
 +(NSDictionary*)parsedInvite: (NSString *)invite {
     NSLog(@"invite np parsed %@", invite);
     if ([invite rangeOfString:@"oob"].location != NSNotFound) {
-        return [self parseInvitationLink: invite];
+        return [self parseInvitationLinkOOB: invite];
     } else if ([invite rangeOfString:@"c_i"].location != NSNotFound) {
         return [self parseInvitationLink: invite];
     } else {
@@ -164,6 +164,19 @@ withCompletionHandler: (ResponseBlock) completionBlock {
 
 +(NSDictionary*) parseInvitationLink: (NSString*) link {
     NSArray* linkComponents = [link componentsSeparatedByString: @"msg?c_i="];
+
+    if([linkComponents count] < 2) {
+        return nil;
+    }
+
+    NSData* invitationData = [Utilities decode64String: linkComponents[1]];
+    NSString*  json = [[NSString alloc] initWithData: invitationData encoding: NSUTF8StringEncoding];
+
+    return [Utilities jsonToDictionary: json];
+}
+
++(NSDictionary*) parseInvitationLinkOOB: (NSString*) link {
+    NSArray* linkComponents = [link componentsSeparatedByString: @"msg?oob="];
 
     if([linkComponents count] < 2) {
         return nil;
