@@ -19,7 +19,6 @@
 		8E50A0092281EFC80098812A /* MSDKSampleAppObjCUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E50A0082281EFC80098812A /* MSDKSampleAppObjCUITests.m */; };
 		DD00E0C82685FED50050BC88 /* HistoryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E0C72685FED50050BC88 /* HistoryViewController.m */; };
 		DD00E107268D931D0050BC88 /* CustomTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00E106268D931D0050BC88 /* CustomTableViewCell.m */; };
-		DD725CD8273936570040CCD6 /* ProductionPoolTxnGenesis.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CB9273936560040CCD6 /* ProductionPoolTxnGenesis.m */; };
 		DD725CD9273936570040CCD6 /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CBD273936560040CCD6 /* Config.m */; };
 		DD725CDA273936570040CCD6 /* MobileSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CBE273936560040CCD6 /* MobileSDK.m */; };
 		DD725CDB273936570040CCD6 /* ConnectionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CBF273936560040CCD6 /* ConnectionHandler.m */; };
@@ -87,10 +86,8 @@
 		DD00E106268D931D0050BC88 /* CustomTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomTableViewCell.m; sourceTree = "<group>"; };
 		DD00E114269457560050BC88 /* MSDKSampleAppObjC-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSDKSampleAppObjC-Prefix.pch"; sourceTree = "<group>"; };
 		DD1EEF42272C224F000EC21D /* XcodeKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XcodeKit.framework; path = Library/Frameworks/XcodeKit.framework; sourceTree = DEVELOPER_DIR; };
-		DD725CB9273936560040CCD6 /* ProductionPoolTxnGenesis.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProductionPoolTxnGenesis.m; sourceTree = "<group>"; };
 		DD725CBA273936560040CCD6 /* MobileSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MobileSDK.h; sourceTree = "<group>"; };
 		DD725CBB273936560040CCD6 /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
-		DD725CBC273936560040CCD6 /* ProductionPoolTxnGenesis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProductionPoolTxnGenesis.h; sourceTree = "<group>"; };
 		DD725CBD273936560040CCD6 /* Config.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Config.m; sourceTree = "<group>"; };
 		DD725CBE273936560040CCD6 /* MobileSDK.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MobileSDK.m; sourceTree = "<group>"; };
 		DD725CBF273936560040CCD6 /* ConnectionHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionHandler.m; sourceTree = "<group>"; };
@@ -267,8 +264,6 @@
 				DD725CBD273936560040CCD6 /* Config.m */,
 				DD725CBA273936560040CCD6 /* MobileSDK.h */,
 				DD725CBE273936560040CCD6 /* MobileSDK.m */,
-				DD725CBC273936560040CCD6 /* ProductionPoolTxnGenesis.h */,
-				DD725CB9273936560040CCD6 /* ProductionPoolTxnGenesis.m */,
 			);
 			path = types;
 			sourceTree = "<group>";
@@ -558,7 +553,6 @@
 				DD725CDC273936570040CCD6 /* Log.m in Sources */,
 				DD725CE5273936570040CCD6 /* CredentialOffer.m in Sources */,
 				8E509FE62281EFC60098812A /* AppDelegate.m in Sources */,
-				DD725CD8273936570040CCD6 /* ProductionPoolTxnGenesis.m in Sources */,
 				DD725CDA273936570040CCD6 /* MobileSDK.m in Sources */,
 				DD725CDE273936570040CCD6 /* Utilities.m in Sources */,
 				DD725CE0273936570040CCD6 /* Credential.m in Sources */,

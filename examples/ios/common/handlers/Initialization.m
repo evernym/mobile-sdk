@@ -9,15 +9,15 @@
 #import <Foundation/Foundation.h>
 #import "Initialization.h"
 #import "Utilities.h"
-#import "ProductionPoolTxnGenesis.h"
 #import "MobileSDK.h"
 #import "LocalStorage.h"
 #import "Config.h"
+#import "Log.h"
 
 @implementation Initialization
 
 +(void)initVCX {
-    [self initLogger];
+    [Log initLogger];
 
     NSMutableDictionary *keychainVcxConfig = [@{} mutableCopy];
     keychainVcxConfig[(__bridge id)kSecClass] = (__bridge id)kSecClassGenericPassword;
@@ -55,7 +55,6 @@
 
 +(void)provisionCloudAgentAndInitializeSdk:(NSMutableDictionary *)keychainVcxConfig {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
-    [self initLogger];
 
     NSString* sdkConfig = [Config getSDKConfig];
     NSLog(@"SDK config %@", sdkConfig);
@@ -160,14 +159,6 @@
 
         [LocalStorage store:token andString:@"provisioningToken"];
         return completionBlock(token, nil);
-    }];
-}
-
-// MOVE to Log.m
-+(void)initLogger {
-    [VcxLogger setDefaultLogger: @"TRACE"];
-    [VcxLogger setLogger: ^(NSObject *context, NSNumber *level, NSString *target, NSString *message, NSString *modulePath, NSString *file, NSNumber *line) {
-        NSLog(@"[Inside VcxLogger.setLogger callback]");
     }];
 }
 

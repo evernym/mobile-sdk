@@ -96,7 +96,7 @@ NSString *PROOF_COMPLETED_STATUS = @"completed";
     withCompletionHandler:(ResponseBlock) completionBlock {
     NSString *serializedConnection = [ConnectionInvitation getConnectionByPwDid:pwDid];
     
-    [ProofRequest sendProofRequest:request
+    [ProofRequest sendProof:request
               serializedConnection:serializedConnection
              withCompletionHandler:^(NSDictionary *proofRequest, NSError *error) {
         if (error && error.code > 0) {

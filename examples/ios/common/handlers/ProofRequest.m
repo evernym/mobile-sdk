@@ -40,10 +40,9 @@
     }
 }
 
-// rename: sendProof
-+(void) sendProofRequest:(NSDictionary *) proofRequest
-    serializedConnection:(NSString *) serializedConnection
-   withCompletionHandler:(ResponseWithObject) completionBlock {
++(void) sendProof:(NSDictionary *) proofRequest
+serializedConnection:(NSString *) serializedConnection
+withCompletionHandler:(ResponseWithObject) completionBlock {
     [self retrieveAvailableCredentials:[Utilities dictToJsonString:proofRequest]
                            withCompletionHandler:^(NSDictionary *creds, NSError *error) {
         if (error && error.code > 0) {

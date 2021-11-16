@@ -28,7 +28,10 @@ NSString *CONNECTION_COMPLETED_STATUS = @"completed";
     NSDictionary *inviteDict = [Utilities jsonToDictionary:invitation];
     NSArray* handshakeProtocols = [inviteDict objectForKey: @"handshake_protocols"];
     NSString* handshakeProtocolsValue = handshakeProtocols[0];
-
+    
+    NSString *HANDSHAKE = MessageType(HandshakeType);
+    NSString *threadId = [inviteDict objectForKey: @"@id"];
+    
     if ([handshakeProtocolsValue  isEqual: @""] || handshakeProtocolsValue == nil) {
         return completionBlock(false, nil);
     }
@@ -45,15 +48,34 @@ NSString *CONNECTION_COMPLETED_STATUS = @"completed";
             if (error && error.code > 0) {
                 return completionBlock(false, error);
             }
+            
+            __block BOOL COMPLETE = NO;
 
-            [Message waitHandshakeReuse:^(BOOL result, NSError *error) {
-                if (error && error.code > 0) {
-                    return completionBlock(false, error);
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                while (1) {
+                    dispatch_semaphore_t acceptedWaitSemaphore = dispatch_semaphore_create(0);
+                    [Message downloadMessage:HANDSHAKE
+                                      soughtId:threadId
+                           withCompletionBlock:^(NSDictionary *message, NSError *error) {
+                        if (message != nil) {
+                            [ConnectionInvitation getPwDid:serializedConnection
+                                     withCompletionHandler:^(NSString *pwDid, NSError *error) {
+                                [Message updateMessageStatus:pwDid
+                                                     messageId:[message objectForKey:@"uid"]
+                                           withCompletionBlock:^(BOOL result, NSError *error) {
+                                    if (error && error.code > 0) {
+                                        return completionBlock(false, error);
+                                    }
+                                    
+                                    return completionBlock(result, nil);
+                                }];
+                            }];
+                        }
+                    }];
+                    dispatch_semaphore_wait(acceptedWaitSemaphore, DISPATCH_TIME_FOREVER);
+                    if (COMPLETE) break;
                 }
-                if (result) {
-                    return completionBlock(true, nil);
-                }
-            }];
+            });
         }];
     }];
 }
