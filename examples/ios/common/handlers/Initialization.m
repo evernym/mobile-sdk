@@ -9,16 +9,16 @@
 #import <Foundation/Foundation.h>
 #import "Initialization.h"
 #import "Utilities.h"
-#import "ProductionPoolTxnGenesis.h"
 #import "MobileSDK.h"
 #import "LocalStorage.h"
 #import "Config.h"
+#import "Log.h"
 
 @implementation Initialization
 
 +(void)initVCX {
-    [self initLogger];
-    
+    [Log initLogger];
+
     NSMutableDictionary *keychainVcxConfig = [@{} mutableCopy];
     keychainVcxConfig[(__bridge id)kSecClass] = (__bridge id)kSecClassGenericPassword;
     keychainVcxConfig[(__bridge id)kSecAttrAccessible] = (__bridge id)kSecAttrAccessibleWhenUnlocked;
@@ -45,7 +45,7 @@
             if (error && error.code > 0) {
                 return [Utilities printError: error];
             }
-            
+
             [MobileSDK shared].sdkInited = true;
             [[NSNotificationCenter defaultCenter] postNotificationName:@"vcxInitialized" object: nil userInfo: nil];
             [Utilities printSuccess:@[@"######## VCX Init Pool Successful! :) #########"]];
@@ -55,11 +55,10 @@
 
 +(void)provisionCloudAgentAndInitializeSdk:(NSMutableDictionary *)keychainVcxConfig {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
-    [self initLogger];
-    
-    NSString* agencyConfig = [Config getAgencyConfig];
-    NSLog(@"Agency config %@", agencyConfig);
-    
+
+    NSString* sdkConfig = [Config getSDKConfig];
+    NSLog(@"SDK config %@", sdkConfig);
+
     [self retreiveProvisioningToken:^(NSString *token, NSError *error) {
         if(error != nil && error > 0) {
             NSLog(@"Provisioning token error: %@", error);
@@ -70,8 +69,8 @@
             return;
         }
         [LocalStorage store:token andString:@"provisioningToken"];
-        
-        const char* oneTimeInfo = [sdkApi agentProvisionWithToken: agencyConfig token: token];
+
+        const char* oneTimeInfo = [sdkApi agentProvisionWithToken: sdkConfig token: token];
         if(oneTimeInfo == nil) {
             NSLog(@"OneTimeInfo is null. Cannot proceed with provisioning");
             return;
@@ -89,15 +88,15 @@
     OSStatus sts = SecItemAdd((__bridge CFDictionaryRef)keychainVcxConfig, NULL);
     [Utilities printErrorMessage: [NSString stringWithFormat: @"Error Code while adding new vcxConfig: %d", (int)sts]];
 }
-    
+
 +(NSString *)getSecurePrefVcxConfig:(NSMutableDictionary*) keychainVcxConfig {
     NSString *vcxConfig = nil;
-    
+
     keychainVcxConfig[(__bridge id)kSecReturnData] = (__bridge id)kCFBooleanTrue;
     keychainVcxConfig[(__bridge id)kSecReturnAttributes] = (__bridge id)kCFBooleanTrue;
     CFDictionaryRef result = nil;
     OSStatus cecItem = SecItemCopyMatching((__bridge CFDictionaryRef)keychainVcxConfig, (CFTypeRef *)&result);
-    
+
     if (cecItem == noErr) {
         NSDictionary *resultDict = ( NSDictionary *)result;
         NSData *vcxConfigData = resultDict[(__bridge id)kSecValueData];
@@ -132,7 +131,7 @@
 +(void)initPool:(ResponseBlock) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
     NSString *poolConfig = [Config getPoolConfig];
-    
+
     [sdkApi initPool:(NSString *)poolConfig
           completion:^(NSError *error) {
         return completionBlock(nil, error);
@@ -160,13 +159,6 @@
 
         [LocalStorage store:token andString:@"provisioningToken"];
         return completionBlock(token, nil);
-    }];
-}
-
-+(void)initLogger {
-    [VcxLogger setDefaultLogger: @"TRACE"];
-    [VcxLogger setLogger: ^(NSObject *context, NSNumber *level, NSString *target, NSString *message, NSString *modulePath, NSString *file, NSNumber *line) {
-        NSLog(@"[Inside VcxLogger.setLogger callback]");
     }];
 }
 

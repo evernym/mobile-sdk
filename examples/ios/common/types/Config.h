@@ -12,7 +12,7 @@
 @interface Config : NSObject
 
 +(NSString*) getWalletName;
-+(NSString*) getAgencyConfig;
++(NSString*) getSDKConfig;
 +(NSString*) getWalletKey;
 +(NSString*) getGenesisFilePath;
 +(NSString*) getPoolConfig;

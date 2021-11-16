@@ -40,10 +40,10 @@
                     NSMutableDictionary *msgDict = [@{} mutableCopy];
 
                     NSDictionary *payload = [Utilities jsonToDictionary:[msg objectForKey:@"decryptedPayload"]];
-                    
+
                     NSDictionary *typeObj = [payload objectForKey:@"@type"];
                     NSString *type = [typeObj objectForKey:@"name"];
-                    
+
                     NSString *uid = [msg objectForKey:@"uid"];
                     NSString *ms = [payload objectForKey:@"@msg"];
                     NSString *status = [msg objectForKey:@"statusCode"];
@@ -63,48 +63,15 @@
     }
 }
 
-+ (void)waitHandshakeReuse: (ResponseWithBoolean) completionBlock {
-    NSError* error;
-    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
-    
-    @try {
-        NSString* messageType = MessageStatusTypeValue(Received);
-        [sdkApi downloadMessages: messageType
-                           uid_s: nil
-                          pwdids: nil
-                      completion: ^(NSError *error, NSString *messages) {
-            NSMutableArray* msgList = [@[] mutableCopy];
-            NSLog(@"messages %@", messages);
-            if (messages) {
-                NSArray* msgArray = [Utilities jsonToArray: messages];
-                if(msgArray && msgArray.count > 0) {
-                    msgList = msgArray[0][@"msgs"];
-                    for (int i = 0; i < msgList.count; i++) {
-                        NSDictionary* message = msgList[i];
-                        NSDictionary* payload = [Utilities jsonToDictionary:[message objectForKey: @"decryptedPayload"]];
-                        NSDictionary *typeObj = [payload objectForKey:@"@type"];
-                        NSString *type = [typeObj objectForKey:@"name"];
-                        if ([type  isEqual: @"handshake-reuse-accepted"]) {
-                            return completionBlock(true, nil);
-                        }
-                    }
-                }
-            }
-        }];
-    } @catch (NSException *exception) {
-        return completionBlock(false, error);
-    }
-}
-
 + (void)updateMessageStatus:(NSString *) pwDid
                   messageId:(NSString *) messageId
         withCompletionBlock:(ResponseWithBoolean) completionBlock {
     NSError* error;
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
-    
+
     @try {
         NSString *pwdidsJson = [NSString stringWithFormat: @"[{\"pairwiseDID\":\"%@\",\"uids\":[\"%@\"]}]", pwDid, messageId];
-        
+
         [sdkApi updateMessages:@"MS-106"
                     pwdidsJson:pwdidsJson
                     completion:^(NSError *error) {
@@ -131,7 +98,7 @@
     [Message downloadAllMessages:^(NSArray *responseArray, NSError *error) {
         NSLog(@"state CDMSG message22 %@", responseArray);
         NSDictionary *result = nil;
-        
+
         for (NSInteger i = 0; i < responseArray.count; i++) {
             NSDictionary *message = responseArray[i];
             NSString *payload = [message objectForKey:@"payload"];
@@ -142,8 +109,6 @@
             if ([messageType isEqual:CREDENTIAL] && [type rangeOfString:@"issue-credential/1.0/issue-credential"].location != NSNotFound) {
                 NSDictionary *thread = [payloadDict objectForKey:@"~thread"];
                 NSString *thid = [thread objectForKey:@"thid"];
-                
-                NSLog(@"state CDMSG message22 %@, %@", soughtId, thid);
 
                 if ([thid isEqual:soughtId]) {
                     result = message;
@@ -164,9 +129,9 @@
             }
             if ([messageType isEqual:HANDSHAKE] && [type rangeOfString:@"handshake-reuse-accepted"].location != NSNotFound) {
                 NSDictionary *thread = [payloadDict objectForKey:@"~thread"];
-                NSString *thid = [thread objectForKey:@"thid"];
-                
-                if ([thid isEqual:soughtId]) {
+                NSString *pthid = [thread objectForKey:@"pthid"];
+
+                if ([pthid isEqual:soughtId]) {
                     result = message;
                     break;
                 }
@@ -176,6 +141,7 @@
     }];
 }
 
+// TODO: move to separate file
 + (void)answerQuestion:(NSString *)serializedConnection
                message:(NSString *)message
                 answer:(NSString *)answer

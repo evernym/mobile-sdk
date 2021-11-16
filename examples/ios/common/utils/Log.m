@@ -40,4 +40,11 @@ void append(NSString *msg){
     [handle writeData:[msg dataUsingEncoding:NSUTF8StringEncoding]];
     [handle closeFile];
 }
+
++(void)initLogger {
+    [VcxLogger setDefaultLogger: @"TRACE"];
+    [VcxLogger setLogger: ^(NSObject *context, NSNumber *level, NSString *target, NSString *message, NSString *modulePath, NSString *file, NSNumber *line) {
+        NSLog(@"[Inside VcxLogger.setLogger callback]");
+    }];
+}
 @end

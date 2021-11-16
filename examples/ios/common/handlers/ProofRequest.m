@@ -40,9 +40,9 @@
     }
 }
 
-+(void) sendProofRequest:(NSDictionary *) proofRequest
-    serializedConnection:(NSString *) serializedConnection
-   withCompletionHandler:(ResponseWithObject) completionBlock {
++(void) sendProof:(NSDictionary *) proofRequest
+serializedConnection:(NSString *) serializedConnection
+withCompletionHandler:(ResponseWithObject) completionBlock {
     [self retrieveAvailableCredentials:[Utilities dictToJsonString:proofRequest]
                            withCompletionHandler:^(NSDictionary *creds, NSError *error) {
         if (error && error.code > 0) {
@@ -97,7 +97,7 @@ withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
 withCompletionHandler: (ResponseWithObject) completionBlock {
     NSError* error;
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
-    
+
     @try {
         [sdkApi connectionDeserialize:serializedConnection
                            completion:^(NSError *error, NSInteger connectionHandle) {
@@ -148,14 +148,14 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
 
 + (NSDictionary*)vcxMatchingCredentials: (NSString*) matchingCredentials {
     NSError *error;
-    
+
     NSMutableDictionary *machingCredsJSON = [[Utilities jsonToDictionary: matchingCredentials] mutableCopy];
 
     NSMutableDictionary *autofilledAttributes = [@{} mutableCopy];
     NSMutableDictionary *selfAttestedAttributes = [@{} mutableCopy];
-    
+
     NSMutableDictionary *result = [@{@"autofilledAttributes": @"{}", @"selfAttestedAttributes": @"{}"} mutableCopy];
-    
+
     if (!machingCredsJSON) {
         NSLog(@"Error parsing matchingCredentials JSON: %@", error);
         return nil;
@@ -180,10 +180,10 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
         // This detiails we will gather from user entering manually in UI form
         [selfAttestedAttributes setValue: @"myTestValue" forKey: attr];
     }
-    
+
     [result setValue: [Utilities toJsonString: [autofilledAttributes count] > 0 ? @{@"attrs": autofilledAttributes}: @{}] forKey: @"autofilledAttributes"];
     [result setValue: [Utilities toJsonString: selfAttestedAttributes] forKey:@"selfAttestedAttributes"];
-    
+
     return result;
 }
 
@@ -233,7 +233,7 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
      withCompletionHandler: (ResponseWithObject) completionBlock {
     NSError* error;
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
-    
+
     @try {
         [sdkApi connectionDeserialize:serializedConnection
                            completion:^(NSError *error, NSInteger connectionHandle) {
@@ -244,7 +244,7 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
                       withCompletion:^(NSError *error, vcx_proof_handle_t proofHandle) {
                 if (error && error.code > 0) {
                     return completionBlock(nil, error);
-                    
+
                 };
                 [sdkApi proofReject:proofHandle
                withConnectionHandle:(int)connectionHandle
