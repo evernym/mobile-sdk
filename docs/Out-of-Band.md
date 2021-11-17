@@ -62,7 +62,19 @@ Connection exists if one of the following conditions resolve for one of the exis
     * base64decode(invitation['request~attach'][0]['data']['base64'])
     * invitation['request~attach'][0]['data']['json']
 
-   It is recommended to use `vcx_extract_attached_message` method from vcx. Examples for iOS [extractRequestAttach](../examples/ios/common/helpers/ConnectionInvitation.m)
+    It is recommended to use `vcx_extract_attached_message`:
+    ##### iOS
+    ```objC
+    [appDelegate.sdkApi extractAttachedMessage:invite
+      completion:^(NSError *error, NSString *attachedMessage) {
+          // ...
+    }];
+    ```
+    
+    ##### Android
+    ```java
+    String attachment = UtilsApi.vcxExtractAttachedMessage(invite).get();
+    ```
 4. Start protocol related to the extracted message:
     * proof request - DisclosedProofApi.proofCreateWithRequest
     * question - answer question
@@ -83,7 +95,19 @@ Connection exists if one of the following conditions resolve for one of the exis
     * base64decode(invitation['request~attach'][0]['data']['base64'])
     * invitation['request~attach'][0]['data']['json']
     
-   It is recommended to use `vcx_extract_attached_message` method from vcx. Examples for iOS [extractRequestAttach](../examples/ios/common/helpers/ConnectionInvitation.m)
+    It is recommended to use `vcx_extract_attached_message`:
+    ##### iOS
+    ```objC
+    [appDelegate.sdkApi extractAttachedMessage:invite
+      completion:^(NSError *error, NSString *attachedMessage) {
+          // ...
+    }];
+    ```
+    
+    ##### Android
+    ```java
+    String attachment = UtilsApi.vcxExtractAttachedMessage(invite).get();
+    ```
 4. Start protocol related to the extracted message:
     * credential offer - CredentialApi.credentialCreateWithOffer ...
     * proof request - DisclosedProofApi.proofCreateWithRequest ...
@@ -114,7 +138,19 @@ Connection exists if one of the following conditions resolve for one of the exis
     * base64decode(invitation['request~attach'][0]['data']['base64'])
     * invitation['request~attach'][0]['data']['json']
 
-    It is recommended to use `vcx_extract_attached_message` method from vcx. Examples for iOS [extractRequestAttach](../examples/ios/common/helpers/ConnectionInvitation.m)
+    It is recommended to use `vcx_extract_attached_message`:
+    ##### iOS
+    ```objC
+    [appDelegate.sdkApi extractAttachedMessage:invite
+      completion:^(NSError *error, NSString *attachedMessage) {
+          // ...
+    }];
+    ```
+    
+    ##### Android
+    ```java
+    String attachment = UtilsApi.vcxExtractAttachedMessage(invite).get();
+    ```
 2. Start protocol related to the extracted message:
     * credential offer - CredentialApi.credentialCreateWithOffer ...
     * proof request - DisclosedProofApi.proofCreateWithRequest
@@ -137,7 +173,19 @@ Connection exists if one of the following conditions resolve for one of the exis
     * base64decode(invitation['request~attach'][0]['data']['base64'])
     * invitation['request~attach'][0]['data']['json']
 
-   It is recommended to use `vcx_extract_attached_message` method from vcx. Examples for iOS [extractRequestAttach](../examples/ios/common/helpers/ConnectionInvitation.m)
+    It is recommended to use `vcx_extract_attached_message` method from vcx:
+    #### iOS
+    ```objC
+    [appDelegate.sdkApi extractAttachedMessage:invite
+      completion:^(NSError *error, NSString *attachedMessage) {
+          // ...
+    }];
+    ```
+    
+    #### Android
+    ```java
+    String attachment = UtilsApi.vcxExtractAttachedMessage(invite).get();
+    ```
 3. Start protocol related to the extracted message:
     * credential offer - CredentialApi.credentialCreateWithOffer ...
     * proof request - DisclosedProofApi.proofCreateWithRequest
