@@ -1,6 +1,7 @@
 package msdk.kotlin.sample.messages
 
 import android.util.Base64
+import com.evernym.sdk.vcx.utils.UtilsApi
 import msdk.kotlin.sample.utils.CommonUtils
 import org.json.JSONArray
 import org.json.JSONException
@@ -35,23 +36,8 @@ class ProofRequestMessage(
 
         fun decodeProofRequestAttach(proofAttach: JSONObject): JSONObject? {
             try {
-                val requestAttachCode =
-                    proofAttach.getString("request_presentations~attach")
-                val requestsAttachItems = JSONArray(requestAttachCode)
-                if (requestsAttachItems.length() == 0) {
-                    return null
-                }
-                val requestsAttachItem = requestsAttachItems.getJSONObject(0)
-                val requestsAttachItemData = requestsAttachItem.getJSONObject("data")
-                val requestsAttachItemBase =
-                    requestsAttachItemData.getString("base64")
-                val requestAttachDecode = String(
-                    Base64.decode(
-                        requestsAttachItemBase,
-                        Base64.NO_WRAP
-                    )
-                )
-                return CommonUtils.convertToJSONObject(requestAttachDecode)
+                val attachment = UtilsApi.vcxExtractAttachedMessage(proofAttach.toString()).get()
+                return CommonUtils.convertToJSONObject(attachment)
             } catch (e: JSONException) {
                 e.printStackTrace()
             }
