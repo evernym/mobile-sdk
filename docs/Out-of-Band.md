@@ -61,6 +61,8 @@ Connection exists if one of the following conditions resolve for one of the exis
 3. Extract the original message from invitation `request~attach` field:
     * base64decode(invitation['request~attach'][0]['data']['base64'])
     * invitation['request~attach'][0]['data']['json']
+
+   It is recommended to use `vcx_extract_attached_message` method from vcx. Examples for iOS [extractRequestAttach](../examples/ios/common/helpers/ConnectionInvitation.m)
 4. Start protocol related to the extracted message:
     * proof request - DisclosedProofApi.proofCreateWithRequest
     * question - answer question
@@ -80,6 +82,8 @@ Connection exists if one of the following conditions resolve for one of the exis
 3. Extract the original message from invitation `request~attach` field:
     * base64decode(invitation['request~attach'][0]['data']['base64'])
     * invitation['request~attach'][0]['data']['json']
+    
+   It is recommended to use `vcx_extract_attached_message` method from vcx. Examples for iOS [extractRequestAttach](../examples/ios/common/helpers/ConnectionInvitation.m)
 4. Start protocol related to the extracted message:
     * credential offer - CredentialApi.credentialCreateWithOffer ...
     * proof request - DisclosedProofApi.proofCreateWithRequest ...
@@ -109,6 +113,8 @@ Connection exists if one of the following conditions resolve for one of the exis
 1. Extract the original message from invitation `request~attach` field:
     * base64decode(invitation['request~attach'][0]['data']['base64'])
     * invitation['request~attach'][0]['data']['json']
+
+    It is recommended to use `vcx_extract_attached_message` method from vcx. Examples for iOS [extractRequestAttach](../examples/ios/common/helpers/ConnectionInvitation.m)
 2. Start protocol related to the extracted message:
     * credential offer - CredentialApi.credentialCreateWithOffer ...
     * proof request - DisclosedProofApi.proofCreateWithRequest
@@ -130,6 +136,8 @@ Connection exists if one of the following conditions resolve for one of the exis
 2. Extract the original message from invitation `request~attach` field:
     * base64decode(invitation['request~attach'][0]['data']['base64'])
     * invitation['request~attach'][0]['data']['json']
+
+   It is recommended to use `vcx_extract_attached_message` method from vcx. Examples for iOS [extractRequestAttach](../examples/ios/common/helpers/ConnectionInvitation.m)
 3. Start protocol related to the extracted message:
     * credential offer - CredentialApi.credentialCreateWithOffer ...
     * proof request - DisclosedProofApi.proofCreateWithRequest

@@ -47,41 +47,45 @@
         }
         
         if ([ConnectionInvitation isOutOfBandInvitation:type]) {
-            NSDictionary *attachment = [ConnectionInvitation extractRequestAttach: [Utilities jsonToDictionary:invite]];
-
-            if (attachment) {
-                [self handleOutOfBandConnectionInvitationWithAttachment: invite
-                                                             attachment:attachment
-                                                     existingConnection:existingConnection
-                                                                   name:name
-                                                  withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
-                    if (error && error.code > 0) {
-                        [Utilities printError:error];
-                    }
-                    return completionBlock([Utilities dictToJsonString: responseObject], error);
-                }];
-            } else {
-                if (existingConnection != nil) {
-                    [Connection connectionRedirectAriesOutOfBand:invite
-                                            serializedConnection:existingConnection
-                                           withCompletionHandler:^(BOOL result, NSError *error) {
+            [ConnectionInvitation extractRequestAttach:[Utilities jsonToDictionary:invite] withCompletionHandler:^(NSString *attachment, NSError *error) {
+                if (error && error.code > 0) {
+                    [Utilities printError:error];
+                }
+                
+                if (attachment) {
+                    [self handleOutOfBandConnectionInvitationWithAttachment:invite
+                                                                 attachment:[Utilities jsonToDictionary: attachment]
+                                                         existingConnection:existingConnection
+                                                                       name:name
+                                                      withCompletionHandler:^(NSDictionary *responseObject, NSError *error) {
                         if (error && error.code > 0) {
                             [Utilities printError:error];
                         }
-                        
-                        [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
-                        return completionBlock(nil, error);
+                        return completionBlock([Utilities dictToJsonString: responseObject], error);
                     }];
                 } else {
-                    [Connection createConnection:invite
-                           withCompletionHandler:^(NSString *responseConnection, NSError *error) {
-                        if (error && error.code > 0) {
-                            [Utilities printError:error];
-                        }
-                        return completionBlock(responseConnection, error);
-                    }];
+                    if (existingConnection != nil) {
+                        [Connection connectionRedirectAriesOutOfBand:invite
+                                                serializedConnection:existingConnection
+                                               withCompletionHandler:^(BOOL result, NSError *error) {
+                            if (error && error.code > 0) {
+                                [Utilities printError:error];
+                            }
+                            
+                            [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
+                            return completionBlock(nil, error);
+                        }];
+                    } else {
+                        [Connection createConnection:invite
+                               withCompletionHandler:^(NSString *responseConnection, NSError *error) {
+                            if (error && error.code > 0) {
+                                [Utilities printError:error];
+                            }
+                            return completionBlock(responseConnection, error);
+                        }];
+                    }
                 }
-            }
+            }];
         }
     }];
 }

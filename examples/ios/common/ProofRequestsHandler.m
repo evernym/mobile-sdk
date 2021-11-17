@@ -104,35 +104,38 @@ NSString *PROOF_COMPLETED_STATUS = @"completed";
         }
         
         // Store the serialized proof
-        NSMutableDictionary* proofs = [[LocalStorage getObjectForKey: @"proofs" shouldCreate: true] mutableCopy];
-        
-        NSString *threadId = [Proof getThid:attachment];
-        NSString *requested_attributes = [Proof getAttributes:attachment];
-        NSString *requested_predicates = [Proof getPredicates:attachment];
-        
-        NSTimeInterval timeStamp = [[NSDate date] timeIntervalSinceNow];
-        NSString *timestamp = [NSString stringWithFormat:@"%@", [NSNumber numberWithDouble: timeStamp]];
-        NSString *uuid = [[NSUUID UUID] UUIDString];
+        [ConnectionInvitation extractRequestAttach:attachment
+                             withCompletionHandler:^(NSString *attachmentMessage, NSError *error) {
+            NSMutableDictionary* proofs = [[LocalStorage getObjectForKey: @"proofs" shouldCreate: true] mutableCopy];
+            NSString *threadId = [Proof getThid:attachment];
+            
+            NSString *requestedAttributes = [[Utilities jsonToDictionary:attachmentMessage] valueForKey:@"requested_attributes"];
+            NSString *requestedPredicates = [[Utilities jsonToDictionary:attachmentMessage] valueForKey:@"requested_predicates"];
+            
+            NSTimeInterval timeStamp = [[NSDate date] timeIntervalSinceNow];
+            NSString *timestamp = [NSString stringWithFormat:@"%@", [NSNumber numberWithDouble: timeStamp]];
+            NSString *uuid = [[NSUUID UUID] UUIDString];
 
-        NSDictionary* proofObj = @{
-            @"pwDid": pwDid,
-            @"serialized": [Utilities dictToJsonString:proofRequest],
-            @"threadId": threadId,
+            NSDictionary* proofObj = @{
+                @"pwDid": pwDid,
+                @"serialized": [Utilities dictToJsonString:proofRequest],
+                @"threadId": threadId,
+                
+                @"title": name,
+                @"requested_attributes": requestedAttributes,
+                @"requested_predicates": requestedPredicates,
+                
+                @"timestamp": timestamp,
+                @"status": PROOF_COMPLETED_STATUS,
+            };
             
-            @"title": name,
-            @"requested_attributes": requested_attributes,
-            @"requested_predicates": requested_predicates,
+            [proofs setValue: proofObj forKey: uuid];
+            [LocalStorage store: @"proofs" andObject: proofs];
             
-            @"timestamp": timestamp,
-            @"status": PROOF_COMPLETED_STATUS,
-        };
-        
-        [proofs setValue: proofObj forKey: uuid];
-        [LocalStorage store: @"proofs" andObject: proofs];
-        
-        [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Proof request send", @""]];
-        
-        return completionBlock([Utilities dictToJsonString:proofRequest], error);
+            [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Proof request send", name]];
+            
+            return completionBlock([Utilities dictToJsonString:proofRequest], error);
+        }];
     }];
 }
 
