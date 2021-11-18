@@ -19,7 +19,6 @@
 
 #import "Config.h"
 #import "MobileSDK.h"
-#import "ProductionPoolTxnGenesis.h"
 
 #import "LocalStorage.h"
 #import "Log.h"
