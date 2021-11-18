@@ -29,7 +29,7 @@ public class MessageAttachment {
 
     public static MessageAttachment parse(String invite) {
         try {
-            String attachment = UtilsApi.vcxExtractAttachedMessage(Objects.requireNonNull(fixForRequestField(invite))).get();
+            String attachment = UtilsApi.vcxExtractAttachedMessage(invite).get();
             JSONObject attachmentJson = CommonUtils.convertToJSONObject(attachment);
             assert attachmentJson != null;
             attachmentJson.put("@id", getIdFromInvite(invite));
@@ -37,29 +37,6 @@ public class MessageAttachment {
             return new MessageAttachment(type, attachmentJson);
         } catch (VcxException | JSONException | InterruptedException | ExecutionException e) {
             e.printStackTrace();
-        }
-        return null;
-    }
-
-    private static String fixForRequestField(String invite) {
-        try {
-            JSONObject fixInvite = new JSONObject();
-            JSONObject inviteJson = new JSONObject(invite);
-
-            fixInvite.put("goal", inviteJson.getString("goal"));
-            fixInvite.put("service", inviteJson.getJSONArray("service"));
-            fixInvite.put("@id", inviteJson.getString("@id"));
-            fixInvite.put("@type", inviteJson.getString("@type"));
-            fixInvite.put("profileUrl", inviteJson.getString("profileUrl"));
-            fixInvite.put("handshake_protocols", inviteJson.getJSONArray("handshake_protocols"));
-            fixInvite.put("label", inviteJson.getString("label"));
-            fixInvite.put("goal_code", inviteJson.getString("goal_code"));
-            fixInvite.put("public_did", inviteJson.getString("public_did"));
-            fixInvite.put("requests~attach", inviteJson.getJSONArray("request~attach"));
-
-            return fixInvite.toString();
-        } catch (JSONException exp) {
-            exp.printStackTrace();
         }
         return null;
     }

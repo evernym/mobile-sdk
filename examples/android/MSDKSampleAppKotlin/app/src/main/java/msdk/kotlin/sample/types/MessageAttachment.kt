@@ -18,7 +18,7 @@ class MessageAttachment(var type: String, var data: JSONObject) {
     companion object {
         fun parse(invite: String?): MessageAttachment? {
             try {
-                val attachment = UtilsApi.vcxExtractAttachedMessage(fixForRequestField(invite)).get()
+                val attachment = UtilsApi.vcxExtractAttachedMessage(invite).get()
                 val attachmentJson = CommonUtils.convertToJSONObject(attachment)!!
                 attachmentJson.put("@id", getIdFromInvite(invite))
                 val type = attachmentJson.getString("@type")
@@ -31,27 +31,6 @@ class MessageAttachment(var type: String, var data: JSONObject) {
                 e.printStackTrace()
             } catch (e: ExecutionException) {
                 e.printStackTrace()
-            }
-            return null
-        }
-
-        private fun fixForRequestField(invite: String?): String? {
-            try {
-                val fixInvite = JSONObject()
-                val inviteJson = CommonUtils.convertToJSONObject(invite)
-                fixInvite.put("goal", inviteJson?.getString("goal"))
-                fixInvite.put("service", inviteJson?.getJSONArray("service"))
-                fixInvite.put("@id", inviteJson?.getString("@id"))
-                fixInvite.put("@type", inviteJson?.getString("@type"))
-                fixInvite.put("profileUrl", inviteJson?.getString("profileUrl"))
-                fixInvite.put("handshake_protocols", inviteJson?.getJSONArray("handshake_protocols"))
-                fixInvite.put("label", inviteJson?.getString("label"))
-                fixInvite.put("goal_code", inviteJson?.getString("goal_code"))
-                fixInvite.put("public_did", inviteJson?.getString("public_did"))
-                fixInvite.put("requests~attach", inviteJson?.getJSONArray("request~attach"))
-                return fixInvite.toString()
-            } catch (exp: JSONException) {
-                exp.printStackTrace()
             }
             return null
         }
