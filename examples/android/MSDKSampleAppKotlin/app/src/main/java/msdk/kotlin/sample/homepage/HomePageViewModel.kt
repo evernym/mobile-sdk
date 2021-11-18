@@ -289,10 +289,14 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
                     )
                 }
             } else {
+                var goal: String? = "Connection request"
+                if (inviteObject.has("goal")) {
+                    goal = inviteObject.getString("goal")
+                }
                 action = Actions.createActionWithConnectionInvitation(
                     MessageType.CONNECTION_INVITATION.toString(),
                     inviteObject.getString("label"),
-                    inviteObject.getString("goal"),
+                    goal,
                     inviteObject.getString("profileUrl"),
                     invite
                 )
