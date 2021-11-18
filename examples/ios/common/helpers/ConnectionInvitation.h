@@ -34,7 +34,8 @@ withCompletionHandler: (ResponseBlock) completionBlock;
 
 +(NSString*) connectionID: connectValues;
 +(NSString*) getConnectionByPwDid: (NSString *) pwDidMes;
-+(NSDictionary*) parsedInvite: (NSString *)invite;
++(void) parsedInvite: (NSString *)invite
+withCompletionHandler: (ResponseWithObject) completionBlock;
 
 +(NSArray*) getAllSerializedConnections;
 +(BOOL) compareInvites:(NSString *)newInvite

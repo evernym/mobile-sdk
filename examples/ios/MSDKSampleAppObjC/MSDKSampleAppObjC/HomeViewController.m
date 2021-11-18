@@ -98,23 +98,29 @@ UIGestureRecognizer *tapper;
 }
 
 - (void) createActionWithInvitation:(NSString *) data {
-    NSDictionary *connectValues = [ConnectionInvitation parsedInvite: data];
-    NSString *label = [connectValues objectForKey: @"label"];
-    NSString *goal = @"";
-    if ([connectValues valueForKey:@"goal"] != nil) {
-        goal = [connectValues objectForKey: @"goal"];
-    } else {
-        goal = @"New connection";
-    }
-    NSString *profileUrl = [connectValues objectForKey: @"profileUrl"];
-    
-    [self createAction:label
-            profileUrl:profileUrl
-                  goal:goal
-                  type:OOB
-                  data:[Utilities dictToJsonString:connectValues]
-        additionalData:@""
-                 pwDid:@""];
+    [ConnectionInvitation parsedInvite:data
+                 withCompletionHandler:^(NSDictionary *connectValues, NSError *error) {
+        if (error && error.code > 0) {
+            return;
+        }
+        
+        NSString *label = [connectValues objectForKey: @"label"];
+        NSString *goal = @"";
+        if ([connectValues valueForKey:@"goal"] != nil) {
+            goal = [connectValues objectForKey: @"goal"];
+        } else {
+            goal = @"New connection";
+        }
+        NSString *profileUrl = [connectValues objectForKey: @"profileUrl"];
+        
+        [self createAction:label
+                profileUrl:profileUrl
+                      goal:goal
+                      type:OOB
+                      data:[Utilities dictToJsonString:connectValues]
+            additionalData:@""
+                     pwDid:@""];
+    }];
 }
 
 - (void) createAction:(NSString *) label
