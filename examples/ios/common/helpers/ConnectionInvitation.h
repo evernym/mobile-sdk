@@ -29,11 +29,13 @@ typedef enum {
 
 +(void)getPwDid: (NSString*) serializedConnection
 withCompletionHandler: (ResponseBlock) completionBlock;
++(void) extractRequestAttach: (NSDictionary*)invite
+                withCompletionHandler: (ResponseBlock) completionBlock;
 
 +(NSString*) connectionID: connectValues;
 +(NSString*) getConnectionByPwDid: (NSString *) pwDidMes;
 +(NSDictionary*) parsedInvite: (NSString *)invite;
-+(NSDictionary*) extractRequestAttach: (NSDictionary*)invite;
+
 +(NSArray*) getAllSerializedConnections;
 +(BOOL) compareInvites:(NSString *)newInvite
          storedInvite:(NSString *)storedInvite;

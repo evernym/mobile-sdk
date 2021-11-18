@@ -1,12 +1,12 @@
 package msdk.java.messages;
 
-import android.util.Base64;
+import com.evernym.sdk.vcx.VcxException;
+import com.evernym.sdk.vcx.utils.UtilsApi;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Iterator;
+import java.util.concurrent.ExecutionException;
 
 import msdk.java.utils.CommonUtils;
 
@@ -39,17 +39,9 @@ public class ProofRequestMessage {
 
     public static JSONObject decodeProofRequestAttach(JSONObject proofAttach) {
         try {
-            String requestAttachCode = proofAttach.getString("request_presentations~attach");
-            JSONArray requestsAttachItems = new JSONArray(requestAttachCode);
-            if (requestsAttachItems.length() == 0) {
-                return null;
-            }
-            JSONObject requestsAttachItem = requestsAttachItems.getJSONObject(0);
-            JSONObject requestsAttachItemData = requestsAttachItem.getJSONObject("data");
-            String requestsAttachItemBase = requestsAttachItemData.getString("base64");
-            String requestAttachDecode = new String(Base64.decode(requestsAttachItemBase, Base64.NO_WRAP));
-            return CommonUtils.convertToJSONObject(requestAttachDecode);
-        } catch (JSONException e) {
+            String attachment = UtilsApi.vcxExtractAttachedMessage(proofAttach.toString()).get();
+            return CommonUtils.convertToJSONObject(attachment);
+        } catch (VcxException | InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
         return null;

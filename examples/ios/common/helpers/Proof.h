@@ -12,8 +12,6 @@
 @interface Proof : NSObject
 
 +(NSString *)getThid:(NSDictionary *) request;
-+(NSString *)getAttributes:(NSDictionary *) request;
-+(NSString *)getPredicates:(NSDictionary *) request;
 
 @end
 
