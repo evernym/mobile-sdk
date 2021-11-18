@@ -146,31 +146,13 @@ withCompletionHandler: (ResponseBlock) completionBlock {
     }
 }
 
-+(NSString *)fixForRequestField: (NSDictionary*)invite {
-    NSDictionary* newInvite = @{
-        @"goal": [invite objectForKey: @"goal"],
-        @"service": [invite objectForKey: @"service"],
-        @"@id": [invite objectForKey: @"@id"],
-        @"@type": [invite objectForKey: @"@type"],
-        @"profileUrl": [invite objectForKey: @"profileUrl"],
-        @"handshake_protocols": [invite objectForKey: @"handshake_protocols"],
-        @"label": [invite objectForKey: @"label"],
-        @"goal_code": [invite objectForKey: @"goal_code"],
-        @"public_did": [invite objectForKey: @"public_did"],
-        
-        @"requests~attach": [invite objectForKey: @"request~attach"],
-    };
-    
-    return [Utilities dictToJsonString:newInvite];
-}
-
 +(void) extractRequestAttach: (NSDictionary*) invite
        withCompletionHandler: (ResponseBlock) completionBlock {
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
     NSDictionary *requestAttach = [invite objectForKey: @"request~attach"];
     
     if (requestAttach) {
-        [sdkApi extractAttachedMessage:[self fixForRequestField: invite]
+        [sdkApi extractAttachedMessage:[Utilities dictToJsonString: invite]
                             completion:^(NSError *error, NSString *attachedMessage) {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
