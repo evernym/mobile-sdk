@@ -105,44 +105,22 @@ withCompletionHandler: (ResponseBlock) completionBlock {
     return resultConnection;
 }
 
-+(NSDictionary*)parsedInvite: (NSString *)invite {
-    NSLog(@"invite np parsed %@", invite);
-    if ([invite rangeOfString:@"oob"].location != NSNotFound) {
-        return [self parseInvitationLinkOOB: invite];
-    } else if ([invite rangeOfString:@"c_i"].location != NSNotFound) {
-        return [self parseInvitationLink: invite];
-    } else {
-        return [self readFromUrl: invite];
-    }
-}
-
-+(NSDictionary*)readFromUrl: (NSString*)invite {
-    if(!invite) {
-        return nil;
-    }
-    NSLog(@"readFromUrl %@ - ", invite);
++(void)parsedInvite: (NSString *)invite
+       withCompletionHandler: (ResponseWithObject) completionBlock {
+    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
     NSURL *url = [NSURL URLWithString:invite];
-    NSData *data = [[NSData alloc] initWithContentsOfURL:url];
-    if (url && data) {
-        NSDictionary *result = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
-        return result;
-    } else {
-        return [Utilities jsonToDictionary:invite];
-    }
-}
 
-+(NSString*)readInviteFromUrl: (NSString*)invite {
-    if(!invite) {
-        return nil;
-    }
-    NSLog(@"readFromUrl %@ - ", invite);
-    NSURL *url = [NSURL URLWithString:invite];
-    NSData *data = [[NSData alloc] initWithContentsOfURL:url];
-    if (url && data) {
-        NSString *result = [Utilities dictToJsonString:[NSJSONSerialization JSONObjectWithData:data options:0 error:NULL]];
-        return result;
+    if (url) {
+        [sdkApi resolveMessageByUrl:invite
+                         completion:^(NSError *error, NSString *parsedInvite) {
+            if (error && error.code > 0) {
+                return completionBlock(nil, error);
+            }
+            
+            return completionBlock([Utilities jsonToDictionary:parsedInvite], nil);
+        }];
     } else {
-        return invite;
+        return completionBlock([Utilities jsonToDictionary:invite], nil);
     }
 }
 
@@ -170,32 +148,6 @@ withCompletionHandler: (ResponseBlock) completionBlock {
             return completionBlock(attachedMessage, error);
         }];
     }
-}
-
-+(NSDictionary*) parseInvitationLink: (NSString*) link {
-    NSArray* linkComponents = [link componentsSeparatedByString: @"msg?c_i="];
-
-    if([linkComponents count] < 2) {
-        return nil;
-    }
-
-    NSData* invitationData = [Utilities decode64String: linkComponents[1]];
-    NSString*  json = [[NSString alloc] initWithData: invitationData encoding: NSUTF8StringEncoding];
-
-    return [Utilities jsonToDictionary: json];
-}
-
-+(NSDictionary*) parseInvitationLinkOOB: (NSString*) link {
-    NSArray* linkComponents = [link componentsSeparatedByString: @"msg?oob="];
-
-    if([linkComponents count] < 2) {
-        return nil;
-    }
-
-    NSData* invitationData = [Utilities decode64String: linkComponents[1]];
-    NSString*  json = [[NSString alloc] initWithData: invitationData encoding: NSUTF8StringEncoding];
-
-    return [Utilities jsonToDictionary: json];
 }
 
 +(NSString*)connectionID: connectValues {

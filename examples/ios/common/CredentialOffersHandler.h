@@ -27,7 +27,7 @@
        withCompletionHandler:(ResponseBlock) completionBlock;
 
 +(void)acceptCredentialOffer:(NSString *) pwDid
-                  attachment:(NSDictionary *) attachment
+                  attachment:(NSString *) attachment
                 createdOffer:(NSDictionary *) createdOffer
                  fromMessage:(BOOL) fromMessage
        withCompletionHandler:(ResponseBlock) completionBlock;

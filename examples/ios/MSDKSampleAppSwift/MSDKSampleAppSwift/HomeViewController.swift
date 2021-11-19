@@ -108,20 +108,21 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
     }
     
     @objc private func createActionWithInvitation(_ data:String) {
-        let connectValues = ConnectionInvitation.parsedInvite(data)
-        let label = (connectValues["label"] ?? "New connection") as! String
-        let goal = (connectValues["goal"] ?? "New connection") as! String
-        let profileUrl = (connectValues["profileUrl"] ?? "") as! String
-        
-        self.createAction(
-            label,
-            profileUrl: profileUrl,
-            goal: goal,
-            type: OOB,
-            data: Utilities.toJsonString(connectValues),
-            additionalData: "",
-            pwDid: ""
-        )
+        ConnectionInvitation.parsedInvite(data) { connectValues, error in
+            let label = (connectValues?["label"] ?? "New connection") as! String
+            let goal = (connectValues?["goal"] ?? "New connection") as! String
+            let profileUrl = (connectValues?["profileUrl"] ?? "") as! String
+            
+            self.createAction(
+                label,
+                profileUrl: profileUrl,
+                goal: goal,
+                type: self.OOB,
+                data: Utilities.toJsonString(connectValues),
+                additionalData: "",
+                pwDid: ""
+            )
+        }
     }
     
     private func createAction(_ label: String,
@@ -183,11 +184,11 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
                 let type = msg["type"];
                 
                 if type == self.CREDENTIAL_OFFER {
-                    _ = self.handleReceivedCredentialOffer(msg, completionHandler: { _, _ in })
+                    self.handleReceivedCredentialOffer(msg, completionHandler: { _, _ in })
                 }
                 
                 if type == self.PRESENTATION_REQUEST {
-                    _ = self.handleReceivedProofrequest(msg, completionHandler: { _, _ in })
+                    self.handleReceivedProofrequest(msg, completionHandler: { _, _ in })
                 }
                 
                 if type == "committed-question" {
@@ -211,7 +212,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
                 profileUrl: "",
                 goal: "Credential Offer",
                 type: self.CREDENTIAL_OFFER,
-                data: Utilities.toJsonString(message),
+                data: payload,
                 additionalData: Utilities.dict(toJsonString: createdOffer),
                 pwDid: pwDid
             )
@@ -233,7 +234,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
                 profileUrl: "",
                 goal: "Proof Request",
                 type: self.PRESENTATION_REQUEST,
-                data: Utilities.toJsonString(message),
+                data: payload,
                 additionalData: Utilities.dict(toJsonString: request),
                 pwDid: pwDid
             )
@@ -272,7 +273,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
         }
         if forType == self.CREDENTIAL_OFFER {
             CredentialOffersHandler.acceptCredentialOffer(pwDid,
-                                                          attachment: Utilities.json(toDictionary: data),
+                                                          attachment: data,
                                                           createdOffer: Utilities.json(toDictionary: additionalData),
                                                           fromMessage: true
             ) { _, _ in

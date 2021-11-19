@@ -15,21 +15,6 @@ import java.util.zip.ZipOutputStream
 
 object CommonUtils {
     private const val BUFFER_SIZE = 4096
-    fun readDataFromUrl(url: String?): String? {
-        val logging = HttpLoggingInterceptor()
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY)
-        val client = OkHttpClient.Builder().build()
-        val request = Request.Builder()
-            .url(url!!)
-            .build()
-        try {
-            val response = client.newCall(request).execute()
-            return response.body!!.string()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        return null
-    }
 
     fun createWalletKey(): String {
         val lengthOfKey = 128

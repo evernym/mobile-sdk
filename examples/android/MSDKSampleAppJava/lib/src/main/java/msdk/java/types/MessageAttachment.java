@@ -1,21 +1,15 @@
 package msdk.java.types;
 
-import android.util.Base64;
 
 import com.evernym.sdk.vcx.VcxException;
-import com.evernym.sdk.vcx.connection.ConnectionApi;
 import com.evernym.sdk.vcx.utils.UtilsApi;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
-import java9.util.concurrent.CompletableFuture;
-import msdk.java.messages.Message;
 import msdk.java.utils.CommonUtils;
 
 public class MessageAttachment {
@@ -37,8 +31,8 @@ public class MessageAttachment {
             return new MessageAttachment(type, attachmentJson);
         } catch (VcxException | JSONException | InterruptedException | ExecutionException e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     private static String getIdFromInvite(String invite) {

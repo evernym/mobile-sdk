@@ -1,12 +1,12 @@
 package msdk.kotlin.sample.messages
 
-import android.net.Uri
-import android.util.Base64
 import android.webkit.URLUtil
+import com.evernym.sdk.vcx.utils.UtilsApi
 import msdk.kotlin.sample.handlers.Connections.ConnectionMetadata
 import msdk.kotlin.sample.types.AriesMessageType
 import msdk.kotlin.sample.utils.CommonUtils
 import org.json.JSONObject
+import java.util.concurrent.ExecutionException
 
 object ConnectionInvitation {
     fun isAriesConnectionInvitation(type: InvitationType): Boolean {
@@ -19,25 +19,15 @@ object ConnectionInvitation {
 
     fun getConnectionInvitationFromData(data: String): String {
         return if (URLUtil.isValidUrl(data)) {
-            val uri = Uri.parse(data)
-            val ariesConnection = uri.getQueryParameter("c_i")
-            val ariesOutOfBand = uri.getQueryParameter("oob")
-            if (ariesConnection != null) {
-                return String(
-                    Base64.decode(
-                        ariesConnection,
-                        Base64.NO_WRAP
-                    )
-                )
+            try {
+                UtilsApi.vcxResolveMessageByUrl(data).get();
+            } catch (ex: ExecutionException) {
+                ex.printStackTrace()
+                data
+            } catch (ex: InterruptedException) {
+                ex.printStackTrace()
+                data
             }
-            if (ariesOutOfBand != null) {
-                String(
-                    Base64.decode(
-                        ariesOutOfBand,
-                        Base64.NO_WRAP
-                    )
-                )
-            } else CommonUtils.readDataFromUrl(data)!!
         } else {
             data
         }

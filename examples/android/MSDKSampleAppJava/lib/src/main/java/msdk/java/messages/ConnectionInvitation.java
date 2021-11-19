@@ -1,16 +1,17 @@
 package msdk.java.messages;
 
-import android.net.Uri;
-import android.util.Base64;
 import android.webkit.URLUtil;
 
+import com.evernym.sdk.vcx.VcxException;
+import com.evernym.sdk.vcx.utils.UtilsApi;
+
 import org.json.JSONObject;
+
+import java.util.concurrent.ExecutionException;
 
 import msdk.java.handlers.Connections.ConnectionMetadata;
 import msdk.java.types.AriesMessageType;
 import msdk.java.utils.CommonUtils;
-
-import static msdk.java.utils.CommonUtils.readDataFromUrl;
 
 public class ConnectionInvitation {
     public enum InvitationType {
@@ -28,16 +29,12 @@ public class ConnectionInvitation {
 
     public static String getConnectionInvitationFromData(String data) {
         if (URLUtil.isValidUrl(data)) {
-            Uri uri = Uri.parse(data);
-            String ariesConnection = uri.getQueryParameter("c_i");
-            String ariesOutOfBand = uri.getQueryParameter("oob");
-            if (ariesConnection != null) {
-                return new String(Base64.decode(ariesConnection, Base64.NO_WRAP));
+            try {
+                return UtilsApi.vcxResolveMessageByUrl(data).get();
+            } catch (InterruptedException | ExecutionException | VcxException exception) {
+                exception.printStackTrace();
+                return null;
             }
-            if (ariesOutOfBand != null) {
-                return new String(Base64.decode(ariesOutOfBand, Base64.NO_WRAP));
-            }
-            return readDataFromUrl(data);
         } else {
             return data;
         }
