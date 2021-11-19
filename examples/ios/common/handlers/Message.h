@@ -36,8 +36,6 @@ typedef enum {
 
 @interface Message: NSObject
 
-+ (void)waitHandshakeReuse: (ResponseWithBoolean) completionBlock;
-
 + (void)downloadAllMessages:(ResponseWithArray) completionBlock;
 
 + (void)updateMessageStatus:(NSString *) pwDid

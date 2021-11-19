@@ -286,7 +286,7 @@ UIGestureRecognizer *tapper;
     }
     if ([forType isEqual:CREDENTIAL_OFFER]) {
         [CredentialOffersHandler acceptCredentialOffer:pwDid
-                                            attachment:[Utilities jsonToDictionary:data]
+                                            attachment:data
                                           createdOffer:[Utilities jsonToDictionary:additionalData]
                                            fromMessage:true
                                  withCompletionHandler:^(NSString *result, NSError *error) {

@@ -71,7 +71,7 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
             }
             
             [self acceptCredentialOffer:pwDid
-                             attachment:attachment
+                             attachment:[Utilities dictToJsonString: attachment]
                            createdOffer:createdOffer
                             fromMessage:false
                   withCompletionHandler:^(NSString *successCredential, NSError *error) {
@@ -86,13 +86,14 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
 }
 
 +(void)acceptCredentialOffer:(NSString *) pwDid
-                  attachment:(NSDictionary *) attachment
+                  attachment:(NSString *) attachment
                 createdOffer:(NSDictionary *) createdOffer
                  fromMessage:(BOOL) fromMessage
        withCompletionHandler:(ResponseBlock) completionBlock {
     NSString *serializedConnection = [ConnectionInvitation getConnectionByPwDid:pwDid];
-    
-    [Credential acceptCredential:[Utilities dictToJsonString: attachment]
+    NSDictionary *attachmentDict = [Utilities jsonToDictionary:attachment];
+
+    [Credential acceptCredential:[Utilities dictToJsonString: attachmentDict]
             serializedCredential:[Utilities dictToJsonString: createdOffer]
             serializedConnection:serializedConnection
                      fromMessage:fromMessage
@@ -104,9 +105,9 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
         // Store the serialized credential
         NSMutableDictionary* credentials = [[LocalStorage getObjectForKey: @"credentials" shouldCreate: true] mutableCopy];
         
-        NSString *threadId = [CredentialOffer getThid:[Utilities dictToJsonString:attachment] fromMessage:fromMessage];
-        NSString *name = [CredentialOffer getOfferName:[Utilities dictToJsonString:attachment] fromMessage:fromMessage];
-        NSString *attr = [CredentialOffer getAttributes:[Utilities dictToJsonString:attachment] fromMessage:fromMessage];
+        NSString *threadId = [CredentialOffer getThid:attachment fromMessage:fromMessage];
+        NSString *name = [CredentialOffer getOfferName:attachment fromMessage:fromMessage];
+        NSString *attr = [CredentialOffer getAttributes:attachment fromMessage:fromMessage];
         
         NSTimeInterval timeStamp = [[NSDate date] timeIntervalSinceNow];
         NSString *timestamp = [NSString stringWithFormat:@"%@", [NSNumber numberWithDouble: timeStamp]];
@@ -150,7 +151,7 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
             }
             
             [self acceptCredentialOffer:pwDid
-                             attachment:attachment
+                             attachment:[Utilities dictToJsonString: attachment]
                            createdOffer:createdOffer
                             fromMessage:false
                   withCompletionHandler:^(NSString *successMessage, NSError *error) {
@@ -169,7 +170,7 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
                 createdOffer:(NSDictionary *) createdOffer
        withCompletionHandler:(ResponseBlock) completionBlock {
     NSString *serializedConnection = [ConnectionInvitation getConnectionByPwDid:pwDid];
-    
+
     [Credential rejectCredentialOffer:serializedConnection
                  serializedCredential:[Utilities dictToJsonString: createdOffer]
                 withCompletionHandler:^(NSString *rejectedCredential, NSError *error) {
