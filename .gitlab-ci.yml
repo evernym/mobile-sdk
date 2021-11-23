@@ -1,6 +1,10 @@
 stages:
   - prebuild
   - check
+  - tag
+
+variables:
+  version: '2.0.0'
 
 ### - Pre-build - ###
 # Helpers / Anchors
@@ -76,3 +80,12 @@ license-data-check:
       - tags
   tags:
     - docker-machine
+
+publish-tag:
+  stage: tag
+  image: ${CI_REGISTRY_IMAGE}/ubuntu18:${CI_COMMIT_REF_SLUG}
+  only:
+    refs:
+      - stable@evernym/mobile/mobile-sdk
+  script:
+    - curl -X POST "https://gitlab.com/api/v4/projects/evernym%2Fmobile%2Fmobile-sdk/repository/tags?tag_name=v${version}&ref=stable&private_token=${GITLAB_API_TOKEN}"
