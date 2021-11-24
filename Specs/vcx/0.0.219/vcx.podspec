@@ -8,7 +8,7 @@
 
 # NOTE: UPDATE ME: versions of libraries in this cocoapod
 # vdr-tools 0.8.0
-# libvcx 0.12.0-3214db8
+# libvcx 0.12.0-efc531e6
 
 Pod::Spec.new do |s|
   s.name             = 'vcx'
@@ -30,7 +30,7 @@ through to the libvcx shared library.
   s.homepage         = 'https://www.evernym.com/'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'evernym-ios-dev' => 'iosdev@evernym.com' }
-  s.source           = { :http => 'https://gitlab.com/evernym/mobile/mobile-sdk/-/package_files/21792617/download', :type => 'zip' }
+  s.source           = { :http => 'https://gitlab.com/evernym/mobile/mobile-sdk/-/package_files/22311896/download', :type => 'zip' }
 
   s.ios.deployment_target = '8.0'
 
