@@ -1,10 +1,14 @@
 package msdk.java.types;
 
-import android.util.Base64;
+
+import com.evernym.sdk.vcx.VcxException;
+import com.evernym.sdk.vcx.utils.UtilsApi;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.concurrent.ExecutionException;
 
 import msdk.java.utils.CommonUtils;
 
@@ -19,30 +23,36 @@ public class MessageAttachment {
 
     public static MessageAttachment parse(String invite) {
         try {
-            JSONObject json = CommonUtils.convertToJSONObject(invite);
-            if (json == null || !json.has("request~attach")) {
+            String attachment = UtilsApi.vcxExtractAttachedMessage(invite).get();
+            JSONObject attachmentJson = CommonUtils.convertToJSONObject(attachment);
+            assert attachmentJson != null;
+            attachmentJson.put("@id", getIdFromInvite(invite));
+            String type = attachmentJson.getString("@type");
+            return new MessageAttachment(type, attachmentJson);
+        } catch (VcxException | JSONException | InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static String getIdFromInvite(String invite) {
+        try {
+            JSONObject inviteJson = CommonUtils.convertToJSONObject(invite);
+
+            if (inviteJson != null && !inviteJson.has("request~attach")) {
                 return null;
             }
 
-            String requestAttachCode = json.getString("request~attach");
+            String requestAttachCode = inviteJson.getString("request~attach");
             JSONArray requestsAttachItems = new JSONArray(requestAttachCode);
             if (requestsAttachItems.length() == 0) {
                 return null;
             }
 
             JSONObject requestsAttachItem = requestsAttachItems.getJSONObject(0);
-            JSONObject requestsAttachItemData = requestsAttachItem.getJSONObject("data");
-            String requestsAttachItemBase = requestsAttachItemData.getString("base64");
-            String requestAttachDecode = new String(Base64.decode(requestsAttachItemBase, Base64.NO_WRAP));
-            JSONObject attachment = CommonUtils.convertToJSONObject(requestAttachDecode);
-            if (attachment == null) {
-                return null;
-            }
-            attachment.put("@id", requestsAttachItem.getString("@id"));
-            String type = attachment.getString("@type");
-            return new MessageAttachment(type, attachment);
-        } catch (JSONException e) {
-            e.printStackTrace();
+            return requestsAttachItem.getString("@id");
+        } catch (JSONException exp) {
+            exp.printStackTrace();
         }
         return null;
     }

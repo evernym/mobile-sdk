@@ -59,8 +59,18 @@ Connection exists if one of the following conditions resolve for one of the exis
 1. Call ConnectionApi.vcxCreateConnectionWithOutofbandInvite function to accept Invitation and create Connection state object. 
 2. Connection will be immediately created in the completed state - 4.<br>
 3. Extract the original message from invitation `request~attach` field:
-    * base64decode(invitation['request~attach'][0]['data']['base64'])
-    * invitation['request~attach'][0]['data']['json']
+    ##### iOS
+    ```objC
+    [appDelegate.sdkApi extractAttachedMessage:invite
+      completion:^(NSError *error, NSString *attachedMessage) {
+          // ...
+    }];
+    ```
+    
+    ##### Android
+    ```java
+    String attachment = UtilsApi.vcxExtractAttachedMessage(invite).get();
+    ```
 4. Start protocol related to the extracted message:
     * proof request - DisclosedProofApi.proofCreateWithRequest
     * question - answer question
@@ -78,8 +88,18 @@ Connection exists if one of the following conditions resolve for one of the exis
     1. ConnectionApi.vcxConnectionConnect to start connection
     1. Wait until complete: int state = ConnectionApi.vcxConnectionUpdateState in a loop until state != 4
 3. Extract the original message from invitation `request~attach` field:
-    * base64decode(invitation['request~attach'][0]['data']['base64'])
-    * invitation['request~attach'][0]['data']['json']
+    ##### iOS
+    ```objC
+    [appDelegate.sdkApi extractAttachedMessage:invite
+      completion:^(NSError *error, NSString *attachedMessage) {
+          // ...
+    }];
+    ```
+    
+    ##### Android
+    ```java
+    String attachment = UtilsApi.vcxExtractAttachedMessage(invite).get();
+    ```
 4. Start protocol related to the extracted message:
     * credential offer - CredentialApi.credentialCreateWithOffer ...
     * proof request - DisclosedProofApi.proofCreateWithRequest ...
@@ -107,8 +127,18 @@ Connection exists if one of the following conditions resolve for one of the exis
     <td>
     
 1. Extract the original message from invitation `request~attach` field:
-    * base64decode(invitation['request~attach'][0]['data']['base64'])
-    * invitation['request~attach'][0]['data']['json']
+    ##### iOS
+    ```objC
+    [appDelegate.sdkApi extractAttachedMessage:invite
+      completion:^(NSError *error, NSString *attachedMessage) {
+          // ...
+    }];
+    ```
+    
+    ##### Android
+    ```java
+    String attachment = UtilsApi.vcxExtractAttachedMessage(invite).get();
+    ```
 2. Start protocol related to the extracted message:
     * credential offer - CredentialApi.credentialCreateWithOffer ...
     * proof request - DisclosedProofApi.proofCreateWithRequest
@@ -128,8 +158,18 @@ Connection exists if one of the following conditions resolve for one of the exis
         * UtilsApi.vcxGetMessages to download message
         * find message by thread['@thid']
 2. Extract the original message from invitation `request~attach` field:
-    * base64decode(invitation['request~attach'][0]['data']['base64'])
-    * invitation['request~attach'][0]['data']['json']
+    #### iOS
+    ```objC
+    [appDelegate.sdkApi extractAttachedMessage:invite
+      completion:^(NSError *error, NSString *attachedMessage) {
+          // ...
+    }];
+    ```
+    
+    #### Android
+    ```java
+    String attachment = UtilsApi.vcxExtractAttachedMessage(invite).get();
+    ```
 3. Start protocol related to the extracted message:
     * credential offer - CredentialApi.credentialCreateWithOffer ...
     * proof request - DisclosedProofApi.proofCreateWithRequest

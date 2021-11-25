@@ -105,87 +105,49 @@ withCompletionHandler: (ResponseBlock) completionBlock {
     return resultConnection;
 }
 
-+(NSDictionary*)parsedInvite: (NSString *)invite {
-    NSLog(@"invite np parsed %@", invite);
-    if ([invite rangeOfString:@"oob"].location != NSNotFound) {
-        return [self parseInvitationLinkOOB: invite];
-    } else if ([invite rangeOfString:@"c_i"].location != NSNotFound) {
-        return [self parseInvitationLink: invite];
-    } else {
-        return [self readFromUrl: invite];
-    }
-}
-
-+(NSDictionary*)readFromUrl: (NSString*)invite {
-    if(!invite) {
-        return nil;
-    }
-    NSLog(@"readFromUrl %@ - ", invite);
++(void)parsedInvite: (NSString *)invite
+       withCompletionHandler: (ResponseWithObject) completionBlock {
+    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
     NSURL *url = [NSURL URLWithString:invite];
-    NSData *data = [[NSData alloc] initWithContentsOfURL:url];
-    if (url && data) {
-        NSDictionary *result = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
-        return result;
+
+    if (url) {
+        [sdkApi resolveMessageByUrl:invite
+                         completion:^(NSError *error, NSString *parsedInvite) {
+            if (error && error.code > 0) {
+                return completionBlock(nil, error);
+            }
+            
+            return completionBlock([Utilities jsonToDictionary:parsedInvite], nil);
+        }];
     } else {
-        return [Utilities jsonToDictionary:invite];
+        return completionBlock([Utilities jsonToDictionary:invite], nil);
     }
 }
 
-+(NSString*)readInviteFromUrl: (NSString*)invite {
-    if(!invite) {
-        return nil;
-    }
-    NSLog(@"readFromUrl %@ - ", invite);
-    NSURL *url = [NSURL URLWithString:invite];
-    NSData *data = [[NSData alloc] initWithContentsOfURL:url];
-    if (url && data) {
-        NSString *result = [Utilities dictToJsonString:[NSJSONSerialization JSONObjectWithData:data options:0 error:NULL]];
-        return result;
++(void) extractRequestAttach: (NSDictionary*) invite
+       withCompletionHandler: (ResponseBlock) completionBlock {
+    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
+    NSDictionary *requestAttach = [invite objectForKey: @"request~attach"];
+    
+    if (requestAttach) {
+        [sdkApi extractAttachedMessage:[Utilities dictToJsonString: invite]
+                            completion:^(NSError *error, NSString *attachedMessage) {
+            if (error && error.code > 0) {
+                return completionBlock(nil, error);
+            }
+            
+            return completionBlock(attachedMessage, error);
+        }];
     } else {
-        return invite;
+        [sdkApi extractAttachedMessage:[Utilities dictToJsonString: invite]
+                            completion:^(NSError *error, NSString *attachedMessage) {
+            if (error && error.code > 0) {
+                return completionBlock(nil, error);
+            }
+            
+            return completionBlock(attachedMessage, error);
+        }];
     }
-}
-
-+(NSDictionary*) extractRequestAttach: (NSDictionary*)invite {
-    NSArray* requestAttach = [invite objectForKey: @"request~attach"];
-    if (requestAttach.count != 0) {
-        NSDictionary* requestAttachItem = requestAttach[0];
-        NSDictionary* requestAttachData = [requestAttachItem objectForKey: @"data"];
-        NSString* requestAttachBase64 = [requestAttachData objectForKey: @"base64"];
-
-        NSData* invitationData = [Utilities decode64String: requestAttachBase64];
-        NSString* json = [[NSString alloc] initWithData: invitationData encoding: NSUTF8StringEncoding];
-        NSLog(@" JSON %@", json);
-        return [Utilities jsonToDictionary: json];
-    } else {
-        return nil;
-    }
-}
-
-+(NSDictionary*) parseInvitationLink: (NSString*) link {
-    NSArray* linkComponents = [link componentsSeparatedByString: @"msg?c_i="];
-
-    if([linkComponents count] < 2) {
-        return nil;
-    }
-
-    NSData* invitationData = [Utilities decode64String: linkComponents[1]];
-    NSString*  json = [[NSString alloc] initWithData: invitationData encoding: NSUTF8StringEncoding];
-
-    return [Utilities jsonToDictionary: json];
-}
-
-+(NSDictionary*) parseInvitationLinkOOB: (NSString*) link {
-    NSArray* linkComponents = [link componentsSeparatedByString: @"msg?oob="];
-
-    if([linkComponents count] < 2) {
-        return nil;
-    }
-
-    NSData* invitationData = [Utilities decode64String: linkComponents[1]];
-    NSString*  json = [[NSString alloc] initWithData: invitationData encoding: NSUTF8StringEncoding];
-
-    return [Utilities jsonToDictionary: json];
 }
 
 +(NSString*)connectionID: connectValues {

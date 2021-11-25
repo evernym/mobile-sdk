@@ -24,22 +24,6 @@ import okhttp3.logging.HttpLoggingInterceptor;
 public class CommonUtils {
     private static final int BUFFER_SIZE = 4096;
 
-    public static String readDataFromUrl(String url) {
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient client = new OkHttpClient.Builder().build();
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
-        try {
-            Response response = client.newCall(request).execute();
-            return response.body().string();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     public static String createWalletKey() {
         int lengthOfKey = 128;
         SecureRandom random = new SecureRandom();
