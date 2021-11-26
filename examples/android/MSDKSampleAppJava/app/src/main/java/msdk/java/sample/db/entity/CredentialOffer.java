@@ -20,9 +20,6 @@ public class CredentialOffer {
     @ColumnInfo(name = "serialized")
     public String serialized;
 
-    @ColumnInfo(name = "claim_id")
-    public String claimId;
-
     @ColumnInfo(name = "attachConnection")
     public String attachConnection;
 

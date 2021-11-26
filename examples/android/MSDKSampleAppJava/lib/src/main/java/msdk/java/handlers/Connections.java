@@ -240,11 +240,15 @@ public class Connections {
             while (true) {
                 try {
                     Message message = Messages.downloadNextMessageFromTheThread(MessageType.CONNECTION_RESPONSE, pwDid).get();
-                        status = ConnectionApi.vcxConnectionUpdateStateWithMessage(handle, message.getPayload()).get();
-                        Messages.updateMessageStatus(pwDid, message.getUid());
-                        if (StateMachineState.ACCEPTED.matches(status)) {
-                            return ConnectionApi.connectionSerialize(handle).get();
-                        }
+                    if (message == null) {
+                        Thread.sleep(2000);
+                        continue;
+                    }
+                    status = ConnectionApi.vcxConnectionUpdateStateWithMessage(handle, message.getPayload()).get();
+                    Messages.updateMessageStatus(pwDid, message.getUid());
+                    if (StateMachineState.ACCEPTED.matches(status)) {
+                        return ConnectionApi.connectionSerialize(handle).get();
+                    }
                     Thread.sleep(2000);
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();

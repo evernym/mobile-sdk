@@ -5,6 +5,8 @@ import org.json.JSONObject;
 import java.util.Iterator;
 import java.util.List;
 
+import msdk.java.messages.CredentialOfferMessage;
+import msdk.java.messages.ProofRequestMessage;
 import msdk.java.messages.QuestionMessage;
 import msdk.java.sample.db.entity.Action;
 
@@ -30,21 +32,17 @@ public class Actions {
 
     public static Action createActionWithOffer(
             String type,
-            String name,
+            CredentialOfferMessage credentialOffer,
             String icon,
-            JSONObject attributes,
-            String offerId,
-            String pwDid,
             String invite
     ) {
         Action action = new Action();
         action.type = type;
-        action.name = name;
+        action.name = credentialOffer.name;
         action.description = "To issue the credential";
         action.icon = icon;
-        action.details = buildCredentialOfferAttributesDetailsString(attributes);
-        action.claimId = offerId;
-        action.pwDid = pwDid;
+        action.details = buildCredentialOfferAttributesDetailsString(credentialOffer.attributes);
+        action.threadId = credentialOffer.threadId;
         action.invite = invite;
         action.status = PENDING.toString();
         return action;
@@ -52,19 +50,17 @@ public class Actions {
 
     public static Action createActionWithProof(
             String type,
-            String name,
+            ProofRequestMessage proofRequest,
             String icon,
-            String threadId,
-            JSONObject attributes,
             String invite
     ) {
         Action action = new Action();
         action.type = type;
-        action.name = name;
+        action.name = proofRequest.name;
         action.description = "Share the proof";
         action.icon = icon;
-        action.details = buildProofRequestDetailsString(attributes);
-        action.threadId = threadId;
+        action.details = buildProofRequestDetailsString(proofRequest.attributes);
+        action.threadId = proofRequest.threadId;
         action.invite = invite;
         action.status = PENDING.toString();
         return action;

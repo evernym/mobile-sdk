@@ -19,11 +19,8 @@ public interface ProofRequestDao {
     @Query("SELECT * FROM proofrequest where id = :id")
     ProofRequest getById(int id);
 
-    @Query("SELECT EXISTS(SELECT * FROM proofrequest WHERE thread_id = :threadId)")
-    boolean checkProofExists(String threadId);
-
     @Query("SELECT * FROM proofrequest WHERE thread_id = :threadId")
-    ProofRequest getByThreadId(String threadId);
+    ProofRequest getByPwDidAndThreadId(String threadId);
 
     @Insert
     void insertAll(ProofRequest... proofRequests);

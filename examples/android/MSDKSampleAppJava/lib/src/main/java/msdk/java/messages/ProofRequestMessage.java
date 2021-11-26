@@ -3,6 +3,7 @@ package msdk.java.messages;
 import com.evernym.sdk.vcx.VcxException;
 import com.evernym.sdk.vcx.utils.UtilsApi;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -23,14 +24,14 @@ public class ProofRequestMessage {
         this.proofReq = proofReq;
     }
 
-    public static ProofRequestMessage parse(Message msg) {
+    public static ProofRequestMessage parse(String message) {
         try {
-            JSONObject json = new JSONObject(msg.getPayload());
-            JSONObject data = json.getJSONObject("proof_request_data");
-            String threadId = json.getString("thread_id");
-            String name = data.getString("name");
-            JSONObject requestedAttrs = data.getJSONObject("requested_attributes");
-            return new ProofRequestMessage(threadId, name, requestedAttrs, msg.getPayload());
+            JSONObject json = new JSONObject(message);
+            String threadId = CommonUtils.getThreadId(json);
+            String name = json.getString("comment");
+            JSONObject attachment = decodeProofRequestAttach(json);
+            JSONObject requestedAttrs = ProofRequestMessage.extractRequestedAttributesFromProofRequest(attachment);
+            return new ProofRequestMessage(threadId, name, requestedAttrs, message);
         } catch (JSONException e) {
             e.printStackTrace();
             return null;

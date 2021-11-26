@@ -89,4 +89,14 @@ public class CommonUtils {
         }
         return new JSONObject();
     }
+
+    public static String getThreadId(JSONObject message) throws JSONException {
+        String threadId;
+        if (message.optJSONObject("~thread") != null) {
+            threadId = message.getJSONObject("~thread").getString("thid");
+        } else {
+            threadId = message.getString("@id");
+        }
+        return threadId;
+    }
 }
