@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity() {
                 .withServerUrl(Constants.SERVER_URL)
                 .withLogo(Constants.LOGO)
                 .withName(Constants.NAME)
+                .withProtocolType(Constants.PROTOCOL_TYPE)
                 .build()
     }
 }

@@ -3,6 +3,7 @@ package msdk.kotlin.sample.types
 import org.json.JSONException
 import org.json.JSONObject
 
+
 object ProvisioningConfig {
     fun builder(): ProvisioningConfigBuilder {
         return ProvisioningConfigBuilder()
@@ -16,6 +17,7 @@ object ProvisioningConfig {
         private var walletKey: String? = null
         private var logo: String? = null
         private var name: String? = null
+        private var protocolType: String? = null
 
         /**
          * Set agency endpoint.
@@ -95,6 +97,17 @@ object ProvisioningConfig {
         }
 
         /**
+         * Set protocol type
+         *
+         * @param protocolType protocol type
+         * @return this
+         */
+        fun withProtocolType(protocolType: String?): ProvisioningConfigBuilder {
+            this.protocolType = protocolType
+            return this
+        }
+
+        /**
          * Creates provisioning config from settings.
          *
          * @return provisioning config
@@ -110,6 +123,7 @@ object ProvisioningConfig {
             agencyConfig.put("protocol_type", "3.0")
             agencyConfig.put("logo", logo)
             agencyConfig.put("name", name)
+            agencyConfig.put("protocol_type", this.protocolType);
             return agencyConfig.toString()
         }
     }

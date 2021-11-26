@@ -20,9 +20,6 @@ data class CredentialOffer(
         @ColumnInfo(name = "serialized")
         var serialized: String,
 
-        @ColumnInfo(name = "claim_id")
-        var claimId: String,
-
         @ColumnInfo(name = "attachConnection")
         var attachConnection: String? = null,
 

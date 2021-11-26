@@ -2,8 +2,11 @@ package msdk.kotlin.sample.homepage
 
 import msdk.kotlin.sample.db.ActionStatus
 import msdk.kotlin.sample.db.entity.Action
+import msdk.kotlin.sample.messages.CredentialOfferMessage
+import msdk.kotlin.sample.messages.ProofRequestMessage
 import msdk.kotlin.sample.messages.QuestionMessage
 import org.json.JSONObject
+
 
 object Actions {
     fun createActionWithConnectionInvitation(
@@ -25,24 +28,17 @@ object Actions {
 
     fun createActionWithOffer(
         type: String?,
-        name: String?,
+        credentialOffer: CredentialOfferMessage,
         icon: String?,
-        attributes: JSONObject,
-        offerId: String?,
-        pwDid: String?,
         invite: String?
-    ): Action {
+    ): Action? {
         val action = Action()
         action.type = type
-        action.name = name
+        action.name = credentialOffer.name
         action.description = "To issue the credential"
         action.icon = icon
-        action.details =
-            buildCredentialOfferAttributesDetailsString(
-                attributes
-            )
-        action.claimId = offerId
-        action.pwDid = pwDid
+        action.details = buildCredentialOfferAttributesDetailsString(credentialOffer.attributes)
+        action.threadId = credentialOffer.threadId
         action.invite = invite
         action.status = ActionStatus.PENDING.toString()
         return action
@@ -50,20 +46,17 @@ object Actions {
 
     fun createActionWithProof(
         type: String?,
-        name: String?,
+        proofRequest: ProofRequestMessage,
         icon: String?,
-        threadId: String?,
-        attributes: JSONObject,
         invite: String?
-    ): Action {
+    ): Action? {
         val action = Action()
         action.type = type
-        action.name = name
+        action.name = proofRequest.name
         action.description = "Share the proof"
         action.icon = icon
-        action.details =
-            buildProofRequestDetailsString(attributes)
-        action.threadId = threadId
+        action.details = buildProofRequestDetailsString(proofRequest.attributes)
+        action.threadId = proofRequest.threadId
         action.invite = invite
         action.status = ActionStatus.PENDING.toString()
         return action

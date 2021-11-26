@@ -8,6 +8,7 @@ object Constants {
     const val WALLET_NAME = "wallet-name"
     const val LOGO = "https://robothash.com/logo.png"
     const val NAME = "MSDK Sample app"
+    const val PROTOCOL_TYPE = "4.0"
     const val SERVER_URL: String = "" // put endpoint of your Sponsor server here
 
     // Application constants

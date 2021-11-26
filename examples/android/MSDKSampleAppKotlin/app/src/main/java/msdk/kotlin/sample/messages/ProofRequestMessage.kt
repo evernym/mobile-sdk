@@ -1,11 +1,10 @@
 package msdk.kotlin.sample.messages
 
-import android.util.Base64
 import com.evernym.sdk.vcx.utils.UtilsApi
 import msdk.kotlin.sample.utils.CommonUtils
-import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+
 
 class ProofRequestMessage(
     var threadId: String,
@@ -15,19 +14,15 @@ class ProofRequestMessage(
 ) {
 
     companion object {
-        fun parse(msg: Message): ProofRequestMessage? {
+        fun parse(message: String?): ProofRequestMessage? {
             return try {
-                val json = JSONObject(msg.payload)
-                val data = json.getJSONObject("proof_request_data")
-                val threadId = json.getString("thread_id")
-                val name = data.getString("name")
-                val attributes = data.getJSONObject("requested_attributes")
-                ProofRequestMessage(
-                    threadId,
-                    name,
-                    attributes,
-                    msg.payload
-                )
+                val json = JSONObject(message)
+                val threadId: String = CommonUtils.getThreadId(json)!!
+                val name = json.getString("comment")
+                val attachment = decodeProofRequestAttach(json)
+                val requestedAttrs =
+                    extractRequestedAttributesFromProofRequest(attachment)
+                ProofRequestMessage(threadId, name, requestedAttrs!!, message)
             } catch (e: JSONException) {
                 e.printStackTrace()
                 null

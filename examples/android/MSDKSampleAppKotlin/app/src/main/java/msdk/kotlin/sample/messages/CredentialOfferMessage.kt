@@ -1,14 +1,11 @@
 package msdk.kotlin.sample.messages
 
-import org.json.JSONArray
+import msdk.kotlin.sample.utils.CommonUtils
 import org.json.JSONException
 import org.json.JSONObject
 
 
-
-
 class CredentialOfferMessage(
-    var id: String,
     var name: String,
     var attributes: JSONObject,
     var offer: String?,
@@ -16,19 +13,17 @@ class CredentialOfferMessage(
 ) {
 
     companion object {
-        fun parse(msg: Message): CredentialOfferMessage? {
+        fun parse(message: String?): CredentialOfferMessage? {
             return try {
-                val data = JSONArray(msg.payload).getJSONObject(0)
-                val id = data.getString("claim_id")
-                val thread_id = data.getString("thread_id")
-                val name = data.getString("claim_name")
-                val attributes = data.getJSONObject("credential_attrs")
+                val json = JSONObject(message)
+                val threadId: String = CommonUtils.getThreadId(json)!!
+                val name = json.getString("comment")
+                val attributes = extractAttributesFromCredentialOffer(json)
                 CredentialOfferMessage(
-                    id,
                     name,
-                    attributes,
-                    msg.payload,
-                    thread_id
+                    attributes!!,
+                    message,
+                    threadId
                 )
             } catch (e: JSONException) {
                 e.printStackTrace()

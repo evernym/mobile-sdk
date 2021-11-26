@@ -2,13 +2,9 @@ package msdk.kotlin.sample.utils
 
 import android.content.Context
 import android.util.Base64
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.*
-import java.lang.Exception
 import java.security.SecureRandom
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -91,5 +87,15 @@ object CommonUtils {
             e.printStackTrace()
         }
         return JSONObject()
+    }
+
+    @Throws(JSONException::class)
+    fun getThreadId(message: JSONObject): String? {
+        val threadId: String = if (message.optJSONObject("~thread") != null) {
+            message.getJSONObject("~thread").getString("thid")
+        } else {
+            message.getString("@id")
+        }
+        return threadId
     }
 }

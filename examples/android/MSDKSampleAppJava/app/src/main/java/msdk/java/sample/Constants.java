@@ -8,6 +8,7 @@ public interface Constants {
     String WALLET_NAME = "wallet-name";
     String LOGO = "https://robothash.com/logo.png";
     String NAME = "MSDK Sample app";
+    String PROTOCOL_TYPE = "4.0";
     String SERVER_URL = ""; // put endpoint of your Sponsor server here
 
     // Application constants

@@ -15,7 +15,6 @@ import msdk.kotlin.sample.types.ProvisioningConfig
 import msdk.kotlin.sample.utils.CommonUtils
 import msdk.kotlin.sample.utils.SecurePreferencesHelper
 import msdk.kotlin.sample.utils.StorageUtils
-import msdk.kotlin.sample.utils.StorageUtils.configureStoragePermissions
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -28,6 +27,7 @@ import pl.brightinventions.slf4android.LogLevel
 import java.io.File
 import java.util.*
 import java.util.concurrent.Executors
+
 
 object Initialization {
     private const val SECURE_PREF_VCX_CONFIG = "msdk.config"
@@ -125,6 +125,7 @@ object Initialization {
             .withWalletKey(CommonUtils.createWalletKey())
             .withLogo(constants.LOGO!!)
             .withName(constants.NAME!!)
+            .withProtocolType(constants.PROTOCOL_TYPE!!)
             .build()
         val result =
             CompletableFuture<Void?>()
@@ -245,6 +246,8 @@ object Initialization {
         private var SERVER_URL: String? = null
         private var LOGO: String? = null
         private var NAME: String? = null
+        private var PROTOCOL_TYPE: String? = null
+
         fun withAgencyEndpoint(AGENCY_ENDPOINT: String): ConstantsBuilder {
             this.AGENCY_ENDPOINT = AGENCY_ENDPOINT
             return this
@@ -295,6 +298,11 @@ object Initialization {
             return this
         }
 
+        fun withProtocolType(PROTOCOL_TYPE: String): ConstantsBuilder {
+            this.PROTOCOL_TYPE = PROTOCOL_TYPE
+            return this
+        }
+
         /**
          * Build [Constants] instance.
          *
@@ -311,7 +319,8 @@ object Initialization {
                 FCM_TOKEN,
                 SERVER_URL,
                 LOGO,
-                NAME
+                NAME,
+                PROTOCOL_TYPE
             )
         }
     }
@@ -329,7 +338,8 @@ object Initialization {
         private val FCM_TOKEN: String?,
         val SERVER_URL: String?,
         val LOGO: String?,
-        val NAME: String?
+        val NAME: String?,
+        val PROTOCOL_TYPE: String?
     ) {
         companion object {
             /**
