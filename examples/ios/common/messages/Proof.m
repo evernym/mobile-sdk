@@ -16,7 +16,7 @@
 +(NSString *)getThid:(NSDictionary *) request {
     NSString *threadId = [request valueForKey:@"~thread"][@"thid"];
     if (threadId == nil) {
-        threadId = [request valueForKey:@"thread_id"];
+        threadId = [request valueForKey:@"@id"];
     }
     return threadId;
 }

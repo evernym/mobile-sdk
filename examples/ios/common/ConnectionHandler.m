@@ -23,15 +23,15 @@
              withCompletionHandler: (ResponseBlock) completionBlock {
     NSString *name = [ConnectionInvitation getConnectionName:invite];
     NSString *type = [ConnectionInvitation getInvitationType:invite];
-    
-    NSArray *serializedConnections = [ConnectionInvitation getAllSerializedConnections];
+
+    NSArray *serializedConnections = [Connection getAllSerializedConnections];
     [Connection verityConnectionExist:invite
                 serializedConnections:serializedConnections
                  withCompletion:^(NSString *existingConnection, NSError *error) {
         if (error && error.code > 0) {
             return completionBlock(nil, error);
         }
-        
+
         if ([ConnectionInvitation isAriesInvitation:type]) {
             if (existingConnection != nil) {
                 [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
@@ -45,13 +45,13 @@
                 }];
             }
         }
-        
+
         if ([ConnectionInvitation isOutOfBandInvitation:type]) {
             [ConnectionInvitation extractRequestAttach:[Utilities jsonToDictionary:invite] withCompletionHandler:^(NSString *attachment, NSError *error) {
                 if (error && error.code > 0) {
                     [Utilities printError:error];
                 }
-                
+
                 if (attachment) {
                     [self handleOutOfBandConnectionInvitationWithAttachment:invite
                                                                  attachment:[Utilities jsonToDictionary: attachment]
@@ -71,7 +71,7 @@
                             if (error && error.code > 0) {
                                 [Utilities printError:error];
                             }
-                            
+
                             [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
                             return completionBlock(nil, error);
                         }];
@@ -96,7 +96,7 @@
                                                      name:(NSString *) name
                                     withCompletionHandler:(ResponseWithObject) completionBlock {
     NSString *attachType = [ConnectionInvitation getAttachmentType:attachment];
-    
+
     if ([ConnectionInvitation isCredentialAttachment:attachType]) {
         [self processInvitationWithCredentialAttachment:invite
                                              attachment:attachment
@@ -128,7 +128,7 @@
                                 serializedConnection:existingConnection
                                withCompletionHandler:^(BOOL result, NSError *error) {
             [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
-            
+
             [CredentialOffersHandler createCredentialStateObject:invite
                                                       attachment:attachment
                                               existingConnection:existingConnection
@@ -156,7 +156,7 @@
                                 serializedConnection:existingConnection
                                withCompletionHandler:^(BOOL result, NSError *error) {
             [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Connection redirect", name]];
-            
+
             [ProofRequestsHandler createProofStateObject:invite
                                               attachment:attachment
                                       existingConnection:existingConnection withCompletionHandler:^(NSString *successMessage, NSError *error) {

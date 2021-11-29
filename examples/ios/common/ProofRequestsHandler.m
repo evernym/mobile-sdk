@@ -32,7 +32,7 @@ NSString *PROOF_COMPLETED_STATUS = @"completed";
         if (error && error.code > 0) {
             return completionBlock(nil, error);
         }
-        
+
         [self handleProofRequest:invite
                       attachment:attachment
               existingConnection:existingConnection
@@ -42,7 +42,7 @@ NSString *PROOF_COMPLETED_STATUS = @"completed";
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
-            
+
             return completionBlock(successMessage, error);
         }];
     }];
@@ -64,16 +64,16 @@ NSString *PROOF_COMPLETED_STATUS = @"completed";
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
-            
+
             return completionBlock(successMessage, error);
         }];
     } else {
-        [ConnectionInvitation getPwDid:existingConnection
+        [Connection getPwDid:existingConnection
                  withCompletionHandler:^(NSString *pwDid, NSError *error) {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
-            
+
             [self acceptProofRequest:pwDid
                           attachment:attachment
                              request:request
@@ -82,7 +82,7 @@ NSString *PROOF_COMPLETED_STATUS = @"completed";
                 if (error && error.code > 0) {
                     return completionBlock(nil, error);
                 }
-                
+
                 return completionBlock(successMessage, error);
             }];
         }];
@@ -94,24 +94,24 @@ NSString *PROOF_COMPLETED_STATUS = @"completed";
                   request:(NSDictionary *) request
                      name:(NSString *) name
     withCompletionHandler:(ResponseBlock) completionBlock {
-    NSString *serializedConnection = [ConnectionInvitation getConnectionByPwDid:pwDid];
-    
+    NSString *serializedConnection = [Connection getConnectionByPwDid:pwDid];
+
     [ProofRequest sendProof:request
               serializedConnection:serializedConnection
              withCompletionHandler:^(NSDictionary *proofRequest, NSError *error) {
         if (error && error.code > 0) {
             return completionBlock(nil, error);
         }
-        
+
         // Store the serialized proof
         [ConnectionInvitation extractRequestAttach:attachment
                              withCompletionHandler:^(NSString *attachmentMessage, NSError *error) {
             NSMutableDictionary* proofs = [[LocalStorage getObjectForKey: @"proofs" shouldCreate: true] mutableCopy];
             NSString *threadId = [Proof getThid:attachment];
-            
+
             NSString *requestedAttributes = [[Utilities jsonToDictionary:attachmentMessage] valueForKey:@"requested_attributes"];
             NSString *requestedPredicates = [[Utilities jsonToDictionary:attachmentMessage] valueForKey:@"requested_predicates"];
-            
+
             NSTimeInterval timeStamp = [[NSDate date] timeIntervalSinceNow];
             NSString *timestamp = [NSString stringWithFormat:@"%@", [NSNumber numberWithDouble: timeStamp]];
             NSString *uuid = [[NSUUID UUID] UUIDString];
@@ -120,20 +120,20 @@ NSString *PROOF_COMPLETED_STATUS = @"completed";
                 @"pwDid": pwDid,
                 @"serialized": [Utilities dictToJsonString:proofRequest],
                 @"threadId": threadId,
-                
+
                 @"title": name,
                 @"requested_attributes": requestedAttributes,
                 @"requested_predicates": requestedPredicates,
-                
+
                 @"timestamp": timestamp,
                 @"status": PROOF_COMPLETED_STATUS,
             };
-            
+
             [proofs setValue: proofObj forKey: uuid];
             [LocalStorage store: @"proofs" andObject: proofs];
-            
+
             [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Proof request send", name]];
-            
+
             return completionBlock([Utilities dictToJsonString:proofRequest], error);
         }];
     }];
@@ -149,13 +149,13 @@ NSString *PROOF_COMPLETED_STATUS = @"completed";
         if (error && error.code > 0) {
             return completionBlock(nil, error);
         }
-        
-        [ConnectionInvitation getPwDid:responseConnection
+
+        [Connection getPwDid:responseConnection
                  withCompletionHandler:^(NSString *pwDid, NSError *error) {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
-            
+
             [self acceptProofRequest:pwDid
                           attachment:attachment
                              request:request
@@ -164,7 +164,7 @@ NSString *PROOF_COMPLETED_STATUS = @"completed";
                 if (error && error.code > 0) {
                     return completionBlock(nil, error);
                 }
-                
+
                 return completionBlock(successMessage, error);
             }];
         }];
@@ -175,8 +175,8 @@ NSString *PROOF_COMPLETED_STATUS = @"completed";
                   request:(NSString *) request
                      name:(NSString *) name
     withCompletionHandler:(ResponseBlock) completionBlock {
-    NSString *serializedConnection = [ConnectionInvitation getConnectionByPwDid:pwDid];
-    
+    NSString *serializedConnection = [Connection getConnectionByPwDid:pwDid];
+
     [ProofRequest rejectProofRequest:serializedConnection
                      serializedProof:request
                withCompletionHandler:^(NSDictionary *rejectedProof, NSError *error) {

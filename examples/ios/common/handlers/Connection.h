@@ -22,4 +22,13 @@
                    serializedConnection:(NSString*) serializedConnection
                   withCompletionHandler:(ResponseWithBoolean) completionBlock;
 
++(void)getPwDid: (NSString*) serializedConnection
+withCompletionHandler: (ResponseBlock) completionBlock;
+
++(NSString*) getConnectionByPwDid: (NSString *) pwDidMes;
+
++(NSString*)getInvitationByPwDid: (NSString *) pwDidMes;
+
++(NSArray*) getAllSerializedConnections;
+
 @end

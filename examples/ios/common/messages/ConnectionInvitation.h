@@ -27,21 +27,16 @@ typedef enum {
 
 @interface ConnectionInvitation : NSObject
 
-+(void)getPwDid: (NSString*) serializedConnection
-withCompletionHandler: (ResponseBlock) completionBlock;
 +(void) extractRequestAttach: (NSDictionary*)invite
                 withCompletionHandler: (ResponseBlock) completionBlock;
 
 +(NSString*) connectionID: connectValues;
-+(NSString*) getConnectionByPwDid: (NSString *) pwDidMes;
 +(void) parsedInvite: (NSString *)invite
 withCompletionHandler: (ResponseWithObject) completionBlock;
 
-+(NSArray*) getAllSerializedConnections;
 +(BOOL) compareInvites:(NSString *)newInvite
          storedInvite:(NSString *)storedInvite;
 +(NSString *)getConnectionName:(NSString *) invite;
-+(NSString*)getInvitationByPwDid: (NSString *) pwDidMes;
 
 +(BOOL) isAriesInvitation:(NSString *) type;
 +(BOOL) isOutOfBandInvitation:(NSString *) type;

@@ -20,6 +20,7 @@
 #import "ConnectionHandler.h"
 #import "CredentialOffersHandler.h"
 #import "ProofRequestsHandler.h"
+#import "CredentialOffer.h"
 
 @interface HomeViewController ()
 
@@ -48,7 +49,7 @@ UIGestureRecognizer *tapper;
     // But you can handle invite with text input and button on home page
     // For show input set this flag to false
     BOOL const isHideInput = true;
-    
+
     [super viewDidLoad];
     self.tableView.dataSource = self;
     self.tableView.delegate = self;
@@ -103,7 +104,7 @@ UIGestureRecognizer *tapper;
         if (error && error.code > 0) {
             return;
         }
-        
+
         NSString *label = [connectValues objectForKey: @"label"];
         NSString *goal = @"";
         if ([connectValues valueForKey:@"goal"] != nil) {
@@ -112,7 +113,7 @@ UIGestureRecognizer *tapper;
             goal = @"New connection";
         }
         NSString *profileUrl = [connectValues objectForKey: @"profileUrl"];
-        
+
         [self createAction:label
                 profileUrl:profileUrl
                       goal:goal
@@ -143,7 +144,7 @@ UIGestureRecognizer *tapper;
         @"additionalData": additionalData,
         @"pwDid": pwDid
     };
-    
+
     [allRequests setValue: request forKey: uuid];
     [LocalStorage store: @"requests" andObject: allRequests];
     requests = allRequests;
@@ -176,7 +177,7 @@ UIGestureRecognizer *tapper;
             [self createActionWithInvitation: resultAsString];
         }];
     }];
-    
+
     [self presentViewController: vc animated: YES completion:^{
         NSLog(@"QR code scanner presented");
     }];
@@ -215,16 +216,16 @@ UIGestureRecognizer *tapper;
     [self messageStatusUpdate: message];
     NSString *pwDid = [message objectForKey:@"pwDid"];
     NSString *payloadJson = [message objectForKey:@"payload"];
-    NSArray *payloadArray = [Utilities jsonToArray:payloadJson];
-    NSDictionary *payloadDict = payloadArray[0];
-    
+    NSDictionary *payloadDict = [Utilities jsonToDictionary:payloadJson];
+
     [Credential createWithOffer:payloadJson
           withCompletionHandler:^(NSDictionary *createdOffer, NSError *error) {
         if (error && error.code > 0) {
             return completionBlock(nil, error);
         }
-        
-        [self createAction:[payloadDict objectForKey:@"claim_name"]
+
+
+        [self createAction:[payloadDict objectForKey:@"comment"]
                 profileUrl:@""
                       goal:@"Credential offer"
                       type:CREDENTIAL_OFFER
@@ -246,7 +247,7 @@ UIGestureRecognizer *tapper;
         if (error && error.code > 0) {
             return completionBlock(nil, error);
         }
-        
+
         [self createAction:[payloadDict objectForKey:@"comment"]
                 profileUrl:@""
                       goal:@"Proof Request"
@@ -262,7 +263,7 @@ UIGestureRecognizer *tapper;
     NSString *pwDid = [message objectForKey:@"pwDid"];
     NSString *payload = [message objectForKey:@"payload"];
     NSDictionary *payloadDict = [Utilities jsonToDictionary:payload];
-    
+
     [self createAction:[payloadDict objectForKey:@"question_text"]
             profileUrl:@""
                   goal:@"Question"
@@ -347,13 +348,13 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
     NSArray *responses = [payloadDict objectForKey:@"valid_responses"];
 
     NSString *pwDidMes = [message objectForKey:@"pwDid"];
-    NSString *questionsConnection = [ConnectionInvitation getConnectionByPwDid:pwDidMes];
+    NSString *questionsConnection = [Connection getConnectionByPwDid:pwDidMes];
 
     UIAlertController * alert = [UIAlertController
                                      alertControllerWithTitle:[payloadDict objectForKey:@"question_text"]
                                      message:[payloadDict objectForKey:@"question_detail"]
                                      preferredStyle:UIAlertControllerStyleAlert];
-    
+
     for(NSInteger i = 0; i < responses.count; i++) {
         NSDictionary *response = responses[i];
         UIAlertAction* button = [UIAlertAction
@@ -400,7 +401,7 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
     if (cell == nil) {
         cell = [[CustomTableViewCell alloc] init];
     }
-    
+
     NSDictionary *requestDict = requests[requests.allKeys[indexPath.row]];
     NSString *type = [requestDict objectForKey: @"type"];
     NSString *name = [requestDict objectForKey: @"name"];
@@ -464,4 +465,4 @@ withCompletionBlock:(ResponseWithBoolean) completionBlock {
 }
 
 @end
-     
+

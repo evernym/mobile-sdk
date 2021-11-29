@@ -17,14 +17,9 @@
     NSLog(@"%@", [[NSUserDefaults standardUserDefaults] objectForKey: key]);
 }
 
-+(void)store: (NSString*)key andString: (NSString*) value {
-    [[NSUserDefaults standardUserDefaults] setValue: value forKey: key];
-    [[NSUserDefaults standardUserDefaults] synchronize];
-}
-
 +(NSDictionary*)getValueForKey: (NSString*) key {
     if([NSUserDefaults.standardUserDefaults objectForKey: key] != nil) {
-        return [NSUserDefaults valueForKey: key];
+        return [[NSUserDefaults standardUserDefaults] valueForKey: key];
     }
     return nil;
 }

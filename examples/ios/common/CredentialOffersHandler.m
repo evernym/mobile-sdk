@@ -32,7 +32,7 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
         if (error && error.code > 0) {
             return completionBlock(nil, error);
         }
-        
+
         [self handleCredentialOffer:invite
                          attachment:attachment
                  existingConnection:existingConnection
@@ -41,7 +41,7 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
-            
+
             return completionBlock(successCredential, error);
         }];
     }];
@@ -60,16 +60,16 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
-            
+
             return completionBlock(successMessage, error);
         }];
     } else {
-        [ConnectionInvitation getPwDid:existingConnection
+        [Connection getPwDid:existingConnection
                  withCompletionHandler:^(NSString *pwDid, NSError *error) {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
-            
+
             [self acceptCredentialOffer:pwDid
                              attachment:[Utilities dictToJsonString: attachment]
                            createdOffer:createdOffer
@@ -78,7 +78,7 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
                 if (error && error.code > 0) {
                     return completionBlock(nil, error);
                 }
-                
+
                 return completionBlock(successCredential, error);
             }];
         }];
@@ -90,7 +90,7 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
                 createdOffer:(NSDictionary *) createdOffer
                  fromMessage:(BOOL) fromMessage
        withCompletionHandler:(ResponseBlock) completionBlock {
-    NSString *serializedConnection = [ConnectionInvitation getConnectionByPwDid:pwDid];
+    NSString *serializedConnection = [Connection getConnectionByPwDid:pwDid];
     NSDictionary *attachmentDict = [Utilities jsonToDictionary:attachment];
 
     [Credential acceptCredential:[Utilities dictToJsonString: attachmentDict]
@@ -101,14 +101,14 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
         if (error && error.code > 0) {
             return completionBlock(nil, error);
         }
-        
+
         // Store the serialized credential
         NSMutableDictionary* credentials = [[LocalStorage getObjectForKey: @"credentials" shouldCreate: true] mutableCopy];
-        
-        NSString *threadId = [CredentialOffer getThid:attachment fromMessage:fromMessage];
-        NSString *name = [CredentialOffer getOfferName:attachment fromMessage:fromMessage];
-        NSString *attr = [CredentialOffer getAttributes:attachment fromMessage:fromMessage];
-        
+
+        NSString *threadId = [CredentialOffer getThid:attachmentDict];
+        NSString *name = [CredentialOffer getOfferName:attachmentDict];
+        NSString *attr = [CredentialOffer getAttributes:attachmentDict];
+
         NSTimeInterval timeStamp = [[NSDate date] timeIntervalSinceNow];
         NSString *timestamp = [NSString stringWithFormat:@"%@", [NSNumber numberWithDouble: timeStamp]];
         NSString *uuid = [[NSUUID UUID] UUIDString];
@@ -117,17 +117,17 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
             @"pwDid": pwDid,
             @"serialized": successCredential,
             @"threadId": threadId,
-            
+
             @"name": name,
             @"attributes": attr,
             @"timestamp": timestamp,
-            
+
             @"status": CREDENTIAL_COMPLETED_STATUS,
         };
-        
+
         [credentials setValue: credentialObj forKey: uuid];
         [LocalStorage store: @"credentials" andObject: credentials];
-        
+
         [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Credential offer accept", name]];
 
         return completionBlock(successCredential, error);
@@ -143,13 +143,13 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
         if (error && error.code > 0) {
             return completionBlock(nil, error);
         }
-       
-        [ConnectionInvitation getPwDid:responseConnection
+
+        [Connection getPwDid:responseConnection
                  withCompletionHandler:^(NSString *pwDid, NSError *error) {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
-            
+
             [self acceptCredentialOffer:pwDid
                              attachment:[Utilities dictToJsonString: attachment]
                            createdOffer:createdOffer
@@ -158,7 +158,7 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
                 if (error && error.code > 0) {
                     return completionBlock(nil, error);
                 }
-                
+
                 return completionBlock(successMessage, error);
             }];
         }];
@@ -169,13 +169,13 @@ NSString *CREDENTIAL_COMPLETED_STATUS = @"completed";
                   attachment:(NSDictionary *) attachment
                 createdOffer:(NSDictionary *) createdOffer
        withCompletionHandler:(ResponseBlock) completionBlock {
-    NSString *serializedConnection = [ConnectionInvitation getConnectionByPwDid:pwDid];
+    NSString *serializedConnection = [Connection getConnectionByPwDid:pwDid];
 
     [Credential rejectCredentialOffer:serializedConnection
                  serializedCredential:[Utilities dictToJsonString: createdOffer]
                 withCompletionHandler:^(NSString *rejectedCredential, NSError *error) {
-        NSString *name = [CredentialOffer getOfferName:[Utilities dictToJsonString:attachment] fromMessage:true];
-        
+        NSString *name = [CredentialOffer getOfferName:[Utilities dictToJsonString:attachment]];
+
         [LocalStorage addEventToHistory:[NSString stringWithFormat:@"%@ - Credential offer rejected", name]];
 
         return completionBlock(rejectedCredential, error);
