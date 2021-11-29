@@ -20,66 +20,6 @@
 NSString *CONNECTION_PENDING_STATUS = @"pending";
 NSString *CONNECTION_COMPLETED_STATUS = @"completed";
 
-+(void)connectionRedirectAriesOutOfBand: (NSString*)invitation
-                   serializedConnection: (NSString*)serializedConnection
-                  withCompletionHandler: (ResponseWithBoolean) completionBlock {
-    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
-
-    NSDictionary *inviteDict = [Utilities jsonToDictionary:invitation];
-    NSArray* handshakeProtocols = [inviteDict objectForKey: @"handshake_protocols"];
-    NSString* handshakeProtocolsValue = handshakeProtocols[0];
-    
-    NSString *HANDSHAKE = MessageType(HandshakeType);
-    NSString *threadId = [inviteDict objectForKey: @"@id"];
-    
-    if ([handshakeProtocolsValue  isEqual: @""] || handshakeProtocolsValue == nil) {
-        return completionBlock(false, nil);
-    }
-
-    [sdkApi connectionDeserialize:serializedConnection
-                       completion:^(NSError *error, NSInteger connectionHandle) {
-        if (error && error.code > 0) {
-            return completionBlock(false, error);
-        }
-
-        [sdkApi connectionSendReuse:(int) connectionHandle
-                             invite:invitation
-                     withCompletion:^(NSError *error) {
-            if (error && error.code > 0) {
-                return completionBlock(false, error);
-            }
-            
-            __block BOOL COMPLETE = NO;
-
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                while (1) {
-                    dispatch_semaphore_t acceptedWaitSemaphore = dispatch_semaphore_create(0);
-                    [Message downloadMessage:HANDSHAKE
-                                      soughtId:threadId
-                           withCompletionBlock:^(NSDictionary *message, NSError *error) {
-                        if (message != nil) {
-                            [ConnectionInvitation getPwDid:serializedConnection
-                                     withCompletionHandler:^(NSString *pwDid, NSError *error) {
-                                [Message updateMessageStatus:pwDid
-                                                     messageId:[message objectForKey:@"uid"]
-                                           withCompletionBlock:^(BOOL result, NSError *error) {
-                                    if (error && error.code > 0) {
-                                        return completionBlock(false, error);
-                                    }
-                                    
-                                    return completionBlock(result, nil);
-                                }];
-                            }];
-                        }
-                    }];
-                    dispatch_semaphore_wait(acceptedWaitSemaphore, DISPATCH_TIME_FOREVER);
-                    if (COMPLETE) break;
-                }
-            });
-        }];
-    }];
-}
-
 +(void)verityConnectionExist:(NSString *) invite
        serializedConnections:(NSArray *) serializedConnections
               withCompletion:(ResponseBlock) completionBlock {
@@ -138,11 +78,72 @@ NSString *CONNECTION_COMPLETED_STATUS = @"completed";
     }
 }
 
++(void)connectionRedirectAriesOutOfBand: (NSString*)invitation
+                   serializedConnection: (NSString*)serializedConnection
+                  withCompletionHandler: (ResponseWithBoolean) completionBlock {
+    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
+
+    NSDictionary *inviteDict = [Utilities jsonToDictionary:invitation];
+    NSArray* handshakeProtocols = [inviteDict objectForKey: @"handshake_protocols"];
+    NSString* handshakeProtocolsValue = handshakeProtocols[0];
+
+    NSString *HANDSHAKE = MessageType(HandshakeType);
+    NSString *threadId = [inviteDict objectForKey: @"@id"];
+
+    if ([handshakeProtocolsValue  isEqual: @""] || handshakeProtocolsValue == nil) {
+        return completionBlock(false, nil);
+    }
+
+    [sdkApi connectionDeserialize:serializedConnection
+                       completion:^(NSError *error, NSInteger connectionHandle) {
+        if (error && error.code > 0) {
+            return completionBlock(false, error);
+        }
+
+        [sdkApi connectionSendReuse:(int) connectionHandle
+                             invite:invitation
+                     withCompletion:^(NSError *error) {
+            if (error && error.code > 0) {
+                return completionBlock(false, error);
+            }
+
+            __block BOOL COMPLETE = NO;
+
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                while (1) {
+                    dispatch_semaphore_t acceptedWaitSemaphore = dispatch_semaphore_create(0);
+                    [Message downloadMessage:HANDSHAKE
+                                      soughtId:threadId
+                           withCompletionBlock:^(NSDictionary *message, NSError *error) {
+                        if (message != nil) {
+                            [Connection getPwDid:serializedConnection
+                                     withCompletionHandler:^(NSString *pwDid, NSError *error) {
+                                [Message updateMessageStatus:pwDid
+                                                     messageId:[message objectForKey:@"uid"]
+                                           withCompletionBlock:^(BOOL result, NSError *error) {
+                                    if (error && error.code > 0) {
+                                        return completionBlock(false, error);
+                                    }
+
+                                    return completionBlock(result, nil);
+                                }];
+                            }];
+                        }
+                    }];
+                    dispatch_semaphore_wait(acceptedWaitSemaphore, DISPATCH_TIME_FOREVER);
+                    if (COMPLETE) break;
+                }
+            });
+        }];
+    }];
+}
+
 +(void)connectWithInvite:(NSString *)invitation
 withCompletionHandler: (ResponseBlock) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
 
-    [sdkApi connectionCreateWithInvite:[ConnectionInvitation connectionID: [Utilities jsonToDictionary:invitation]]
+    NSString* connectionID = [ConnectionInvitation connectionID: [Utilities jsonToDictionary:invitation]];
+    [sdkApi connectionCreateWithInvite:connectionID
                          inviteDetails:invitation
                             completion:^(NSError *error, NSInteger connectionHandle) {
         if (error && error.code > 0) {
@@ -164,8 +165,9 @@ withCompletionHandler: (ResponseBlock) completionBlock {
 +(void)connectWithOutofbandInvite: (NSString*)invitation
             withCompletionHandler: (ResponseBlock) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
+    NSString* connectionID = [ConnectionInvitation connectionID: [Utilities jsonToDictionary:invitation]];
 
-    [sdkApi connectionCreateWithOutofbandInvite: [ConnectionInvitation connectionID: [Utilities jsonToDictionary:invitation]]
+    [sdkApi connectionCreateWithOutofbandInvite: connectionID
                                          invite: invitation
                                      completion: ^(NSError *error, NSInteger connectionHandle) {
         if (error && error.code > 0) {
@@ -214,7 +216,7 @@ withCompletionHandler: (ResponseBlock) completionBlock {
                 // Store the serialized connection
                 NSMutableDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
 
-                [ConnectionInvitation getPwDid:successConnection
+                [Connection getPwDid:successConnection
                          withCompletionHandler:^(NSString *pwDid, NSError *error) {
                     if (error && error.code > 0) {
                         return completionBlock(nil, error);
@@ -286,7 +288,7 @@ withCompletionHandler: (ResponseBlock) completionBlock {
             withCompletionBlock:(ResponseBlock) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
 
-    [ConnectionInvitation getPwDid:serializedConnection
+    [Connection getPwDid:serializedConnection
              withCompletionHandler:^(NSString *pwDid, NSError *error) {
         if (error && error.code > 0) {
             return completionBlock(nil, error);
@@ -323,5 +325,67 @@ withCompletionHandler: (ResponseBlock) completionBlock {
     }];
 }
 
++(void)getPwDid: (NSString*) serializedConnection
+withCompletionHandler: (ResponseBlock) completionBlock {
+    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
+
+    [sdkApi connectionDeserialize:serializedConnection
+                       completion:^(NSError *error, NSInteger connectionHandle) {
+        if (error && error.code > 0) {
+            return completionBlock(nil, error);
+        }
+
+        [sdkApi connectionGetPwDid:(int)connectionHandle
+                    withCompletion:^(NSError *error, NSString *pwDid) {
+            if (error && error.code > 0) {
+                return completionBlock(nil, error);
+            }
+
+            return completionBlock(pwDid, error);
+        }];
+    }];
+}
+
++(NSString*)getConnectionByPwDid: (NSString *) pwDidMes {
+    NSDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
+    NSString *resultConnection = @"";
+    for (NSInteger i = 0; i < connections.allKeys.count; i++) {
+        NSString *key = connections.allKeys[i];
+        NSDictionary *connection = [connections objectForKey:key];
+        NSString *pwDid = [connection objectForKey:@"pwDid"];
+        if ([pwDidMes isEqual:pwDid]) {
+            resultConnection = [connection objectForKey:@"serialized"];
+            break;
+        }
+    }
+    return resultConnection;
+}
+
++(NSString*)getInvitationByPwDid: (NSString *) pwDidMes {
+    NSDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
+    NSString *resultConnection = @"";
+    for (NSInteger i = 0; i < connections.allKeys.count; i++) {
+        NSString *key = connections.allKeys[i];
+        NSDictionary *connection = [connections objectForKey:key];
+        NSString *pwDid = [connection objectForKey:@"pwDid"];
+        if ([pwDidMes isEqual:pwDid]) {
+            resultConnection = [connection objectForKey:@"invitation"];
+            break;
+        }
+    }
+    return resultConnection;
+}
+
++(NSArray*) getAllSerializedConnections {
+    NSMutableArray *serializedConnectionsArray = [[NSMutableArray alloc] init];
+    NSDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
+    for (NSInteger i = 0; i < connections.allKeys.count; i++) {
+        NSString *key = connections.allKeys[i];
+        NSDictionary *connection = [connections objectForKey:key];
+        NSString *serializedConnection = [connection objectForKey:@"serialized"];
+        [serializedConnectionsArray addObject: serializedConnection];
+    }
+    return serializedConnectionsArray;
+}
 
 @end

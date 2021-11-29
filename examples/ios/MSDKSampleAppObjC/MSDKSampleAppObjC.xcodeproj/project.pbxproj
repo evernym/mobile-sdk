@@ -242,6 +242,10 @@
 		DD725CB7273936560040CCD6 /* common */ = {
 			isa = PBXGroup;
 			children = (
+				DD725CBB273936560040CCD6 /* Config.h */,
+				DD725CBD273936560040CCD6 /* Config.m */,
+				DD725CBA273936560040CCD6 /* MobileSDK.h */,
+				DD725CBE273936560040CCD6 /* MobileSDK.m */,
 				DD725CC7273936560040CCD6 /* ConnectionHandler.h */,
 				DD725D1A273A8FCA0040CCD6 /* CredentialOffersHandler.h */,
 				DD725D1B273BAEE50040CCD6 /* ProofRequestsHandler.h */,
@@ -249,23 +253,11 @@
 				DD725D18273A8FB30040CCD6 /* CredentialOffersHandler.m */,
 				DD725D1C273BAF3F0040CCD6 /* ProofRequestsHandler.m */,
 				DD725CC8273936560040CCD6 /* handlers */,
-				DD725CD3273936560040CCD6 /* helpers */,
-				DD725CB8273936560040CCD6 /* types */,
+				DD725CD3273936560040CCD6 /* messages */,
 				DD725CC0273936560040CCD6 /* utils */,
 			);
 			name = common;
 			path = ../../common;
-			sourceTree = "<group>";
-		};
-		DD725CB8273936560040CCD6 /* types */ = {
-			isa = PBXGroup;
-			children = (
-				DD725CBB273936560040CCD6 /* Config.h */,
-				DD725CBD273936560040CCD6 /* Config.m */,
-				DD725CBA273936560040CCD6 /* MobileSDK.h */,
-				DD725CBE273936560040CCD6 /* MobileSDK.m */,
-			);
-			path = types;
 			sourceTree = "<group>";
 		};
 		DD725CC0273936560040CCD6 /* utils */ = {
@@ -298,7 +290,7 @@
 			path = handlers;
 			sourceTree = "<group>";
 		};
-		DD725CD3273936560040CCD6 /* helpers */ = {
+		DD725CD3273936560040CCD6 /* messages */ = {
 			isa = PBXGroup;
 			children = (
 				DD725CD7273936560040CCD6 /* ConnectionInvitation.h */,
@@ -308,7 +300,7 @@
 				DD725D23273BE5810040CCD6 /* Proof.h */,
 				DD725D24273BE58A0040CCD6 /* Proof.m */,
 			);
-			path = helpers;
+			path = messages;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -737,7 +729,7 @@
 				CODE_SIGN_ENTITLEMENTS = MSDKSampleAppObjC/MSDKSampleAppObjC.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = ES8QU3D2A4;
+				DEVELOPMENT_TEAM = 77YR6TY6U3;
 				ENABLE_BITCODE = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MSDKSampleAppObjC/MSDKSampleAppObjC-Prefix.pch";
@@ -762,7 +754,7 @@
 					"@executable_path/Frameworks",
 				);
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = me.connect.sdk.objc.CMeSdkObjc;
+				PRODUCT_BUNDLE_IDENTIFIER = me.connect.sdk.objc.CMeSdkObjc2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -777,7 +769,7 @@
 				CODE_SIGN_ENTITLEMENTS = MSDKSampleAppObjC/MSDKSampleAppObjC.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = ES8QU3D2A4;
+				DEVELOPMENT_TEAM = F34LU2BG3U;
 				ENABLE_BITCODE = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MSDKSampleAppObjC/MSDKSampleAppObjC-Prefix.pch";

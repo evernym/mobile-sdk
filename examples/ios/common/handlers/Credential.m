@@ -46,7 +46,7 @@
   withCompletionHandler: (ResponseWithObject) completionBlock {
     NSError* error;
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
-    
+
     @try {
         NSString *uuid = [[NSUUID UUID] UUIDString];
         [sdkApi credentialCreateWithOffer:uuid
@@ -55,7 +55,7 @@
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
-            
+
             [sdkApi credentialSerialize:credentailHandle
                              completion:^(NSError *error, NSString *state) {
                 if (error && error.code > 0) {
@@ -75,7 +75,7 @@
         withCompletionHandler: (ResponseBlock) completionBlock {
     NSError* error;
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
-        
+
     @try {
     [sdkApi connectionDeserialize:serializedConnection
                        completion:^(NSError *error, NSInteger connectionHandle) {
@@ -156,7 +156,9 @@
                    fromMessage:(BOOL) fromMessage
            withCompletionBlock:(ResponseBlock) completionBlock {
     ConnectMeVcx *sdkApi = [[MobileSDK shared] sdkApi];
-    NSString *thid = [CredentialOffer getThid:offer fromMessage:fromMessage];
+    NSDictionary *offerObj = [Utilities jsonToDictionary:offer];
+
+    NSString *thid = [CredentialOffer getThid:offerObj];
     __block NSString *serialized = @"";
 
     [sdkApi credentialDeserialize:serializedCredential
@@ -165,9 +167,9 @@
         if (error && error.code > 0) {
             return completionBlock(nil, error);
         }
-        
+
         __block BOOL COMPLETE = NO;
-        
+
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             while (1) {
                 dispatch_semaphore_t acceptedWaitSemaphore = dispatch_semaphore_create(0);
@@ -193,19 +195,19 @@
         withCompletionHandler:(ResponseBlock) completionBlock {
     NSError* error;
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
-    
+
     @try {
         [sdkApi connectionDeserialize:serializedConnection
                            completion:^(NSError *error, NSInteger connectionHandle) {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
-            
+
             [sdkApi credentialDeserialize:serializedCredential completion:^(NSError *error, NSInteger credentialHandle) {
                 if (error && error.code > 0) {
                     return completionBlock(nil, error);
                 }
-                
+
                 [sdkApi credentialReject:credentialHandle
                         connectionHandle:(int)connectionHandle
                                  comment:@""
@@ -213,13 +215,13 @@
                     if (error && error.code > 0) {
                         return completionBlock(nil, error);
                     }
-                    
+
                     [sdkApi credentialSerialize:credentialHandle
                                      completion:^(NSError *error, NSString *credentialSerialized) {
                         if (error && error.code > 0) {
                             return completionBlock(nil, error);
                         }
-                        
+
                         return completionBlock(credentialSerialized, nil);
                     }];
                 }];

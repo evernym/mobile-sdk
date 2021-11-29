@@ -22,7 +22,7 @@ The application provides the base functionality of our [ConnectMe](https://gitla
 #### Environment
 
 By default, the applications points to [**Production**](../../../environments/ProductionEnvironment.md) environment.
-* Cloud Agent and Pool Ledger Genesis Transactions can be changed in the [file](../common/types/Config.m) containing main application settings.
+* Cloud Agent and Pool Ledger Genesis Transactions can be changed in the [file](../common/Config.m) containing main application settings.
 
-In order to run the application you **MUST** provide an endpoint ([**sponsorServerURL**](../common/types/Config.m)) of your Sponsor Server which application will call to generate a provisioning tokens.\
+In order to run the application you **MUST** provide an endpoint ([**sponsorServerURL**](../common/Config.m)) of your Sponsor Server which application will call to generate a provisioning tokens.\
 A minimal Sponsor Server sample can be found [here](/examples/simple-sponsor).
