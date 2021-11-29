@@ -37,9 +37,6 @@ public class Action {
     @ColumnInfo(name = "pwDid")
     public String pwDid;
 
-    @ColumnInfo(name = "claimId")
-    public String claimId;
-
     @ColumnInfo(name="threadId")
     public String threadId;
 

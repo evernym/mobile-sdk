@@ -2,8 +2,8 @@
 platform :ios, '11.0'
 
 source 'https://cdn.cocoapods.org/'
-source 'git@gitlab.com:evernym/mobile/mobile-sdk.git'
-  
+source 'https://gitlab.com/evernym/mobile/mobile-sdk.git'
+
 pre_install do |installer|
   Pod::Installer::Xcode::TargetValidator.send(:define_method, :verify_no_static_framework_transitive_dependencies) {}
 end
@@ -34,8 +34,6 @@ target 'MSDKSampleAppObjC' do
   # Below line will be removed when we go public with our cocoapod
   pod 'vcx', '0.0.219'
 #  pod 'vcx', '0.0.220'
-  pod 'Firebase/Analytics'
-  pod 'Firebase/Messaging'
   pod 'QRCodeReaderViewController'
 
   target 'MSDKSampleAppObjCTests' do

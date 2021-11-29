@@ -33,7 +33,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.30'
     implementation 'net.java.dev.jna:jna:4.5.0@aar'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.evernym:vcx:0.12.0-3214db8@aar'
+    implementation 'com.evernym:vcx:0.12.0-fb9d45f@aar'
     api 'net.sourceforge.streamsupport:android-retrofuture:1.7.1'
     api 'net.sourceforge.streamsupport:android-retrostreams:1.7.1'
     implementation 'de.adorsys.android:securestoragelibrary:1.1.0'

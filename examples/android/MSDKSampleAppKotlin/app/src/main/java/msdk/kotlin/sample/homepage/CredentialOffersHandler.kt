@@ -1,20 +1,21 @@
 package msdk.kotlin.sample.homepage
 
 import kotlinx.coroutines.future.await
-import msdk.kotlin.sample.handlers.Connections
-import msdk.kotlin.sample.handlers.Credentials
-import msdk.kotlin.sample.messages.ConnectionInvitation
-import msdk.kotlin.sample.messages.OutOfBandInvitation
 import msdk.kotlin.sample.SingleLiveData
 import msdk.kotlin.sample.db.Database
 import msdk.kotlin.sample.db.entity.Action
 import msdk.kotlin.sample.db.entity.Connection
 import msdk.kotlin.sample.db.entity.CredentialOffer
+import msdk.kotlin.sample.handlers.Connections
+import msdk.kotlin.sample.handlers.Credentials
 import msdk.kotlin.sample.history.HistoryHandler
 import msdk.kotlin.sample.homepage.Results.*
+import msdk.kotlin.sample.messages.ConnectionInvitation
+import msdk.kotlin.sample.messages.CredentialOfferMessage
+import msdk.kotlin.sample.messages.OutOfBandInvitation
 import msdk.kotlin.sample.utils.wrap
-import org.json.JSONException
 import java.util.*
+
 
 object CredentialOffersHandler {
     suspend fun createCredentialStateObject(
@@ -23,34 +24,26 @@ object CredentialOffersHandler {
             liveData: SingleLiveData<Results>,
             action: Action
     ) {
-        try {
-            val claimId: String = outOfBandInvite.attachment!!.getString("@id")
-            if (!db.credentialOffersDao().checkOfferExists(claimId)) {
-                val thread = outOfBandInvite.attachment!!.getJSONObject("~thread")
-                val threadId = thread.getString("thid")
-                var pwDid: String? = null
-                if (outOfBandInvite.existingConnection != null) {
-                    pwDid = Connections.getPwDid(outOfBandInvite.existingConnection!!)
-                }
-                val serialized = Credentials.createWithOffer(
-                        UUID.randomUUID().toString(),
-                        outOfBandInvite.attachment.toString()
-                ).wrap().await()
-                val offer = CredentialOffer(
-                        threadId = threadId,
-                        claimId = claimId,
-                        pwDid = pwDid,
-                        serialized = serialized,
-                        attachConnection = outOfBandInvite.invitation,
-                        attachConnectionLogo = outOfBandInvite.userMeta!!.logo,
-                        attachConnectionName = outOfBandInvite.userMeta!!.name
-                )
-                db.credentialOffersDao().insertAll(offer)
-                processCredentialOffer(offer, db, liveData, action)
-            }
-        } catch (e: JSONException) {
-            e.printStackTrace()
+        val credentialOffer = CredentialOfferMessage.parse(outOfBandInvite.attachment.toString())!!
+
+        var pwDid: String? = null
+        if (outOfBandInvite.existingConnection != null) {
+            pwDid = Connections.getPwDid(outOfBandInvite.existingConnection!!)
         }
+        val serialized = Credentials.createWithOffer(
+            UUID.randomUUID().toString(),
+            outOfBandInvite.attachment.toString()
+        ).wrap().await()
+        val offer = CredentialOffer(
+            threadId = credentialOffer.threadId,
+            pwDid = pwDid,
+            serialized = serialized,
+            attachConnection = outOfBandInvite.invitation,
+            attachConnectionLogo = outOfBandInvite.userMeta!!.logo,
+            attachConnectionName = outOfBandInvite.userMeta!!.name
+        )
+        db.credentialOffersDao().insertAll(offer)
+        processCredentialOffer(offer, db, liveData, action)
     }
 
     suspend fun processCredentialOffer(

@@ -1,19 +1,21 @@
 package msdk.kotlin.sample.homepage
 
 import kotlinx.coroutines.future.await
-import msdk.kotlin.sample.handlers.Connections
-import msdk.kotlin.sample.handlers.Proofs
-import msdk.kotlin.sample.messages.ConnectionInvitation
-import msdk.kotlin.sample.messages.OutOfBandInvitation
 import msdk.kotlin.sample.SingleLiveData
 import msdk.kotlin.sample.db.Database
 import msdk.kotlin.sample.db.entity.Action
 import msdk.kotlin.sample.db.entity.Connection
 import msdk.kotlin.sample.db.entity.ProofRequest
+import msdk.kotlin.sample.handlers.Connections
+import msdk.kotlin.sample.handlers.Proofs
 import msdk.kotlin.sample.history.HistoryHandler
 import msdk.kotlin.sample.homepage.Results.*
+import msdk.kotlin.sample.messages.ConnectionInvitation
+import msdk.kotlin.sample.messages.OutOfBandInvitation
+import msdk.kotlin.sample.messages.ProofRequestMessage
 import msdk.kotlin.sample.utils.wrap
 import java.util.*
+
 
 object ProofRequestsHandler {
     suspend fun createProofStateObject(
@@ -22,7 +24,7 @@ object ProofRequestsHandler {
             liveData: SingleLiveData<Results>,
             action: Action
     ) {
-        val threadId = outOfBandInvite.attachment!!.getJSONObject("~thread").getString("thid")
+        val proofRequest = ProofRequestMessage.parse(outOfBandInvite.attachment.toString())!!
 
         var pwDid: String? = outOfBandInvite.existingConnection
         if (outOfBandInvite.existingConnection != null) {
@@ -35,7 +37,7 @@ object ProofRequestsHandler {
         ).wrap().await()
         val proof = ProofRequest(
                 serialized = serialized,
-                threadId = threadId,
+                threadId = proofRequest.threadId,
                 pwDid = pwDid,
                 attachConnection = outOfBandInvite.invitation,
                 attachConnectionName = outOfBandInvite.userMeta?.name,

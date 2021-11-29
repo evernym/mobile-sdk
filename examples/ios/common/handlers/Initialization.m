@@ -68,7 +68,6 @@
             NSLog(@"Fail to init vcx because provisioning token is empty");
             return;
         }
-        [LocalStorage store:token andString:@"provisioningToken"];
 
         const char* oneTimeInfo = [sdkApi agentProvisionWithToken: sdkConfig token: token];
         if(oneTimeInfo == nil) {
@@ -78,6 +77,7 @@
         NSString *oneTimeInfoConfig = [NSString stringWithUTF8String: oneTimeInfo];
 
         [self setSecurePrefVcxConfig:keychainVcxConfig data:oneTimeInfoConfig];
+        [LocalStorage store:@"appProvisioned" andObject:@{}];
         [self initialize: keychainVcxConfig];
     }];
 }
@@ -120,8 +120,8 @@
 }
 
 +(BOOL)isCloudAgentProvisioned:(NSMutableDictionary*) keychainVcxConfig {
-    NSString *token = [LocalStorage getValueForKey: @"provisioningToken"];
-    if (token == nil) {
+    NSDictionary *appProvisioned = [LocalStorage getValueForKey: @"appProvisioned"];
+    if (appProvisioned == nil) {
         [self clearSecureStorage];
         return false;
     }
@@ -148,16 +148,13 @@
         return completionBlock(nil, error);
     }
     NSString* sponseeID = [[[NSUUID alloc] init] UUIDString];
-    [LocalStorage store:sponseeID andString:@"sponseeID"];
-
-    [Utilities sendPostRequest: [sponsorServerURL stringByAppendingString:@"/generate"]
+    [Utilities sendPostRequest: sponsorServerURL
                         withBody:@{@"sponseeId": sponseeID }
                    andCompletion:^(NSString *token, NSError *error) {
         if(error != nil) {
             return completionBlock(nil, error);
         }
 
-        [LocalStorage store:token andString:@"provisioningToken"];
         return completionBlock(token, nil);
     }];
 }

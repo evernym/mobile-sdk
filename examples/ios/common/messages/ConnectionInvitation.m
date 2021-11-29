@@ -54,57 +54,6 @@
     return nil;
 }
 
-+(void)getPwDid: (NSString*) serializedConnection
-withCompletionHandler: (ResponseBlock) completionBlock {
-    ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
-    
-    [sdkApi connectionDeserialize:serializedConnection
-                       completion:^(NSError *error, NSInteger connectionHandle) {
-        if (error && error.code > 0) {
-            return completionBlock(nil, error);
-        }
-        
-        [sdkApi connectionGetPwDid:(int)connectionHandle
-                    withCompletion:^(NSError *error, NSString *pwDid) {
-            if (error && error.code > 0) {
-                return completionBlock(nil, error);
-            }
-            
-            return completionBlock(pwDid, error);
-        }];
-    }];
-}
-
-+(NSString*)getConnectionByPwDid: (NSString *) pwDidMes {
-    NSDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
-    NSString *resultConnection = @"";
-    for (NSInteger i = 0; i < connections.allKeys.count; i++) {
-        NSString *key = connections.allKeys[i];
-        NSDictionary *connection = [connections objectForKey:key];
-        NSString *pwDid = [connection objectForKey:@"pwDid"];
-        if ([pwDidMes isEqual:pwDid]) {
-            resultConnection = [connection objectForKey:@"serialized"];
-            break;
-        }
-    }
-    return resultConnection;
-}
-
-+(NSString*)getInvitationByPwDid: (NSString *) pwDidMes {
-    NSDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
-    NSString *resultConnection = @"";
-    for (NSInteger i = 0; i < connections.allKeys.count; i++) {
-        NSString *key = connections.allKeys[i];
-        NSDictionary *connection = [connections objectForKey:key];
-        NSString *pwDid = [connection objectForKey:@"pwDid"];
-        if ([pwDidMes isEqual:pwDid]) {
-            resultConnection = [connection objectForKey:@"invitation"];
-            break;
-        }
-    }
-    return resultConnection;
-}
-
 +(void)parsedInvite: (NSString *)invite
        withCompletionHandler: (ResponseWithObject) completionBlock {
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
@@ -116,7 +65,7 @@ withCompletionHandler: (ResponseBlock) completionBlock {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
-            
+
             return completionBlock([Utilities jsonToDictionary:parsedInvite], nil);
         }];
     } else {
@@ -128,14 +77,14 @@ withCompletionHandler: (ResponseBlock) completionBlock {
        withCompletionHandler: (ResponseBlock) completionBlock {
     ConnectMeVcx* sdkApi = [[MobileSDK shared] sdkApi];
     NSDictionary *requestAttach = [invite objectForKey: @"request~attach"];
-    
+
     if (requestAttach) {
         [sdkApi extractAttachedMessage:[Utilities dictToJsonString: invite]
                             completion:^(NSError *error, NSString *attachedMessage) {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
-            
+
             return completionBlock(attachedMessage, error);
         }];
     } else {
@@ -144,28 +93,14 @@ withCompletionHandler: (ResponseBlock) completionBlock {
             if (error && error.code > 0) {
                 return completionBlock(nil, error);
             }
-            
+
             return completionBlock(attachedMessage, error);
         }];
     }
 }
 
 +(NSString*)connectionID: connectValues {
-    NSString* connectionID = [connectValues objectForKey: @"id"];
-
-    if(!connectionID) {
-        connectionID =  [connectValues objectForKey: @"@id"];
-    }
-
-    if(!connectionID) {
-        NSDictionary* connectionData = [Utilities jsonToDictionary: connectValues[@"serialized"]];
-        connectionID = connectionData[@"data"][@"pw_did"];
-    }
-
-    if(!connectionID) {
-        NSLog(@"Connection ID is missing %@", connectValues);
-    }
-
+    NSString* connectionID = [connectValues objectForKey: @"@id"];
     return connectionID;
 }
 
@@ -175,26 +110,14 @@ withCompletionHandler: (ResponseBlock) completionBlock {
     return name;
 }
 
-+(NSArray*) getAllSerializedConnections {
-    NSMutableArray *serializedConnectionsArray = [[NSMutableArray alloc] init];
-    NSDictionary* connections = [[LocalStorage getObjectForKey: @"connections" shouldCreate: true] mutableCopy];
-    for (NSInteger i = 0; i < connections.allKeys.count; i++) {
-        NSString *key = connections.allKeys[i];
-        NSDictionary *connection = [connections objectForKey:key];
-        NSString *serializedConnection = [connection objectForKey:@"serialized"];
-        [serializedConnectionsArray addObject: serializedConnection];
-    }
-    return serializedConnectionsArray;
-}
-
 +(BOOL)compareInvites:(NSString *)newInvite
          storedInvite:(NSString *)storedInvite {
     NSDictionary *newObject = [Utilities jsonToDictionary:newInvite];
     NSDictionary *storedObject = [Utilities jsonToDictionary:storedInvite];
-    
+
     NSString *newPublicDid = [newObject valueForKey: @"public_did"];
     NSString *storedPublicDid = [storedObject valueForKey: @"public_did"];
-    
+
     if ([storedPublicDid isEqual:@""] != true) {
         return [newPublicDid isEqual:storedPublicDid];
     } else {

@@ -25,7 +25,7 @@ class HomePageAdapter(private val itemClickListener: ItemClickListener) : Recycl
     }
 
     override fun onBindViewHolder(holder: HomePageViewHolder, position: Int) {
-        val (id, name, _, description, details, icon, _, _, _, _, _, entryId, selectedAnswer, messageAnswers) = data[position]
+        val (id, name, _, description, details, icon, _, _, _, _, entryId, selectedAnswer, messageAnswers) = data[position]
         holder.name.text = name
         holder.description.text = description
         holder.details.text = details

@@ -11,7 +11,6 @@ import org.json.JSONObject;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 import msdk.java.messages.ConnectionInvitation;
@@ -120,7 +119,7 @@ public class HomePageViewModel extends AndroidViewModel {
     private void handleReceivedCredentialOffer(Message message, SingleLiveData<Results> liveData) {
         try {
             Connection connection = db.connectionDao().getByPwDid(message.getPwDid());
-            CredentialOfferMessage credentialOffer = CredentialOfferMessage.parse(message);
+            CredentialOfferMessage credentialOffer = CredentialOfferMessage.parse(message.getPayload());
             Credentials.createWithOffer(UUID.randomUUID().toString(), credentialOffer.offer).handle((serialized, err) -> {
                 if (err != null) {
                     err.printStackTrace();
@@ -128,18 +127,14 @@ public class HomePageViewModel extends AndroidViewModel {
                 } else {
                     CredentialOffer offer = new CredentialOffer();
                     offer.threadId = credentialOffer.threadId;
-                    offer.claimId = credentialOffer.id;
                     offer.pwDid = message.getPwDid();
                     offer.serialized = serialized;
                     db.credentialOffersDao().insertAll(offer);
 
                     Action action = Actions.createActionWithOffer(
                             MessageType.CREDENTIAL_OFFER.toString(),
-                            credentialOffer.name,
+                            credentialOffer,
                             connection.icon,
-                            credentialOffer.attributes,
-                            credentialOffer.id,
-                            connection.pwDid,
                             null
                     );
                     db.actionDao().insertAll(action);
@@ -156,7 +151,7 @@ public class HomePageViewModel extends AndroidViewModel {
     private void handleReceivedProofRequest(Message message, SingleLiveData<Results> liveData) {
         try {
             Connection connection = db.connectionDao().getByPwDid(message.getPwDid());
-            ProofRequestMessage proofRequest = ProofRequestMessage.parse(message);
+            ProofRequestMessage proofRequest = ProofRequestMessage.parse(message.getPayload());
             Proofs.createWithRequest(UUID.randomUUID().toString(), proofRequest.proofReq).handle((pr, err) -> {
                 if (err != null) {
                     err.printStackTrace();
@@ -169,11 +164,9 @@ public class HomePageViewModel extends AndroidViewModel {
                     db.proofRequestDao().insertAll(proof);
 
                     Action action = Actions.createActionWithProof(
-                            MessageType.CREDENTIAL_OFFER.toString(),
-                            proofRequest.name,
+                            MessageType.PROOF_REQUEST.toString(),
+                            proofRequest,
                             connection.icon,
-                            proofRequest.threadId,
-                            proofRequest.attributes,
                             null
                     );
                     db.actionDao().insertAll(action);
@@ -224,12 +217,12 @@ public class HomePageViewModel extends AndroidViewModel {
                     return;
                 }
                 if (action.type.equals(MessageType.CREDENTIAL_OFFER.toString())) {
-                    CredentialOffer offer = db.credentialOffersDao().getByPwDidAndClaimId(action.claimId, action.pwDid);
+                    CredentialOffer offer = db.credentialOffersDao().getByPwDidAndThreadId(action.threadId);
                     CredentialOffersHandler.acceptCredentialOffer(offer, db, liveData, action);
                     return;
                 }
                 if (action.type.equals(MessageType.PROOF_REQUEST.toString())) {
-                    ProofRequest proof = db.proofRequestDao().getByThreadId(action.threadId);
+                    ProofRequest proof = db.proofRequestDao().getByPwDidAndThreadId(action.threadId);
                     ProofRequestsHandler.acceptProofRequest(proof, db, liveData, action);
                 }
             } catch (Exception e) {
@@ -248,12 +241,12 @@ public class HomePageViewModel extends AndroidViewModel {
                     return;
                 }
                 if (action.type.equals(MessageType.CREDENTIAL_OFFER.toString())) {
-                    CredentialOffer offer = db.credentialOffersDao().getByPwDidAndClaimId(action.claimId, action.pwDid);
+                    CredentialOffer offer = db.credentialOffersDao().getByPwDidAndThreadId(action.threadId);
                     CredentialOffersHandler.rejectCredentialOffer(offer, db, liveData);
                     return;
                 }
                 if (action.type.equals(MessageType.PROOF_REQUEST.toString())) {
-                    ProofRequest proof = db.proofRequestDao().getByThreadId(action.threadId);
+                    ProofRequest proof = db.proofRequestDao().getByPwDidAndThreadId(action.threadId);
                     ProofRequestsHandler.rejectProofReq(proof, db, liveData);
                 }
             } catch (Exception e) {
@@ -299,26 +292,20 @@ public class HomePageViewModel extends AndroidViewModel {
 
                 if (ConnectionInvitation.isAriesOutOfBandConnectionInvitation(invitationType) && attachment != null) {
                     if (attachment.isCredentialAttachment()) {
-                        JSONObject attributes = CredentialOfferMessage.extractAttributesFromCredentialOffer(attachment.data);
+                        CredentialOfferMessage credentialOffer = CredentialOfferMessage.parse(attachment.data.toString());
                         action = Actions.createActionWithOffer(
                                 MessageType.CONNECTION_INVITATION.toString(),
-                                attachment.data.getString("comment"),
+                                credentialOffer,
                                 inviteObject.getString("profileUrl"),
-                                attributes,
-                                null,
-                                null,
                                 invite
                         );
                     }
                     if (attachment.isProofAttachment()) {
-                        JSONObject decodedProofAttach = ProofRequestMessage.decodeProofRequestAttach(attachment.data);
-                        JSONObject requestedAttributes = ProofRequestMessage.extractRequestedAttributesFromProofRequest(decodedProofAttach);
+                        ProofRequestMessage proofRequest = ProofRequestMessage.parse(attachment.data.toString());
                         action = Actions.createActionWithProof(
                                 MessageType.CONNECTION_INVITATION.toString(),
-                                ProofRequestMessage.extractRequestedNameFromProofRequest(decodedProofAttach),
+                                proofRequest,
                                 inviteObject.getString("profileUrl"),
-                                null,
-                                requestedAttributes,
                                 invite
                         );
                     }

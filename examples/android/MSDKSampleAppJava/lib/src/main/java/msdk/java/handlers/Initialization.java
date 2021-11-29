@@ -134,6 +134,7 @@ public class Initialization {
                 .withWalletKey(CommonUtils.createWalletKey())
                 .withLogo(constants.LOGO)
                 .withName(constants.NAME)
+                .withProtocolType(constants.PROTOCOL_TYPE)
                 .build();
 
         CompletableFuture<Void> result = new CompletableFuture<>();
@@ -249,6 +250,7 @@ public class Initialization {
         private String SERVER_URL;
         private String LOGO;
         private String NAME;
+        private String PROTOCOL_TYPE;
 
         private ConstantsBuilder() {
         }
@@ -313,6 +315,12 @@ public class Initialization {
             return this;
         }
 
+        public @NonNull
+        ConstantsBuilder withProtocolType(@NonNull String PROTOCOL_TYPE) {
+            this.PROTOCOL_TYPE = PROTOCOL_TYPE;
+            return this;
+        }
+
         /**
          * Build {@link Constants} instance.
          *
@@ -330,7 +338,8 @@ public class Initialization {
                     FCM_TOKEN,
                     SERVER_URL,
                     LOGO,
-                    NAME
+                    NAME,
+                    PROTOCOL_TYPE
             );
         }
     }
@@ -349,6 +358,7 @@ public class Initialization {
         private String SERVER_URL;
         private String LOGO;
         private String NAME;
+        private String PROTOCOL_TYPE;
 
         public Constants(String AGENCY_ENDPOINT,
                          String AGENCY_DID,
@@ -359,7 +369,8 @@ public class Initialization {
                          String FCM_TOKEN,
                          String SERVER_URL,
                          String LOGO,
-                         String NAME
+                         String NAME,
+                         String PROTOCOL_TYPE
         ) {
             this.AGENCY_ENDPOINT = AGENCY_ENDPOINT;
             this.AGENCY_DID = AGENCY_DID;
@@ -371,6 +382,7 @@ public class Initialization {
             this.SERVER_URL = SERVER_URL;
             this.LOGO = LOGO;
             this.NAME = NAME;
+            this.PROTOCOL_TYPE = PROTOCOL_TYPE;
         }
 
         /**

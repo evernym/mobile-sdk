@@ -21,6 +21,7 @@ public class ProvisioningConfig {
         private String walletKey;
         private String logo;
         private String name;
+        private String protocolType;
 
         private ProvisioningConfigBuilder() {
         }
@@ -98,6 +99,18 @@ public class ProvisioningConfig {
         }
 
         /**
+         * Set protocol type
+         *
+         * @param protocolType protocol type
+         * @return this
+         */
+        public @NonNull
+        ProvisioningConfigBuilder withProtocolType(String protocolType) {
+            this.protocolType = protocolType;
+            return this;
+        }
+
+        /**
          * Set wallet key
          *
          * @param walletKey walletKey
@@ -122,9 +135,9 @@ public class ProvisioningConfig {
             agencyConfig.put("agency_verkey", this.agencyVerkey);
             agencyConfig.put("wallet_name", this.walletName);
             agencyConfig.put("wallet_key", this.walletKey);
-            agencyConfig.put("protocol_type", "3.0");
             agencyConfig.put("logo", this.logo);
             agencyConfig.put("name", this.name);
+            agencyConfig.put("protocol_type", this.protocolType);
             return agencyConfig.toString();
         }
     }

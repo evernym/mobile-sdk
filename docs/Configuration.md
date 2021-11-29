@@ -56,7 +56,7 @@ Here is the list of available protocol types:
         * use pack/unpack cryptography functions for messages encoding
         * use aries protocols for communication with other Users.
         * all functions return resulting values in the format defined in `1.0/2.0` protocols.
-    * "4.0" - is not supported (the work is in progress)
+    * "4.0" - is not supported (recommended)
         * use aries cross domain message format for communication with Agent, 
         * use pack/unpack cryptography functions for messages encoding
         * use aries protocols for communication with other Users.
@@ -66,13 +66,13 @@ Here is the list of available protocol types:
   
 #### User specific information options
 
-* `institution_name` - (optional) name associated with the user. 
+* `name` - (optional) name associated with the user. 
       It will be used as a label for connection/credential offer/proof request. 
       Please note that result JSON will contain a field with a different name `institution_name`. 
       This field will be filled even if the value for `name` was not passed.
       If no value specified, the `<CHANGE_ME>` value will be set.  
     
-* `institution_logo_url` - (optional) url containing a logo associated with the user.
+* `logo` - (optional) url containing a logo associated with the user.
       Please note that result JSON will contain a field with a different name `institution_logo_url`. 
       This field will be filled even if the value for `logo` was not passed.
       If no value specified, the `<CHANGE_ME>` value will be set.  
@@ -141,19 +141,6 @@ Here is the list of available protocol types:
         ]
     ```
 
-#### Outdated
-Here are listed settings that became outdated and should not be used anymore.
-These settings can be removed in next releases.
-
-* `use_latest_protocols` - (optional) flag to use `"protocol_type":"2.0"` protocol for connection establishment.
-
-* `communication_method` - (optional) the version of protocols to use (can be `aries` or `proprietary`) for connection establishment and messages exchange.
-  Please not that this option makes effect only if `2.0`
-  The combination of settings `"protocol_type":"2.0" and "communication_method":"aries"` is equals to usage `"protocol_type":"3.0"`.
-
-    * `aries` - the public protocols described in the [repository](https://github.com/hyperledger/aries-rfcs).
-    * `proprietary` - the proprietary protocols.
-
 ### Config Sample
 
 ```json
@@ -180,7 +167,7 @@ These settings can be removed in next releases.
   ],
 
   // User Meta
-  "institution_logo_url": "https://robothash.com/logo.png", // url leading to image
-  "institution_name": "real institution name" // name to use
+  "logo": "https://robothash.com/logo.png", // url leading to image
+  "name": "real institution name" // name to use
 }
 ```

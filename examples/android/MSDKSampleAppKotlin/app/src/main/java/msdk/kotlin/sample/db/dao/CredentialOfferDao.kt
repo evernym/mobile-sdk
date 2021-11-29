@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import msdk.kotlin.sample.db.entity.CredentialOffer
 
+
 @Dao
 interface CredentialOfferDao {
     @Query("SELECT * FROM credentialoffer")
@@ -15,14 +16,8 @@ interface CredentialOfferDao {
     @Insert
     suspend fun insertAll(vararg connections: CredentialOffer)
 
-    @Query("SELECT EXISTS(SELECT * FROM credentialoffer WHERE (claim_id = :claimId))")
-    fun checkOfferExists(claimId: String?): Boolean
-
-    @Query("SELECT * FROM credentialoffer WHERE (claim_id = :claimId AND pwDid = :pwDid)")
-    fun getByPwDidAndClaimId(
-        claimId: String?,
-        pwDid: String?
-    ): CredentialOffer?
+    @Query("SELECT * FROM credentialoffer WHERE (threadId = :threadId)")
+    fun getByPwDidAndThreadId(threadId: String?): CredentialOffer?
 
     @Update
     suspend fun update(connection: CredentialOffer)

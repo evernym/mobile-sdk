@@ -34,9 +34,6 @@ data class Action(
     @ColumnInfo(name = "pwDid")
     var pwDid: String? = null,
 
-    @ColumnInfo(name = "claimId")
-    var claimId: String? = null,
-
     @ColumnInfo(name = "threadId")
     var threadId: String? = null,
 

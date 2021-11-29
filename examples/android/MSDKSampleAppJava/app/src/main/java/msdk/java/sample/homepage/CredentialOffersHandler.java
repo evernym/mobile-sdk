@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import msdk.java.messages.ConnectionInvitation;
 import msdk.java.handlers.Connections;
 import msdk.java.handlers.Credentials;
+import msdk.java.messages.CredentialOfferMessage;
 import msdk.java.messages.OutOfBandInvitation;
 import msdk.java.sample.SingleLiveData;
 import msdk.java.sample.db.Database;
@@ -32,40 +33,31 @@ public class CredentialOffersHandler {
             SingleLiveData<Results> liveData,
             Action action
     ) {
-        try {
-            String claimId = outOfBandInvite.attachment.getString("@id");
-            if (!db.credentialOffersDao().checkOfferExists(claimId)) {
-                JSONObject thread = outOfBandInvite.attachment.getJSONObject("~thread");
-                String threadId = thread.getString("thid");
+        CredentialOfferMessage credentialOffer = CredentialOfferMessage.parse(outOfBandInvite.attachment.toString());
 
-                String pwDid = null;
-                if (outOfBandInvite.existingConnection != null) {
-                    pwDid = Connections.getPwDid(outOfBandInvite.existingConnection);
-                }
-                String finalPwDid = pwDid;
-
-                Credentials.createWithOffer(UUID.randomUUID().toString(), outOfBandInvite.attachment.toString()).handle((serialized, er) -> {
-                    if (er != null) {
-                        er.printStackTrace();
-                    } else {
-                        CredentialOffer offer = new CredentialOffer();
-                        offer.threadId = threadId;
-                        offer.claimId = claimId;
-                        offer.pwDid = finalPwDid;
-                        offer.serialized = serialized;
-                        offer.attachConnection = outOfBandInvite.invitation;
-                        offer.attachConnectionLogo = outOfBandInvite.userMeta.logo;
-                        offer.attachConnectionName = outOfBandInvite.userMeta.name;
-                        db.credentialOffersDao().insertAll(offer);
-
-                        acceptCredentialOffer(offer, db, liveData, action);
-                    }
-                    return null;
-                });
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
+        String pwDid = null;
+        if (outOfBandInvite.existingConnection != null) {
+            pwDid = Connections.getPwDid(outOfBandInvite.existingConnection);
         }
+        String finalPwDid = pwDid;
+
+        Credentials.createWithOffer(UUID.randomUUID().toString(), outOfBandInvite.attachment.toString()).handle((serialized, er) -> {
+            if (er != null) {
+                er.printStackTrace();
+            } else {
+                CredentialOffer offer = new CredentialOffer();
+                offer.threadId = credentialOffer.threadId;
+                offer.pwDid = finalPwDid;
+                offer.serialized = serialized;
+                offer.attachConnection = outOfBandInvite.invitation;
+                offer.attachConnectionLogo = outOfBandInvite.userMeta.logo;
+                offer.attachConnectionName = outOfBandInvite.userMeta.name;
+                db.credentialOffersDao().insertAll(offer);
+
+                acceptCredentialOffer(offer, db, liveData, action);
+            }
+            return null;
+        });
     }
 
     public static void acceptCredentialOffer(

@@ -31,7 +31,7 @@ NSString * const productionPoolTxnGenesisDef = @"\n{\"reqSignature\":{},\"txn\":
     NSString* agencyUrl = @"https://agency.evernym.com";
     NSString* agencyDid = @"DwXzE7GdE5DNfsrRXJChSD";
     NSString* agencyVerKey = @"844sJfb2snyeEugKvpY7Y4jZJk9LT6BnS6bnuKoiqbip";
-    NSString* protocolType = @"3.0";
+    NSString* protocolType = @"4.0";
     NSString* logo = @"https://robothash.com/logo.png";
     NSString* name = @"real institution name";
 

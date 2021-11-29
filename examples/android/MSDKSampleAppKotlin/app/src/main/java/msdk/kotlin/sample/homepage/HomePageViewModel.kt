@@ -23,8 +23,6 @@ import msdk.kotlin.sample.messages.ConnectionInvitation.getInvitationType
 import msdk.kotlin.sample.messages.CredentialOfferMessage
 import msdk.kotlin.sample.messages.Message
 import msdk.kotlin.sample.messages.ProofRequestMessage
-import msdk.kotlin.sample.messages.ProofRequestMessage.Companion.decodeProofRequestAttach
-import msdk.kotlin.sample.messages.ProofRequestMessage.Companion.extractRequestedAttributesFromProofRequest
 import msdk.kotlin.sample.messages.ProofRequestMessage.Companion.extractRequestedNameFromProofRequest
 import msdk.kotlin.sample.types.MessageAttachment
 import msdk.kotlin.sample.types.MessageType
@@ -32,6 +30,7 @@ import msdk.kotlin.sample.utils.wrap
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
+
 
 class HomePageViewModel(application: Application) : AndroidViewModel(application) {
     private val db: Database = Database.getInstance(application)
@@ -90,12 +89,11 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
 
     private suspend fun handleReceivedCredentialOffer(message: Message, liveData: SingleLiveData<Results>) {
         try {
-            val credentialOffer = CredentialOfferMessage.parse(message)
+            val credentialOffer = CredentialOfferMessage.parse(message.payload)
             val connection: Connection = db.connectionDao().getByPwDid(message.pwDid)
 
             val co = Credentials.createWithOffer(UUID.randomUUID().toString(), credentialOffer!!.offer!!).wrap().await()
             val offer = CredentialOffer(
-                claimId = credentialOffer.id,
                 pwDid = message.pwDid,
                 serialized = co,
                 attachConnectionLogo = connection.icon,
@@ -105,13 +103,10 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
 
             val action: Action = Actions.createActionWithOffer(
                 MessageType.CREDENTIAL_OFFER.toString(),
-                credentialOffer.name,
+                credentialOffer,
                 connection.icon!!,
-                credentialOffer.attributes,
-                credentialOffer.id,
-                connection.pwDid,
                 null
-            )
+            )!!
             db.actionDao().insertAll(action)
             liveData.postValue(SUCCESS)
         } catch (e: Exception) {
@@ -121,7 +116,7 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
 
     private suspend fun handleReceivedProofRequest(message: Message, liveData: SingleLiveData<Results>) {
         try {
-            val proofRequest = ProofRequestMessage.parse(message)!!
+            val proofRequest = ProofRequestMessage.parse(message.payload)!!
             val connection: Connection = db.connectionDao().getByPwDid(message.pwDid)
             val pr = Proofs.createWithRequest(UUID.randomUUID().toString(), proofRequest.proofReq!!).wrap().await()
             val proof = ProofRequest(
@@ -134,12 +129,10 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
 
             val action: Action = Actions.createActionWithProof(
                 MessageType.CREDENTIAL_OFFER.toString(),
-                proofRequest.name,
+                proofRequest,
                 connection.icon!!,
-                proofRequest.threadId,
-                proofRequest.attributes,
                 null
-            )
+            )!!
             db.actionDao().insertAll(action)
             liveData.postValue(SUCCESS)
         } catch (e: Exception) {
@@ -189,12 +182,12 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
                 return@launch
             }
             if (action.type == MessageType.CREDENTIAL_OFFER.toString()) {
-                val offer = db.credentialOffersDao().getByPwDidAndClaimId(action.claimId, action.pwDid)
+                val offer = db.credentialOffersDao().getByPwDidAndThreadId(action.threadId)
                 CredentialOffersHandler.processCredentialOffer(offer!!, db, liveData, action)
                 return@launch
             }
             if (action.type == MessageType.PROOF_REQUEST.toString()) {
-                val proof = db.proofRequestDao().getByThreadId(action.threadId)
+                val proof = db.proofRequestDao().getByPwDidAndThreadId(action.threadId)
                 ProofRequestsHandler.processProofRequest(proof!!, db, liveData, action)
             }
         } catch (e: java.lang.Exception) {
@@ -214,12 +207,12 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
                 return@launch
             }
             if (action.type == MessageType.CREDENTIAL_OFFER.toString()) {
-                val offer = db.credentialOffersDao().getByPwDidAndClaimId(action.claimId, action.pwDid)
+                val offer = db.credentialOffersDao().getByPwDidAndThreadId(action.threadId)
                 CredentialOffersHandler.rejectCredentialOffer(offer!!, db, liveData)
                 return@launch
             }
             if (action.type == MessageType.PROOF_REQUEST.toString()) {
-                val proof = db.proofRequestDao().getByThreadId(action.threadId)
+                val proof = db.proofRequestDao().getByPwDidAndThreadId(action.threadId)
                 ProofRequestsHandler.rejectProofReq(proof!!, db, liveData)
             }
         } catch (e: java.lang.Exception) {
@@ -260,31 +253,21 @@ class HomePageViewModel(application: Application) : AndroidViewModel(application
 
             if (ConnectionInvitation.isAriesOutOfBandConnectionInvitation(invitationType!!) && attachment != null) {
                 if (attachment.isCredentialAttachment) {
-                    val attributes =
-                        CredentialOfferMessage.extractAttributesFromCredentialOffer(attachment.data)
+                    val credentialOffer = CredentialOfferMessage.parse(attachment.data.toString())
+
                     action = Actions.createActionWithOffer(
                         MessageType.CONNECTION_INVITATION.toString(),
-                        attachment.data.getString("comment"),
+                        credentialOffer!!,
                         inviteObject.getString("profileUrl"),
-                        attributes!!,
-                        null,
-                        null,
                         invite
                     )
                 }
                 if (attachment.isProofAttachment) {
-                    val decodedProofAttach =
-                        decodeProofRequestAttach(attachment.data)
-                    val requestedAttributes: JSONObject? =
-                        extractRequestedAttributesFromProofRequest(
-                            decodedProofAttach
-                        )
+                    val proofRequest = ProofRequestMessage.parse(attachment.data.toString())!!
                     action = Actions.createActionWithProof(
                         MessageType.CONNECTION_INVITATION.toString(),
-                        extractRequestedNameFromProofRequest(decodedProofAttach),
+                        proofRequest,
                         inviteObject.getString("profileUrl"),
-                        null,
-                        requestedAttributes!!,
                         invite
                     )
                 }

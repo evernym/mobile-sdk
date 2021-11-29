@@ -42,6 +42,7 @@ Before starting, please read the [Base Concepts document](docs/0.BaseConcepts.md
 1. [Accept offered credential](docs/6.Credentials.md)
 1. [Respond to a proof request](docs/7.Proofs.md)
 1. [Exchange secured structured messages](docs/8.StructuredMessages.md)
+1. [Handle Connection Invitations with attached messages](docs/9.Connection-Invitations-With-Attachment.md)
 
 ![Mobile SDK Flow](wiki-images/ConnectMeMobileSDK.png)
 

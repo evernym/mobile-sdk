@@ -109,7 +109,7 @@ DEPENDENCIES:
   - vcx (= 0.0.219)
 
 SPEC REPOS:
-  "git@gitlab.com:evernym/mobile/mobile-sdk.git":
+  https://gitlab.com/evernym/mobile/mobile-sdk.git:
     - vcx
   trunk:
     - Firebase
@@ -138,8 +138,8 @@ SPEC CHECKSUMS:
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
   QRCodeReaderViewController: e8f27d035b3e72b1d4b1c61ff66458287e3be0ff
-  vcx: 5c161f304b5dd92d0f2217884d1f73b8bc21c46a
+  vcx: e7e3aac5f3ab62351481fcac4e7eb1da59abf45e
 
-PODFILE CHECKSUM: 208120f831a424847868c376b444fcb2a9d00027
+PODFILE CHECKSUM: b2010a90e8e52820feb2b4dd42cac3f7dd557f5e
 
 COCOAPODS: 1.10.2

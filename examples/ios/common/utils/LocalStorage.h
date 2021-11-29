@@ -13,7 +13,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface LocalStorage: NSObject
 
 +(void)store: (NSString*)key andObject: (NSDictionary*) object;
-+(void)store: (NSString*)key andString: (NSString*) value;
 +(NSDictionary*)getObjectForKey: (NSString*) key shouldCreate: (BOOL) shouldCreateIfEmpty;
 +(NSString*)getValueForKey: (NSString*) key;
 +(void)deleteObjectForKey: (NSString*) key;

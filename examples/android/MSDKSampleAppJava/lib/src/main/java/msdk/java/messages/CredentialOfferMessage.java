@@ -6,34 +6,32 @@ import org.json.JSONObject;
 
 import java.util.Iterator;
 
+import msdk.java.utils.CommonUtils;
+
 public class CredentialOfferMessage {
-    public String id;
     public String name;
     public JSONObject attributes;
     public String offer;
     public String threadId;
 
-    public CredentialOfferMessage(String id, String name, JSONObject attributes, String offer, String threadId) {
-        this.id = id;
+    public CredentialOfferMessage(String name, JSONObject attributes, String offer, String threadId) {
         this.name = name;
         this.attributes = attributes;
         this.offer = offer;
         this.threadId = threadId;
     }
 
-    public static CredentialOfferMessage parse(Message msg) {
+    public static CredentialOfferMessage parse(String message) {
         try {
-            JSONObject data = new JSONArray(msg.getPayload()).getJSONObject(0);
-            String id = data.getString("claim_id");
-            String thread_id = data.getString("thread_id");
-            String name = data.getString("claim_name");
-            JSONObject attributes = data.getJSONObject("credential_attrs");
+            JSONObject json = new JSONObject(message);
+            String threadId = CommonUtils.getThreadId(json);
+            String name = json.getString("comment");
+            JSONObject attributes = extractAttributesFromCredentialOffer(json);
             return new CredentialOfferMessage(
-                    id,
                     name,
                     attributes,
-                    msg.getPayload(),
-                    thread_id
+                    message,
+                    threadId
             );
         } catch (JSONException e) {
             e.printStackTrace();
