@@ -160,12 +160,12 @@ object Proofs {
 
     private fun checkProofCorrectness(retrievedCreds: String): Boolean {
         try {
-            val retrievedCredsObject = JSONObject(retrievedCreds).getJSONObject("attrs")
+            val retrievedCredsObject = JSONObject(retrievedCreds).getJSONObject("attributes")
             val keys = retrievedCredsObject.keys()
             var result = true
             while (keys.hasNext()) {
                 val key = keys.next()
-                if (retrievedCredsObject.getJSONArray(key).length() == 0) {
+                if (retrievedCredsObject.getJSONObject(key).getJSONArray("credentials").length() == 0) {
                     result = false
                     break
                 }
@@ -366,11 +366,11 @@ object Proofs {
             val resultAttrs = JSONObject()
             result.put("attrs", resultAttrs)
             val data = JSONObject(proofRequestCreds)
-            val attrs = data.getJSONObject("attrs")
-            val it = attrs.keys()
+            val attributes = data.getJSONObject("attributes")
+            val it = attributes.keys()
             while (it.hasNext()) {
                 val key = it.next()
-                val credArray = attrs.getJSONArray(key)
+                val credArray = attributes.getJSONObject(key).getJSONArray("credentials")
                 val cred = credArray.getJSONObject(0)
                 val credHolder = JSONObject()
                 credHolder.put("credential", cred)
