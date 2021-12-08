@@ -151,12 +151,12 @@ public class Proofs {
 
     private static boolean checkProofCorrectness(String retrievedCreds) {
         try {
-            JSONObject retrievedCredsObject = new JSONObject(retrievedCreds).getJSONObject("attrs");
+            JSONObject retrievedCredsObject = new JSONObject(retrievedCreds).getJSONObject("attributes");
             Iterator<String> keys = retrievedCredsObject.keys();
             boolean result = true;
             while(keys.hasNext()) {
                 String key = keys.next();
-                if (retrievedCredsObject.getJSONArray(key).length() == 0) {
+                if (retrievedCredsObject.getJSONObject(key).getJSONArray("credentials").length() == 0) {
                     result = false;
                     break;
                 }
@@ -321,10 +321,10 @@ public class Proofs {
             JSONObject resultAttrs = new JSONObject();
             result.put("attrs", resultAttrs);
             JSONObject data = new JSONObject(proofRequestCreds);
-            JSONObject attrs = data.getJSONObject("attrs");
-            for (Iterator<String> it = attrs.keys(); it.hasNext(); ) {
+            JSONObject attributes = data.getJSONObject("attributes");
+            for (Iterator<String> it = attributes.keys(); it.hasNext(); ) {
                 String key = it.next();
-                JSONArray credArray = attrs.getJSONArray(key);
+                JSONArray credArray = attributes.getJSONObject(key).getJSONArray("credentials");
                 JSONObject cred = credArray.getJSONObject(0);
                 JSONObject credHolder = new JSONObject();
                 credHolder.put("credential", cred);
