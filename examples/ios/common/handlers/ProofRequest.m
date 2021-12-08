@@ -161,15 +161,14 @@ withCompletionHandler: (ResponseWithObject) completionBlock {
         return nil;
     }
     NSLog(@"Serialized matchingCredentials to JSON: %@", machingCredsJSON);
-    for(NSString *attr in machingCredsJSON[@"attrs"]) {
-        NSLog(@"attr: %@ attrs attr: %@", attr, machingCredsJSON[@"attrs"][attr]);
+    for(NSString *attr in machingCredsJSON[@"attributes"]) {
+        NSLog(@"attr: %@ attrs attr: %@", attr, machingCredsJSON[@"attributes"][attr]);
 
         NSMutableDictionary *attributeField = [@{} mutableCopy];
 
-        if (machingCredsJSON[@"attrs"][attr]) {
-            attributeField[@"tails_file"] = nil;
-            if([machingCredsJSON[@"attrs"][attr] count] > 0){
-                NSDictionary *credentialInfo = [machingCredsJSON[@"attrs"][attr][0] objectForKey:@"cred_info"];
+        if (machingCredsJSON[@"attributes"][attr]) {
+            if([machingCredsJSON[@"attributes"][attr][@"credentials"] count] > 0){
+                NSDictionary *credentialInfo = [machingCredsJSON[@"attributes"][attr][@"credentials"][0] objectForKey:@"cred_info"];
                 attributeField[@"credential"] = @{@"cred_info": credentialInfo, @"interval": @"nil"};
                 [autofilledAttributes setValue: attributeField forKey: attr];
                 continue;
