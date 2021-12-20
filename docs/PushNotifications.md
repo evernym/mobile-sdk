@@ -32,7 +32,7 @@
          where config is JSON: 
          {
              `id`: String - whatever the `Sponsor` uses to identify this specific `Sponsee`.
-             `type`: Int - Com Method Type (3 or 4. See explanations below),
+             `type`: Int - Com Method Type (3 or 4),
              `value`: String 
          }
          ```
@@ -98,7 +98,7 @@ From Vcx and cloud agent perspective, you will need to link received **push noti
    where config is JSON string:
    {
         `id`: String - `Sponsee's` Id, can be device ID
-        `type`: Int - Com Method Type (3 or 4. See explanations below),
+        `type`: Int - Com Method Type (3 or 4),
         `value`: String - FCM:{pushToken}
    }
    ```
