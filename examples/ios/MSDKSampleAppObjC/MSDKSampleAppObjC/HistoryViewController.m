@@ -25,7 +25,7 @@
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear: animated];
-    history = [LocalStorage getObjectForKey: @"history" shouldCreate: false];
+    history = [LocalStorage getObjectForKey: @"histor" shouldCreate: false];
     [self.tableView reloadData];
 }
 

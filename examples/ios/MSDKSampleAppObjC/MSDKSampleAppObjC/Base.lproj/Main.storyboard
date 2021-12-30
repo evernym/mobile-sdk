@@ -102,7 +102,7 @@
                                             <color key="titleColor" white="1" alpha="0.95813160210000003" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         </state>
                                         <connections>
-                                            <action selector="addNewConnection:" destination="QRY-eE-MLJ" eventType="touchUpInside" id="qaY-0e-yMj"/>
+                                            <action selector="addConnByClick:" destination="QRY-eE-MLJ" eventType="touchUpInside" id="dVa-gt-qFO"/>
                                         </connections>
                                     </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="New Connection" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MEY-2N-9Cs">
