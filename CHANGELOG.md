@@ -1,5 +1,27 @@
 # Changelog
 
+# Release notes - MSDK 2.1.0 - Dec 30 2021
+
+## Features
+* [MSDK-180] - Added protocol type `4.0` (`protocol_type` setting in configuration JSON) implying that all input and output messages (`Credential Offers`, `Credential`, `Proof Requests`) will be in the Aries message format instead of legacy one. **Recommended to use**.
+* [CM-2455] - Added ability to connect to multiple Indy Pool Ledger networks and read data from them. Read more [here](./docs/3.Initialization.md#multi-pool-ledger-connection).
+* [MSDK-523] - Added helper function `vcx_extract_attached_message` to extract attachment content from Aries message containing attachment decorator:
+    * Android - `UtilsApi.vcxExtractAttachedMessage`
+    * iOS - `extractAttachedMessage`
+* [MSDK-557] - Added helper function `vcx_resolve_message_by_url` to resolve message by URL:
+    * Android - `UtilsApi.vcxResolveMessageByUrl`
+    * iOS - `resolveMessageByUrl`
+* [MSDK-571] - Added helper function `vcx_extract_thread_id` to extract thread id from a message:
+    * Android - `UtilsApi.vcxExtractThreadId`
+    * iOS - `extractThreadId`
+* [MSDK-565] - Extend the result of `proofRetrieveCredentials` function to return more information for each requested attribute and predicate:
+    * values of requested attributes fetched from credential (case-insensitive)
+    * if an attribute can be self-attested (only when `protocol_type:4.0` is used)
+    * if an attribute is missing (only when `protocol_type:4.0` is used)
+
+## Bugs
+* Objective-C: Added missing functions  - `connectionGetPwDid`, `connectionGetTheirDid`, `connectionInfo`, wallet related functions.
+
 # Release notes - MSDK 2.0.0 - Jun 17 2021
 
 ## Change

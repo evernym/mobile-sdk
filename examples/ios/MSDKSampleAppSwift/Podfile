@@ -31,7 +31,7 @@ target 'MSDKSampleAppSwift' do
   # Below line will be enabled when we go public with our cocoapod
   # pod 'vcx', '0.0.198'
   # Below line will be removed when we go public with our cocoapod
-  pod 'vcx', '0.0.221'
+  pod 'vcx', '0.0.223'
   #  pod 'vcx', '0.0.222'
   pod 'QRCodeReaderViewController'
   pod 'QRCodeReader.swift', '~> 10.1.0'
