@@ -9,6 +9,22 @@
 /* Begin PBXBuildFile section */
 		18DE27D0A68602838A2662B2 /* Pods_MSDKSampleAppSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41341473AD61E51982BCFD33 /* Pods_MSDKSampleAppSwift.framework */; };
 		2B71DF26712021F4AB8A69DE /* Pods_MSDKSampleAppSwiftUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9279A836C6972B4F6FDE841D /* Pods_MSDKSampleAppSwiftUITests.framework */; };
+		55D75B32277DBABD0015D76B /* Proof.m in Sources */ = {isa = PBXBuildFile; fileRef = 55D75B11277DBABD0015D76B /* Proof.m */; };
+		55D75B33277DBABD0015D76B /* ConnectionInvitation.m in Sources */ = {isa = PBXBuildFile; fileRef = 55D75B13277DBABD0015D76B /* ConnectionInvitation.m */; };
+		55D75B34277DBABD0015D76B /* CredentialOffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 55D75B14277DBABD0015D76B /* CredentialOffer.m */; };
+		55D75B35277DBABD0015D76B /* ConnectionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 55D75B17277DBABD0015D76B /* ConnectionHandler.m */; };
+		55D75B36277DBABD0015D76B /* Log.m in Sources */ = {isa = PBXBuildFile; fileRef = 55D75B1C277DBABD0015D76B /* Log.m */; };
+		55D75B37277DBABD0015D76B /* LocalStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = 55D75B1D277DBABD0015D76B /* LocalStorage.m */; };
+		55D75B38277DBABD0015D76B /* Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 55D75B21277DBABD0015D76B /* Utilities.m */; };
+		55D75B39277DBABD0015D76B /* ProofRequestsHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 55D75B22277DBABD0015D76B /* ProofRequestsHandler.m */; };
+		55D75B3A277DBABD0015D76B /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = 55D75B23277DBABD0015D76B /* Config.m */; };
+		55D75B3B277DBABD0015D76B /* MobileSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = 55D75B24277DBABD0015D76B /* MobileSDK.m */; };
+		55D75B3C277DBABD0015D76B /* Initialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 55D75B28277DBABD0015D76B /* Initialization.m */; };
+		55D75B3D277DBABD0015D76B /* Credential.m in Sources */ = {isa = PBXBuildFile; fileRef = 55D75B29277DBABD0015D76B /* Credential.m */; };
+		55D75B3E277DBABD0015D76B /* ProofRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 55D75B2A277DBABD0015D76B /* ProofRequest.m */; };
+		55D75B3F277DBABD0015D76B /* Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 55D75B2D277DBABD0015D76B /* Connection.m */; };
+		55D75B40277DBABD0015D76B /* Message.m in Sources */ = {isa = PBXBuildFile; fileRef = 55D75B30277DBABD0015D76B /* Message.m */; };
+		55D75B41277DBABD0015D76B /* CredentialOffersHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 55D75B31277DBABD0015D76B /* CredentialOffersHandler.m */; };
 		7188C479D80CF4DA5AD7D759 /* Pods_MSDKSampleAppSwiftTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AFF34EAEA3A50D934899359C /* Pods_MSDKSampleAppSwiftTests.framework */; };
 		8EAE24B02282058F00F49443 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EAE24AF2282058F00F49443 /* AppDelegate.swift */; };
 		8EAE24B52282058F00F49443 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8EAE24B32282058F00F49443 /* Main.storyboard */; };
@@ -22,22 +38,6 @@
 		DD00E1F5269482120050BC88 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00E1F4269482120050BC88 /* HomeViewController.swift */; };
 		DD00E1F72694822C0050BC88 /* HistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00E1F62694822C0050BC88 /* HistoryViewController.swift */; };
 		DD00E1FB2695F7C00050BC88 /* CustomTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00E1FA2695F7C00050BC88 /* CustomTableViewCell.swift */; };
-		DD725D08273936E80040CCD6 /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CEC273936E80040CCD6 /* Config.m */; };
-		DD725D09273936E80040CCD6 /* MobileSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CED273936E80040CCD6 /* MobileSDK.m */; };
-		DD725D0A273936E80040CCD6 /* ConnectionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CEE273936E80040CCD6 /* ConnectionHandler.m */; };
-		DD725D0B273936E80040CCD6 /* Log.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CF0273936E80040CCD6 /* Log.m */; };
-		DD725D0C273936E80040CCD6 /* LocalStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CF1273936E80040CCD6 /* LocalStorage.m */; };
-		DD725D0D273936E80040CCD6 /* Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CF5273936E80040CCD6 /* Utilities.m */; };
-		DD725D0E273936E80040CCD6 /* Initialization.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CF9273936E80040CCD6 /* Initialization.m */; };
-		DD725D0F273936E80040CCD6 /* Credential.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CFA273936E80040CCD6 /* Credential.m */; };
-		DD725D10273936E80040CCD6 /* ProofRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CFB273936E80040CCD6 /* ProofRequest.m */; };
-		DD725D11273936E80040CCD6 /* Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725CFE273936E80040CCD6 /* Connection.m */; };
-		DD725D12273936E80040CCD6 /* Message.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D01273936E80040CCD6 /* Message.m */; };
-		DD725D13273936E80040CCD6 /* ConnectionInvitation.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D04273936E80040CCD6 /* ConnectionInvitation.m */; };
-		DD725D14273936E80040CCD6 /* CredentialOffer.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D05273936E80040CCD6 /* CredentialOffer.m */; };
-		DD725D2A273BE9530040CCD6 /* ProofRequestsHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D26273BE9520040CCD6 /* ProofRequestsHandler.m */; };
-		DD725D2B273BE9530040CCD6 /* CredentialOffersHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D27273BE9520040CCD6 /* CredentialOffersHandler.m */; };
-		DD725D2E273BE9620040CCD6 /* Proof.m in Sources */ = {isa = PBXBuildFile; fileRef = DD725D2D273BE9620040CCD6 /* Proof.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,6 +61,38 @@
 		12B86CD3335206F34FD79ED2 /* Pods-MSDKSampleAppSwift.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppSwift.debug.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppSwift/Pods-MSDKSampleAppSwift.debug.xcconfig"; sourceTree = "<group>"; };
 		2427237868E3CAD90126590C /* Pods-MSDKSampleAppSwiftTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppSwiftTests.release.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppSwiftTests/Pods-MSDKSampleAppSwiftTests.release.xcconfig"; sourceTree = "<group>"; };
 		41341473AD61E51982BCFD33 /* Pods_MSDKSampleAppSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MSDKSampleAppSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		55D75B0F277DBABD0015D76B /* ProofRequestsHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProofRequestsHandler.h; sourceTree = "<group>"; };
+		55D75B11277DBABD0015D76B /* Proof.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Proof.m; sourceTree = "<group>"; };
+		55D75B12277DBABD0015D76B /* CredentialOffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CredentialOffer.h; sourceTree = "<group>"; };
+		55D75B13277DBABD0015D76B /* ConnectionInvitation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionInvitation.m; sourceTree = "<group>"; };
+		55D75B14277DBABD0015D76B /* CredentialOffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CredentialOffer.m; sourceTree = "<group>"; };
+		55D75B15277DBABD0015D76B /* Proof.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Proof.h; sourceTree = "<group>"; };
+		55D75B16277DBABD0015D76B /* ConnectionInvitation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionInvitation.h; sourceTree = "<group>"; };
+		55D75B17277DBABD0015D76B /* ConnectionHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionHandler.m; sourceTree = "<group>"; };
+		55D75B18277DBABD0015D76B /* MobileSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MobileSDK.h; sourceTree = "<group>"; };
+		55D75B19277DBABD0015D76B /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
+		55D75B1A277DBABD0015D76B /* CredentialOffersHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CredentialOffersHandler.h; sourceTree = "<group>"; };
+		55D75B1C277DBABD0015D76B /* Log.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Log.m; sourceTree = "<group>"; };
+		55D75B1D277DBABD0015D76B /* LocalStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocalStorage.m; sourceTree = "<group>"; };
+		55D75B1E277DBABD0015D76B /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
+		55D75B1F277DBABD0015D76B /* Log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Log.h; sourceTree = "<group>"; };
+		55D75B20277DBABD0015D76B /* LocalStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalStorage.h; sourceTree = "<group>"; };
+		55D75B21277DBABD0015D76B /* Utilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utilities.m; sourceTree = "<group>"; };
+		55D75B22277DBABD0015D76B /* ProofRequestsHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProofRequestsHandler.m; sourceTree = "<group>"; };
+		55D75B23277DBABD0015D76B /* Config.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Config.m; sourceTree = "<group>"; };
+		55D75B24277DBABD0015D76B /* MobileSDK.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MobileSDK.m; sourceTree = "<group>"; };
+		55D75B25277DBABD0015D76B /* ConnectionHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionHandler.h; sourceTree = "<group>"; };
+		55D75B27277DBABD0015D76B /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
+		55D75B28277DBABD0015D76B /* Initialization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Initialization.m; sourceTree = "<group>"; };
+		55D75B29277DBABD0015D76B /* Credential.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Credential.m; sourceTree = "<group>"; };
+		55D75B2A277DBABD0015D76B /* ProofRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProofRequest.m; sourceTree = "<group>"; };
+		55D75B2B277DBABD0015D76B /* Message.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Message.h; sourceTree = "<group>"; };
+		55D75B2C277DBABD0015D76B /* Initialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Initialization.h; sourceTree = "<group>"; };
+		55D75B2D277DBABD0015D76B /* Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Connection.m; sourceTree = "<group>"; };
+		55D75B2E277DBABD0015D76B /* ProofRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProofRequest.h; sourceTree = "<group>"; };
+		55D75B2F277DBABD0015D76B /* Credential.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Credential.h; sourceTree = "<group>"; };
+		55D75B30277DBABD0015D76B /* Message.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Message.m; sourceTree = "<group>"; };
+		55D75B31277DBABD0015D76B /* CredentialOffersHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CredentialOffersHandler.m; sourceTree = "<group>"; };
 		8EAE24AC2282058F00F49443 /* MSDKSampleAppSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MSDKSampleAppSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8EAE24AF2282058F00F49443 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8EAE24B42282058F00F49443 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -86,39 +118,6 @@
 		DD00E1F62694822C0050BC88 /* HistoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViewController.swift; sourceTree = "<group>"; };
 		DD00E1F8269482600050BC88 /* MSDKSampleAppSwift-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSDKSampleAppSwift-Prefix.pch"; sourceTree = "<group>"; };
 		DD00E1FA2695F7C00050BC88 /* CustomTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTableViewCell.swift; sourceTree = "<group>"; };
-		DD725CE9273936E80040CCD6 /* MobileSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MobileSDK.h; sourceTree = "<group>"; };
-		DD725CEA273936E80040CCD6 /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
-		DD725CEC273936E80040CCD6 /* Config.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Config.m; sourceTree = "<group>"; };
-		DD725CED273936E80040CCD6 /* MobileSDK.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MobileSDK.m; sourceTree = "<group>"; };
-		DD725CEE273936E80040CCD6 /* ConnectionHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionHandler.m; sourceTree = "<group>"; };
-		DD725CF0273936E80040CCD6 /* Log.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Log.m; sourceTree = "<group>"; };
-		DD725CF1273936E80040CCD6 /* LocalStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocalStorage.m; sourceTree = "<group>"; };
-		DD725CF2273936E80040CCD6 /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
-		DD725CF3273936E80040CCD6 /* Log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Log.h; sourceTree = "<group>"; };
-		DD725CF4273936E80040CCD6 /* LocalStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalStorage.h; sourceTree = "<group>"; };
-		DD725CF5273936E80040CCD6 /* Utilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utilities.m; sourceTree = "<group>"; };
-		DD725CF6273936E80040CCD6 /* ConnectionHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionHandler.h; sourceTree = "<group>"; };
-		DD725CF8273936E80040CCD6 /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
-		DD725CF9273936E80040CCD6 /* Initialization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Initialization.m; sourceTree = "<group>"; };
-		DD725CFA273936E80040CCD6 /* Credential.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Credential.m; sourceTree = "<group>"; };
-		DD725CFB273936E80040CCD6 /* ProofRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProofRequest.m; sourceTree = "<group>"; };
-		DD725CFC273936E80040CCD6 /* Message.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Message.h; sourceTree = "<group>"; };
-		DD725CFD273936E80040CCD6 /* Initialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Initialization.h; sourceTree = "<group>"; };
-		DD725CFE273936E80040CCD6 /* Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Connection.m; sourceTree = "<group>"; };
-		DD725CFF273936E80040CCD6 /* ProofRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProofRequest.h; sourceTree = "<group>"; };
-		DD725D00273936E80040CCD6 /* Credential.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Credential.h; sourceTree = "<group>"; };
-		DD725D01273936E80040CCD6 /* Message.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Message.m; sourceTree = "<group>"; };
-		DD725D03273936E80040CCD6 /* CredentialOffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CredentialOffer.h; sourceTree = "<group>"; };
-		DD725D04273936E80040CCD6 /* ConnectionInvitation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionInvitation.m; sourceTree = "<group>"; };
-		DD725D05273936E80040CCD6 /* CredentialOffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CredentialOffer.m; sourceTree = "<group>"; };
-		DD725D06273936E80040CCD6 /* ConnectionInvitation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionInvitation.h; sourceTree = "<group>"; };
-		DD725D1727393B640040CCD6 /* MSDKSampleAppSwift-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "MSDKSampleAppSwift-Bridging-Header.h"; path = "MSDKSampleAppSwift/MSDKSampleAppSwift-Bridging-Header.h"; sourceTree = SOURCE_ROOT; };
-		DD725D26273BE9520040CCD6 /* ProofRequestsHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProofRequestsHandler.m; sourceTree = "<group>"; };
-		DD725D27273BE9520040CCD6 /* CredentialOffersHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CredentialOffersHandler.m; sourceTree = "<group>"; };
-		DD725D28273BE9530040CCD6 /* CredentialOffersHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CredentialOffersHandler.h; sourceTree = "<group>"; };
-		DD725D29273BE9530040CCD6 /* ProofRequestsHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProofRequestsHandler.h; sourceTree = "<group>"; };
-		DD725D2C273BE9620040CCD6 /* Proof.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Proof.h; sourceTree = "<group>"; };
-		DD725D2D273BE9620040CCD6 /* Proof.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Proof.m; sourceTree = "<group>"; };
 		FDA9D469AF731FE94DBA14FA /* Pods-MSDKSampleAppSwiftUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSDKSampleAppSwiftUITests.release.xcconfig"; path = "Target Support Files/Pods-MSDKSampleAppSwiftUITests/Pods-MSDKSampleAppSwiftUITests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -150,6 +149,70 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		55D75B0E277DBABD0015D76B /* common */ = {
+			isa = PBXGroup;
+			children = (
+				55D75B0F277DBABD0015D76B /* ProofRequestsHandler.h */,
+				55D75B10277DBABD0015D76B /* messages */,
+				55D75B17277DBABD0015D76B /* ConnectionHandler.m */,
+				55D75B18277DBABD0015D76B /* MobileSDK.h */,
+				55D75B19277DBABD0015D76B /* Config.h */,
+				55D75B1A277DBABD0015D76B /* CredentialOffersHandler.h */,
+				55D75B1B277DBABD0015D76B /* utils */,
+				55D75B22277DBABD0015D76B /* ProofRequestsHandler.m */,
+				55D75B23277DBABD0015D76B /* Config.m */,
+				55D75B24277DBABD0015D76B /* MobileSDK.m */,
+				55D75B25277DBABD0015D76B /* ConnectionHandler.h */,
+				55D75B26277DBABD0015D76B /* handlers */,
+				55D75B31277DBABD0015D76B /* CredentialOffersHandler.m */,
+			);
+			name = common;
+			path = ../../common;
+			sourceTree = "<group>";
+		};
+		55D75B10277DBABD0015D76B /* messages */ = {
+			isa = PBXGroup;
+			children = (
+				55D75B11277DBABD0015D76B /* Proof.m */,
+				55D75B12277DBABD0015D76B /* CredentialOffer.h */,
+				55D75B13277DBABD0015D76B /* ConnectionInvitation.m */,
+				55D75B14277DBABD0015D76B /* CredentialOffer.m */,
+				55D75B15277DBABD0015D76B /* Proof.h */,
+				55D75B16277DBABD0015D76B /* ConnectionInvitation.h */,
+			);
+			path = messages;
+			sourceTree = "<group>";
+		};
+		55D75B1B277DBABD0015D76B /* utils */ = {
+			isa = PBXGroup;
+			children = (
+				55D75B1C277DBABD0015D76B /* Log.m */,
+				55D75B1D277DBABD0015D76B /* LocalStorage.m */,
+				55D75B1E277DBABD0015D76B /* Utilities.h */,
+				55D75B1F277DBABD0015D76B /* Log.h */,
+				55D75B20277DBABD0015D76B /* LocalStorage.h */,
+				55D75B21277DBABD0015D76B /* Utilities.m */,
+			);
+			path = utils;
+			sourceTree = "<group>";
+		};
+		55D75B26277DBABD0015D76B /* handlers */ = {
+			isa = PBXGroup;
+			children = (
+				55D75B27277DBABD0015D76B /* Connection.h */,
+				55D75B28277DBABD0015D76B /* Initialization.m */,
+				55D75B29277DBABD0015D76B /* Credential.m */,
+				55D75B2A277DBABD0015D76B /* ProofRequest.m */,
+				55D75B2B277DBABD0015D76B /* Message.h */,
+				55D75B2C277DBABD0015D76B /* Initialization.h */,
+				55D75B2D277DBABD0015D76B /* Connection.m */,
+				55D75B2E277DBABD0015D76B /* ProofRequest.h */,
+				55D75B2F277DBABD0015D76B /* Credential.h */,
+				55D75B30277DBABD0015D76B /* Message.m */,
+			);
+			path = handlers;
+			sourceTree = "<group>";
+		};
 		63A94541A84BE609A71E5501 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -185,9 +248,9 @@
 		8EAE24AE2282058F00F49443 /* MSDKSampleAppSwift */ = {
 			isa = PBXGroup;
 			children = (
+				55D75B0E277DBABD0015D76B /* common */,
 				8EAE24AF2282058F00F49443 /* AppDelegate.swift */,
 				8EAE24B62282059000F49443 /* Assets.xcassets */,
-				DD725CE6273936E80040CCD6 /* common */,
 				DD00E1FA2695F7C00050BC88 /* CustomTableViewCell.swift */,
 				AAD4B57C25CB69710009588A /* CustomTableViewCell.xib */,
 				AAD4B58925CB70480009588A /* GoogleService-Info.plist */,
@@ -232,79 +295,6 @@
 				FDA9D469AF731FE94DBA14FA /* Pods-MSDKSampleAppSwiftUITests.release.xcconfig */,
 			);
 			path = Pods;
-			sourceTree = "<group>";
-		};
-		DD725CE6273936E80040CCD6 /* common */ = {
-			isa = PBXGroup;
-			children = (
-				DD725D28273BE9530040CCD6 /* CredentialOffersHandler.h */,
-				DD725D27273BE9520040CCD6 /* CredentialOffersHandler.m */,
-				DD725D29273BE9530040CCD6 /* ProofRequestsHandler.h */,
-				DD725D26273BE9520040CCD6 /* ProofRequestsHandler.m */,
-				DD725D1727393B640040CCD6 /* MSDKSampleAppSwift-Bridging-Header.h */,
-				DD725CF6273936E80040CCD6 /* ConnectionHandler.h */,
-				DD725CEE273936E80040CCD6 /* ConnectionHandler.m */,
-				DD725CF7273936E80040CCD6 /* handlers */,
-				DD725D02273936E80040CCD6 /* helpers */,
-				DD725CE7273936E80040CCD6 /* types */,
-				DD725CEF273936E80040CCD6 /* utils */,
-			);
-			name = common;
-			path = ../../common;
-			sourceTree = "<group>";
-		};
-		DD725CE7273936E80040CCD6 /* types */ = {
-			isa = PBXGroup;
-			children = (
-				DD725CEA273936E80040CCD6 /* Config.h */,
-				DD725CEC273936E80040CCD6 /* Config.m */,
-				DD725CE9273936E80040CCD6 /* MobileSDK.h */,
-				DD725CED273936E80040CCD6 /* MobileSDK.m */,
-			);
-			path = types;
-			sourceTree = "<group>";
-		};
-		DD725CEF273936E80040CCD6 /* utils */ = {
-			isa = PBXGroup;
-			children = (
-				DD725CF4273936E80040CCD6 /* LocalStorage.h */,
-				DD725CF1273936E80040CCD6 /* LocalStorage.m */,
-				DD725CF3273936E80040CCD6 /* Log.h */,
-				DD725CF0273936E80040CCD6 /* Log.m */,
-				DD725CF2273936E80040CCD6 /* Utilities.h */,
-				DD725CF5273936E80040CCD6 /* Utilities.m */,
-			);
-			path = utils;
-			sourceTree = "<group>";
-		};
-		DD725CF7273936E80040CCD6 /* handlers */ = {
-			isa = PBXGroup;
-			children = (
-				DD725CF8273936E80040CCD6 /* Connection.h */,
-				DD725CFE273936E80040CCD6 /* Connection.m */,
-				DD725D00273936E80040CCD6 /* Credential.h */,
-				DD725CFA273936E80040CCD6 /* Credential.m */,
-				DD725CFD273936E80040CCD6 /* Initialization.h */,
-				DD725CF9273936E80040CCD6 /* Initialization.m */,
-				DD725CFC273936E80040CCD6 /* Message.h */,
-				DD725D01273936E80040CCD6 /* Message.m */,
-				DD725CFF273936E80040CCD6 /* ProofRequest.h */,
-				DD725CFB273936E80040CCD6 /* ProofRequest.m */,
-			);
-			path = handlers;
-			sourceTree = "<group>";
-		};
-		DD725D02273936E80040CCD6 /* helpers */ = {
-			isa = PBXGroup;
-			children = (
-				DD725D2C273BE9620040CCD6 /* Proof.h */,
-				DD725D2D273BE9620040CCD6 /* Proof.m */,
-				DD725D06273936E80040CCD6 /* ConnectionInvitation.h */,
-				DD725D04273936E80040CCD6 /* ConnectionInvitation.m */,
-				DD725D03273936E80040CCD6 /* CredentialOffer.h */,
-				DD725D05273936E80040CCD6 /* CredentialOffer.m */,
-			);
-			path = helpers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -533,25 +523,25 @@
 			buildActionMask = 2147483647;
 			files = (
 				DD00E1FB2695F7C00050BC88 /* CustomTableViewCell.swift in Sources */,
-				DD725D14273936E80040CCD6 /* CredentialOffer.m in Sources */,
-				DD725D08273936E80040CCD6 /* Config.m in Sources */,
+				55D75B3A277DBABD0015D76B /* Config.m in Sources */,
+				55D75B3D277DBABD0015D76B /* Credential.m in Sources */,
+				55D75B39277DBABD0015D76B /* ProofRequestsHandler.m in Sources */,
 				DD00E1F72694822C0050BC88 /* HistoryViewController.swift in Sources */,
-				DD725D0E273936E80040CCD6 /* Initialization.m in Sources */,
-				DD725D13273936E80040CCD6 /* ConnectionInvitation.m in Sources */,
-				DD725D0C273936E80040CCD6 /* LocalStorage.m in Sources */,
-				DD725D0B273936E80040CCD6 /* Log.m in Sources */,
+				55D75B3F277DBABD0015D76B /* Connection.m in Sources */,
+				55D75B33277DBABD0015D76B /* ConnectionInvitation.m in Sources */,
+				55D75B37277DBABD0015D76B /* LocalStorage.m in Sources */,
+				55D75B3E277DBABD0015D76B /* ProofRequest.m in Sources */,
+				55D75B40277DBABD0015D76B /* Message.m in Sources */,
+				55D75B41277DBABD0015D76B /* CredentialOffersHandler.m in Sources */,
+				55D75B3B277DBABD0015D76B /* MobileSDK.m in Sources */,
+				55D75B36277DBABD0015D76B /* Log.m in Sources */,
+				55D75B34277DBABD0015D76B /* CredentialOffer.m in Sources */,
+				55D75B3C277DBABD0015D76B /* Initialization.m in Sources */,
+				55D75B38277DBABD0015D76B /* Utilities.m in Sources */,
+				55D75B35277DBABD0015D76B /* ConnectionHandler.m in Sources */,
 				8EAE24B02282058F00F49443 /* AppDelegate.swift in Sources */,
-				DD725D0F273936E80040CCD6 /* Credential.m in Sources */,
-				DD725D2B273BE9530040CCD6 /* CredentialOffersHandler.m in Sources */,
-				DD725D0D273936E80040CCD6 /* Utilities.m in Sources */,
-				DD725D12273936E80040CCD6 /* Message.m in Sources */,
-				DD725D2A273BE9530040CCD6 /* ProofRequestsHandler.m in Sources */,
-				DD725D0A273936E80040CCD6 /* ConnectionHandler.m in Sources */,
-				DD725D10273936E80040CCD6 /* ProofRequest.m in Sources */,
 				DD00E1F5269482120050BC88 /* HomeViewController.swift in Sources */,
-				DD725D2E273BE9620040CCD6 /* Proof.m in Sources */,
-				DD725D09273936E80040CCD6 /* MobileSDK.m in Sources */,
-				DD725D11273936E80040CCD6 /* Connection.m in Sources */,
+				55D75B32277DBABD0015D76B /* Proof.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

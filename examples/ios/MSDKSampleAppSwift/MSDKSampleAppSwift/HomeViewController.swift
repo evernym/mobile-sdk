@@ -61,7 +61,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
         // On iOS diveces you cann't use qr code scnner
         // But you can handle invite with text input and button on home page
         // For show input set this flag to false
-        let isHideInput = true;
+        let isHideInput = false;
         
         super.viewDidLoad();
         self.tableView.delegate = self;
@@ -335,7 +335,7 @@ class HomeViewController: UIViewController, QRCodeReaderViewControllerDelegate, 
         let responses = payloadDict?["valid_responses"] as? [[String : String]];
         
         let pwDidMes = msg?["pwDid"];
-        let questionConnection = ConnectionInvitation.getConnectionByPwDid(pwDidMes as? String ?? "");
+        let questionConnection = Connection.getByPwDid(pwDidMes as? String ?? "")!;
         let alert = UIAlertController(
             title: payloadDict?["question_text"] as? String,
             message: payloadDict?["question_detail"] as? String,

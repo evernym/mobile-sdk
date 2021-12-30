@@ -32,8 +32,8 @@ target 'MSDKSampleAppObjC' do
   # Below line will be enabled when we go public with our cocoapod
   # pod 'vcx', '0.0.198'
   # Below line will be removed when we go public with our cocoapod
-  pod 'vcx', '0.0.223'
-#  pod 'vcx', '0.0.222'
+  # pod 'vcx', '0.0.223'
+ pod 'vcx', '0.0.224'
   pod 'QRCodeReaderViewController'
 
   target 'MSDKSampleAppObjCTests' do
