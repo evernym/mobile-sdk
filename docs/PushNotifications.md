@@ -32,7 +32,7 @@
          where config is JSON: 
          {
              `id`: String - whatever the `Sponsor` uses to identify this specific `Sponsee`.
-             `type`: Int - Com Method Type (ALWAYS `4` for forwarding),
+             `type`: Int - Com Method Type (3 or 4),
              `value`: String 
          }
          ```
@@ -98,7 +98,7 @@ From Vcx and cloud agent perspective, you will need to link received **push noti
    where config is JSON string:
    {
         `id`: String - `Sponsee's` Id, can be device ID
-        `type`: Int - Com Method Type (ALWAYS `4` for forwarding),
+        `type`: Int - Com Method Type (3 or 4),
         `value`: String - FCM:{pushToken}
    }
    ```
@@ -117,3 +117,26 @@ Once you (Sponsor) receive a message on your webhook. You can send push notifica
 Inside the app you can use method ```downloadMessages``` in ObjC or ```UtilsApi.vcxGetMessages``` in Java, for pulling either all messages waiting on cloud agent, or a specific one matching to received notification.
 
 See [messages documentation](4.MessagesFlow.md) for message download information.
+
+### Com Method Types
+
+When setting up a communication method with an agent, you can either use Com Method type 3 or 4.
+
+1. Type 3- Forward Push
+
+>>  This method is used when the sponsor wants to handle sending of actual push notifications. 
+>>
+>>  Mobile app is supposed to register its own push notification details. 
+>>
+>>  Associated sponsor’s configuration should have been already configured with an endpoint.
+>>
+>>  In this case, Verity will use the associated sponsor’s configured endpoint and send the meta data (msg type, sponsee details, recipient DID etc.) to the associated sponsor’s endpoint. The sponsor is supposed to notify the mobile app about the message, and then, the mobile app is supposed to download the message from its agent by calling the relevant api.
+
+
+2. Type 4- Sponsor Push
+
+>>  If using this method, Verity will handle sending of actual push notifications.
+>>
+>>  Associated sponsor’s configuration should have been already configured with an endpoint.
+>>
+>>  Verity will use the associated sponsor’s configured push notification account detail instead of Evernym’s push notification account detail.
