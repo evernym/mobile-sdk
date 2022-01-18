@@ -140,3 +140,5 @@ When setting up a communication method with an agent, you can either use Com Met
 >>  Associated sponsor’s configuration should have been already configured with an endpoint.
 >>
 >>  Verity will use the associated sponsor’s configured push notification account detail instead of Evernym’s push notification account detail.
+>>
+>>  Currently, only Firebase Cloud Messaging is supported.
