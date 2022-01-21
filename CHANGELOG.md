@@ -8,7 +8,7 @@
 # Release notes - MSDK 2.1.0 - Dec 30 2021
 
 ## Features
-* [MSDK-180] - Added protocol type `4.0` (`protocol_type` setting in configuration JSON) implying that all input and output messages (`Credential Offers`, `Credential`, `Proof Requests`) will be in the Aries message format instead of legacy one. **Recommended to use**.
+* [MSDK-180] - Added protocol type `4.0` (`protocol_type` setting in configuration JSON) implying that all input and output messages (`Credential Offers`, `Credential`, `Proof Requests`) will be in the Aries message format instead of legacy one. **Recommended to use**. See [migration guide](./docs/ProtocolMigrationGuide.md) for more details. 
 * [CM-2455] - Added ability to connect to multiple Indy Pool Ledger networks and read data from them. Read more [here](./docs/3.Initialization.md#multi-pool-ledger-connection).
 * [MSDK-523] - Added helper function `vcx_extract_attached_message` to extract attachment content from Aries message containing attachment decorator:
     * Android - `UtilsApi.vcxExtractAttachedMessage`
