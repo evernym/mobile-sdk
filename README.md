@@ -55,6 +55,7 @@ Before starting, please read the [Base Concepts document](docs/0.BaseConcepts.md
 * [Advanced Techniques](docs/Advanced.md)
 * [Troubleshooting](docs/Troubleshooting.md)
 * [Errors](docs/Errors.md) &#8212; The list of all possible errors and their definitions.
+* [Developer Guide for MSDK migration from protocol type 3.0 to 4.0](docs/ProtocolMigrationGuide.md)
 
 ### Helpful links
 - [Verity-SDK Samples](https://github.com/evernym/verity-sdk#sample-code) - samples can be used for testing of different application use cases.
