@@ -1,6 +1,6 @@
 # Changelog
 
-# Release notes - MSDK 2.1.1 - Jan 21 2021
+# Release notes - MSDK 2.1.1 - Jan 21 2022
 
 ## Bugs
 * [MSDK-574] - Deserialization does not work for Connection state objects created with usage of previous EvVCX versions.
