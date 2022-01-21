@@ -28,12 +28,7 @@ target 'MSDKSampleAppObjC' do
   # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
    use_frameworks!
 
-  # Pods for MSDKSampleAppObjC
-  # Below line will be enabled when we go public with our cocoapod
-  # pod 'vcx', '0.0.198'
-  # Below line will be removed when we go public with our cocoapod
-  # pod 'vcx', '0.0.223'
- pod 'vcx', '0.0.224'
+  pod 'vcx', '0.0.228'
   pod 'QRCodeReaderViewController'
 
   target 'MSDKSampleAppObjCTests' do

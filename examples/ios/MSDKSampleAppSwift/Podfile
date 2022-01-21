@@ -28,11 +28,7 @@ target 'MSDKSampleAppSwift' do
   # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
   use_frameworks!
 
-  # Below line will be enabled when we go public with our cocoapod
-  # pod 'vcx', '0.0.198'
-  # Below line will be removed when we go public with our cocoapod
-  # pod 'vcx', '0.0.223'
-  pod 'vcx', '0.0.224'
+  pod 'vcx', '0.0.228'
   pod 'QRCodeReaderViewController'
   pod 'QRCodeReader.swift', '~> 10.1.0'
 
