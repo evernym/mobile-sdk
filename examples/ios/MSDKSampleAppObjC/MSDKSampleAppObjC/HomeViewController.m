@@ -26,8 +26,8 @@
 
 @property (weak, nonatomic) IBOutlet UILabel *infoLbl;
 @property (nonatomic, readwrite, strong) IBOutlet UITableView *tableView;
-@property (retain, nonatomic) IBOutlet UIButton *addConnectionButton;
 @property (retain, nonatomic) IBOutlet UILabel *newConnLabel;
+@property (retain, nonatomic) IBOutlet UIButton *addConnectionButton;
 
 @property NSDictionary* requests;
 @property BOOL isInitialized;
@@ -48,7 +48,7 @@ UIGestureRecognizer *tapper;
     // On iOS diveces you cann't use qr code scnner
     // But you can handle invite with text input and button on home page
     // For show input set this flag to false
-    BOOL const isHideInput = true;
+    BOOL const isHideInput = false;
 
     [super viewDidLoad];
     self.tableView.dataSource = self;
@@ -57,7 +57,7 @@ UIGestureRecognizer *tapper;
     addConnConfigTextView.layer.cornerRadius = 5;
     [addConnConfigTextView setHidden: isHideInput];
     [newConnLabel setHidden: isHideInput];
-    [addConnectionButton setHidden:isHideInput];
+    [addConnectionButton setHidden: isHideInput];
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -151,7 +151,7 @@ UIGestureRecognizer *tapper;
     [self.tableView reloadData];
 }
 
-- (IBAction)addNewConnBtnClick: (id)sender {
+- (IBAction)addConnByClick:(id)sender {
     if(addConnConfigTextView.text.length > 3 && ![addConnConfigTextView.text isEqual: @"enter code here"]) {
         [self createActionWithInvitation: addConnConfigTextView.text];
     }

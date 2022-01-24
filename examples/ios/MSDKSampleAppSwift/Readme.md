@@ -12,8 +12,8 @@ The application provides the base functionality of our [ConnectMe](https://gitla
         * arm64, arm7, x86, x86_64
 
       **Note:** Depending on the architecture, you should choose the version
-        * `vcx 0.0.219` for phones
-        * `vcx 0.0.220` for simulators
+        * `vcx 0.0.227` for phones
+        * `vcx 0.0.228` for simulators
 
 * OS
     * iOS 10+

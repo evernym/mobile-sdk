@@ -10,9 +10,10 @@
 
 @interface HomeViewController : UIViewController<UITextViewDelegate, UITableViewDelegate, UITableViewDataSource>
 @property (weak, nonatomic) IBOutlet UILabel *addConnLabel;
+@property (nonatomic, readonly, strong) IBOutlet UIButton *addConnButton;
 @property (weak, nonatomic) IBOutlet UITextView *addConnConfigTextView;
 
-- (IBAction)addNewConnBtnClick:(id)sender;
+- (IBAction)addConnByClick:(id)sender;
 - (IBAction)scanQR: (UIButton*) sender;
 - (IBAction)checkMessages: (UIButton*) sender;
 
