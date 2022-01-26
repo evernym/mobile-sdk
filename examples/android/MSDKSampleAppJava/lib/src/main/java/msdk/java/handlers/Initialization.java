@@ -91,9 +91,15 @@ public class Initialization {
                 if (err != null) {
                     result.completeExceptionally(err);
                 } else {
-                    // 3. Initialize pool
+                    // 6. Initialize pool
                     initializePool(context, genesisPool);
-                    result.complete(null);
+                    updateAgentPushToken(context, constants).whenComplete((res, err2) -> {
+                        if (err2 != null) {
+                            result.completeExceptionally(err2);
+                        } else {
+                            result.complete(null);
+                        }
+                    });
                 }
             });
         }catch (AlreadyInitializedException e) {
@@ -237,6 +243,39 @@ public class Initialization {
         }
         Log.d(TAG, "Retrieved token: " + token);
         return token;
+    }
+
+    public static CompletableFuture<Void> updateAgentPushToken(
+            Context context,
+            Constants constants) {
+        CompletableFuture<Void> result = new CompletableFuture<>();
+
+        try {
+            Activity activity = (Activity) context;
+            SharedPreferences prefs = activity.getSharedPreferences(constants.PREFERENCES_KEY, Context.MODE_PRIVATE);
+            JSONObject agentInfoObj = new JSONObject();
+
+            String sponseeId = prefs.getString(constants.SPONSEE_ID, null);
+
+            agentInfoObj.put("id", sponseeId);
+            agentInfoObj.put("type", 3);
+            agentInfoObj.put("value", "pass_FCM_TOKEN_here");
+            String agentInfo = agentInfoObj.toString();
+            UtilsApi.vcxUpdateAgentInfo(agentInfo).whenComplete((sc, err) -> {
+                if (err != null) {
+                    Logger.getInstance().i("vcxUpdateAgentInfo failed. Error: : " + err);
+                    result.completeExceptionally(err);
+                } else {
+                    Logger.getInstance().i("vcxUpdateAgentInfo isSuccessful");
+                    result.complete(null);
+                }
+            });
+        } catch (JSONException | VcxException e) {
+            Logger.getInstance().i("vcxUpdateAgentInfo failed.");
+            e.printStackTrace();
+            result.completeExceptionally(e);
+        }
+        return result;
     }
 
     public static final class ConstantsBuilder {
