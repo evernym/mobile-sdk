@@ -135,10 +135,14 @@ When setting up a communication method with an agent, you can either use Com Met
 
 2. Type 4- Sponsor Push
 
->>  If using this method, Verity will handle sending of actual push notifications.
+>>  If using this method, Verity will handle sending of actual push notifications, and you won't need to register the endpoint.
 >>
->>  Associated sponsor’s configuration should have been already configured with an endpoint.
+>>  Associated sponsor’s configuration should have been already configured.
 >>
->>  Verity will use the associated sponsor’s configured push notification account detail instead of Evernym’s push notification account detail.
+>>  Verity will use the associated sponsor’s configured push notification account detail.
 >>
 >>  Currently, only Firebase Cloud Messaging is supported.
+>> 
+>>  Firebase Cloud Messaging should have been already set up, connected with the app's back end, and working properly.
+>>
+>>  You need to send your Firebase account key to [support@evernym.com](mailto:support@evernym.com), and Verity will use that key to send messages to your Firebase account.
