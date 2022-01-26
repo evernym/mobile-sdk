@@ -23,10 +23,10 @@
  This means you (`Sponsor`) will have to implement a communication mechanism (e.g. Push Notification Service) with your customer (`Sponsee`).
 
 2 Sponsee Provisioning 
- - As mentioned [here](3.Initialization.md#mobile-sdk-customer-provisioning-overview), a customer (`Sponsee`) will need to provision with Evernym's Cloud Service using a token signed by you (`Sponsor`).
+ - As mentioned [here](3.Initialization.md#mobile-application-provisioning-overview), a customer (`Sponsee`) will need to provision with Evernym's Cloud Service using a token signed by you (`Sponsor`).
  
- - After provisioning is complete, the customer's application (`Sponsee`) will need to call MSDK method to set communication method with the agent.
-     * Android - `UtilsApi.vcxUpdateAgentInfo(config)`
+ - After provisioning and SDK initialization are completed, the customer's application (`Sponsee`) will need to call MSDK method to set up [communication method type](#com-method-types) with the agent. 
+     * Android - `UtilsApi.vcxUpdateAgentInfo(config)` (see example function [here](../examples/android/MSDKSampleAppJava/lib/src/main/java/msdk/java/handlers/Initialization.java))
      * iOS - `agentUpdateInfo:config`
          ```
          where config is JSON: 
