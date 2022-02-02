@@ -58,3 +58,46 @@
 - **Q: What does the `Item not found on ledger` error means?**
 
   This error occurs when the Holder mobile application and Issue service are connected to different Pool Ledger Networks.
+
+- **Q: APK file size is too huge after integrating SDK**
+
+  We can split build by ABI. Here is one link that describes the process for [ABI split](https://developer.android.com/studio/build/configure-apk-splits).
+  
+  We would suggest to use 4 ABIs (arm64, arm32, x86_64 and x86). Assign version code to each split ABI. This version code gets appended to apk version number and let us identify the architecture of apk.  You can configure gradle with ABI split as shown in below code
+
+```gradle
+    splits {
+       abi {
+           reset()
+           enable enableSeparateBuildPerCPUArchitecture
+           universalApk false  // If true, also generate a universal APK
+           include "x86" , "armeabi-v7a", "arm64-v8a", "x86_64"
+       }
+   }
+
+// Map for the version code that gives each ABI a value.
+// [ABI_NUMBER] is 10 - 10 for 'x86', 11 for 'armeabi-v7a', 12 for 'arm64-v8a', 13 for 'x86_64' - a two
+// digit number to represent the CPU architecture or Application Binary Interface
+
+ext.abiCodes = ['x86':'10', 'armeabi-v7a':'11', 'arm64-v8a':'12', 'x86_64':'13']
+android.applicationVariants.all { variant ->
+  variant.outputs.each { output ->
+    // https://developer.android.com/studio/build/configure-apk-splits.html
+    // Determines the ABI for this variant and returns the mapped value.
+    def endingAbiCode = project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
+
+    // Because abiCodes.get() returns null for ABIs that are not mapped by ext.abiCodes,
+    // the following code does not override the version code for universal APKs.
+    // However, because we want universal APKs to have the lowest version code,
+    // this outcome is desirable.
+    if (endingAbiCode != null) {
+
+      // Assigns the new version code to versionCodeOverride, which changes the version code
+      // for only the output APK, not for the variant itself. Skipping this step simply
+      // causes Gradle to use the value of variant.versionCode for the APK.
+      def nextVersionCode = variant.versionCode.toString() + endingAbiCode
+      output.versionCodeOverride = nextVersionCode.toInteger()
+    }
+  }
+}
+```
