@@ -2,9 +2,9 @@
 
 - Key definitions can be found [here](3.Initialization.md#definitions)
 
-- Before you can get started with this, you as the `Sponsor` need to be [onboarded](3.Initialization.md#sponsor-ie-you-onboarding-with-evernyms-cloud-service) with Evernym's Cloud Service. You as the sponsor will need to provide an endpoint during this process.
+- Before you can get started with this, you as the `Sponsor` need to be [onboarded](3.Initialization.md#sponsor-ie-you-onboarding-with-evernyms-cloud-service) with Evernym's Cloud Service. When you onboard as a Sponsor, you provide an endpoint URL where messages will be forwarded by Evernym’s Cloud Service so that you can notify your customer's app (`Sponsee`) that there are messages available to be picked up from its cloud agent.
 
-- To push notify a message to your customer's app (`Sponsee`), you will need to setup your own Push Notification System and handle Message Forwarding on your back-end.
+- You will need to set up your own Push Notification System on your back-end and set up a handler for your Notification endpoint URL that processes messages forwarded from Evernym’s Cloud Service and uses your Push Notification System to notify your customer's app (`Sponsee`).
 
 - You as the `Sponsor` will receive messages via Message Forwarding from Evernym's Cloud Service. These messages will contain enough information to push-notify your cutomer (`Sponsee`)
 
