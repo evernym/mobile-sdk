@@ -11,7 +11,7 @@
     
     - [iOS](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/EnablingLocalAndPushNotifications.html)
     
-    -  [Android](https://developers.google.com/web/ilt/pwa/introduction-to-push-notifications)
+    - [Android](https://developers.google.com/web/ilt/pwa/introduction-to-push-notifications)
 
 - **Q: What is CAS?**
 
@@ -101,3 +101,34 @@ android.applicationVariants.all { variant ->
   }
 }
 ```
+
+- **Q: How to manage multiple apks after using abi split functionality as described above**
+
+  There are different ways to manage multiple apks. We recommend to use a CI/CD system for app deployments to internal CI/CD platform and also to Play Store. In this way, it would become very easy to distribute all apks as per device architecture. We use [Fastlane](https://fastlane.tools/) for all our mobile CI/CD tasks and most mobile CI/CD platforms support fastlane scripts by default. Below is the fastlane script to upload all apks to AppCenter and to the Play Store:
+
+  ```ruby
+    # upload all 4 apks to appcenter
+
+    appcenter_upload(api_token: ENV["APPCENTER_API_TOKEN"], owner_type: "organization", owner_name: "<owner-name>", app_name: "<app-name>", file: "app/build/outputs/apk/release/app-armeabi-v7a-release.apk")
+    appcenter_upload(api_token: ENV["APPCENTER_API_TOKEN"], owner_type: "organization", owner_name: "<owner-name>", app_name: "<app-name>", file: "app/build/outputs/apk/release/app-arm64-v8a-release.apk")
+    appcenter_upload(api_token: ENV["APPCENTER_API_TOKEN"], owner_type: "organization", owner_name: "<owner-name>", app_name: "<app-name>", file: "app/build/outputs/apk/release/app-x86-release.apk")
+    appcenter_upload(api_token: ENV["APPCENTER_API_TOKEN"], owner_type: "organization", owner_name: "<owner-name>", app_name: "<app-name>", file: "app/build/outputs/apk/release/app-x86_64-release.apk")
+
+    # upload all 4 apks to Play Store
+    supply(
+      track: "beta",
+      apk_paths: [
+        "app/build/outputs/apk/release/app-armeabi-v7a-release.apk",
+        "app/build/outputs/apk/release/app-arm64-v8a-release.apk",
+        "app/build/outputs/apk/release/app-x86-release.apk",
+        "app/build/outputs/apk/release/app-x86_64-release.apk"
+      ],
+    )
+  ```
+
+  Play Store automatically detects device architecture and will show the build to the user which is meant for their device. For internal CI/CD platform it can happen that they don't support automatic device architecure and hence show all four apks per build. For that purpose, we have to remember code for apk type. Most of the devices are 64 bit devices, and we just might need to remember single code for internal testing. 
+
+  Another approach is to use `abi split` approach only for production builds that needs to go to Play Store. Use universal builds for development and internal testing or for anything other than play store such as AppCenter, Bitrise, App Circle, Code Magic, etc. In this way, internal testing will only have single build and won't need to remember any code. When we go to Play Store, then it will automatically select the build as per device architecture. In this approach, we need to change our deployment script and needs to bit of extra work. Here is how we can do it.
+
+  - Use `bash` or any other script to change this line in build.gradle `universalApk false` and set `false` to `true` before the pipeline that needs to deploy to internal CI/CD platform. We can use this `sed` comand to change false to true `$ sed -i 's/universalApk\sfalse/universalApk\strue/gI' build.gradle` 
+  - Add `if...else` in fastlane script for uploading single apk for internal CI/CD build, and multiple apks for Play Store deployment
