@@ -1,10 +1,10 @@
 # Frequenly Asked Questions
 
-- **Q: My connection is successfully established but I can't see any message?**
+- ## Q: My connection is successfully established but I can't see any message?
 
     Sometimes changing connection state can be a bit longer, usually a couple of seconds. Please have that in consideration and count this delay in your user flow, without proceeding further in the flow before `conection state` is not successfully changed to **4**.
 
-- **Q: MobileSDK app did not received Push Notification message?**
+- ## Q: MobileSDK app did not received Push Notification message?
 
     Make sure you have enabled Push notification capabilities in your project. 
     For more details how to set them properly, please follow this guide: 
@@ -13,53 +13,53 @@
     
     - [Android](https://developers.google.com/web/ilt/pwa/introduction-to-push-notifications)
 
-- **Q: What is CAS?**
+- ## Q: What is CAS?
 
      CAS stands for Consumer Agency Service. This service is hosted by Evernym. It creates and hosts cloud agents for individual app installs. Evernym's production CAS is hosted at `https://agency.evernym.com`. To communicate with CAS, developers would also need to know CAS's `DID` and `verification key`. To know `DID` and `verification key` of Evernym's CAS or EAS, developers can make a GET API call to `https://agency.evernym.com/agency/`.
 
-- **Q: What is EAS?**
+- ## Q: What is EAS?
 
      Enterprise Agency Service (EAS) hosted by Evernym is responsible for creating and hosting cloud agent for Enterprise wallets. Mobile SDK, almost always interact with CAS, not EAS.
 
-- **Q: What is the difference between Evernym Agency Service and the cloud agent?**
+- ## Q: What is the difference between Evernym Agency Service and the cloud agent?
 
      Evernym's Agency Service creates and hosts individual cloud agents for each unique app install of Connect.Me, or each instance of our mobile SDK.
      Cloud agents primary value is for storing and forwarding messages, while the edge agent (the app on the phone) comes on and offline. It also provides push notification services.
 
-- **Q: Can I use mobile SDK in Xamarin?**
+- ## Q: Can I use mobile SDK in Xamarin?
 
      Yes, mobile SDK can be used in Xamarin. However, Evernym does not provide .NET wrapper for mobile SDK. Mobile SDK contains native Android and iOS wrappers. These native Android and iOS wrappers can be used in Xamarin in same way as other native plugin/modules of Android and iOS are used.
 
-- **Q: Can I use mobile SDK in Xamarin?**
+- ## Q: Can I use mobile SDK in Xamarin?
 
      Yes, mobile SDK can be used in Flutter. However, mobile SDK does not contain flutter bindings for mobile SDK. Mobile SDK can be integrated in Flutter as other native Android and iOS plugins are used.
 
-- **Q: How to get started with mobile SDK?**
+- ## Q: How to get started with mobile SDK?
 
     - Get access to mobile SDK. It should be available to download from `release tab`
     - Familiarize yourself with [basic concepts](./0.Base%20Concepts.md)
     - Integrate mobile SDK in your app using this [guide](./1.ProjectSetup.md)
     - Run through other markdown files from #2 to #9
 
-- **Q: How to send a credential with an image/photo?**
+- ## Q: How to send a credential with an image/photo?
 
     Check this [guide](CredentialsWithAttachments.md)
 
-- **Q: How to send a message with custom action?**
+- ## Q: How to send a message with custom action?
 
     Check this [guide](8.StructuredMessages.md)
 
-- **Q: Do connections and credentials are stored between wallet re-installations?**
+- ## Q: Do connections and credentials are stored between wallet re-installations?
 
     No, when you delete the application wallet all data get lost. 
     When you install the application again it does provisioning of a new Cloud Agent (`provision_with_token`).
     The newly created Cloud Agent does not know anything about previous. So all previous connections and credentials will be lost. 
 
-- **Q: What does the `Item not found on ledger` error means?**
+- ## Q: What does the `Item not found on ledger` error means?
 
   This error occurs when the Holder mobile application and Issue service are connected to different Pool Ledger Networks.
 
-- **Q: APK file size is too huge after integrating SDK**
+- ## Q: APK file size is too huge after integrating SDK. What should we do?
 
   We can split build by ABI. Here is one link that describes the process for [ABI split](https://developer.android.com/studio/build/configure-apk-splits).
   
@@ -102,7 +102,7 @@ android.applicationVariants.all { variant ->
 }
 ```
 
-- **Q: How to manage multiple apks after using abi split functionality as described above**
+- ## Q: How to manage multiple apks after using abi split functionality?
 
   There are different ways to manage multiple apks. We recommend to use a CI/CD system for app deployments to internal CI/CD platform and also to Play Store. In this way, it would become very easy to distribute all apks as per device architecture. We use [Fastlane](https://fastlane.tools/) for all our mobile CI/CD tasks and most mobile CI/CD platforms support fastlane scripts by default. Below is the fastlane script to upload all apks to AppCenter and to the Play Store:
 
