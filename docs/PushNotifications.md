@@ -146,3 +146,19 @@ When setting up a communication method with an agent, you can either use Com Met
 >>  Firebase Cloud Messaging should have been already set up, connected with the app's back end, and working properly.
 >>
 >>  You need to send your Firebase account key to [support@evernym.com](mailto:support@evernym.com), and Verity will use that key to send messages to your Firebase account.
+
+
+### Message Type from Evernym CAS to App's Push Notification webhook
+
+```js
+    {
+        "msgId": String, // a unique message ID
+        "msgType": String, // message type will be one of the message type strings such as "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/offer-credential"
+        "sponseeDetails": String, // this is the value that app sends to Evernym in API call for ios: "agentUpdateInfo:config" and for Android: UtilsApi.vcxUpdateAgentInfo. Refer Step #2 second point in this document
+        "relationshipDid": String, // DID which is used to identify connection
+        // metaData is deperacted, please avoid relying on it
+        "metaData": {
+            "msgType": Option[String], "msgSenderName": Option[String]
+        }
+    }
+```
