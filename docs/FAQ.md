@@ -1,13 +1,13 @@
 # Frequenly Asked Questions
 
-- ## Q: My connection is successfully established but I can't see any message?
+- ## Q: My connection is successfully established but I can't see any message.
 
-    Sometimes changing connection state can be a bit longer, usually a couple of seconds. Please have that in consideration and count this delay in your user flow, without proceeding further in the flow before `conection state` is not successfully changed to **4**.
+    Sometimes changing the connection state can take a bit longer, usually a couple of seconds. Please have that in consideration and count this delay in your user flow, without proceeding further in the flow before `conection state` is successfully changed to **4**.
 
-- ## Q: MobileSDK app did not received Push Notification message?
+- ## Q: MobileSDK app did not receive a Push Notification message.
 
     Make sure you have enabled Push notification capabilities in your project. 
-    For more details how to set them properly, please follow this guide: 
+    For more details on how to set them properly, please follow this guide: 
     
     - [iOS](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/EnablingLocalAndPushNotifications.html)
     
@@ -19,20 +19,20 @@
 
 - ## Q: What is EAS?
 
-     Enterprise Agency Service (EAS) hosted by Evernym is responsible for creating and hosting cloud agent for Enterprise wallets. Mobile SDK, almost always interact with CAS, not EAS.
+     Enterprise Agency Service (EAS) hosted by Evernym is responsible for creating and hosting cloud agents for Enterprise wallets. Mobile SDK almost always interacts with CAS, not EAS.
 
 - ## Q: What is the difference between Evernym Agency Service and the cloud agent?
 
      Evernym's Agency Service creates and hosts individual cloud agents for each unique app install of Connect.Me, or each instance of our mobile SDK.
-     Cloud agents primary value is for storing and forwarding messages, while the edge agent (the app on the phone) comes on and offline. It also provides push notification services.
+     Cloud agent's primary value is storing and forwarding messages, while the edge agent (the app on the phone) comes on and offline. It also provides push notification services.
 
 - ## Q: Can I use mobile SDK in Xamarin?
 
-     Yes, mobile SDK can be used in Xamarin. However, Evernym does not provide .NET wrapper for mobile SDK. Mobile SDK contains native Android and iOS wrappers. These native Android and iOS wrappers can be used in Xamarin in same way as other native plugin/modules of Android and iOS are used.
+     Yes, mobile SDK can be used in Xamarin. However, Evernym does not provide .NET wrapper for mobile SDK. Mobile SDK contains native Android and iOS wrappers. These native Android and iOS wrappers can be used in Xamarin in the same way as other native plugin/modules of Android and iOS are used.
 
-- ## Q: Can I use mobile SDK in Xamarin?
+- ## Q: Can I use mobile SDK in Flutter?
 
-     Yes, mobile SDK can be used in Flutter. However, mobile SDK does not contain flutter bindings for mobile SDK. Mobile SDK can be integrated in Flutter as other native Android and iOS plugins are used.
+     Yes, mobile SDK can be used in Flutter. However, mobile SDK does not contain Flutter bindings for mobile SDK. **Mobile SDK can be integrated in Flutter as other native Android and iOS plugins are used.**
 
 - ## Q: How to get started with mobile SDK?
 
@@ -45,25 +45,25 @@
 
     Check this [guide](CredentialsWithAttachments.md)
 
-- ## Q: How to send a message with custom action?
+- ## Q: How to send a message with a custom action?
 
     Check this [guide](8.StructuredMessages.md)
 
-- ## Q: Do connections and credentials are stored between wallet re-installations?
+- ## Q: Do connections and credentials get stored between wallet re-installations?
 
     No, when you delete the application wallet all data get lost. 
     When you install the application again it does provisioning of a new Cloud Agent (`provision_with_token`).
-    The newly created Cloud Agent does not know anything about previous. So all previous connections and credentials will be lost. 
+    The newly created Cloud Agent does not know anything about the previous one. So all previous connections and credentials will be lost. 
 
-- ## Q: What does the `Item not found on ledger` error means?
+- ## Q: What does the `Item not found on ledger` error mean?
 
   This error occurs when the Holder mobile application and Issue service are connected to different Pool Ledger Networks.
 
-- ## Q: APK file size is too huge after integrating SDK. What should we do?
+- ## Q: APK file size is too big after integrating SDK. What should we do?
 
   We can split build by ABI. Here is one link that describes the process for [ABI split](https://developer.android.com/studio/build/configure-apk-splits).
   
-  We would suggest to use 4 ABIs (arm64, arm32, x86_64 and x86). Assign version code to each split ABI. This version code gets appended to apk version number and let us identify the architecture of apk.  You can configure gradle with ABI split as shown in below code
+  We would suggest using 4 ABIs (arm64, arm32, x86_64 and x86). Assign version code to each split ABI. This version code gets appended to apk version number and lets us identify the architecture of apk.  You can configure gradle with ABI split as shown in the below code
 
 ```gradle
     splits {
@@ -104,7 +104,7 @@ android.applicationVariants.all { variant ->
 
 - ## Q: How to manage multiple apks after using abi split functionality?
 
-  There are different ways to manage multiple apks. We recommend to use a CI/CD system for app deployments to internal CI/CD platform and also to Play Store. In this way, it would become very easy to distribute all apks as per device architecture. We use [Fastlane](https://fastlane.tools/) for all our mobile CI/CD tasks and most mobile CI/CD platforms support fastlane scripts by default. Below is the fastlane script to upload all apks to AppCenter and to the Play Store:
+  There are different ways to manage multiple apks. We recommend using a CI/CD system for app deployments to internal CI/CD platform and also to Play Store. In this way, it would become very easy to distribute all apks as per device architecture. We use [Fastlane](https://fastlane.tools/) for all our mobile CI/CD tasks and most mobile CI/CD platforms support fastlane scripts by default. Below is the fastlane script to upload all apks to AppCenter and to the Play Store:
 
   ```ruby
     # upload all 4 apks to appcenter
@@ -126,9 +126,9 @@ android.applicationVariants.all { variant ->
     )
   ```
 
-  Play Store automatically detects device architecture and will show the build to the user which is meant for their device. For internal CI/CD platform it can happen that they don't support automatic device architecure and hence show all four apks per build. For that purpose, we have to remember code for apk type. Most of the devices are 64 bit devices, and we just might need to remember single code for internal testing. 
+  Play Store automatically detects device architecture and will show the build to the user which is meant for their device. For internal CI/CD platform it can happen that they don't support automatic device architecture and hence show all four apks per build. For that purpose, we have to remember the code for the apk type. Most of the devices are 64 bit devices, and we just might need to remember a single code for internal testing. 
 
-  Another approach is to use `abi split` approach only for production builds that needs to go to Play Store. Use universal builds for development and internal testing or for anything other than play store such as AppCenter, Bitrise, App Circle, Code Magic, etc. In this way, internal testing will only have single build and won't need to remember any code. When we go to Play Store, then it will automatically select the build as per device architecture. In this approach, we need to change our deployment script and needs to bit of extra work. Here is how we can do it.
+  Another approach is to use `abi split` approach only for production builds that need to go to Play Store. Use universal builds for development and internal testing or for anything other than play store such as AppCenter, Bitrise, App Circle, Code Magic, etc. In this way, internal testing will only have a single build and won't need to remember any code. When we go to Play Store, then it will automatically select the build as per device architecture. In this approach, we need to change our deployment script and it needs a bit of extra work. Here is how we can do it.
 
-  - Use `bash` or any other script to change this line in build.gradle `universalApk false` and set `false` to `true` before the pipeline that needs to deploy to internal CI/CD platform. We can use this `sed` comand to change false to true `$ sed -i 's/universalApk\sfalse/universalApk\strue/gI' build.gradle` 
-  - Add `if...else` in fastlane script for uploading single apk for internal CI/CD build, and multiple apks for Play Store deployment
+  - Use `bash` or any other script to change this line in build.gradle `universalApk false` and set `false` to `true` before the pipeline that needs to deploy to internal CI/CD platform. We can use this `sed` command to change false to true `$ sed -i 's/universalApk\sfalse/universalApk\strue/gI' build.gradle` 
+  - Add `if...else` in fastlane script for uploading single apk for internal CI/CD build, and multiple apks for Play Store deployment.
