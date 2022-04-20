@@ -59,6 +59,20 @@
 
   This error occurs when the Holder mobile application and Issue service are connected to different Pool Ledger Networks.
 
+- ## Q: Which attributes will be included in a credential issued to me when I use the Document Verification feature? 
+
+  Credential definitions for each document are listed below. You can find the list of attributes in each credential by following the corresponding link.  
+
+  DEMO environment  
+  Identity Card: [3Bw2cGDYMEdFaXYM23yicT:3:CL:258169:latest](https://indyscan.io/tx/SOVRIN_STAGINGNET/domain/258171)  
+  Driver's License: [3Bw2cGDYMEdFaXYM23yicT:3:CL:258173:latest](https://indyscan.io/tx/SOVRIN_STAGINGNET/domain/258174)  
+  Passport: [3Bw2cGDYMEdFaXYM23yicT:3:CL:258175:latest](https://indyscan.io/tx/SOVRIN_STAGINGNET/domain/258176)  
+
+  PROD environment  
+  Identity Card: [RkayAfMr1FzjcK89NX8NtM:3:CL:72542:latest](https://indyscan.io/tx/SOVRIN_MAINNET/domain/72543)  
+  Driver's License: [RkayAfMr1FzjcK89NX8NtM:3:CL:72544:latest](https://indyscan.io/tx/SOVRIN_MAINNET/domain/72545)  
+  Passport: [RkayAfMr1FzjcK89NX8NtM:3:CL:72546:latest](https://indyscan.io/tx/SOVRIN_MAINNET/domain/72547)  
+
 - ## Q: APK file size is too big after integrating SDK. What should we do?
 
   We can split build by ABI. Here is one link that describes the process for [ABI split](https://developer.android.com/studio/build/configure-apk-splits).
