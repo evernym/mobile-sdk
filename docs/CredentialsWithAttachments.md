@@ -1,4 +1,4 @@
-# 9. Credential with attachments
+# Credential with attachments
 
 Credentials with attachments can be issued and attachments can be shown in client application.
 
