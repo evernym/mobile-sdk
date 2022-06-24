@@ -1,5 +1,10 @@
 # Changelog
 
+# Release notes - MSDK 2.1.3 - June 24 2022
+
+* [MSDK-580] - Fix download message error after fetch cred def fails
+* [MSDK-581] - Fix sqlite connection pool timeout
+
 # Release notes - MSDK 2.1.1 - Jan 21 2022
 
 ## Bugs
