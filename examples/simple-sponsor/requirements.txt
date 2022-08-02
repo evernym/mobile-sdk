@@ -1,2 +1,2 @@
-python3-indy==1.15.0
+vdr-tools==0.8.4
 aiohttp==3.7.4

@@ -4,7 +4,7 @@ import configparser
 import datetime
 import json
 import logging
-from indy import crypto, wallet, did
+from vdrtools import crypto, wallet, did
 import string
 import random
 import os

@@ -25,7 +25,7 @@ This is a simple HTTP server performing generation and signing of tokens which c
 
 ##### Locally
 
-1. Install [Libindy](https://github.com/hyperledger/indy-sdk#installing-the-sdk)
+1. Install [libvdrtools](https://gitlab.com/evernym/verity/vdr-tools/-/tree/main/)
 1. Install python dependencies with `pip3 install -r requirements.txt`
 1. Start server with `python3 server.py`
 

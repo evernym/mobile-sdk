@@ -17,15 +17,15 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CE7709D068DB5E88 &&
 RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     python3 \
     python3-pip \
-    libsodium-dev \
-    libtool \
     pkg-config \
     build-essential \
     autoconf \
     automake \
     uuid-dev \
-    wget \
-    libindy
+    wget && \
+    # Install libvdrtools
+    curl https://gitlab.com/evernym/verity/vdr-tools/-/package_files/27311920/download --output libvdrtools_0.8.4-bionic_amd64.deb && \
+    apt-get install -y ./libvdrtools_0.8.4-bionic_amd64.deb
 
 COPY . /app
 WORKDIR /app
