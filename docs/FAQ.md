@@ -41,6 +41,11 @@
     - Integrate mobile SDK in your app using this [guide](./1.ProjectSetup.md)
     - Run through other markdown files from #2 to #9
 
+- ## Q: What is required for the Mobile SDK to communicate?
+    The Sovrin Network allows validator nodes to accept connections on TCP ports between 9700 and 9800, so communication will fail if your network blocks those ports to outbound traffic. Also, deep packet inspection must not block the ZeroMQ (ZMQ) protocol, as that is used for communication between clients and the ledger.
+
+    The Mobile SDK also communicates with the Evernym Consumer Agency (CAS) on port 443 at the URL [specified in the documentation for the environment you are using](https://gitlab.com/evernym/mobile/mobile-sdk/-/tree/main/environments).
+
 - ## Q: How to send a credential with an image/photo?
 
     Check this [guide](CredentialsWithAttachments.md)
