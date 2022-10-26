@@ -27,6 +27,11 @@ These tools depend on the Evernym Consumer Agency SaaS service to act as a commu
 
 Evernym provides commercial support to customers. If you would like help from Evernym, please [contact us](https://www.evernym.com/our-team/#contact).
 
+## Supported operating systems for Android and IOS
+
+* Android 6+ 32 bit & 64bit  
+* iOS 11+
+
 ## Getting Started
 Connecting and exchanging encrypted data between an Agency (server side) and an Edge Client (mobile application) consists of several steps and is supported by a secured, encrypted protocol library (VCX). 
 
