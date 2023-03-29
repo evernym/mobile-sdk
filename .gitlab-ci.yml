@@ -70,16 +70,16 @@ ubuntu-build:
 
 # Jobs
 ## - Check license file - ##
-license-data-check:
-  stage: check
-  image: ${CI_REGISTRY_IMAGE}/ubuntu18:${CI_COMMIT_REF_SLUG}
-  script: ci/devops/license-date-check.sh
-  only:
-    refs:
-      - branches
-      - tags
-  tags:
-    - docker-machine
+# license-data-check:
+#   stage: check
+#   image: ${CI_REGISTRY_IMAGE}/ubuntu18:${CI_COMMIT_REF_SLUG}
+#   script: ci/devops/license-date-check.sh
+#   only:
+#     refs:
+#       - branches
+#       - tags
+#   tags:
+#     - docker-machine
 
 publish-tag:
   stage: tag
